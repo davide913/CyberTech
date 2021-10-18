@@ -10,6 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".noleggio.HomePage"
+            android:exported="true" />
+        <activity
+            android:name=".gestione_covid.HomePage"
+            android:exported="true" />
+        <activity
+            android:name=".assistenza.HomePage"
+            android:exported="true" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
