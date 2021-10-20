@@ -10,6 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".gestione_covid.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".gestione_covid.ManifestNegativityActivity"
+            android:exported="false" />
+        <activity
+            android:name=".gestione_covid.ManifestPositivityActivity"
+            android:exported="false" />
+        <activity
             android:name=".noleggio.HomePage"
             android:exported="true" />
         <activity

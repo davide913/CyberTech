@@ -3,4 +3,11 @@
     <string name="Choose">Scelta Sezione</string>
     <string name="drawer_open">drawer_open</string>
     <string name="drawer_close">drawer_close</string>
+    <string name="HomePage_return">Torna alla Homepage</string>
+    <string name="manifest_posotivity">Segnala Positività </string>
+    <string name="manifest_negativity">Segnala Guarigione </string>
+    <string name="settings">Impostazioni</string>
+    <string name="todo">TODO</string>
+    <string name="Sezione_covid">Sezione Covid 19</string>
+    <string name="covid_section">Segnalazione Positività Covid 19</string>
 </resources>

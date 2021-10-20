@@ -3,14 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_homepage_covid"
+    android:id="@+id/drawer_ManifestPositivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/LightSteelBlue"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context=".gestione_covid.HomePage"
+    tools:context=".gestione_covid.ManifestPositivityActivity"
     tools:openDrawer="start">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +19,7 @@
         tools:context=".gestione_covid.HomePage">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_Homepage_covid"
+            android:id="@+id/toolbar_ManifestPositivity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/CadetBlue"
@@ -27,13 +27,13 @@
             android:theme="?attr/actionBarTheme"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:title="@string/covid_section"
+            app:title="@string/Sezione_covid"
             app:titleTextColor="@color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigationView_Homepage_covid"
+        android:id="@+id/navigationView_ManifestPositivity"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
