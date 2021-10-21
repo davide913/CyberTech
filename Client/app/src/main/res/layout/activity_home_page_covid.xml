@@ -1,52 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_homepage_covid"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/LightSteelBlue"
-    android:clickable="true"
+    tools:context=".gestione_covid.HomePage"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context=".gestione_covid.HomePage"
-    tools:openDrawer="start">
+    android:clickable="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".gestione_covid.HomePage">
+        android:layout_height="wrap_content"
+        android:background="@color/blu"
+        app:layout_constraintBottom_toTopOf="@+id/viewPager_covid"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_Homepage_covid"
+            android:id="@+id/toolbar_covid_homepage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/CadetBlue"
-            android:minHeight="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/Teal"
+            android:clickable="false"
+            android:textAlignment="center"
             android:theme="?attr/actionBarTheme"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:autoSizeTextType="uniform"
+            app:layout_scrollFlags="scroll|snap"
             app:title="@string/covid_section"
             app:titleTextColor="@color/white" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/horyzontal_navbar_toolbar_covid"
+            android:layout_width="401dp"
+            android:layout_height="wrap_content"
+            android:background="@color/blu"
+            app:layout_collapseMode="pin"
+            app:title="@string/covid_section">
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigationView_Homepage_covid"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:layout_marginStart="0dp"
-        android:background="@color/CadetBlue"
-        android:visibility="visible"
-        app:headerLayout="@layout/navigation_header"
-        app:itemIconPadding="15dp"
-        app:itemIconSize="25dp"
-        app:itemIconTint="@color/Gainsboro"
-        app:itemTextColor="@color/Gainsboro"
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabella_covid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/blu"
+                android:padding="0dp"
+                app:tabIndicatorColor="@color/Orange"
+                app:tabTextColor="@color/white">
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/manifest_pos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manifest_posotivity"
+                    android:textAlignment="center" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/manifest_neg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manifest_negativity"
+                    android:textAlignment="center" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings"
+                    android:textAlignment="center" />
+
+            </com.google.android.material.tabs.TabLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager_covid"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/navigation_menu_homepage_covid"/>
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout2"
+        tools:ignore="SpeakableTextPresentCheck" >
 
-</androidx.drawerlayout.widget.DrawerLayout>
+    </androidx.viewpager.widget.ViewPager>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

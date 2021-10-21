@@ -5,17 +5,30 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Adapter;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.tabs.TabLayout;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
 
-public class HomePage extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class HomePage extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,36 +38,72 @@ public class HomePage extends AppCompatActivity implements NavigationView.OnNavi
         initViews();
     }
 
-    private void initViews(){
-
-        Toolbar toolbar = findViewById(R.id.toolbar_Homepage_covid);
-        NavigationView navigationView = findViewById(R.id.navigationView_Homepage_covid);
-
-        //Aggiunge il menu ad Hamburger che attivca NavigationView
-        DrawerLayout drawer_map_client = findViewById(R.id.drawer_homepage_covid);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer_map_client, toolbar, R.string.drawer_open, R.string.drawer_close);
-        drawer_map_client.addDrawerListener(toggle);
-        toggle.syncState();
-
+    //Setta i fragment della viewpager
+    private void setupViewPager(ViewPager viewPager) {
+        Adapter adapter = new Adapter(getSupportFragmentManager());
+        adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività");
+        adapter.addFragment(new ManifestNegativityFragment(), "Segnala Guarigione");
+        adapter.addFragment(new SettingsCovidFragment(), "Impostazioni");
+        viewPager.setAdapter(adapter);
     }
 
+    private void initViews(){
+        TabLayout tabLayout = findViewById(R.id.tabella_covid);
+        ViewPager viewPager = findViewById(R.id.viewPager_covid);
+        Toolbar toolbar_covid_homepage = findViewById(R.id.toolbar_covid_homepage);
+
+        tabLayout.setupWithViewPager(viewPager);
+
+        setupViewPager(viewPager);
+
+        setSupportActionBar(toolbar_covid_homepage);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
+    }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.SignPos:
-                startActivity(new Intent(this, it.unive.cybertech.gestione_covid.ManifestPositivityActivity.class));
-                break;
-            case R.id.SignNeg:
-                startActivity(new Intent(this, it.unive.cybertech.gestione_covid.ManifestNegativityActivity.class));
-                break;
-            case R.id.ImpostazioniCovid:
-                startActivity(new Intent(this, it.unive.cybertech.gestione_covid.SettingsActivity.class));
-                break;
-            case R.id.HomeCovid:
-                startActivity(new Intent(this, it.unive.cybertech.MainActivity.class));
-                break;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle arrow click here
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // close this activity and return to preview activity (if there is any)
         }
-        return false;
+
+        return super.onOptionsItemSelected(item);
     }
+
+    static class Adapter extends FragmentPagerAdapter {
+
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public Adapter(FragmentManager manager) {
+            super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        }
+
+        @NotNull
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
+    }
+
+
+
 }

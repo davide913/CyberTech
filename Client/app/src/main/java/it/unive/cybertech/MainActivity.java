@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_MainActivity);
         navigationView = findViewById(R.id.navigationView_MainActivity);
 
-        //Aggiunge il menu ad Hamburger che attivca NavigationView
+        //Aggiunge il menu ad Hamburger che attiva NavigationView
         DrawerLayout drawer_map_client = findViewById(R.id.drawer_main_activity);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer_map_client, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer_map_client.addDrawerListener(toggle);

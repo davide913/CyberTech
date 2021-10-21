@@ -10,4 +10,24 @@
     <string name="todo">TODO</string>
     <string name="Sezione_covid">Sezione Covid 19</string>
     <string name="covid_section">Segnalazione Positività Covid 19</string>
+    <string name="title_activity_settings_covid">SettingsCovidActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button">Button</string>
+    <string name="textview">TextView</string>
+    <string name="name">Nome:</string>
+    <string name="surname">Cognome:</string>
+    <string name="date_alert">Data Segnalazione:</string>
+    <string name="state_alert">Stato Segnalazione:</string>
+
+
+
 </resources>
