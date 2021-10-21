@@ -27,6 +27,8 @@
     <string name="surname">Cognome:</string>
     <string name="date_alert">Data Segnalazione:</string>
     <string name="state_alert">Stato Segnalazione:</string>
+    <string name="nulls">Null</string>
+    <string name="no_sign">Nessuna segnalazione effettuata</string>
 
 
 

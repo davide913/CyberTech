@@ -152,4 +152,7 @@
     <color name="DarkBlue">#00008B</color>
     <color name="Navy">#000080</color>
     <color name="Black">#000000</color>
+    <color name="viola_mask">#8A3264</color>
+    <color name="grigio_mask">#C8D2EB</color>
+    <color name="ciuc">#00788B</color>
 </resources>
