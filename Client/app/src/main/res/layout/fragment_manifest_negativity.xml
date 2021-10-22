@@ -17,7 +17,48 @@
             android:background="@color/GhostWhite"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/textView_UltimaSegnalazione"
+            android:layout_width="284dp"
+            android:layout_height="38dp"
+            android:text="@string/last_sign"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.151" />
+
+        <ImageView
+            android:id="@+id/imageView_noSign"
+            android:layout_width="364dp"
+            android:layout_height="346dp"
+            android:contentDescription="@string/todo"
+            android:src="@drawable/topcovid_adobespark"
+            app:layout_constraintBottom_toBottomOf="@+id/view_manifestNegativity"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.489"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_UltimaSegnalazione"
+            app:layout_constraintVertical_bias="0.076" />
+
+        <TextView
+            android:id="@+id/textView_noSignEff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_sign2"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView_noSign"
+            app:layout_constraintVertical_bias="0.271" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

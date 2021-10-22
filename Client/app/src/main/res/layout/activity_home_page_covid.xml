@@ -30,7 +30,7 @@
             android:theme="?attr/actionBarTheme"
             app:autoSizeTextType="uniform"
             app:layout_scrollFlags="scroll|snap"
-            app:title="@string/covid_section"
+            app:title="@string/Sezione_covid"
             app:titleTextColor="@color/grigio_mask" />
 
         <androidx.appcompat.widget.Toolbar
@@ -68,7 +68,7 @@
                     android:id="@+id/settings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings"
+                    android:text="@string/reports_received"
                     android:textAlignment="center" />
 
             </com.google.android.material.tabs.TabLayout>

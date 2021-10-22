@@ -29,6 +29,9 @@
     <string name="state_alert">Stato Segnalazione:</string>
     <string name="nulls">Null</string>
     <string name="no_sign">Nessuna segnalazione effettuata</string>
+    <string name="reports_received">Segnalazioni ricevute</string>
+    <string name="last_sign">Ultima segnalazione effettuata:</string>
+    <string name="no_sign2">Non hai effettuato nessuna segnalazione</string>
 
 
 
