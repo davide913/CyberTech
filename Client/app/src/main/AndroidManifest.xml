@@ -11,7 +11,8 @@
         android:theme="@style/Theme.Cybertech">
         <activity
             android:name=".gestione_covid.ReportPositivityActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
         <activity
             android:name=".noleggio.HomePage"
             android:exported="true" />

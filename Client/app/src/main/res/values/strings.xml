@@ -34,6 +34,11 @@
     <string name="no_sign2">Non hai effettuato nessuna segnalazione</string>
     <string name="no_sign_received">Nessuna Segnalazione ricevuta</string>
     <string name="ultime_sign">Segnalazioni di positività ricevute:</string>
+    <string name="effettua_sign">Effettua una segnalazione</string>
+    <string name="name2">Nome</string>
+    <string name="surname2">Cognome</string>
+    <string name="date">Data del contagio</string>
+    <string name="send_sign">Invia segnalazione</string>
 
 
 </resources>

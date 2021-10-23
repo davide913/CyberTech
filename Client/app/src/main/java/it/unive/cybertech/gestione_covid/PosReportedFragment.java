@@ -70,6 +70,12 @@ public class PosReportedFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_pos_reported, container, false);
 
+        initViews(v);
+
+        return v;
+    }
+
+    private void initViews(View v){
         Boolean var = false;
 
         ImageView imageView = v.findViewById(R.id.imageView_PosReported);
@@ -104,7 +110,7 @@ public class PosReportedFragment extends Fragment {
             textView1.setVisibility(View.INVISIBLE);
         }
 
-        return v;
+
     }
 
 }
