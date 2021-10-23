@@ -32,7 +32,8 @@
     <string name="reports_received">Segnalazioni ricevute</string>
     <string name="last_sign">Ultima segnalazione effettuata:</string>
     <string name="no_sign2">Non hai effettuato nessuna segnalazione</string>
-
+    <string name="no_sign_received">Nessuna Segnalazione ricevuta</string>
+    <string name="ultime_sign">Segnalazioni di positività ricevute:</string>
 
 
 </resources>
