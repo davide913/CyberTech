@@ -1,5 +1,6 @@
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteResult;
@@ -51,15 +52,42 @@ public class Connessione {
         // future.get() blocks on response
         //System.out.println("Update time : " + future.get().getUpdateTime());*/
 
-        //asynchronously update doc, create the document if missing
+        /*asynchronously update doc, create the document if missing
         Map<String, Object> update = new HashMap<>();
-        update.put("capital", true);
+        update.put("capital", false);
 
         ApiFuture<WriteResult> writeResult =
                 db
                         .collection("cities")
-                        .document("BJ")
+                        .document("LA")                 //where
                         .set(update, SetOptions.merge());
+// ...
+        System.out.println("Update time : " + writeResult.get().getUpdateTime());*/
+
+
+        // Create an initial document to update
+        DocumentReference frankDocRef = db.collection("users").document("frank");
+        Map<String, Object> initialData = new HashMap<>();
+        initialData.put("name", "Frank");
+        initialData.put("age", 12);
+
+        Map<String, Object> favorites = new HashMap<>();
+        favorites.put("food", "Pizza");
+        favorites.put("color", "Blue");
+        favorites.put("subject", "Recess");
+        initialData.put("favorites", favorites);        //SOTTOCLASSE!!
+
+        ApiFuture<WriteResult> initialResult = frankDocRef.set(initialData);
+// Confirm that data has been successfully saved by blocking on the operation
+        initialResult.get();
+
+// Update age and favorite color
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("age", 13);
+        updates.put("favorites.color", "Red");
+
+// Async update document
+        ApiFuture<WriteResult> writeResult = frankDocRef.update(updates);
 // ...
         System.out.println("Update time : " + writeResult.get().getUpdateTime());
 
