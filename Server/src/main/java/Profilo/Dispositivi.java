@@ -1,0 +1,13 @@
+package Profilo;
+
+class Dispositivi{
+    private String id;
+
+    public Dispositivi(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+}
