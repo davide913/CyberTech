@@ -18,10 +18,6 @@ scambiarsi informazioni più dettagliate
  */
 
 public class RequestDetails extends AppCompatActivity {
-    private String requestDetails;
-    private String requestTitle;
-    private String date;
-    private String location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

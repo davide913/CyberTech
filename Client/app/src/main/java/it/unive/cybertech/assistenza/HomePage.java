@@ -1,6 +1,7 @@
 package it.unive.cybertech.assistenza;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,26 +22,33 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  */
 
 public class HomePage extends AppCompatActivity {
-    private List<RequestDetails> requestList;
-    private TextView text;
-    private EditText editext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page_assistenza);
 
-        requestList = new ArrayList<>();
+        List<String> provaLista = new ArrayList<>();
+        provaLista.add("Ciao");
+        provaLista.add("Come");
+        provaLista.add("Stai?");
+
+        RecyclerView listRequests = findViewById(R.id.listRequests);
+        listRequests.setAdapter(new ListRequestsAdapter(provaLista));
 
         //Deve tornare in maniera visiva la richiesta di aiuto con titolo, una preview del testo, data e location,
         //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
+        //qui estraggo lo user dal DB
+
         Button newHelpRequest = findViewById(R.id.newHelpRequest);
+        //newHelpRequest.setVisibility(View.VISIBLE);
         newHelpRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 goToRequestDetails();
             }
         });
+
 
         Button takenRequests = findViewById(R.id.takenRequests);
         takenRequests.setOnClickListener(new View.OnClickListener() {
