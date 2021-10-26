@@ -1,7 +1,7 @@
 Profilo/Assistenza/TipoAssistenza.java
  Profilo.Assistenza.TipoAssistenza
-Connessione/Connessione.java
- Connessione.Connessione
+Profilo/PrestitiInCorso.java
+ Profilo.PrestitiInCorso
 Profilo/RichiesteProlungamento.java
  Profilo.RichiesteProlungamento
 Profilo/Dispositivi.java
@@ -10,7 +10,7 @@ Profilo/MaterialeNoleggio.java
  Profilo.MaterialeNoleggio
 Profilo/AssistenzaQuarantena.java
  Profilo.AssistenzaQuarantena
-Profilo/PrestitiInCorso.java
- Profilo.PrestitiInCorso
+Connessione/Connessione.java
+ Connessione.Connessione
 Profilo/Utenti.java
  Profilo.Utenti

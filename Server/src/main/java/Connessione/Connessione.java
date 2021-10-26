@@ -11,6 +11,7 @@ import com.google.firebase.cloud.FirestoreClient;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -39,17 +40,17 @@ public class Connessione {
         Firestore db = FirestoreClient.getFirestore();
 
 
-        /* Create a Map to store the data we want to set            WRITE NEW DATA
+        // Create a Map to store the data we want to set            WRITE NEW DATA
         Map<String, Object> docData = new HashMap<>();
         docData.put("name", "Los Angeles");
         docData.put("state", "CA");
         docData.put("country", "USA");
         docData.put("regions", Arrays.asList("west_coast", "socal"));
         // Add a new document (asynchronously) in collection "cities" with id "LA"
-        ApiFuture<WriteResult> future = db.collection("cities").document("LA").set(docData);
+        ApiFuture<DocumentReference> future = db.collection("cities").add(docData);
         // ...
         // future.get() blocks on response
-        //System.out.println("Update time : " + future.get().getUpdateTime());*/
+        System.out.println("Update time : " + future.get().getId());
 
         /*asynchronously update doc, create the document if missing
         Map<String, Object> update = new HashMap<>();
@@ -65,7 +66,7 @@ public class Connessione {
 
 
         // Create an initial document to update
-        DocumentReference frankDocRef = db.collection("users").document("frank");
+        /*DocumentReference frankDocRef = db.collection("users").document("frank");
         Map<String, Object> initialData = new HashMap<>();
         initialData.put("name", "Frank");
         initialData.put("age", 12);
@@ -88,7 +89,7 @@ public class Connessione {
 // Async update document
         ApiFuture<WriteResult> writeResult = frankDocRef.update(updates);
 // ...
-        System.out.println("Update time : " + writeResult.get().getUpdateTime());
+        System.out.println("Update time : " + writeResult.get().getUpdateTime());*/
 
         System.out.println("fatto");
     }
