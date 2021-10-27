@@ -39,6 +39,7 @@
     <string name="surname2">Cognome</string>
     <string name="date">Data del contagio</string>
     <string name="send_sign">Invia segnalazione</string>
+    <string name="anonymous">Segnalazione anonima?</string>
 
 
 </resources>

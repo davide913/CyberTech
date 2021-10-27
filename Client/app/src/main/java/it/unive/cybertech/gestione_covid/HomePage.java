@@ -73,6 +73,7 @@ public class HomePage extends AppCompatActivity {
             super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
+
         @NotNull
         @Override
         public Fragment getItem(int position) {
