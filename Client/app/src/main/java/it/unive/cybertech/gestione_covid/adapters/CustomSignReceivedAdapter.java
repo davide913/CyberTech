@@ -20,7 +20,7 @@ import it.unive.cybertech.R;
 public class CustomSignReceivedAdapter extends ArrayAdapter {
     private static final String TAG = "CustomOrderArrayAdapterTrader";
     private Context context;
-    private List<String > sign;
+    private List<String> sign;
 
     public CustomSignReceivedAdapter(@NonNull Context context, int resource, ArrayList<String> sign) {
         super(context, resource, sign);
@@ -37,7 +37,7 @@ public class CustomSignReceivedAdapter extends ArrayAdapter {
 
 
         TextView Nome = view.findViewById(R.id.nome_segnalatore);
-        TextView Cognome= view.findViewById(R.id.cognome_segnalatore);
+        TextView Cognome = view.findViewById(R.id.cognome_segnalatore);
 
         return view;
     }
