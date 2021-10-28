@@ -19,29 +19,47 @@
         tools:ignore="UselessParent">
 
         <TextView
-            android:id="@+id/nome_segnalatore"
+            android:id="@+id/textView_dateTamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
             android:layout_marginStart="17dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="328dp"
-            android:text="@string/name"
-            android:textColor="@color/white" />
+            android:layout_marginTop="14dp"
+            android:text="@string/date_tampone"
+            android:textColor="#E1BEE7" />
 
         <TextView
-            android:id="@+id/cognome_segnalatore"
-            android:layout_width="77dp"
+            android:id="@+id/textView_stateTamp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/nome_segnalatore"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="17dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="293dp"
-            android:text="@string/surname"
-            android:textColor="@color/white" />
+            android:layout_below="@+id/textView_dateTamp"
+            android:layout_alignStart="@+id/textView_dateTamp"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="15dp"
+            android:text="@string/state_cont"
+            android:textColor="#E1BEE7" />
+
+        <TextView
+            android:id="@+id/textView_changeDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/textView_dateTamp"
+            android:layout_marginStart="11dp"
+            android:layout_marginTop="0dp"
+            android:layout_toEndOf="@+id/textView_dateTamp"
+            android:text="@string/data"
+            android:textColor="#E1BEE7" />
+
+        <TextView
+            android:id="@+id/textView_changeStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/textView_stateTamp"
+            android:layout_marginStart="11dp"
+            android:layout_marginTop="1dp"
+            android:layout_toEndOf="@+id/textView_stateTamp"
+            android:text="@string/stato"
+            android:textColor="#E1BEE7" />
     </RelativeLayout>
 </RelativeLayout>

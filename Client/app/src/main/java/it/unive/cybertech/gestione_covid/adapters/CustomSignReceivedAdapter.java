@@ -36,8 +36,11 @@ public class CustomSignReceivedAdapter extends ArrayAdapter {
 
 
 
-        TextView Nome = view.findViewById(R.id.nome_segnalatore);
-        TextView Cognome = view.findViewById(R.id.cognome_segnalatore);
+        TextView DateTamp = view.findViewById(R.id.textView_changeDate);
+        TextView StatusTamp = view.findViewById(R.id.textView_changeStatus);
+
+        DateTamp.setText("28/10/2021");
+        StatusTamp.setText("Positivo");
 
         return view;
     }

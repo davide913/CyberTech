@@ -32,52 +32,19 @@
         app:title="@string/Sezione_covid"
         app:titleTextColor="@color/grigio_mask" />
 
-    <EditText
-        android:id="@+id/EditText_insertName"
-        android:layout_width="292dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/background_field"
-        android:hint="@string/name2"
-        android:importantForAutofill="no"
-        android:inputType="textPersonName"
-        android:paddingStart="10dp"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.285"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText_insertDate"
-        tools:ignore="TextContrastCheck" />
-
-    <EditText
-        android:id="@+id/editText_insertSurname"
-        android:layout_width="292dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/background_field"
-        android:hint="@string/surname2"
-        android:importantForAutofill="no"
-        android:inputType="textPersonName"
-        android:paddingStart="10dp"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.285"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/EditText_insertName"
-        tools:ignore="TextContrastCheck" />
 
     <EditText
         android:id="@+id/editText_insertDate"
         android:layout_width="292dp"
         android:layout_height="48dp"
-        android:layout_marginTop="172dp"
+        android:layout_marginTop="264dp"
         android:background="@drawable/background_field"
         android:hint="@string/date"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.285"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_sendSign"
         tools:ignore="TextContrastCheck" />
@@ -86,24 +53,13 @@
         android:id="@+id/button_sendSign"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="188dp"
         android:backgroundTint="@color/ciuc"
         android:text="@string/send_sign"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.448"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText_insertSurname" />
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switch_anonymous"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:minHeight="48dp"
-        android:text="@string/anonymous"
-        app:layout_constraintBottom_toTopOf="@+id/editText_insertDate"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.156"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/editText_insertDate" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

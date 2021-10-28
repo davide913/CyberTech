@@ -31,34 +31,18 @@ public class ReportPositivityActivity extends AppCompatActivity {
     private void initViews(){
         Toolbar toolbar = findViewById(R.id.toolbar_sendSign);
         bSendSign = findViewById(R.id.button_sendSign);
-        mInsertNome = findViewById(R.id.EditText_insertName);
-        mInsertCognome = findViewById(R.id.editText_insertSurname);
         mInsertData = findViewById(R.id.editText_insertDate);
-        mAnonymous = findViewById(R.id.switch_anonymous);
+
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
-        isAnonymous();
         CreateAlertDialog();
 
     }
 
-    private void isAnonymous(){
-        mAnonymous.setOnCheckedChangeListener(((buttonView, isChecked) -> {
-            if(mAnonymous.isChecked()) {
-                mInsertNome.setVisibility(View.INVISIBLE);
-                mInsertCognome.setVisibility(View.INVISIBLE);
-            }
-            else{
-                mInsertNome.setVisibility(View.VISIBLE);
-                mInsertCognome.setVisibility(View.VISIBLE);
-            }
-        }));
 
-    }
 
     private void CreateAlertDialog(){
         bSendSign = findViewById(R.id.button_sendSign);
