@@ -35,29 +35,29 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.805" />
 
-        <ImageView
-            android:id="@+id/imageView_PosReported"
-            android:layout_width="335dp"
-            android:layout_height="334dp"
-            android:contentDescription="@string/todo"
-            android:src="@drawable/coppiaapp"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/view_pos_reported"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="ImageContrastCheck" />
-
         <ListView
             android:id="@+id/ListView_signReported"
             android:layout_width="0dp"
-            android:layout_height="547dp"
-            android:visibility="invisible"
+            android:layout_height="524dp"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/view_pos_reported"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/view_pos_reported"
             app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
+            android:id="@+id/imageView_PosReported"
+            android:layout_width="341dp"
+            android:layout_height="220dp"
+            android:contentDescription="@string/todo"
+            android:src="@drawable/personecovid"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/view_pos_reported"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="ImageContrastCheck" />
 
         <TextView
             android:id="@+id/textView_UltimeSegnalazioni"
