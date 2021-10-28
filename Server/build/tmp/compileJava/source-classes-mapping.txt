@@ -1,16 +1,21 @@
-Profilo/Assistenza/TipoAssistenza.java
- Profilo.Assistenza.TipoAssistenza
-Profilo/PrestitiInCorso.java
- Profilo.PrestitiInCorso
-Profilo/RichiesteProlungamento.java
- Profilo.RichiesteProlungamento
-Profilo/Dispositivi.java
- Profilo.Dispositivi
-Profilo/MaterialeNoleggio.java
- Profilo.MaterialeNoleggio
-Profilo/AssistenzaQuarantena.java
- Profilo.AssistenzaQuarantena
-Connessione/Connessione.java
- Connessione.Connessione
-Profilo/Utenti.java
- Profilo.Utenti
+Profile/LendingInProgress.java
+ Profile.LendingInProgress
+Profile/Device.java
+ Profile.Device
+Profile/ExtensionRequest.java
+ Profile.ExtensionRequest
+Profile/Assistance/AssistanceType.java
+ Profile.Assistance.AssistanceType
+Profile/RentMaterial.java
+ Profile.RentMaterial
+Profile/QuarantineAssistance.java
+ Profile.QuarantineAssistance
+Profile/NoUserFoundExeption.java
+ Profile.NoUserFoundExeption
+Connection/Connection.java
+ Connection.Connection
+Main.java
+ City
+ Main
+Profile/User.java
+ Profile.User
