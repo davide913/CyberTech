@@ -32,6 +32,6 @@ public class Main {
 
         User u = User.getUserById(s.getId());
 
-        System.out.println(u.getId());
+        System.out.println(u.getName());
     }
 }

@@ -80,7 +80,7 @@ public class User {
         return this.Id;
     }
 
-    public void setId(String id) {
+    private void setId(String id) {
         Id = id;
     }
 
@@ -88,7 +88,7 @@ public class User {
         return Name;
     }
 
-    public void setName(String name) {
+    private void setName(String name) {
         Name = name;
     }
 
@@ -96,7 +96,7 @@ public class User {
         return Surname;
     }
 
-    public void setSurname(String surname) {
+    private void setSurname(String surname) {
         Surname = surname;
     }
 
@@ -104,7 +104,7 @@ public class User {
         return Sex;
     }
 
-    public void setSex(String sex) {
+    private void setSex(String sex) {
         Sex = sex;
     }
 
@@ -112,7 +112,7 @@ public class User {
         return Address;
     }
 
-    public void setAddress(String address) {
+    private void setAddress(String address) {
         Address = address;
     }
 
@@ -120,7 +120,7 @@ public class User {
         return City;
     }
 
-    public void setCity(String city) {
+    private void setCity(String city) {
         City = city;
     }
 
@@ -128,7 +128,7 @@ public class User {
         return Country;
     }
 
-    public void setCountry(String country) {
+    private void setCountry(String country) {
         Country = country;
     }
 
@@ -136,7 +136,7 @@ public class User {
         return Position;
     }
 
-    public void setPosition(GeoPoint position) {
+    private void setPosition(GeoPoint position) {
         Position = position;
     }
 
@@ -144,7 +144,7 @@ public class User {
         return Greenpass;
     }
 
-    public void setGreenpass(boolean greenpass) {
+    private void setGreenpass(boolean greenpass) {
         Greenpass = greenpass;
     }
 
@@ -152,7 +152,7 @@ public class User {
         return PositiveSince;
     }
 
-    public void setPositiveSince(DateTime positiveSince) {
+    private void setPositiveSince(DateTime positiveSince) {
         PositiveSince = positiveSince;
     }
 
@@ -160,7 +160,7 @@ public class User {
         return LendingPoint;
     }
 
-    public void setLendingPoint(long lendingPoint) {
+    private void setLendingPoint(long lendingPoint) {
         LendingPoint = lendingPoint;
     }
 
@@ -168,7 +168,7 @@ public class User {
         return Devices;
     }
 
-    public void setDevices(Collection<Device> devices) {
+    private void setDevices(Collection<Device> devices) {
         Devices = devices;
     }
 
@@ -176,7 +176,7 @@ public class User {
         return LendingInProgress;
     }
 
-    public void setLendingInProgress(Collection<Profile.LendingInProgress> lendingInProgress) {
+    private void setLendingInProgress(Collection<Profile.LendingInProgress> lendingInProgress) {
         LendingInProgress = lendingInProgress;
     }
 
@@ -184,7 +184,7 @@ public class User {
         return ExtensionRequest;
     }
 
-    public void setExtensionRequest(Collection<Profile.ExtensionRequest> extensionRequest) {
+    private void setExtensionRequest(Collection<Profile.ExtensionRequest> extensionRequest) {
         ExtensionRequest = extensionRequest;
     }
 
@@ -192,7 +192,7 @@ public class User {
         return RentMaterial;
     }
 
-    public void setRentMaterial(Collection<Profile.RentMaterial> rentMaterial) {
+    private void setRentMaterial(Collection<Profile.RentMaterial> rentMaterial) {
         RentMaterial = rentMaterial;
     }
 
@@ -200,9 +200,11 @@ public class User {
         return Assistance;
     }
 
-    public void setAssistance(QuarantineAssistance assistance) {
+    private void setAssistance(QuarantineAssistance assistance) {
         Assistance = assistance;
     }
+
+    //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
     public static User createUser(String name, String surname, String sex, String address,
                                   String city, String country, GeoPoint position, boolean greenpass) throws Exception {
@@ -223,12 +225,12 @@ public class User {
         myUser.put("Greenpass", greenpass);
         myUser.put("LendingPoint", 0);
 
-        ApiFuture<DocumentReference> addedDocRef = db.collection("users").add(myUser);        //push sul db
+        ApiFuture<DocumentReference> addedDocRef = db.collection("users").add(myUser);        //push on db
 
-        //TODO insert type in arraylist
         return new User(addedDocRef.get().getId(), name, surname, sex, address, city, country, position,
-                                    greenpass, null, 0, new ArrayList<>(), new ArrayList<>(),
-                                    new ArrayList<>(), new ArrayList<>(), new QuarantineAssistance());
+                                    greenpass, null, 0, new ArrayList<Device>(),
+                                    new ArrayList<Profile.LendingInProgress>(), new ArrayList<Profile.ExtensionRequest>(),
+                                    new ArrayList<Profile.RentMaterial>(), new QuarantineAssistance());
 
     }
 
