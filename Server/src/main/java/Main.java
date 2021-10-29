@@ -1,37 +1,38 @@
 import Connection.Connection;
 import Profile.User;
-import com.google.cloud.firestore.*;
+import com.google.cloud.Timestamp;
 
-import java.util.*;
-
-class City{
-    private String name;
-    private String country;
-    private String nation;
-    private boolean capital;
-    private long population;
-    private List<String> a;
-
-    public City(String name, String country, String nation, boolean capital, long population, List<String> a) {
-        this.name = name;
-        this.country = country;
-        this.nation = nation;
-        this.capital = capital;
-        this.population = population;
-        this.a = a;
-    }
-}
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         Connection.initializeConnection();
 
-        User s = User.createUser("davide", "finesso", "M", "rosmini", "abano", "italy",
+        /*User s = User.createUser("davide", "finesso", "M", "rosmini", "abano", "italy",
                         new GeoPoint(1.4,1.5),true );
 
         User u = User.getUserById(s.getId());
 
         System.out.println(u.getName());
+
+        s = User.createUser("davide", "finesso", "M", "rosmini", "abano", "italy",
+                new GeoPoint(1.4,1.5),true );
+
+        u = User.getUserById(s.getId());
+
+        System.out.println(u.getName());*/
+
+        //User.deleteUser("4HeuqZvyZxqSkUGshiXF");
+
+        System.out.println(User.updatePositiveSince("S2BaLtNi3Zja76BMWGXH", new Date(2021-1900, 10,7)));
+
+
+
+        //User u = User.getUserById("S2BaLtNi3Zja76BMWGXH");
+
+        //System.out.println(u.getPositiveSince());
     }
 }

@@ -3,17 +3,20 @@ package Profile;
 import Connection.Connection;
 import com.google.api.SystemParameterRule;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.google.common.collect.Lists;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.type.Date;
+import com.google.firebase.internal.NonNull;
 import com.google.type.DateTime;
 import com.google.type.DateTimeOrBuilder;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -27,7 +30,7 @@ public class User {
     private String Country;
     private GeoPoint Position;
     private boolean Greenpass;
-    private DateTime PositiveSince;
+    private Timestamp PositiveSince;
     private long LendingPoint;
     private Collection<Device> Devices;
     private Collection<Profile.LendingInProgress> LendingInProgress;
@@ -38,7 +41,7 @@ public class User {
     public User(){}
 
     private User(String id, String name, String surname, String sex, String address, String city,
-                String country, GeoPoint position, boolean greenpass, DateTime positiveSince, long lendingPoint) {
+                 String country, GeoPoint position, boolean greenpass, Timestamp positiveSince, long lendingPoint) {
         Id = id;
         Name = name;
         Surname = surname;
@@ -54,7 +57,7 @@ public class User {
 
     private User(String Id, String Name, String cognome, String sex, String address,
                  String city, String country, GeoPoint position, boolean greenpass,
-                 DateTime positiveSince, long lendingPoint, Collection<Device> devices,
+                 Timestamp positiveSince, long lendingPoint, Collection<Device> devices,
                  Collection<Profile.LendingInProgress> lendingInProgress, Collection<Profile.ExtensionRequest> extensionRequest,
                  Collection<Profile.RentMaterial> rentMaterial, QuarantineAssistance assistance) {
 
@@ -148,11 +151,15 @@ public class User {
         Greenpass = greenpass;
     }
 
-    public DateTime getPositiveSince() {
+    public Timestamp getPositiveSince() {
         return PositiveSince;
     }
 
-    private void setPositiveSince(DateTime positiveSince) {
+    public Date getDatePositiveSince() {
+        return PositiveSince.toDate();
+    }           //return a timestamp as a date
+
+    private void setPositiveSince(Timestamp positiveSince) {
         PositiveSince = positiveSince;
     }
 
@@ -206,6 +213,18 @@ public class User {
 
     //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
+    //TODO funzioni private per ripetizione di codice
+    private static DocumentReference getReference(String id){
+        Firestore db = FirestoreClient.getFirestore();      //create of object db
+
+        return db.collection("users").document(id);
+    }
+
+    private static DocumentSnapshot getDocument(DocumentReference reference) throws ExecutionException, InterruptedException {
+        ApiFuture<DocumentSnapshot> val = reference.get();
+        return val.get();
+    }
+
     public static User createUser(String name, String surname, String sex, String address,
                                   String city, String country, GeoPoint position, boolean greenpass) throws Exception {
 
@@ -235,15 +254,12 @@ public class User {
     }
 
     public static User getUserById(String id) throws Exception {
-
         Firestore db = FirestoreClient.getFirestore();      //create of object db
 
+        // Update an existing document
         DocumentReference docRef = db.collection("users").document(id);
         ApiFuture<DocumentSnapshot> var = docRef.get();
         DocumentSnapshot document = var.get();
-
-        //System.out.println(document.getData());
-
         User user = null;
 
         if (document.exists()) {
@@ -254,6 +270,71 @@ public class User {
             throw new NoUserFoundExeption("No user found with this id: "+ id);
 
         return user;
+    }
+
+    public static boolean deleteUser(String id) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();      //create of object db
+
+        try {
+            db.collection("users").document(id).delete();//do not manage the NoUserFoundExeption because is already throw by the method getUserById
+
+            return true;
+        }
+        catch (NoUserFoundExeption e){
+            return false;
+        }
+   }
+
+   public static boolean updateGreenPass(@NonNull String id,@NonNull boolean val) throws ExecutionException, InterruptedException {
+       Firestore db = FirestoreClient.getFirestore();      //create of object db
+
+       // Update an existing document
+       DocumentReference docRef = db.collection("users").document(id);
+       ApiFuture<DocumentSnapshot> var = docRef.get();
+       DocumentSnapshot document = var.get();
+
+       if(document.exists()) {
+           docRef.update("Greenpass", val);
+           return true;
+       }
+       else
+           return false;
+   }
+
+   public static boolean updatePositiveSince(@NonNull String id, Date date) throws ExecutionException, InterruptedException {
+       Firestore db = FirestoreClient.getFirestore();      //create of object db
+
+       // Update an existing document
+       DocumentReference docRef = db.collection("users").document(id);
+       ApiFuture<DocumentSnapshot> var = docRef.get();
+       DocumentSnapshot document = var.get();
+
+       if(document.exists()) {
+           if(date != null){                    //if the date is null is possible to delete the field date from db
+               Timestamp timestamp = Timestamp.of(date);            //conversion from date to timestamp
+               docRef.update("PositiveSince", timestamp);
+           }
+           else
+               docRef.update("PositiveSince", FieldValue.delete());
+
+           return true;
+       }
+       else
+           return false;
+   }
+
+   //TODO da testare
+   public static boolean updateLendingPoint(@NonNull String id,@NonNull long val) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if(document.exists() && val >= 0) {
+           docRef.update("LendingPoint", val);
+
+           return true;
+       }
+       else
+           return false;
    }
 
 
