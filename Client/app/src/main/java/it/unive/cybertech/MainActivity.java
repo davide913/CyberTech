@@ -11,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         findViewById(R.id.gestioneCovid).setOnClickListener(view -> {
             startActivity(new Intent(this, it.unive.cybertech.gestione_covid.HomePage.class));
         });

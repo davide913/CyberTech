@@ -13,6 +13,22 @@
             android:name=".noleggio.HomePage"
             android:exported="true" />
         <activity
+            android:name=".assistenza.RequestDetails"
+            android:exported="true"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.MyRequests"
+            android:exported="true"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.TakenRequests"
+            android:exported="true"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.MyProfile"
+            android:exported="true"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
             android:name=".gestione_covid.HomePage"
             android:exported="true" />
         <activity

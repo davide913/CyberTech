@@ -19,13 +19,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="409dp"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_Request"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="1dp" />
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="409dp"
@@ -37,16 +40,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <EditText
         android:id="@+id/requestTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="64dp"
+        android:layout_width="312dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="76dp"
         android:hint="Titolo"
         android:inputType="textLongMessage|textAutoCorrect"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.191"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_Request" />
 
     <Button
         android:id="@+id/uploadRequest"
@@ -61,38 +65,45 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/textView"
+    <EditText
+        android:id="@+id/requestText"
         android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:layout_marginStart="1dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
         android:hint="Inserire qui il testo della richiesta"
-        android:inputType="textLongMessage|textAutoCorrect|textMultiLine|textPersonName|text|phone"
+        android:inputType="textLongMessage|textAutoCorrect"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.092"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestTitle" />
 
     <EditText
         android:id="@+id/requestDate"
-        android:layout_width="56dp"
-        android:layout_height="23dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="123dp"
+        android:layout_height="48dp"
         android:autoSizeMinTextSize="15sp"
         android:ems="10"
         android:inputType="date"
+        android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintHorizontal_bias="0.539"
+        app:layout_constraintStart_toEndOf="@+id/requestLocation"
+        app:layout_constraintTop_toTopOf="@+id/requestLocation"
+        tools:ignore="SpeakableTextPresentCheck" />
 
-    <TextView
+    <EditText
         android:id="@+id/requestLocation"
         android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="2dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
         android:autoSizeMinTextSize="20sp"
         android:hint="Inserire qui il luogo della richiesta"
         android:inputType="textLongMessage|textMultiLine|textPostalAddress|textCapCharacters"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.079"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/requestText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

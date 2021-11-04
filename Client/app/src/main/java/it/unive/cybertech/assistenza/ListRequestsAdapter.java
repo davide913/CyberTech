@@ -1,5 +1,8 @@
 package it.unive.cybertech.assistenza;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,40 +17,55 @@ import it.unive.cybertech.R;
 
 public class ListRequestsAdapter extends RecyclerView.Adapter<ListRequestsAdapter.ViewHolder> {
     private List<String> listRequests;
+    private Context context;
+    public String ciao = "ciao";
 
-    public ListRequestsAdapter(List<String> list) {
+    public ListRequestsAdapter(Context context,List<String> list) {
+        this.context = context;
         this.listRequests = list;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView;
+        private TextView textFull;
+        private TextView textLocation;
+        private TextView textDate;
+        private TextView textTitle;
+        public String ciao = "ciao";
 
-        public TextView getTextView() {
-            return textView;
+
+        public TextView getTextTitle() {
+            return textTitle;
         }
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             //inserisci tutti i campi che hai creato di la sul xml
-            textView = itemView.findViewById(R.id.textFull);
-            textView = itemView.findViewById(R.id.textLocation);
-            textView = itemView.findViewById(R.id.textDate);
-            textView = itemView.findViewById(R.id.textTitle);
-
+            textFull = itemView.findViewById(R.id.textFull);
+            textLocation = itemView.findViewById(R.id.textLocation);
+            textDate = itemView.findViewById(R.id.textDate);
+            textTitle = itemView.findViewById(R.id.title_request);
+            textTitle.setText(ciao);
         }
     }
 
     @NonNull
     @Override
     public ListRequestsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_request_visualisation, parent,  false);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.activity_request_home_visualisation, null);
+
+        TextView txt = view.findViewById(R.id.title_request);
+        txt.setText("ciao");
+
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ListRequestsAdapter.ViewHolder holder, int position) {
-        holder.getTextView().setText(listRequests.get(position).toString());
+        holder.getTextTitle().setText(listRequests.get(position).toString());
+        TextView textTitle = holder.textTitle;
+
+        textTitle.setText(ciao);
     }
 
     @Override

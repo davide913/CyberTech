@@ -6,6 +6,10 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import java.util.Date;
+import java.util.Objects;
 
 import it.unive.cybertech.R;
 
@@ -24,20 +28,21 @@ public class RequestDetails extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_details);
 
+        //Da sistemare il tasto "torna indietro"
+        Toolbar toolbar = findViewById(R.id.toolbar_Request);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         setTitle("Dettagli Richiesta");
         //onPause() Devo mettere in pausa l'altra activity?
         //Devo mettere dei setter per i campi da collegare poi con il box del testo?
 
         //collegare i testi con il codice
 
-
-        Button backNoticeBoard = findViewById(R.id.backNoticeBoard);
-        backNoticeBoard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToNoticeBoard();
-                finish();   //per finire l'attività
-            }
+        //per tornare indietro alla home
+        findViewById(R.id.backNoticeBoard).setOnClickListener(view -> {
+            startActivity(new Intent(this, HomePage.class));
         });
 
         Button uploadRequest = findViewById(R.id.uploadRequest);
@@ -45,7 +50,11 @@ public class RequestDetails extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //come mando indietro le info che prendo dall'utente
-                goToNoticeBoard();
+                //goToNoticeBoard();
+                String title = findViewById(R.id.requestTitle).toString();
+                String location = findViewById(R.id.requestLocation).toString();
+                String date = findViewById(R.id.requestDate).toString();
+                //devo far ritornare i valori indietro alla home e metterli nell'adapter, creo una classe??
             }
         });
     }

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Cybertech</string>
+    <string name="name">Nome</string>
+    <string name="nuova_richiesta">Nuova Richiesta</string>
+    <string name="prese_in_carico">Prese in carico</string>
+    <string name="le_mie_richieste">Le mie richieste</string>
+    <string name="mio_profilo">Mio Profilo</string>
 </resources>

@@ -3,6 +3,7 @@ package it.unive.cybertech.assistenza;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import it.unive.cybertech.R;
 
@@ -13,15 +14,16 @@ e in parte della sua affidabilità
 */
 
 public class MyProfile extends AppCompatActivity {
-    private String name;
-    private String surname;
-    private String age;
-    private String location;
-    private String score;
-    private boolean positivity;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_profile);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_Profile);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        setTitle("Profilo");
     }
 }
