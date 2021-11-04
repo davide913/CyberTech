@@ -9,6 +9,10 @@ class ExtensionRequest {
         this.LendingID = LendingID;
     }
 
+    private void setLendingID(CollectionReference lendingID) {
+        LendingID = lendingID;
+    }
+
     public CollectionReference getLendingID() {
         return LendingID;
     }

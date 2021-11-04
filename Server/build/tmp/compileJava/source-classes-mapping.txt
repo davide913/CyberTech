@@ -1,20 +1,20 @@
-Profile/LendingInProgress.java
- Profile.LendingInProgress
+Profile/ExtensionRequest.java
+ Profile.ExtensionRequest
 Profile/Device.java
  Profile.Device
-Profile/NoUserFoundExeption.java
- Profile.NoUserFoundExeption
-Connection/Connection.java
- Connection.Connection
+Profile/Exception/NoUserFoundExeption.java
+ Profile.Exception.NoUserFoundExeption
 Profile/Assistance/AssistanceType.java
  Profile.Assistance.AssistanceType
 Profile/RentMaterial.java
  Profile.RentMaterial
 Profile/QuarantineAssistance.java
  Profile.QuarantineAssistance
-Profile/ExtensionRequest.java
- Profile.ExtensionRequest
-Profile/User.java
- Profile.User
+Connection/Connection.java
+ Connection.Connection
+Profile/LendingInProgress.java
+ Profile.LendingInProgress
 Main.java
  Main
+Profile/User.java
+ Profile.User

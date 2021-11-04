@@ -1,10 +1,11 @@
 import Connection.Connection;
+import Profile.Device;
+import Profile.LendingInProgress;
 import Profile.User;
-import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+
 
 public class Main {
 
@@ -27,9 +28,24 @@ public class Main {
 
         //User.deleteUser("4HeuqZvyZxqSkUGshiXF");
 
-        System.out.println(User.updatePositiveSince("S2BaLtNi3Zja76BMWGXH", new Date(2021-1900, 10,7)));
+        //System.out.println(User.updatePositiveSince("S2BaLtNi3Zja76BMWGXH", new Date(2021-1900, 10,7)));
 
+        //User.removeDevice("S2BaLtNi3Zja76BMWGXH", new Device("shish"));
 
+        //System.out.println(User.updateQuarantine("S2BaLtNi3Zja76BMWGXH", null));
+
+        //User.addDevice("S2BaLtNi3Zja76BMWGXH", new Device("shish"));
+
+        //User.removeDevice("S2BaLtNi3Zja76BMWGXH", new Device("test"));
+
+        //User.updateDevice("S2BaLtNi3Zja76BMWGXH", new Device("testo"), new Device("shish"));
+
+        //User.addLending("S2BaLtNi3Zja76BMWGXH", new LendingInProgress(new Date(2021-1900, 8, 05)));
+
+        //User.removeLending("S2BaLtNi3Zja76BMWGXH", new LendingInProgress(new Date(2021-1900, 8, 05)));
+        //User.updateLending("S2BaLtNi3Zja76BMWGXH", new LendingInProgress(new Date(2021-1900, 8, 05)), new LendingInProgress(new Date(2011-1900, 8, 05)));
+
+        //User.updateLending("S2BaLtNi3Zja76BMWGXH", )
 
         //User u = User.getUserById("S2BaLtNi3Zja76BMWGXH");
 

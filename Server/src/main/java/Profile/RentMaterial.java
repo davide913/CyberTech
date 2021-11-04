@@ -12,4 +12,8 @@ class RentMaterial {
     public CollectionReference getIDmaterial() {
         return IDmaterial;
     }
+
+    private void setIDmaterial(CollectionReference IDmaterial) {
+        this.IDmaterial = IDmaterial;
+    }
 }

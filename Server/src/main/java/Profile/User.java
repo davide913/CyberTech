@@ -1,22 +1,12 @@
 package Profile;
 
-import Connection.Connection;
-import com.google.api.SystemParameterRule;
+import Profile.Exception.NoUserFoundExeption;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
-import com.google.common.collect.Lists;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.database.annotations.NotNull;
 import com.google.firebase.internal.NonNull;
-import com.google.type.DateTime;
-import com.google.type.DateTimeOrBuilder;
-
-import java.io.IOException;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -32,10 +22,10 @@ public class User {
     private boolean Greenpass;
     private Timestamp PositiveSince;
     private long LendingPoint;
-    private Collection<Device> Devices;
-    private Collection<Profile.LendingInProgress> LendingInProgress;
-    private Collection<Profile.ExtensionRequest> ExtensionRequest;
-    private Collection<Profile.RentMaterial> RentMaterial;
+    private ArrayList<Device> Devices;
+    private ArrayList<LendingInProgress> LendingInProgress;
+    private ArrayList<ExtensionRequest> ExtensionRequest;
+    private ArrayList<RentMaterial> RentMaterial;
     private QuarantineAssistance Assistance;
 
     public User(){}
@@ -57,9 +47,9 @@ public class User {
 
     private User(String Id, String Name, String cognome, String sex, String address,
                  String city, String country, GeoPoint position, boolean greenpass,
-                 Timestamp positiveSince, long lendingPoint, Collection<Device> devices,
-                 Collection<Profile.LendingInProgress> lendingInProgress, Collection<Profile.ExtensionRequest> extensionRequest,
-                 Collection<Profile.RentMaterial> rentMaterial, QuarantineAssistance assistance) {
+                 Timestamp positiveSince, long lendingPoint, ArrayList<Device> devices,
+                 ArrayList<LendingInProgress> lendingInProgress, ArrayList<ExtensionRequest> extensionRequest,
+                 ArrayList<RentMaterial> rentMaterial, QuarantineAssistance assistance) {
 
         this.Id = Id;
         this.Name = Name;
@@ -171,35 +161,35 @@ public class User {
         LendingPoint = lendingPoint;
     }
 
-    public Collection<Device> getDevices() {
+    public ArrayList<Device> getDevices() {
         return Devices;
     }
 
-    private void setDevices(Collection<Device> devices) {
+    private void setDevices(ArrayList<Device> devices) {
         Devices = devices;
     }
 
-    public Collection<Profile.LendingInProgress> getLendingInProgress() {
+    public ArrayList<Profile.LendingInProgress> getLendingInProgress() {
         return LendingInProgress;
     }
 
-    private void setLendingInProgress(Collection<Profile.LendingInProgress> lendingInProgress) {
+    private void setLendingInProgress(ArrayList<Profile.LendingInProgress> lendingInProgress) {
         LendingInProgress = lendingInProgress;
     }
 
-    public Collection<Profile.ExtensionRequest> getExtensionRequest() {
+    public ArrayList<Profile.ExtensionRequest> getExtensionRequest() {
         return ExtensionRequest;
     }
 
-    private void setExtensionRequest(Collection<Profile.ExtensionRequest> extensionRequest) {
+    private void setExtensionRequest(ArrayList<Profile.ExtensionRequest> extensionRequest) {
         ExtensionRequest = extensionRequest;
     }
 
-    public Collection<Profile.RentMaterial> getRentMaterial() {
+    public ArrayList<Profile.RentMaterial> getRentMaterial() {
         return RentMaterial;
     }
 
-    private void setRentMaterial(Collection<Profile.RentMaterial> rentMaterial) {
+    private void setRentMaterial(ArrayList<Profile.RentMaterial> rentMaterial) {
         RentMaterial = rentMaterial;
     }
 
@@ -213,18 +203,20 @@ public class User {
 
     //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
-    //TODO funzioni private per ripetizione di codice
+    //TODO funzione private per ripetizione di codice
     private static DocumentReference getReference(String id){
         Firestore db = FirestoreClient.getFirestore();      //create of object db
 
         return db.collection("users").document(id);
     }
 
+    //TODO funzione private per ripetizione di codice
     private static DocumentSnapshot getDocument(DocumentReference reference) throws ExecutionException, InterruptedException {
         ApiFuture<DocumentSnapshot> val = reference.get();
         return val.get();
     }
 
+    //tested
     public static User createUser(String name, String surname, String sex, String address,
                                   String city, String country, GeoPoint position, boolean greenpass) throws Exception {
 
@@ -248,50 +240,48 @@ public class User {
 
         return new User(addedDocRef.get().getId(), name, surname, sex, address, city, country, position,
                                     greenpass, null, 0, new ArrayList<Device>(),
-                                    new ArrayList<Profile.LendingInProgress>(), new ArrayList<Profile.ExtensionRequest>(),
-                                    new ArrayList<Profile.RentMaterial>(), new QuarantineAssistance());
+                                    new ArrayList<LendingInProgress>(), new ArrayList<ExtensionRequest>(),
+                                    new ArrayList<RentMaterial>(), new QuarantineAssistance());
 
     }
 
+    //tested
     public static User getUserById(String id) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();      //create of object db
+        DocumentReference docRef = getReference(id);
+        DocumentSnapshot document = getDocument(docRef);
 
-        // Update an existing document
-        DocumentReference docRef = db.collection("users").document(id);
-        ApiFuture<DocumentSnapshot> var = docRef.get();
-        DocumentSnapshot document = var.get();
         User user = null;
 
         if (document.exists()) {
             user = document.toObject(User.class);
             user.setId(document.getId());
+
+            return user;
         }
         else
             throw new NoUserFoundExeption("No user found with this id: "+ id);
 
-        return user;
     }
 
-    public static boolean deleteUser(String id) throws Exception {
+    //tested
+    public static boolean deleteUser(String id) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();      //create of object db
+        DocumentReference docRef = getReference(id);
+        DocumentSnapshot document = getDocument(docRef);
 
-        try {
-            db.collection("users").document(id).delete();//do not manage the NoUserFoundExeption because is already throw by the method getUserById
+        if(document.exists())
+            db.collection("users").document(id).delete();
+        else
+            throw new NoUserFoundExeption("No user found with this id: "+ id);
 
-            return true;
-        }
-        catch (NoUserFoundExeption e){
-            return false;
-        }
+        return true;
+
    }
 
+    //tested
    public static boolean updateGreenPass(@NonNull String id,@NonNull boolean val) throws ExecutionException, InterruptedException {
-       Firestore db = FirestoreClient.getFirestore();      //create of object db
-
-       // Update an existing document
-       DocumentReference docRef = db.collection("users").document(id);
-       ApiFuture<DocumentSnapshot> var = docRef.get();
-       DocumentSnapshot document = var.get();
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists()) {
            docRef.update("Greenpass", val);
@@ -301,13 +291,10 @@ public class User {
            return false;
    }
 
+    //tested
    public static boolean updatePositiveSince(@NonNull String id, Date date) throws ExecutionException, InterruptedException {
-       Firestore db = FirestoreClient.getFirestore();      //create of object db
-
-       // Update an existing document
-       DocumentReference docRef = db.collection("users").document(id);
-       ApiFuture<DocumentSnapshot> var = docRef.get();
-       DocumentSnapshot document = var.get();
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists()) {
            if(date != null){                    //if the date is null is possible to delete the field date from db
@@ -323,13 +310,170 @@ public class User {
            return false;
    }
 
-   //TODO da testare
+    //tested
    public static boolean updateLendingPoint(@NonNull String id,@NonNull long val) throws ExecutionException, InterruptedException {
        DocumentReference docRef = getReference(id);
        DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists() && val >= 0) {
            docRef.update("LendingPoint", val);
+
+           return true;
+       }
+       else
+           return false;
+   }
+
+   //tested
+   public static boolean addDevice(@NotNull String id, @NonNull Device device) throws Exception {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("Devices", FieldValue.arrayUnion(device));
+           return true;
+       }
+       else
+           return false;
+   }
+
+   //tested
+   public static boolean removeDevice(@NotNull String id, @NonNull Device device) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("Devices", FieldValue.arrayRemove(device));
+           return true;
+       }
+       else
+           return false;
+   }
+
+   public static boolean updateDevice(@NotNull String id, @NonNull Device oldDevice, @NonNull Device newDevice) throws Exception {
+        if(!oldDevice.equals(newDevice)) {          //if old and new device are different
+            User myuser = getUserById(id);          //it also manage the wrong id
+            boolean flag = false;
+
+            for (Device d : myuser.Devices) {               //check if the old device is present in the list of that user
+                if (d.equals(oldDevice)) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (flag) {             //if find the old device it can update that
+                removeDevice(id, oldDevice);
+                addDevice(id, newDevice);
+                return true;
+            }
+        }
+        return false;
+   }
+
+    //tested
+   public static boolean addLending(@NotNull String id, @NonNull LendingInProgress lending) throws Exception {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("LendingInProgress", FieldValue.arrayUnion(lending));
+           return true;
+       } else
+           return false;
+   }
+
+   //tested
+   public static boolean removeLending(@NotNull String id, @NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("LendingInProgress", FieldValue.arrayRemove(lending));
+           return true;
+       } else
+           return false;
+   }
+
+   //tested
+   public static boolean updateLending(@NotNull String id, @NonNull LendingInProgress oldLending, @NonNull LendingInProgress newLending) throws Exception {
+       if(!oldLending.equals(newLending)) {          //if old and new device are different
+           User myuser = getUserById(id);          //it also manage the wrong id
+           boolean flag = false;
+
+           for (LendingInProgress l : myuser.LendingInProgress) {               //check if the old device is present in the list of that user
+               if (l.equals(oldLending)) {
+                   flag = true;
+                   break;
+               }
+           }
+
+           if (flag) {             //if find the old device it can update that
+               removeLending(id, oldLending);
+               addLending(id, newLending);
+               return true;
+           }
+       }
+       return false;
+   }
+
+    /*TODO da testate tutti gli add e remove alle collection sottostanti, aggiungere gli update.
+       DOMANDA: eliminare la collection se é vuota o tenerla vuota nel dbv una volta creata?!
+     */
+   public static boolean addExtensionRequest(@NotNull String id, @NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("ExtensionRequest", FieldValue.arrayUnion(extensionRequest));
+           return true;
+       } else
+           return false;
+   }
+
+   public static boolean removeExtensionRequest(@NotNull String id, @NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("ExtensionRequest", FieldValue.arrayRemove(extensionRequest));
+           return true;
+       } else
+           return false;
+   }
+
+   public static boolean addRentMaterial(@NotNull String id, @NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("RentMaterial", FieldValue.arrayUnion(rentMaterial));
+           return true;
+       } else
+           return false;
+   }
+
+   public static boolean removeRentMaterial(@NotNull String id, @NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if (document.exists()) {
+           docRef.update("RentMaterial", FieldValue.arrayRemove(rentMaterial));
+           return true;
+       } else
+           return false;
+   }
+
+   //tested
+   public static boolean updateQuarantine(@NotNull String id, QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
+       DocumentReference docRef = getReference(id);
+       DocumentSnapshot document = getDocument(docRef);
+
+       if(document.exists()) {
+           if(quarantineAssistance != null)                  //if the quarantineAssistance is null is possible to delete the field date from db
+               docRef.update("quarantineAssistance", quarantineAssistance);
+           else
+               docRef.update("quarantineAssistance", FieldValue.delete());
 
            return true;
        }
