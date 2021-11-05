@@ -401,14 +401,14 @@ public class User {
            User myuser = getUserById(id);          //it also manage the wrong id
            boolean flag = false;
 
-           for (LendingInProgress l : myuser.LendingInProgress) {               //check if the old device is present in the list of that user
+           for (LendingInProgress l : myuser.LendingInProgress) {               //check if the old LendingInProgress is present in the list of that user
                if (l.equals(oldLending)) {
                    flag = true;
                    break;
                }
            }
 
-           if (flag) {             //if find the old device it can update that
+           if (flag) {             //if find the old LendingInProgress it can update that
                removeLending(id, oldLending);
                addLending(id, newLending);
                return true;
@@ -417,9 +417,7 @@ public class User {
        return false;
    }
 
-    /*TODO da testate tutti gli add e remove alle collection sottostanti, aggiungere gli update.
-       DOMANDA: eliminare la collection se é vuota o tenerla vuota nel dbv una volta creata?!
-     */
+   //tested
    public static boolean addExtensionRequest(@NotNull String id, @NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
        DocumentReference docRef = getReference(id);
        DocumentSnapshot document = getDocument(docRef);
@@ -431,6 +429,7 @@ public class User {
            return false;
    }
 
+    //tested
    public static boolean removeExtensionRequest(@NotNull String id, @NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
        DocumentReference docRef = getReference(id);
        DocumentSnapshot document = getDocument(docRef);
@@ -442,6 +441,29 @@ public class User {
            return false;
    }
 
+   //tested
+   public static boolean updateExtensionRequest(@NonNull String id, @NonNull ExtensionRequest oldextensionRequest, @NonNull ExtensionRequest newextensionRequest) throws Exception {
+       if(!oldextensionRequest.equals(newextensionRequest)){
+           User myuser = getUserById(id);          //it also manage the wrong id
+           boolean flag = false;
+
+           for (ExtensionRequest l : myuser.ExtensionRequest) {               //check if the old ExtensionRequest is present in the list of that user
+               if (l.equals(oldextensionRequest)) {
+                   flag = true;
+                   break;
+               }
+           }
+
+           if (flag) {             //if find the old ExtensionRequest it can update that
+               removeExtensionRequest(id, oldextensionRequest);
+               addExtensionRequest(id, newextensionRequest);
+               return true;
+           }
+       }
+       return false;
+   }
+
+   //tested
    public static boolean addRentMaterial(@NotNull String id, @NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
        DocumentReference docRef = getReference(id);
        DocumentSnapshot document = getDocument(docRef);
@@ -453,6 +475,7 @@ public class User {
            return false;
    }
 
+    //tested
    public static boolean removeRentMaterial(@NotNull String id, @NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
        DocumentReference docRef = getReference(id);
        DocumentSnapshot document = getDocument(docRef);
@@ -462,6 +485,28 @@ public class User {
            return true;
        } else
            return false;
+   }
+
+   //tested
+   public static boolean updateRentMaterial(@NotNull String id, @NonNull RentMaterial oldrentMaterial, @NonNull RentMaterial newrentMaterial) throws Exception {
+       if(!oldrentMaterial.equals(newrentMaterial)){
+           User myuser = getUserById(id);          //it also manage the wrong id
+           boolean flag = false;
+
+           for (RentMaterial l : myuser.RentMaterial) {               //check if the old RentMaterial is present in the list of that user
+               if (l.equals(oldrentMaterial)) {
+                   flag = true;
+                   break;
+               }
+           }
+
+           if (flag) {             //if find the old RentMaterial it can update that
+               removeRentMaterial(id, oldrentMaterial);
+               addRentMaterial(id, newrentMaterial);
+               return true;
+           }
+       }
+       return false;
    }
 
    //tested

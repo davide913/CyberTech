@@ -1,7 +1,5 @@
 import Connection.Connection;
-import Profile.Device;
-import Profile.LendingInProgress;
-import Profile.User;
+import Profile.*;
 import com.google.cloud.firestore.CollectionReference;
 
 import java.util.Date;
@@ -44,6 +42,9 @@ public class Main {
 
         //User.removeLending("S2BaLtNi3Zja76BMWGXH", new LendingInProgress(new Date(2021-1900, 8, 05)));
         //User.updateLending("S2BaLtNi3Zja76BMWGXH", new LendingInProgress(new Date(2021-1900, 8, 05)), new LendingInProgress(new Date(2011-1900, 8, 05)));
+
+
+
 
         //User.updateLending("S2BaLtNi3Zja76BMWGXH", )
 

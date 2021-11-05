@@ -2,8 +2,10 @@ package Profile;
 
 import com.google.cloud.firestore.CollectionReference;
 
-class ExtensionRequest {
+public class ExtensionRequest {
     private CollectionReference LendingID;
+
+    public ExtensionRequest(){}
 
     public ExtensionRequest(CollectionReference LendingID) {
         this.LendingID = LendingID;
@@ -15,5 +17,14 @@ class ExtensionRequest {
 
     public CollectionReference getLendingID() {
         return LendingID;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof ExtensionRequest){
+            ExtensionRequest e = (ExtensionRequest) o;
+            return  e.LendingID.equals(this.LendingID);
+        }
+        return false;
     }
 }
