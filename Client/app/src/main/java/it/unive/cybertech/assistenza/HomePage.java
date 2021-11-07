@@ -24,7 +24,13 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  */
 
 public class HomePage extends AppCompatActivity {
-    //Da inserire nel manifest tutti i pulsanti
+    List<RequestInfo> requestInfoList;
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+
+    ReferencedClass myReference = (ReferencedClass) this.getApplication();
 
 
     @Override
@@ -36,45 +42,29 @@ public class HomePage extends AppCompatActivity {
     }
 
     private void initViews(){
-        RecyclerView listRequests = findViewById(R.id.listRequests);
-        ArrayList<String> provaLista = new ArrayList<>();
-        ListAdapter adapter;    //da sostituire con la mia classe, con tutte le ripercussioni nel codice.
+        recyclerView = findViewById(R.id.listRequests);
+        recyclerView.setHasFixedSize(true);
 
-        ArrayList<String> sefunziona = new ArrayList<>();
-        sefunziona.add("Ciao");
-        sefunziona.add("come");
-        sefunziona.add("stai");
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
-        View foo = findViewById(R.id.list_proto);
-        Intent Int = new Intent(this, HomePage.class);
+        mAdapter = new ListAdapter(requestInfoList, this);
+        recyclerView.setAdapter(mAdapter);
 
-        //provaLista.add(foo, sefunziona.get(0));
+        requestInfoList = myReference.getRequestInfoList();
 
-        provaLista.add(1, "Come");
-        provaLista.add(2, "stai");
-        provaLista.add("Mike");
+        //NON CHIAMO MAI LIST_PROTO E oneLineRequestLayout
 
-        listRequests.setLayoutManager(new LinearLayoutManager(this));
-
-        adapter = new ListAdapter(this, provaLista);
-        //Deve tornare in maniera visiva la richiesta di aiuto con titolo, data e location,
-
-        listRequests.setAdapter(adapter);
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
-
-        listRequests.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToRequestVisualisation();
-            }
+        recyclerView.setOnClickListener(view -> {
+            startActivity(new Intent(this, RequestViz.class));
         });
 
         /*
-        findViewById(R.id.request_proto).setOnClickListener(view -> {
+        findViewById(R.id.list_proto).setOnClickListener(view -> {
             startActivity(new Intent(this, RequestViz.class));
         });
         */
-
         //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
         //qui estraggo lo user dal DB
 
@@ -97,12 +87,5 @@ public class HomePage extends AppCompatActivity {
         findViewById(R.id.newHelpRequest).setOnClickListener(view -> {
             startActivity(new Intent(this, RequestDetails.class));
         });
-
     }
-
-    public void goToRequestVisualisation() {
-        Intent openReqVis = new Intent(this, RequestViz.class);
-        startActivity(openReqVis);
-    }
-
 }

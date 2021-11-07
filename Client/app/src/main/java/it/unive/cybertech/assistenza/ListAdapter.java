@@ -3,26 +3,37 @@ package it.unive.cybertech.assistenza;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.unive.cybertech.R;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
-    private ArrayList<String> localDataSet;
+
+    List<RequestInfo> requestInfoList;
     private Context context;
 
+    public ListAdapter(List<RequestInfo> requestInfoList, Context context) {
+        requestInfoList = new ArrayList<RequestInfo>();
+        this.requestInfoList = requestInfoList;
+        this.context = context;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView textTitle;
-        private TextView textLocation;
-        private TextView textDate;
+        TextView textTitle;
+        TextView textLocation;
+        TextView textDate;
+        ConstraintLayout parentLayout;
 
         public ViewHolder(View view) {
             super(view);
@@ -31,7 +42,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
             textTitle = (TextView) view.findViewById(R.id.title_request);
             textLocation = (TextView) view.findViewById(R.id.location_request);
             textDate = (TextView) view.findViewById(R.id.date_request);
-
+            parentLayout = view.findViewById(R.id.list_proto);
         }
 
         public TextView getTextTitle() {
@@ -45,10 +56,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         }
     }
 
-    public ListAdapter(Context context , ArrayList<String> dataSet) {
-        localDataSet = dataSet;
-        this.context = context;
-    }
 
     @NonNull
     @Override
@@ -61,14 +68,19 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.textTitle.setText(localDataSet.get(position));
-        holder.textLocation.setText(localDataSet.get(position));
-        holder.textDate.setText(localDataSet.get(position));
+        holder.textTitle.setText(requestInfoList.get(position).getTitle());
+        holder.textLocation.setText(requestInfoList.get(position).getLocation());
+        holder.textDate.setText(requestInfoList.get(position).getDate());
+        holder.parentLayout.setOnClickListener(view ->{
+            context.startActivity(new Intent(context, RequestViz.class));
 
+        });
     }
 
     @Override
     public int getItemCount() {
-        return localDataSet.size();
+        if(requestInfoList.isEmpty())
+            return 0;
+        return requestInfoList.size();
     }
 }

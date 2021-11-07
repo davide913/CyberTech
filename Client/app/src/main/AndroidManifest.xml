@@ -3,6 +3,7 @@
     package="it.unive.cybertech">
 
     <application
+        android:name=".assistenza.ReferencedClass"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -15,25 +16,30 @@
         <activity
             android:name=".assistenza.RequestDetails"
             android:exported="true"
-            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+            android:theme="@style/Theme.Cybertech.NoActionBar"
+            android:parentActivityName=".assistenza.HomePage"/>
         <activity
             android:name=".assistenza.MyRequests"
             android:exported="true"
-            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+            android:theme="@style/Theme.Cybertech.NoActionBar"
+            android:parentActivityName=".assistenza.HomePage" />
         <activity
             android:name=".assistenza.TakenRequests"
             android:exported="true"
-            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+            android:theme="@style/Theme.Cybertech.NoActionBar"
+            android:parentActivityName=".assistenza.HomePage"/>
         <activity
             android:name=".assistenza.MyProfile"
             android:exported="true"
-            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+            android:theme="@style/Theme.Cybertech.NoActionBar"
+            android:parentActivityName=".assistenza.HomePage"/>
         <activity
             android:name=".gestione_covid.HomePage"
             android:exported="true" />
         <activity
             android:name=".assistenza.HomePage"
-            android:exported="true" />
+            android:exported="true"
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import it.unive.cybertech.R;
@@ -22,47 +24,43 @@ scambiarsi informazioni più dettagliate
  */
 
 public class RequestDetails extends AppCompatActivity {
+    List<RequestInfo> requestInfoList;
+    ReferencedClass reference = (ReferencedClass) this.getApplication();
+    EditText et_requestTitle, et_requestLocation, et_requestDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_details);
 
-        //Da sistemare il tasto "torna indietro"
         Toolbar toolbar = findViewById(R.id.toolbar_Request);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         setTitle("Dettagli Richiesta");
-        //onPause() Devo mettere in pausa l'altra activity?
-        //Devo mettere dei setter per i campi da collegare poi con il box del testo?
 
-        //collegare i testi con il codice
+        requestInfoList = reference.getRequestInfoList();
 
-        //per tornare indietro alla home
-        findViewById(R.id.backNoticeBoard).setOnClickListener(view -> {
-            startActivity(new Intent(this, HomePage.class));
-        });
+        et_requestTitle = findViewById(R.id.requestTitle);
+        et_requestLocation = findViewById(R.id.requestLocation);
+        et_requestDate = findViewById(R.id.requestDate);
 
-        Button uploadRequest = findViewById(R.id.uploadRequest);
-        uploadRequest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //come mando indietro le info che prendo dall'utente
-                //goToNoticeBoard();
-                String title = findViewById(R.id.requestTitle).toString();
-                String location = findViewById(R.id.requestLocation).toString();
-                String date = findViewById(R.id.requestDate).toString();
-                //devo far ritornare i valori indietro alla home e metterli nell'adapter, creo una classe??
-            }
+
+        findViewById(R.id.uploadRequest).setOnClickListener(view -> {
+            //creare un oggetto Request Info
+                int nextId = reference.getNextId();
+                RequestInfo newRequest = new RequestInfo(nextId, et_requestTitle.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString());
+
+                //lo inserisco nella lista delle richieste
+                requestInfoList.add(newRequest);
+                reference.setNextId(nextId++);
+
+                Intent intent = new Intent(this, HomePage.class);
+                startActivity(intent);
         });
     }
 
     //Se ho del contenuto in sospeso, creo una bozza o elimino tutto? pop-up per avvertire il cliente che
     //non ha salvato la richiesta di aiuto?
-    public void goToNoticeBoard() {
-        Intent openNoticeBoard = new Intent(this, HomePage.class);
-        startActivity(openNoticeBoard); //devo sostituire start con onResume()?
-    }
 }
