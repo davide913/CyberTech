@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "5807486351",
+    "firebase_url": "https://cybertech-a61ab-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cybertech-a61ab",
+    "storage_bucket": "cybertech-a61ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5807486351:android:66f6ec3cf45e534a1a47fa",
+        "android_client_info": {
+          "package_name": "it.unive.cybertech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "5807486351-5sridj0u3q0pljuv7qrvm888ildbhuin.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJAcDsq0o_EOiScCHsLmRDtbn-1Z7kD08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "5807486351-5sridj0u3q0pljuv7qrvm888ildbhuin.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

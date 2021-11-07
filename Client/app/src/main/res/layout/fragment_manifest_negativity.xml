@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".gestione_covid.ManifestNegativityFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/view_manifestNegativity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/GhostWhite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/textView_UltimaSegnalazione"
+            android:layout_width="280dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="20dp"
+            android:text="@string/last_sign"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/textView_noSignEff"
+            app:layout_constraintEnd_toEndOf="@+id/imageView_noSign"
+            app:layout_constraintHorizontal_bias="0.457"
+            app:layout_constraintStart_toStartOf="@+id/imageView_noSign"
+            app:layout_constraintTop_toTopOf="@+id/view_manifestNegativity"
+            app:layout_constraintVertical_bias="0.263" />
+
+        <ImageView
+            android:id="@+id/imageView_noSign"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:contentDescription="@string/todo"
+            android:src="@drawable/coronavirus_5107715_1280"
+            app:layout_constraintBottom_toBottomOf="@+id/view_manifestNegativity"
+            app:layout_constraintEnd_toEndOf="@+id/view_manifestNegativity"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView_noSignEff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="124dp"
+            android:text="@string/no_sign2"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.494"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

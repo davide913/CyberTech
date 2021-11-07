@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".gestione_covid.ManifestPositivityFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/GhostWhite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/textView_nome"
+            android:layout_width="205dp"
+            android:layout_height="43dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="300dp"
+            android:background="@drawable/background_field"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/name"
+            android:textColor="#455A64"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView_cognome"
+            android:layout_width="206dp"
+            android:layout_height="39dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/background_field"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/surname"
+            android:textColor="#455A64"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.136"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_nome" />
+
+        <TextView
+            android:id="@+id/textView_dateAlert"
+            android:layout_width="346dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/background_field"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/date_alert"
+            android:textColor="#616161"
+            app:layout_constraintEnd_toEndOf="@+id/textView_cognome"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/textView_cognome"
+            app:layout_constraintTop_toBottomOf="@+id/textView_cognome" />
+
+        <TextView
+            android:id="@+id/textView_stateAlert"
+            android:layout_width="346dp"
+            android:layout_height="43dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/background_field"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:text="@string/state_alert"
+            android:textColor="#616161"
+            app:layout_constraintEnd_toEndOf="@+id/textView_dateAlert"
+            app:layout_constraintHorizontal_bias="0.509"
+            app:layout_constraintStart_toStartOf="@+id/textView_dateAlert"
+            app:layout_constraintTop_toBottomOf="@+id/textView_dateAlert" />
+
+        <TextView
+            android:id="@+id/textView_nome2"
+            android:layout_width="99dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="84dp"
+            android:layout_marginTop="300dp"
+            android:paddingTop="10dp"
+            android:text="@string/nulls"
+            android:textColor="#455A64"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView_cognome2"
+            android:layout_width="100dp"
+            android:layout_height="33dp"
+            android:layout_marginTop="28dp"
+            android:paddingTop="10dp"
+            android:text="@string/nulls"
+            android:textColor="#455A64"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.337"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_nome" />
+
+        <TextView
+            android:id="@+id/textView_dateAlert2"
+            android:layout_width="216dp"
+            android:layout_height="29dp"
+            android:layout_marginTop="28dp"
+            android:paddingTop="10dp"
+            android:text="@string/no_sign"
+            android:textColor="#455A64"
+            app:layout_constraintEnd_toEndOf="@+id/view"
+            app:layout_constraintHorizontal_bias="0.82"
+            app:layout_constraintStart_toStartOf="@+id/view"
+            app:layout_constraintTop_toBottomOf="@+id/textView_cognome" />
+
+        <TextView
+            android:id="@+id/textView_stateAlert2"
+            android:layout_width="218dp"
+            android:layout_height="28dp"
+            android:layout_marginTop="28dp"
+            android:paddingTop="10dp"
+            android:text="@string/no_sign"
+            android:textColor="#455A64"
+            app:layout_constraintEnd_toEndOf="@+id/view"
+            app:layout_constraintHorizontal_bias="0.865"
+            app:layout_constraintStart_toStartOf="@+id/view"
+            app:layout_constraintTop_toBottomOf="@+id/textView_dateAlert" />
+
+        <Button
+            android:id="@+id/button_alertPos"
+            android:layout_width="201dp"
+            android:layout_height="58dp"
+            android:backgroundTint="@color/ciuc"
+            android:text="@string/manifest_posotivity"
+            android:theme="@style/Button.ciuc"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
+            app:layout_constraintVertical_bias="0.547" />
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="349dp"
+            android:layout_height="418dp"
+            android:layout_marginStart="212dp"
+            android:contentDescription="@string/todo"
+            android:src="@drawable/covid_man"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="ImageContrastCheck" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
