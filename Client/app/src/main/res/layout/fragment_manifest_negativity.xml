@@ -38,10 +38,10 @@
 
         <ImageView
             android:id="@+id/imageView_noSign"
-            android:layout_width="560dp"
-            android:layout_height="503dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:contentDescription="@string/todo"
-            android:src="@drawable/bimbaapp__"
+            android:src="@drawable/coronavirus_5107715_1280"
             app:layout_constraintBottom_toBottomOf="@+id/view_manifestNegativity"
             app:layout_constraintEnd_toEndOf="@+id/view_manifestNegativity"
             app:layout_constraintStart_toStartOf="parent"

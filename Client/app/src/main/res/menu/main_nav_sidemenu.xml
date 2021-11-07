@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_menu_home"
+        android:icon="@drawable/ic_baseline_home_64_black"
+        android:title="@string/menu_homepage" />
+
+    <item
+        android:id="@+id/nav_menu_covid"
+        android:icon="@drawable/ic_baseline_coronavirus_64_black"
+        android:title="@string/menu_covid" />
+
+    <item
+        android:id="@+id/nav_menu_quarantine_assistance"
+        android:icon="@drawable/ic_baseline_assistant_64_black"
+        android:title="@string/menu_quarantine_assistance" />
+
+    <item
+        android:id="@+id/nav_menu_showcase"
+        android:icon="@drawable/ic_baseline_shopping_cart_64_black"
+        android:title="@string/menu_showcase" />
+
+</menu>

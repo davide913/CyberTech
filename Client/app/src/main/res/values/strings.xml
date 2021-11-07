@@ -46,5 +46,9 @@
     <string name="data">data</string>
     <string name="stato">stato</string>
 
+    <string name="menu_homepage">Home page</string>
+    <string name="menu_covid">Gestione COVID-19</string>
+    <string name="menu_quarantine_assistance">Assistenza</string>
+    <string name="menu_showcase">Prestiti</string>
 
 </resources>
