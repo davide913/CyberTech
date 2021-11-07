@@ -14,6 +14,26 @@
             android:exported="false"
             android:theme="@style/Theme.Cybertech.NoActionBar"/>
         <activity
+            android:name=".assistenza.MyProfile"
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.MyRequests"
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.RequestDetails"
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.RequestViz"
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
+            android:name=".assistenza.TakenRequests"
+            android:exported="false"
+            android:theme="@style/Theme.Cybertech.NoActionBar"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Cybertech.NoActionBar">
