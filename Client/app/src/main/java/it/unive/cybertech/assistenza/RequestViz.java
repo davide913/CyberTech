@@ -14,7 +14,6 @@ import it.unive.cybertech.R;
 
 public class RequestViz extends AppCompatActivity {
     List<RequestInfo> requestInfoList;
-    //ReferencedClass reference = (ReferencedClass) this.getApplication();
     int id;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,21 +25,7 @@ public class RequestViz extends AppCompatActivity {
         TextView textLocation = findViewById(R.id.textLocation);
         TextView textDate = findViewById(R.id.textDate);
 
-        //requestInfoList = reference.getRequestInfoList();
-
-        Intent intent = getIntent();
-        id = intent.getIntExtra("id", -1);
-        RequestInfo request = null;
-
-        if(id >= 0) {
-            for(RequestInfo r: requestInfoList) {
-                if (r.getId() == id)
-                    request = r;
-            }
-            textTitle.setText(request.getTitle());
-            text.setText(request.getText());
-            textLocation.setText(request.getLocation());
-            textDate.setText(request.getDate());
-        }
+        String title = getIntent().getStringExtra("title");
+        textTitle.setText(title);
     }
 }

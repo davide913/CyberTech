@@ -25,7 +25,7 @@ scambiarsi informazioni più dettagliate
 
 public class RequestDetails extends AppCompatActivity {
     List<RequestInfo> requestInfoList;
-    ReferencedClass reference = (ReferencedClass) this.getApplication();
+
     EditText et_requestTitle, et_requestLocation, et_requestDate, et_requestText;
 
     @Override
@@ -40,7 +40,6 @@ public class RequestDetails extends AppCompatActivity {
 
         setTitle("Dettagli Richiesta");
 
-        requestInfoList = reference.getRequestInfoList();
 
         et_requestTitle = findViewById(R.id.requestTitle);
         et_requestLocation = findViewById(R.id.requestLocation);
@@ -48,19 +47,8 @@ public class RequestDetails extends AppCompatActivity {
 
 
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            //creare un oggetto Request Info
-                int nextId = reference.getNextId();
-                ReferencedClass newref;
-                //RequestInfo newRequest = new RequestInfo(nextId, et_requestTitle.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString()); -> Per test statico
-                if(et_requestTitle != null && et_requestText != null && et_requestLocation != null) {
-                    newref = new ReferencedClass(nextId, et_requestTitle.getText().toString(), et_requestText.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString());
-                    reference.setNextId(nextId++);
-                }
-                    //else -> messaggio di errore
-
-                //requestInfoList.add(newRequest);
-
-                finish();
+            //upload tutte le info nel db
+            finish();
         });
     }
 
