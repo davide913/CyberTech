@@ -38,10 +38,11 @@
 
         <ImageView
             android:id="@+id/imageView_noSign"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:contentDescription="@string/todo"
-            android:src="@drawable/coronavirus_5107715_1280"
+            android:src="@drawable/immagine2"
+            android:scaleType="center"
             app:layout_constraintBottom_toBottomOf="@+id/view_manifestNegativity"
             app:layout_constraintEnd_toEndOf="@+id/view_manifestNegativity"
             app:layout_constraintStart_toStartOf="parent"

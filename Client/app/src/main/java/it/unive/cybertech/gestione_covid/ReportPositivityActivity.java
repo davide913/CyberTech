@@ -16,9 +16,8 @@ import android.widget.Switch;
 import it.unive.cybertech.R;
 
 public class ReportPositivityActivity extends AppCompatActivity {
-    private EditText mInsertNome, mInsertCognome, mInsertData;
     private Button bSendSign;
-    private SwitchCompat mAnonymous;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +30,6 @@ public class ReportPositivityActivity extends AppCompatActivity {
     private void initViews(){
         Toolbar toolbar = findViewById(R.id.toolbar_sendSign);
         bSendSign = findViewById(R.id.button_sendSign);
-        mInsertData = findViewById(R.id.editText_insertDate);
 
 
         setSupportActionBar(toolbar);
@@ -53,7 +51,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(getApplicationContext(), HomePage.class));
+                    finish();
                 }
             });
             builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {

@@ -17,7 +17,7 @@
             android:background="@color/GhostWhite"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
@@ -26,16 +26,17 @@
             android:id="@+id/textView_nome"
             android:layout_width="205dp"
             android:layout_height="43dp"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="300dp"
+            android:layout_marginTop="308dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/name"
             android:textColor="#455A64"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.135"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/view" />
 
         <TextView
             android:id="@+id/textView_cognome"
@@ -90,7 +91,7 @@
             android:layout_width="99dp"
             android:layout_height="35dp"
             android:layout_marginStart="84dp"
-            android:layout_marginTop="300dp"
+            android:layout_marginTop="308dp"
             android:paddingTop="10dp"
             android:text="@string/nulls"
             android:textColor="#455A64"
