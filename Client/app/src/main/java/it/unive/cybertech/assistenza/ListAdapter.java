@@ -73,8 +73,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>{
         holder.textLocation.setText(requestInfoList.get(position).getLocation());
         holder.textDate.setText(requestInfoList.get(position).getDate());
         holder.parentLayout.setOnClickListener(view ->{
-            context.startActivity(new Intent(context, RequestViz.class));
-
+            //mando avanti i dati
+            //Ho modificato da qui -----> 08/11/2021
+            Intent intent = new Intent(context, RequestViz.class);
+            //intent.putExtra("lista", requestInfoList);
+            intent.putExtra("title", requestInfoList.get(position).getTitle());
+            context.startActivity(intent);
         });
     }
 

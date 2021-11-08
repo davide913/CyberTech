@@ -5,11 +5,13 @@ public class RequestInfo {
     private String title;
     private String location;
     private String date;
+    private String text;
 
 
-    public RequestInfo(int id, String title, String location, String date) {
+    public RequestInfo(int id, String title, String text, String location, String date) {
         this.id = id;
         this.title = title;
+        this.text = text;
         this.location = location;
         this.date = date;
     }
@@ -29,6 +31,14 @@ public class RequestInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     public String getLocation() {
@@ -53,6 +63,7 @@ public class RequestInfo {
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", location='" + location + '\'' +
+                ", text='" + text + '\'' +
                 ", date='" + date + '\'' +
                 '}';
     }

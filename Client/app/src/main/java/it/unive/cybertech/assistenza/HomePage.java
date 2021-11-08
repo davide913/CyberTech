@@ -49,18 +49,11 @@ public class HomePage extends Fragment {
         recyclerView.setAdapter(mAdapter);
 
 
-        //NON CHIAMO MAI LIST_PROTO E oneLineRequestLayout
-
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         recyclerView.setOnClickListener(v -> {
             startActivity(new Intent(getActivity(), RequestViz.class));
         });
 
-        /*
-        findViewById(R.id.list_proto).setOnClickListener(view -> {
-            startActivity(new Intent(this, RequestViz.class));
-        });
-        */
         //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
         //qui estraggo lo user dal DB
 

@@ -26,7 +26,7 @@ scambiarsi informazioni più dettagliate
 public class RequestDetails extends AppCompatActivity {
     List<RequestInfo> requestInfoList;
     ReferencedClass reference = (ReferencedClass) this.getApplication();
-    EditText et_requestTitle, et_requestLocation, et_requestDate;
+    EditText et_requestTitle, et_requestLocation, et_requestDate, et_requestText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +50,17 @@ public class RequestDetails extends AppCompatActivity {
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
             //creare un oggetto Request Info
                 int nextId = reference.getNextId();
-                RequestInfo newRequest = new RequestInfo(nextId, et_requestTitle.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString());
+                ReferencedClass newref;
+                //RequestInfo newRequest = new RequestInfo(nextId, et_requestTitle.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString()); -> Per test statico
+                if(et_requestTitle != null && et_requestText != null && et_requestLocation != null) {
+                    newref = new ReferencedClass(nextId, et_requestTitle.getText().toString(), et_requestText.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString());
+                    reference.setNextId(nextId++);
+                }
+                    //else -> messaggio di errore
 
-                //lo inserisco nella lista delle richieste
-                requestInfoList.add(newRequest);
-                reference.setNextId(nextId++);
+                //requestInfoList.add(newRequest);
 
-                Intent intent = new Intent(this, HomePage.class);
-                startActivity(intent);
+                finish();
         });
     }
 
