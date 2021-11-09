@@ -33,6 +33,13 @@ public class PosReportedFragment extends Fragment {
     private void initViews(View v){
         Boolean var = false;
 
+        /*TODO
+        if(ObjectClient.getPositiveUsers() != null){
+            var = true;
+        }
+         */
+
+
         ImageView imageView = v.findViewById(R.id.imageView_PosReported);
         TextView textView = v.findViewById(R.id.TextView_PosReported);
         TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
@@ -44,6 +51,11 @@ public class PosReportedFragment extends Fragment {
             listView.setVisibility(View.VISIBLE);
             textView1.setVisibility(View.VISIBLE);
             ArrayList<String> sign = new ArrayList<>();
+
+            /* TODO passa il vero ArrayList di utenti positivi
+            ArrayList<User> userList = ObjectClient.getPositiveUsers();
+             */
+
             ArrayAdapter<String> adapter;
 
             //Prove ListView con Adapter
@@ -54,7 +66,7 @@ public class PosReportedFragment extends Fragment {
             sign.add("rawlist5");
             sign.add("rawlist6");
 
-            adapter = new CustomSignReceivedAdapter(getContext(), 0, sign);
+            adapter = new CustomSignReceivedAdapter(getContext(), 0, sign); //TODO qua prenderà in ingresso userList
 
             listView.setAdapter(adapter);
         }

@@ -25,11 +25,33 @@ public class ManifestPositivityFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_manifest_positivity, container, false);
 
+        initViews(v);
+
+        return v;
+    }
+
+    private void initViews(View v){
+
         TextView mNome = v.findViewById(R.id.textView_nome2);
         TextView mCognome = v.findViewById(R.id.textView_cognome2);
         TextView mDateSign = v.findViewById(R.id.textView_dateAlert2);
         TextView mStateSign = v.findViewById(R.id.textView_stateAlert2);
         Button signPosButton = v.findViewById(R.id.button_alertPos);
+
+
+        /*TODO impostare parametri corretti nella HomePage gestione covid
+          mNome.setText(ObjectClient.getName());
+          mCognome.setText(ObjectClient.getSurname());
+          if(ObjectClient.isPositive()){
+                mDateSign.setText(ObjectClient.getDateSign());
+                mStateSign("Positivo");
+          }
+          else{
+                mDateSign.setText("Nessuna segnalazione inviata");
+                mStateSign("Negativo");
+          }
+        */
+
 
         signPosButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,6 +60,5 @@ public class ManifestPositivityFragment extends Fragment {
             }
         });
 
-        return v;
     }
 }

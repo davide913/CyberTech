@@ -55,5 +55,6 @@
     <string name="prese_in_carico">Prese in carico</string>
     <string name="le_mie_richieste">Le mie richieste</string>
     <string name="mio_profilo">Mio Profilo</string>
+    <string name="manifestNegButton">Segnala Guarigione</string>
 
 </resources>
