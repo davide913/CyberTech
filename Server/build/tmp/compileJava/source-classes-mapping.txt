@@ -1,20 +1,34 @@
-Connection/Connection.java
- Connection.Connection
-Profile/Device.java
- Profile.Device
-Profile/Exception/NoUserFoundExeption.java
- Profile.Exception.NoUserFoundExeption
-Profile/Assistance/AssistanceType.java
- Profile.Assistance.AssistanceType
 Profile/LendingInProgress.java
  Profile.LendingInProgress
-Profile/QuarantineAssistance.java
- Profile.QuarantineAssistance
+Profile/Device.java
+ Profile.Device
+Profile/Exception/NoQuarantineAssistanceFoundException.java
+ Profile.Exception.NoQuarantineAssistanceFoundException
+Groups/Activity.java
+ Groups.Activity
+Profile/Exception/NoUserFoundExeption.java
+ Profile.Exception.NoUserFoundExeption
+Groups/Members.java
+ Groups.Members
+Profile/AssistanceType.java
+ Profile.AssistanceType
+Groups/Partecipants/Partecipants.java
+ Groups.Partecipants.Partecipants
+Groups/Groups.java
+ Groups.Groups
+Profile/ExtensionRequest.java
+ Profile.ExtensionRequest
+Connection/Connection.java
+ Connection.Connection
+Groups/Chat.java
+ Groups.Chat
+Profile/Exception/NoAssistanceTypeFoundExeption.java
+ Profile.Exception.NoAssistanceTypeFoundExeption
 Main.java
  Main
 Profile/RentMaterial.java
  Profile.RentMaterial
-Profile/User.java
- Profile.User
-Profile/ExtensionRequest.java
- Profile.ExtensionRequest
+Profile/Users.java
+ Profile.Users
+Profile/QuarantineAssistance.java
+ Profile.QuarantineAssistance

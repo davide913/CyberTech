@@ -1,21 +1,30 @@
 package Profile;
 
-import com.google.cloud.firestore.CollectionReference;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
+
+import java.util.concurrent.ExecutionException;
 
 public class RentMaterial {
-    private CollectionReference IDmaterial;
+    private DocumentReference IDmaterial;
 
     public RentMaterial(){}
 
-    public RentMaterial(CollectionReference IDmaterial) {
+    public RentMaterial(DocumentReference IDmaterial) {
         this.IDmaterial = IDmaterial;
     }
 
-    public CollectionReference getIDmaterial() {
-        return IDmaterial;
-    }
+    /*public Material getMaterial() throws ExecutionException, InterruptedException {
+        ApiFuture<DocumentSnapshot> val = IDmaterial.get();
+        DocumentSnapshot document = val.get();
 
-    private void setIDmaterial(CollectionReference IDmaterial) {
+        return document.toObject(Material.class);
+    }*/
+
+    private void setIDmaterial(DocumentReference IDmaterial) {
         this.IDmaterial = IDmaterial;
     }
 
