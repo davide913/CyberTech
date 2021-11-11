@@ -10,6 +10,9 @@ import com.google.firebase.internal.NonNull;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static Connection.Connection.getDocument;
+import static Connection.Connection.getReference;
+
 //TODO all the function are tested
 public class Users {
     private String Id;
@@ -205,16 +208,10 @@ public class Users {
     //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
     //private function for code replication
-    protected static DocumentReference getReference(String id){
-        Firestore db = FirestoreClient.getFirestore();      //create of object db
+    protected DocumentReference getDocumentReference(){
+        Firestore db = FirestoreClient.getFirestore();
 
-        return db.collection("users").document(id);
-    }
-
-    //private function for code replication
-    protected static DocumentSnapshot getDocument(DocumentReference reference) throws ExecutionException, InterruptedException {
-        ApiFuture<DocumentSnapshot> val = reference.get();
-        return val.get();
+        return db.collection("users").document(this.Id);
     }
 
     public static Users createUser(String name, String surname, String sex, String address,
@@ -246,7 +243,7 @@ public class Users {
     }
 
     public static Users getUserById(String id) throws Exception {
-        DocumentReference docRef = getReference(id);
+        DocumentReference docRef = getReference("users",id);
         DocumentSnapshot document = getDocument(docRef);
 
         Users users = null;
@@ -264,7 +261,7 @@ public class Users {
 
     public boolean deleteUser() throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();      //create of object db
-        DocumentReference docRef = getReference(Id);
+        DocumentReference docRef = getReference("users",Id);
         DocumentSnapshot document = getDocument(docRef);
 
         if(document.exists())
@@ -278,7 +275,7 @@ public class Users {
 
 
    public boolean updateGreenPass(@NonNull boolean val) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(this.Id);
+       DocumentReference docRef = getReference("users", this.Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists()) {
@@ -292,7 +289,7 @@ public class Users {
 
 
    public boolean updatePositiveSince(Date date) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists()) {
@@ -314,7 +311,7 @@ public class Users {
 
 
    public boolean updateLendingPoint(@NonNull long val) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists() && val >= 0) {
@@ -328,7 +325,7 @@ public class Users {
    }
 
    public boolean addDevice( @NonNull Device device) throws Exception {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -341,7 +338,7 @@ public class Users {
    }
 
    public boolean removeDevice(@NonNull Device device) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -375,7 +372,7 @@ public class Users {
 
 
    public boolean addLending(@NonNull LendingInProgress lending) throws Exception {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -387,7 +384,7 @@ public class Users {
    }
 
    public boolean removeLending(@NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -419,7 +416,7 @@ public class Users {
    }
 
    public boolean addExtensionRequest(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -432,7 +429,7 @@ public class Users {
 
 
    public boolean removeExtensionRequest(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -464,7 +461,7 @@ public class Users {
    }
 
    public boolean addRentMaterial(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -477,7 +474,7 @@ public class Users {
 
 
    public boolean removeRentMaterial(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if (document.exists()) {
@@ -509,7 +506,7 @@ public class Users {
    }
 
    public boolean updateQuarantine(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
-       DocumentReference docRef = getReference(Id);
+       DocumentReference docRef = getReference("users",Id);
        DocumentSnapshot document = getDocument(docRef);
 
        if(document.exists()) {

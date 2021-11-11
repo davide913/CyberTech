@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static Connection.Connection.getDocument;
+import static Connection.Connection.getReference;
+
 public class QuarantineAssistance {
     private DocumentReference AssistanceType;
     private String Description;
@@ -82,11 +85,10 @@ public class QuarantineAssistance {
         InCharge = inCharge;
     }
 
-    private void setInChargeUser(Users inCharge) {
-        Firestore db = FirestoreClient.getFirestore();
-
-        InCharge = db.collection("users").document(inCharge.getId());
-    }
+    //gestita dall'update
+    /*private void setInChargeUser(Users inCharge) {
+        InCharge = inCharge.getDocumentReference();
+    }*/
 
     public String getId() {
         return Id;
@@ -106,6 +108,17 @@ public class QuarantineAssistance {
     private void setDeliveryDate(Timestamp deliveryDate) {
         DeliveryDate = deliveryDate;
     }
+    //private function for code replication
+    private boolean unusedAssistanceType() throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();      //create of object db
+
+        ApiFuture<QuerySnapshot> future = db.collection("quarantineAssistance").
+                whereEqualTo("assistanceType", this.AssistanceType ).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        return documents.isEmpty();
+    }
+
 
     //tested
     public static QuarantineAssistance addQuarantineAssistance(String typeAssistance, String description, Users user, Date date) throws ExecutionException, InterruptedException {
@@ -119,7 +132,7 @@ public class QuarantineAssistance {
         Profile.AssistanceType assistanceType = Profile.AssistanceType.getAssistanceType(typeAssistance);
 
         DocumentReference AssTypeRef = db.collection("assistanceType").document(assistanceType.getID());
-        DocumentReference userRef = getReference(user.getId());
+        DocumentReference userRef = getReference("users", user.getId());
 
         Timestamp t = Timestamp.of(date);
 
@@ -134,30 +147,6 @@ public class QuarantineAssistance {
         return new QuarantineAssistance(AssTypeRef, description, userRef, t, addedDocRef.get().getId());
     }
 
-    //private function for code replication
-    private boolean unusedAssistanceType() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();      //create of object db
-
-        ApiFuture<QuerySnapshot> future = db.collection("quarantineAssistance").
-                whereEqualTo("assistanceType", this.AssistanceType ).get();
-        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-
-        return documents.isEmpty();
-    }
-
-    //private function for code replication
-    protected static DocumentReference getReference(String id){
-        Firestore db = FirestoreClient.getFirestore();      //create of object db
-
-        return db.collection("quarantineAssistance").document(id);
-    }
-
-    //private function for code replication
-    protected static DocumentSnapshot getDocument(DocumentReference reference) throws ExecutionException, InterruptedException {
-        ApiFuture<DocumentSnapshot> val = reference.get();
-        return val.get();
-    }
-
     //tested
     public void removeQuarantineAssistance() throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();      //create of object db
@@ -170,7 +159,7 @@ public class QuarantineAssistance {
 
     //tested
     public static QuarantineAssistance getQuarantineAssistance(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference(id);
+        DocumentReference docRef = getReference("quarantineAssistance", id);
         DocumentSnapshot document = getDocument(docRef);
 
         QuarantineAssistance quarantineAssistance = null;
@@ -187,8 +176,8 @@ public class QuarantineAssistance {
     }
 
     //tested
-    public boolean updateAssistanceType_QuarantineAssistance(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference(this.Id);
+    public boolean updateInCharge_QuarantineAssistance(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("quarantineAssistance", Id);
         DocumentSnapshot document = getDocument(docRef);
 
         if(document.exists()) {
@@ -206,15 +195,52 @@ public class QuarantineAssistance {
             return false;
     }
 
+    //tested
+    public boolean updateAssistanceType_QuarantineAssistance(@NonNull Users user) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("quarantineAssistance", Id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if(document.exists()) {
+            DocumentReference docRefAssistance = user.getDocumentReference();
+            docRef.update("users", docRefAssistance);
+            this.InCharge = docRefAssistance;
+
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //tested
+    public boolean updateDeliveryDate(@NonNull Date date) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("quarantineAssistance", Id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if(document.exists()) {
+            docRef.update("date", date);
+            this.DeliveryDate = Timestamp.of(date);
+
+            return true;
+        }
+        else
+            return false;
+    }
+
     //TODO finire la parte di QuarantineAssistance
 
     public static void main(String[] args) throws Exception {
         Connection.initializeConnection();
 
         //Users u = Users.getUserById("S2BaLtNi3Zja76BMWGXH");
+        //Users s = Users.createUser("davide", "finesso", "M", "rosmini", "abano", "italy",
+        //                  new GeoPoint(1.4,1.5),true );
+
+
 
         QuarantineAssistance q = getQuarantineAssistance("TnLz3hORQl9RpqaHsNK4");
 
+        q.updateDeliveryDate(new Date(2021, 9,10));
+        //System.out.println( q.updateAssistanceType_QuarantineAssistance(s) );
         //q.updateAssistanceType_QuarantineAssistance(get;
 
 

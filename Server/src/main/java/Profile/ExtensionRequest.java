@@ -4,6 +4,7 @@ import com.google.cloud.firestore.CollectionReference;
 
 public class ExtensionRequest {
     private CollectionReference LendingID;
+    private String id;
 
     public ExtensionRequest(){}
 
