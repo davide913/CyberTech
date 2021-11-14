@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Connection.Database;
-import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExeption;
+import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 
 public class QuarantineAssistance {
@@ -128,7 +128,7 @@ public class QuarantineAssistance {
 
         try {       //try to add the assistance type, if exist this branch just get that object
             addAssistanceType(typeAssistance);
-        } catch (NoAssistanceTypeFoundExeption e) {
+        } catch (NoAssistanceTypeFoundException e) {
         }
         //TODO getAssistanceType??? a cosa serve? non è statico, va in errore......
         AssistanceType assistanceType = null;//getAssistanceType(typeAssistance);

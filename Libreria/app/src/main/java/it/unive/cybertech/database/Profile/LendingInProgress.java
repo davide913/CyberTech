@@ -68,8 +68,8 @@ public class LendingInProgress {
         return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
     }
 
-    public void removeLendingInProgress() {
-        deleteFromCollection("lendingInProgress", this.id);//db.collection("lendingInProgress").document(this.id).delete();
+    public boolean removeLendingInProgress() {
+        return deleteFromCollection("lendingInProgress", this.id);//db.collection("lendingInProgress").document(this.id).delete();
     }
 
     public boolean updateExpiryDate(Date date) throws ExecutionException, InterruptedException {
@@ -91,7 +91,7 @@ public class LendingInProgress {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            DocumentReference docRefMaterial = getReference("material",material.getId());//db.collection("material").document(material.getId());
+            DocumentReference docRefMaterial = getReference("material", material.getId());//db.collection("material").document(material.getId());
 
             docRef.update("date", docRefMaterial);
             this.idMaterial = docRefMaterial;

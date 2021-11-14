@@ -12,7 +12,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
@@ -20,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
-import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExeption;
+import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 
 //TODO all this function are tested
 public class AssistanceType {
@@ -56,7 +54,7 @@ public class AssistanceType {
 
         try {
             getAssistanceType(type);
-        } catch (NoAssistanceTypeFoundExeption e) {
+        } catch (NoAssistanceTypeFoundException e) {
             Map<String, Object> myMap = new HashMap<>();          //create "table"
             myMap.put("type", type);
 
@@ -64,7 +62,7 @@ public class AssistanceType {
 
             return new AssistanceType(type, addedDocRef.getId());
         }
-        throw new NoAssistanceTypeFoundExeption("This assistance type( " + type + " ) already exsist ");
+        throw new NoAssistanceTypeFoundException("This assistance type( " + type + " ) already exsist ");
     }
 
     public static AssistanceType getAssistanceType(@NonNull String type) throws ExecutionException, InterruptedException {
@@ -75,7 +73,7 @@ public class AssistanceType {
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         if (documents.isEmpty())
-            throw new NoAssistanceTypeFoundExeption("No assistance type found with this type: " + type);
+            throw new NoAssistanceTypeFoundException("No assistance type found with this type: " + type);
 
         AssistanceType assistance = documents.get(0).toObject(AssistanceType.class);
         assistance.ID = documents.get(0).getId();
