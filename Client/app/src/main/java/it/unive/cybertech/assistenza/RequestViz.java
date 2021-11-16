@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import org.w3c.dom.Text;
 
@@ -19,6 +20,13 @@ public class RequestViz extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_visualisation);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        setTitle("Dettagli richiesta");
 
         TextView textTitle = findViewById(R.id.textTitle);
         TextView text = findViewById(R.id.textFull);
