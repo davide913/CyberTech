@@ -42,7 +42,7 @@ public class AddProductForRent extends AppCompatActivity {
                 formOk = false;
                 date.setError("Campo obbligatorio");
             }
-            if(type.getSelectedItem().toString().length() == 0)
+            if(type.getSelectedItem() != null && type.getSelectedItem().toString().length() == 0)
                 formOk = false;
 
             if(formOk){

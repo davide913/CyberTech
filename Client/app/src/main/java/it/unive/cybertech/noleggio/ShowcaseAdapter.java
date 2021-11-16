@@ -41,7 +41,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
             image = view.findViewById(R.id.showcase_item_image);
         }
 
-        public TextView getTitle() {
+        /*public TextView getTitle() {
             return title;
         }
         public TextView getDescription() {
@@ -49,11 +49,21 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         }
         public ImageView getImage() {
             return image;
-        }
+        }*/
 
         @Override
         public void onClick(View view) {
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
+        }
+
+        public void bind(final String item, int position) {
+            title.setText(item);
+            description.setText(item);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    clickListener.onItemClick(v, position);
+                }
+            });
         }
     }
 
@@ -68,9 +78,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.getTitle().setText(showcaseList.get(position));
-        holder.getDescription().setText(showcaseList.get(position));
-        //holder.getImage().setImageBitmap();
+        holder.bind(showcaseList.get(position), position);
     }
 
     @Override

@@ -17,8 +17,6 @@ import android.view.ViewGroup;
 
 import com.google.android.material.tabs.TabLayout;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +85,6 @@ public class HomePage extends Fragment {
         }
 
 
-        @NotNull
         @Override
         public Fragment getItem(int position) {
             return mFragmentList.get(position);

@@ -22,6 +22,8 @@ import it.unive.cybertech.R;
 
 public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListener {
 
+    private ArrayList<String> items;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -29,10 +31,10 @@ public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListe
         RecyclerView recyclerView = view.findViewById(R.id.showcase_list);
         FloatingActionButton add = view.findViewById(R.id.showcase_add);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        ArrayList<String> data = new ArrayList<>();
+        items = new ArrayList<>();
         for (int i = 0; i < 20; i++)
-            data.add("prova" + i);
-        ShowcaseAdapter adapter = new ShowcaseAdapter(data);
+            items.add("prova" + i);
+        ShowcaseAdapter adapter = new ShowcaseAdapter(items);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         add.setOnClickListener(v -> {
@@ -43,6 +45,8 @@ public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListe
 
     @Override
     public void onItemClick(View view, int position) {
-
+        Intent i = new Intent(getActivity(), ProductDetails.class);
+        i.putExtra("ID", items.get(position));
+        startActivity(i);
     }
 }
