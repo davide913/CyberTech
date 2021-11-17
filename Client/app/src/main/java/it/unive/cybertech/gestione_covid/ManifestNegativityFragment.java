@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 
 public class ManifestNegativityFragment extends Fragment {
@@ -35,14 +37,16 @@ public class ManifestNegativityFragment extends Fragment {
         TextView nessunaSegnalazione = v.findViewById(R.id.textView_noSignEff);
         Button button = v.findViewById(R.id.button_manifestNegativity);
 
-        /* TODO impostare pagina corretta se utente positivo
-        if(ObjectClient.isPositive()){
+
+
+
+        if(CachedUser.user.getDatePositiveSince() != null){
             imageView.setVisibility(View.INVISIBLE);
             nessunaSegnalazione.setVisibility(View.INVISIBLE);
             statoSegnalazione.setVisibility(View.VISIBLE);
             dataSegnalazione.setVisibility(View.VISIBLE);
             statoSegnalazione.setText("Positivo");
-            dataSegnalazione.setText(ObjectClient.getDateSign());
+            dataSegnalazione.setText(CachedUser.user.getDatePositiveSince().toString());
         }
         else{
             imageView.setVisibility(View.VISIBLE);
@@ -51,7 +55,7 @@ public class ManifestNegativityFragment extends Fragment {
             dataSegnalazione.setVisibility(View.INVISIBLE);
         }
 
-         */
+
 
 
     }

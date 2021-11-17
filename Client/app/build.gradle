@@ -42,7 +42,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
-    implementation files('D:/Windows/Documenti/GitHub/CyberTech/Client/app/libs/app-debug.aar')
+    implementation files('/libs/app-debug.aar')
     implementation 'com.google.firebase:firebase-firestore:24.0.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
