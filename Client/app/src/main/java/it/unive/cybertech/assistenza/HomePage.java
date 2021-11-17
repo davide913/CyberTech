@@ -36,6 +36,7 @@ public class HomePage extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home_page_assistenza, container, false);
         initViews(view);
+        //TODO use CachedUser to work with database
         return view;
     }
 
