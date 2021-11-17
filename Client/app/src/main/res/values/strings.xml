@@ -62,5 +62,6 @@
     <string name="showcase_expire_date">Data di restituzione:</string>
     <string name="rent_disclosure_description">Accettando di prendere in prestito il materiale, dichiari di essere responsabile del prestito e di qualsiasi danno accidentale o non venga arrecato al materiale. Al termine del prestito un questionario di feedback verrà sottoposto al proprietario per verificare la cura prestata.\nSe il proprietario dovesse notare delle anomalie gravi, il tuo profilo potrebbe essere segnato come \'inaffidabile\' e non potrai più richiedere alcun prestito finchè non rimedierai ai danni</string>
     <string name="rent_disclosure">Assunzione responsabilità</string>
+    <string name="manifestNegButton">Segnala Guarigione</string>
 
 </resources>
