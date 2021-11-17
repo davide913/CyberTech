@@ -12,10 +12,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
 
 /*
 La home page di assistenza si occupa di mostrare le richieste in primo piano (in un qualche ordine)
@@ -23,11 +27,8 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  quelle già create, andare sul suo profilo
  */
 public class HomePage extends Fragment {
-    List<RequestInfo> requestInfoList;
-
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private ArrayList<String> requestInfoList;
+    ListView listView;
 
 
     @Nullable
@@ -39,35 +40,27 @@ public class HomePage extends Fragment {
     }
 
     private void initViews(View view) {
-        recyclerView = view.findViewById(R.id.listRequests);
-        recyclerView.setHasFixedSize(true);
+        requestInfoList = new ArrayList<String>();
+        ArrayAdapter<String> adapter;
+        listView = view.findViewById(R.id.listRequests);
+        requestInfoList.add("stringa di prova");
 
-        layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
-        requestInfoList = new ReferencedClass().getRequestInfoList();
-        mAdapter = new ListAdapter(requestInfoList, getContext());
-        recyclerView.setAdapter(mAdapter);
-
-
-        //NON CHIAMO MAI LIST_PROTO E oneLineRequestLayout
+        adapter = new CastomRequestsAdapter(getContext(), 0, requestInfoList);
+        listView.setAdapter(adapter);
 
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
-        recyclerView.setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RequestViz.class));
-        });
+        listView.setOnItemClickListener(((parent, view1, position, id) -> {
+            Intent newIntent = new Intent(getContext(), RequestViz.class);
+            newIntent.putExtra("title", adapter.getItem(position));
+            startActivity(newIntent);
+        }));
 
-        /*
-        findViewById(R.id.list_proto).setOnClickListener(view -> {
-            startActivity(new Intent(this, RequestViz.class));
-        });
-        */
+
+
         //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
         //qui estraggo lo user dal DB
 
         //il profilo è visibile da tutti
-        view.findViewById(R.id.myProfile).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), MyProfile.class));
-        });
 
         //Poter prendere in carico una richiesta solo se sei negativo
         view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
@@ -83,5 +76,6 @@ public class HomePage extends Fragment {
         view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
             startActivity(new Intent(getActivity(), RequestDetails.class));
         });
+
     }
 }

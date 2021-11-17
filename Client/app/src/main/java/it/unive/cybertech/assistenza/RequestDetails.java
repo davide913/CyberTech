@@ -25,8 +25,8 @@ scambiarsi informazioni più dettagliate
 
 public class RequestDetails extends AppCompatActivity {
     List<RequestInfo> requestInfoList;
-    ReferencedClass reference = (ReferencedClass) this.getApplication();
-    EditText et_requestTitle, et_requestLocation, et_requestDate;
+
+    EditText et_requestTitle, et_requestLocation, et_requestDate, et_requestText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,6 @@ public class RequestDetails extends AppCompatActivity {
 
         setTitle("Dettagli Richiesta");
 
-        requestInfoList = reference.getRequestInfoList();
 
         et_requestTitle = findViewById(R.id.requestTitle);
         et_requestLocation = findViewById(R.id.requestLocation);
@@ -48,16 +47,8 @@ public class RequestDetails extends AppCompatActivity {
 
 
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            //creare un oggetto Request Info
-                int nextId = reference.getNextId();
-                RequestInfo newRequest = new RequestInfo(nextId, et_requestTitle.getText().toString(), et_requestLocation.getText().toString(), et_requestDate.getText().toString());
-
-                //lo inserisco nella lista delle richieste
-                requestInfoList.add(newRequest);
-                reference.setNextId(nextId++);
-
-                Intent intent = new Intent(this, HomePage.class);
-                startActivity(intent);
+            //upload tutte le info nel db
+            finish();
         });
     }
 
