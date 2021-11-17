@@ -2,6 +2,7 @@ package it.unive.cybertech.gestione_covid;
 
 import android.os.Bundle;
 
+import static it.unive.cybertech.utils.CachedUser.user;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Date;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.User;
@@ -39,8 +42,7 @@ public class ManifestNegativityFragment extends Fragment {
 
 
 
-
-        if(CachedUser.user.getDatePositiveSince() != null){
+        if(user.getPositiveSince() != null){
             imageView.setVisibility(View.INVISIBLE);
             nessunaSegnalazione.setVisibility(View.INVISIBLE);
             statoSegnalazione.setVisibility(View.VISIBLE);

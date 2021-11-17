@@ -1,5 +1,6 @@
 package it.unive.cybertech.gestione_covid;
 
+import static it.unive.cybertech.utils.CachedUser.user;
 import androidx.fragment.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class ManifestPositivityFragment extends Fragment {
 
     private void initViews(View v){
 
+
         TextView mNome = v.findViewById(R.id.textView_nome2);
         TextView mCognome = v.findViewById(R.id.textView_cognome2);
         TextView mDateSign = v.findViewById(R.id.textView_dateAlert2);
@@ -39,18 +41,21 @@ public class ManifestPositivityFragment extends Fragment {
         Button signPosButton = v.findViewById(R.id.button_alertPos);
 
 
-        /*TODO impostare parametri corretti nella HomePage gestione covid
-          mNome.setText(ObjectClient.getName());
-          mCognome.setText(ObjectClient.getSurname());
-          if(ObjectClient.isPositive()){
-                mDateSign.setText(ObjectClient.getDateSign());
-                mStateSign("Positivo");
+
+          mNome.setText(user.getName());
+          mCognome.setText(user.getSurname());
+
+          if(user.getPositiveSince() != null){
+                mDateSign.setText(user.getDatePositiveSince().toString());
+                mStateSign.setText("Positivo");
           }
           else{
                 mDateSign.setText("Nessuna segnalazione inviata");
-                mStateSign("Negativo");
+                mStateSign.setText("Negativo");
           }
-        */
+
+
+
 
 
         signPosButton.setOnClickListener(new View.OnClickListener() {
