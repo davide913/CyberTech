@@ -1,5 +1,7 @@
 package it.unive.cybertech;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,11 +9,18 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
 import com.google.android.material.navigation.NavigationView;
+
 import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -32,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.setDrawerIndicatorEnabled(true);
         toggle.syncState();
+        View header = navigationView.getHeaderView(0);
+        ((TextView) header.findViewById(R.id.user_name)).setText(user.getName() + " " + user.getSurname());
         //initViews();
     }
 

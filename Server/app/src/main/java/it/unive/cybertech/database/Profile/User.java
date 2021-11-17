@@ -225,15 +225,15 @@ public class User {
             return null;
         GeoPoint position = new GeoPoint(latitude, longitude);
         Map<String, Object> myUser = new HashMap<>();          //create "table"
-        myUser.put("Name", name);
-        myUser.put("Surname", surname);
-        myUser.put("Sex", sex);
-        myUser.put("Address", address);
-        myUser.put("City", city);
-        myUser.put("Country", country);
-        myUser.put("Geopoint", position);
-        myUser.put("Greenpass", greenpass);
-        myUser.put("LendingPoint", 0);
+        myUser.put("name", name);
+        myUser.put("surname", surname);
+        myUser.put("sex", sex);
+        myUser.put("address", address);
+        myUser.put("city", city);
+        myUser.put("country", country);
+        myUser.put("geopoint", position);
+        myUser.put("greenpass", greenpass);
+        myUser.put("lendingPoint", 0);
 
         DocumentReference addedDocRef;// db.collection("users").add(myUser);        //push on db
         try {
@@ -250,7 +250,7 @@ public class User {
     }
 
     public static User getUserById(String id) throws Exception {
-        DocumentReference docRef = getReference("user", id);
+        DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
         User user = null;

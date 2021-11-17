@@ -28,7 +28,7 @@ public class HomePage extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_home_page_covid);
-
+        //TODO Use cachedUser to interact with the database
         //initViews();
     }
 
