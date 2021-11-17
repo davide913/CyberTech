@@ -1,1 +1,0 @@
-Cartella dedicata alla parte di gestione del server
