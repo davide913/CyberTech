@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,6 +40,10 @@ public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListe
         recyclerView.setAdapter(adapter);
         add.setOnClickListener(v -> {
             startActivity(new Intent(getActivity(), AddProductForRent.class));
+        });
+
+        view.findViewById(R.id.test_showcase).setOnClickListener(v -> {
+            startActivity(new Intent(getActivity(), RentFeedback.class));
         });
         return view;
     }
