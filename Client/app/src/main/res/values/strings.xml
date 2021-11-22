@@ -63,5 +63,9 @@
     <string name="rent_disclosure_description">Accettando di prendere in prestito il materiale, dichiari di essere responsabile del prestito e di qualsiasi danno accidentale o non venga arrecato al materiale. Al termine del prestito un questionario di feedback verrà sottoposto al proprietario per verificare la cura prestata.\nSe il proprietario dovesse notare delle anomalie gravi, il tuo profilo potrebbe essere segnato come \'inaffidabile\' e non potrai più richiedere alcun prestito finchè non rimedierai ai danni</string>
     <string name="rent_disclosure">Assunzione responsabilità</string>
     <string name="manifestNegButton">Segnala Guarigione</string>
+    <string name="rent_feedback_negative_message">Ci dispiace che il prestito non sia andato a buon fine e l\'utente sia stato irrispettoso. Con il tuo feedback all\'utente verrà assegnata una mora che potrebbe impedirgli di ottenere nuovi prestiti, perciò sii onesto</string>
+    <string name="rent_feedback_positive_message">Grazie per il feedback</string>
+    <string name="rent_feedback_positive">Tutto a buon fine</string>
+    <string name="rent_feedback_negative">Feedback negativo</string>
 
 </resources>
