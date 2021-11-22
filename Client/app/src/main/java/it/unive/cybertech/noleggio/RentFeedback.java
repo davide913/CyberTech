@@ -68,7 +68,7 @@ public class RentFeedback extends AppCompatActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the Builder class for convenient dialog construction
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setMessage(score >= 0 ? R.string.rent_feedback_positive_message : R.string.rent_feedback_negative_message)
                     .setTitle(score >= 0 ? R.string.rent_feedback_positive : R.string.rent_feedback_negative)
                     .setPositiveButton(android.R.string.ok, (dialog, id) -> {

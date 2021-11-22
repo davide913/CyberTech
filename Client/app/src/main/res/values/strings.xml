@@ -67,5 +67,13 @@
     <string name="rent_feedback_positive_message">Grazie per il feedback</string>
     <string name="rent_feedback_positive">Tutto a buon fine</string>
     <string name="rent_feedback_negative">Feedback negativo</string>
+    <string name="field_required">Campo obbligatorio</string>
+    <string name="password_mismatch">Le password deveono corrispondere</string>
+
+    <array name="sex">
+        <item>Maschio</item>
+        <item>Femmina</item>
+        <item>Preferisco non dirlo</item>
+    </array>
 
 </resources>
