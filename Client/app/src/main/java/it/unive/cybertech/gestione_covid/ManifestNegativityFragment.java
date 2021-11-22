@@ -54,12 +54,14 @@ public class ManifestNegativityFragment extends Fragment {
             dataSegnalazione.setVisibility(View.VISIBLE);
             statoSegnalazione.setText("Positivo");
             dataSegnalazione.setText(CachedUser.user.getDatePositiveSince().toString());
+            button.setVisibility(View.VISIBLE);
         }
         else{
             imageView.setVisibility(View.VISIBLE);
             nessunaSegnalazione.setVisibility(View.VISIBLE);
             statoSegnalazione.setVisibility(View.INVISIBLE);
             dataSegnalazione.setVisibility(View.INVISIBLE);
+            button.setVisibility(View.INVISIBLE);
         }
 
         button.setOnClickListener(v1 -> {
@@ -69,7 +71,12 @@ public class ManifestNegativityFragment extends Fragment {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                   user.updatePositiveSince(null);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            user.updatePositiveSince(null); //TODO vedere se funziona
+                        }
+                    }).start();
                    dialog.cancel();
                    updateFr();
                 }
