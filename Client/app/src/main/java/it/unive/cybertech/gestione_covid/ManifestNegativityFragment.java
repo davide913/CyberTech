@@ -1,9 +1,14 @@
 package it.unive.cybertech.gestione_covid;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import static it.unive.cybertech.utils.CachedUser.user;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +62,36 @@ public class ManifestNegativityFragment extends Fragment {
             dataSegnalazione.setVisibility(View.INVISIBLE);
         }
 
-
+        button.setOnClickListener(v1 -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Invia Guarigione");
+            builder.setMessage("Confermi di voler inviare la segnalazione di guarigione?\n");
+            builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                   user.updatePositiveSince(null);
+                   dialog.cancel();
+                   updateFr();
+                }
+            });
+            builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            builder.create().show();
+        });
 
 
     }
+
+    //TODO vedere se funziona refresh fragment
+    private void updateFr(){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.detach(this).attach(this).commit();
+    }
+
 
 
 }

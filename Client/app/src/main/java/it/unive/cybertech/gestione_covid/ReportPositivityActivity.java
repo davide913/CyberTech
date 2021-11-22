@@ -13,10 +13,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import it.unive.cybertech.R;
 
 public class ReportPositivityActivity extends AppCompatActivity {
     private Button bSendSign;
+    EditText insertDate;
 
 
     @Override
@@ -30,6 +36,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
     private void initViews(){
         Toolbar toolbar = findViewById(R.id.toolbar_sendSign);
         bSendSign = findViewById(R.id.button_sendSign);
+        insertDate = findViewById(R.id.editText_insertDate);
 
 
         setSupportActionBar(toolbar);
@@ -51,6 +58,8 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
+
                     finish();
                 }
             });
@@ -63,4 +72,5 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.create().show();
         });
     }
+
 }
