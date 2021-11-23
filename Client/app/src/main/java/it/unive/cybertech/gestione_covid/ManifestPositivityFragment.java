@@ -2,7 +2,12 @@ package it.unive.cybertech.gestione_covid;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import android.app.Activity;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Bundle;
 
 
@@ -17,7 +22,7 @@ import it.unive.cybertech.R;
 
 
 public class ManifestPositivityFragment extends Fragment {
-
+    public static String tag = "android:switcher:"+R.id.viewPager_covid+":"+1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -30,6 +35,7 @@ public class ManifestPositivityFragment extends Fragment {
 
         return v;
     }
+
 
     private void initViews(View v){
 
@@ -61,9 +67,28 @@ public class ManifestPositivityFragment extends Fragment {
         signPosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(v.getContext(), ReportPositivityActivity.class));
+                Intent intent = new Intent(getActivity(), ReportPositivityActivity.class);
+                startActivityForResult(intent, 10001);
+
             }
         });
 
+
+
+    }
+
+    private void updateFr(){  //Permette di aggiornare i fragments
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == 10001) && (resultCode == Activity.RESULT_OK))
+            // recreate your fragment here
+            updateFr();
     }
 }

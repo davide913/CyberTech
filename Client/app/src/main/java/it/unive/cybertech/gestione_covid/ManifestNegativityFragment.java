@@ -4,10 +4,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 import static it.unive.cybertech.utils.CachedUser.user;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.ViewPager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +17,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Date;
+import java.util.List;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
 
 
@@ -71,14 +71,9 @@ public class ManifestNegativityFragment extends Fragment {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            user.updatePositiveSince(null); //TODO vedere se funziona
-                        }
-                    }).start();
-                   dialog.cancel();
-                   updateFr();
+                    updateDateOnDb();
+                    dialog.cancel();
+
                 }
             });
             builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
@@ -93,12 +88,27 @@ public class ManifestNegativityFragment extends Fragment {
 
     }
 
-    //TODO vedere se funziona refresh fragment
-    private void updateFr(){
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.detach(this).attach(this).commit();
+
+    private void updateFr(){  //Permette di aggiornare i fragments
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
-
+    private void updateDateOnDb(){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                user.updatePositiveSince(null); //Imposta la data a Null sul database
+            }
+        });
+        t.start();
+        try {
+            t.join();                           //Aspetta che il thread abbia finito prima di riaggiornare i fragments
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        updateFr();
+    }
 
 }
