@@ -169,14 +169,6 @@ public class User {
         return positiveSince;
     }
 
-    //TODO sistemare, quando si va a fare la add di uno user, essendo un get, aggiunge 2 campi date
-    /*public Date getDatePositiveSince() {
-        if(positiveSince == null)
-            return null;
-        else
-            return positiveSince.toDate();
-    }*/           //return a timestamp as a date
-
     private void setPositiveSince(Timestamp positiveSince) {
         this.positiveSince = positiveSince;
     }
@@ -233,45 +225,21 @@ public class User {
 
     public static User createUser(String id, String name, String surname, Sex sex, String address,
                                   String city, String country, long latitude, long longitude, boolean greenpass) throws ExecutionException, InterruptedException {
-        /*if (sex.length() > 1 || (!sex.equals("M") && !sex.equals("F")))      //check sex variable
-            return null;
-        GeoPoint position = new GeoPoint(latitude, longitude);
-        Map<String, Object> myUser = new HashMap<>();          //create "table"
-        myUser.put("name", name);
-        myUser.put("surname", surname);
-        myUser.put("sex", sex);
-        myUser.put("address", address);
-        myUser.put("city", city);
-        myUser.put("country", country);
-        myUser.put("geopoint", position);
-        myUser.put("greenpass", greenpass);
-        myUser.put("lendingPoint", 0);
-
-        DocumentReference addedDocRef;// db.collection("users").add(myUser);        //push on db
-        try {
-            addedDocRef = addToCollection("users", myUser);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }*/
 
         if(sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
         Firestore db = FirestoreClient.getFirestore();
-        Date d = new Date(2021-1900, 10,10);
 
         User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
-                greenpass, Timestamp.of(d), 0, new ArrayList<>(),
+                greenpass, null, 0, new ArrayList<>(),
                 new ArrayList<>(), new ArrayList<>(),
                 new ArrayList<>(), null);
 
         ApiFuture<WriteResult> future = db.collection("users").document(id).set(user);
         future.get();
 
-        user.updatePositiveSince(null);
         return user;
-
     }
 
     public static User getUserById(String id) throws Exception {
@@ -346,7 +314,7 @@ public class User {
 
         if (document.exists()) {
             if (date != null) {                    //if the date is null is possible to delete the field date from db
-                Timestamp timestamp = new Timestamp(date);            //conversion from date to timestamp
+                Timestamp timestamp = Timestamp.of(date);//new Timestamp(date);            //conversion from date to timestamp
                 return docRef.update("PositiveSince", timestamp);
             } else {
                 return docRef.update("PositiveSince", FieldValue.delete());
@@ -355,11 +323,12 @@ public class User {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    //TODO controllare se lavora la funzione
     public boolean updatePositiveSince(Date date) {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
             Tasks.await(t);
-            this.positiveSince = date == null ? null : new Timestamp(date);
+            this.positiveSince = date == null ? null : Timestamp.of(date);//new Timestamp(date);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -374,10 +343,9 @@ public class User {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists() && val >= 0) {
+        if (document.exists() && val >= 0)
             return docRef.update("LendingPoint", val);
-            //this.lendingPoint = val;
-        } else
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -400,11 +368,9 @@ public class User {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists()) {
+        if (document.exists())
             return docRef.update("Devices", FieldValue.arrayUnion(device));
-            //this.devices.add(device);
-            //return true;
-        } else
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 

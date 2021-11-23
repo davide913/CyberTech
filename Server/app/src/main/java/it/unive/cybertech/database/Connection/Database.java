@@ -18,7 +18,7 @@ public class Database {
     }
 
     public static void initialize(Context context) {
-        FirebaseApp.initializeApp(context);
+        FirebaseApp.initializeApp(String.valueOf(context));
     }
 
     public static FirebaseFirestore getInstance() {

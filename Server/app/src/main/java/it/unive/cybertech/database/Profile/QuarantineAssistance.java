@@ -88,11 +88,6 @@ public class QuarantineAssistance {
         this.inCharge = inCharge;
     }
 
-    //gestita dall'update
-    /*private void setInChargeUser(User inCharge) {
-        InCharge = inCharge.getDocumentReference();
-    }*/
-
     public String getId() {
         return id;
     }
