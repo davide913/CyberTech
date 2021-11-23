@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
 
@@ -52,7 +54,7 @@ public class ManifestPositivityFragment extends Fragment {
           mCognome.setText(user.getSurname());
 
           if(user.getPositiveSince() != null){
-                mDateSign.setText(user.getDatePositiveSince().toString());
+                mDateSign.setText((user.getDatePositiveSince().toString()));
                 mStateSign.setText("Positivo");
           }
           else{
@@ -91,4 +93,30 @@ public class ManifestPositivityFragment extends Fragment {
             // recreate your fragment here
             updateFr();
     }
+
+    private String convertDate(String date){ //TODO vedere se funziona
+        String datafinale = "";
+        ArrayList<String> mesi = new ArrayList<>();
+        mesi.add("Jan");
+        mesi.add("Feb");
+        mesi.add("Mar");
+        mesi.add("Apr");
+        mesi.add("May");
+        mesi.add("Jun");
+        mesi.add("Jul");
+        mesi.add("Aug");
+        mesi.add("Sep");
+        mesi.add("Oct");
+        mesi.add("Nov");
+        mesi.add("Dec");
+        ArrayList<Integer> nmesi = new ArrayList<>();
+        for(int i = 1; i<=12; i++){
+            nmesi.add(i);
+        }
+        char[] charmese = {date.charAt(4),date.charAt(5),date.charAt(6)};
+        String mese = new String(charmese);
+
+        return datafinale;
+    }
+
 }
