@@ -8,15 +8,12 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
-import com.google.firebase.cloud.FirestoreClient;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.cloud.Timestamp;
 
 
 import java.util.ArrayList;
@@ -25,12 +22,6 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
-
-enum Sex{
-    male,
-    female,
-    nonBinary
-}
 
 //TODO all the function are tested
 public class User {
@@ -229,15 +220,15 @@ public class User {
         if(sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
-        Firestore db = FirestoreClient.getFirestore();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
                 greenpass, null, 0, new ArrayList<>(),
                 new ArrayList<>(), new ArrayList<>(),
                 new ArrayList<>(), null);
 
-        ApiFuture<WriteResult> future = db.collection("users").document(id).set(user);
-        future.get();
+        Task<Void> future = db.collection("users").document(id).set(user);
+        future.getResult();
 
         return user;
     }
@@ -314,7 +305,7 @@ public class User {
 
         if (document.exists()) {
             if (date != null) {                    //if the date is null is possible to delete the field date from db
-                Timestamp timestamp = Timestamp.of(date);//new Timestamp(date);            //conversion from date to timestamp
+                Timestamp timestamp = new Timestamp(date);            //conversion from date to timestamp
                 return docRef.update("PositiveSince", timestamp);
             } else {
                 return docRef.update("PositiveSince", FieldValue.delete());
@@ -328,7 +319,7 @@ public class User {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
             Tasks.await(t);
-            this.positiveSince = date == null ? null : Timestamp.of(date);//new Timestamp(date);
+            this.positiveSince = date == null ? null : new Timestamp(date);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
