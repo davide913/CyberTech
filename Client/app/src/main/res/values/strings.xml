@@ -1,4 +1,6 @@
 <resources>
+    <string name="firebase_key">5807486351-5sridj0u3q0pljuv7qrvm888ildbhuin.apps.googleusercontent.com</string>
+
     <string name="app_name">Cybertech</string>
     <string name="Choose">Scelta Sezione</string>
     <string name="drawer_open">drawer_open</string>

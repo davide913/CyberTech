@@ -47,11 +47,14 @@ public class SignUpActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private Location location;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         mAuth = FirebaseAuth.getInstance();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        initGPS();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         FloatingActionButton done = findViewById(R.id.signup_done);
         EditText name = findViewById(R.id.name_signup),
@@ -59,7 +62,6 @@ public class SignUpActivity extends AppCompatActivity {
                 email = findViewById(R.id.email_signup),
                 pwd = findViewById(R.id.password_signup),
                 confirmPwd = findViewById(R.id.password_confirm_signup);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         Spinner sex = findViewById(R.id.sex_signup);
         done.setOnClickListener(v -> {
             boolean ok = true;
@@ -91,35 +93,6 @@ public class SignUpActivity extends AppCompatActivity {
             if (ok)
                 signInWithEmailAndPassword(email.getText().toString(), pwd.getText().toString(), name.getText().toString(), surname.getText().toString(), sex.getSelectedItem().toString(), this);
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkGPSPermission();
-    }
-
-    private void showGPSDialogInformation() {
-        AppCompatActivity c = this;
-        new AlertDialog.Builder(this)
-                .setTitle("Delete entry")
-                .setMessage("Are you sure you want to delete this entry?")
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(c, new String[]{
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION},
-                                1);
-                    }
-                })
-                .show();
-    }
-
-    private void checkGPSPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            showGPSDialogInformation();
-        else
-            initGPS();
     }
 
     private void initGPS() {
@@ -170,12 +143,4 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
-            Utils.showGenericDialog("Impossibile continuare", "Senxa l'accesso alla posizione non è possibile continuare la registrazione", this);
-        else
-            initGPS();
-    }
 }
