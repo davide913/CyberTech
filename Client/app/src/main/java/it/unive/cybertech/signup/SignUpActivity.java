@@ -1,21 +1,10 @@
 package it.unive.cybertech.signup;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
-
-import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -23,9 +12,6 @@ import android.widget.Spinner;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -122,10 +108,10 @@ public class SignUpActivity extends AppCompatActivity {
                         country = adr.getCountryName();
                         address = adr.getThoroughfare();
                     }
-                } catch (IOException e) {
+                    User.createUser(task.getResult().getUser().getUid(), name, surname, null, address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                User.createUser(name, surname, sex, address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
             } else {
                 try {
                     throw task.getException();

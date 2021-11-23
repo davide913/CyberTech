@@ -36,6 +36,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.concurrent.ExecutionException;
+
 import it.unive.cybertech.R;
 import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.User;
@@ -103,7 +105,11 @@ public class LogInActivity extends AppCompatActivity {
                             surname = name.substring(name.indexOf(" "));
                             name = name.split(" ", 1)[0];
                         }
-                        User.createUser(name, surname, "N", null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                        try {
+                            User.createUser(user.getUid(),name, surname, null, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         try {
                             throw task.getException();
