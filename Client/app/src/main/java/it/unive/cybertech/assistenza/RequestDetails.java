@@ -2,6 +2,7 @@ package it.unive.cybertech.assistenza;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,11 +10,18 @@ import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 /*
 La classe RequestDetails permette all'utente di creare una richiesta di assistenza, secificando il titolo e in un box dedicato
@@ -42,12 +50,23 @@ public class RequestDetails extends AppCompatActivity {
 
 
         et_requestTitle = findViewById(R.id.requestTitle);
+        et_requestText = findViewById(R.id.requestText);
         et_requestLocation = findViewById(R.id.requestLocation);
         et_requestDate = findViewById(R.id.requestDate);
 
 
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
             //upload tutte le info nel db
+            Date date = Calendar.getInstance().getTime();
+
+            try {
+                QuarantineAssistance request = QuarantineAssistance.createQuarantineAssistance("Spesa", et_requestText.toString(), null, date);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             finish();
         });
     }

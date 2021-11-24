@@ -6,20 +6,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import static it.unive.cybertech.utils.CachedUser.user;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.firebase.Timestamp;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 /*
 La home page di assistenza si occupa di mostrare le richieste in primo piano (in un qualche ordine)
@@ -28,7 +39,10 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  */
 public class HomePage extends Fragment {
     private ArrayList<String> requestInfoList;
+    private ArrayList<QuarantineAssistance> myQuarantineList;
     ListView listView;
+
+    ListView myNewListView;
 
 
     @Nullable
@@ -42,41 +56,55 @@ public class HomePage extends Fragment {
 
     private void initViews(View view) {
         requestInfoList = new ArrayList<String>();
-        ArrayAdapter<String> adapter;
+        ArrayAdapter<String> adapter; //TODO: non più String, ma QuarantineAssistance
+
         listView = view.findViewById(R.id.listRequests);
         requestInfoList.add("stringa di prova");
+        requestInfoList.add("La seconda prova della Home");
 
-        adapter = new CastomRequestsAdapter(getContext(), 0, requestInfoList);
+        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList, 0); //requestInfoList
         listView.setAdapter(adapter);
+
+        /*
+        myQuarantineList = new ArrayList<QuarantineAssistance>();
+        ArrayAdapter<QuarantineAssistance> myAdapter;
+        myNewListView = view.findViewById(R.id.listRequests);
+
+        myAdapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList, 0);
+        myNewListView.setAdapter(myAdapter);
+        */
+
 
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
             newIntent.putExtra("title", adapter.getItem(position));
+            newIntent.putExtra("location", adapter.getItem(position));
             startActivity(newIntent);
         }));
-
 
 
         //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
         //qui estraggo lo user dal DB
 
-        //il profilo è visibile da tutti
 
-        //Poter prendere in carico una richiesta solo se sei negativo
-        view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), TakenRequests.class));
-        });
+        if(user.getPositiveSince() != null){
+            //Poter prendere in carico una richiesta solo se sei negativo
+            view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
+                startActivity(new Intent(getActivity(), TakenRequests.class));
+            });
+        }
+        else {
+            //Devo creare l'utente e far vedere questo tasto solo se il flag positivity è true
+            //My requests e newHelpRequest sono disponibili solo se sei positivo
+            view.findViewById(R.id.buttMyRequests).setOnClickListener(v -> {
+                startActivity(new Intent(getActivity(), MyRequests.class));
+            });
 
-        //Devo creare l'utente e far vedere questo tasto solo se il flag positivity è true
-        //My requests e newHelpRequest sono disponibili solo se sei positivo
-        view.findViewById(R.id.buttMyRequests).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), MyRequests.class));
-        });
-
-        view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RequestDetails.class));
-        });
+            view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
+                startActivity(new Intent(getActivity(), RequestDetails.class));
+            });
+        }
 
     }
 }
