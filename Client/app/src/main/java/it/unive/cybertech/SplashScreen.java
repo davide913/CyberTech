@@ -31,19 +31,19 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
+        //FirebaseUser currentUser = mAuth.getCurrentUser();
+        //if (currentUser != null) {
             new Thread(() -> {
                 //User u = User.createUser("Mario", "Rossi", "M", "Via Torino", "Venezia", "Itala", 10, 10, true);
                 try {
-                    User u = User.getUserById(currentUser.getUid());
+                    User u = User.getUserById("VSSBtIPMOvIqFIZpYAvt");
                     CachedUser.user = u;
                     startActivity(new Intent(this, MainActivity.class));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }).start();
-        } else
-            startActivity(new Intent(this, LogInActivity.class));
+        //} else
+        //    startActivity(new Intent(this, LogInActivity.class));
     }
 }

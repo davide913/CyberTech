@@ -51,7 +51,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         location.setText(myList.get(index)); //TODO: request.getLocation();
 
         TextView date = view.findViewById(R.id.date_request);
-        date.setText(myOtherList.get(index).getDeliveryDate().toString());
+        date.setText(myList.get(index)); // TODO: myOtherList.get(index).getDate().toString();
 
         return view;
     }

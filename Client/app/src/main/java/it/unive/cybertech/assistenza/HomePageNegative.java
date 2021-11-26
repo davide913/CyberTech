@@ -37,7 +37,7 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  e di indirizzare l'utente verso le altre view a seconda se vuole creare una nuova richiesta, visualizzare
  quelle già create, andare sul suo profilo
  */
-public class HomePage extends Fragment {
+public class HomePageNegative extends Fragment {
     private ArrayList<String> requestInfoList;
     private ArrayList<QuarantineAssistance> myQuarantineList;
     ListView listView;
@@ -62,7 +62,7 @@ public class HomePage extends Fragment {
         requestInfoList.add("stringa di prova");
         requestInfoList.add("La seconda prova della Home");
 
-        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList, 0); //requestInfoList
+        adapter = new CastomRequestsAdapter(getContext(), 0, requestInfoList); // myQuarantineList
         listView.setAdapter(adapter);
 
         /*
@@ -74,6 +74,7 @@ public class HomePage extends Fragment {
         myNewListView.setAdapter(myAdapter);
         */
 
+        //TODO mettere un spinner per un ulteriore filtro di ricerca
 
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
@@ -83,28 +84,17 @@ public class HomePage extends Fragment {
             startActivity(newIntent);
         }));
 
+        //Poter prendere in carico una richiesta solo se sei negativo
+        view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
+            startActivity(new Intent(getActivity(), TakenRequests.class));
+        });
 
-        //visibile solo se l'utente è positivo, quindi abilitato a chiedere aiuto alla community
-        //qui estraggo lo user dal DB
+        /*
+        view.findViewById(R.id.btn_chatNeg).setOnClickListener(v -> {
+            ci metto il collegamento alla chat);
+        });
 
-
-        if(user.getPositiveSince() != null){
-            //Poter prendere in carico una richiesta solo se sei negativo
-            view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
-                startActivity(new Intent(getActivity(), TakenRequests.class));
-            });
-        }
-        else {
-            //Devo creare l'utente e far vedere questo tasto solo se il flag positivity è true
-            //My requests e newHelpRequest sono disponibili solo se sei positivo
-            view.findViewById(R.id.buttMyRequests).setOnClickListener(v -> {
-                startActivity(new Intent(getActivity(), MyRequests.class));
-            });
-
-            view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
-                startActivity(new Intent(getActivity(), RequestDetails.class));
-            });
-        }
+         */
 
     }
 }

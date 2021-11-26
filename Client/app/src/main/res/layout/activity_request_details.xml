@@ -94,4 +94,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestText" />
 
+    <Spinner
+        android:id="@+id/spinner_type"
+        android:layout_width="365dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/requestLocation" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
