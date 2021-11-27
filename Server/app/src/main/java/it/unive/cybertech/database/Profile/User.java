@@ -1,6 +1,5 @@
 package it.unive.cybertech.database.Profile;
 
-import static it.unive.cybertech.database.Connection.Database.addToCollection;
 import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getReference;
@@ -13,9 +12,12 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
@@ -26,7 +28,7 @@ public class User {
     private String id;
     private String name;
     private String surname;
-    private String sex;
+    private Sex sex;
     private String address;
     private String city;
     private String country;
@@ -43,7 +45,7 @@ public class User {
     public User() {
     }
 
-    private User(String id, String name, String surname, String sex, String address, String city,
+    private User(String id, String name, String surname, Sex sex, String address, String city,
                  String country, GeoPoint position, boolean greenPass, Timestamp positiveSince, long lendingPoint) {
         this.id = id;
         this.name = name;
@@ -58,7 +60,7 @@ public class User {
         this.lendingPoint = lendingPoint;
     }
 
-    private User(String id, String name, String surname, String sex, String address,
+    private User(String id, String name, String surname, Sex sex, String address,
                  String city, String country, GeoPoint position, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<Device> devices,
                  ArrayList<LendingInProgress> lendingInProgresses, ArrayList<ExtensionRequest> extensionRequest,
@@ -106,11 +108,11 @@ public class User {
         this.surname = surname;
     }
 
-    public String getSex() {
+    public Sex getSex() {
         return sex;
     }
 
-    private void setSex(String sex) {
+    private void setSex(Sex sex) {
         this.sex = sex;
     }
 
@@ -157,10 +159,6 @@ public class User {
     public Timestamp getPositiveSince() {
         return positiveSince;
     }
-
-    public Date getDatePositiveSince() {
-        return positiveSince.toDate();
-    }           //return a timestamp as a date
 
     private void setPositiveSince(Timestamp positiveSince) {
         this.positiveSince = positiveSince;
@@ -216,37 +214,23 @@ public class User {
 
     //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
-    public static User createUser(String name, String surname, String sex, String address,
-                                  String city, String country, long latitude, long longitude, boolean greenpass) {
+    public static User createUser(String id, String name, String surname, Sex sex, String address,
+                                  String city, String country, long latitude, long longitude, boolean greenpass) throws ExecutionException, InterruptedException {
 
-        //TODO trasformare sesso in un enum
-        //TODO non ritornare null ma eccezione
-        if (sex.length() > 1 || (!sex.equals("M") && !sex.equals("F")))      //check sex variable
-            return null;
-        GeoPoint position = new GeoPoint(latitude, longitude);
-        Map<String, Object> myUser = new HashMap<>();          //create "table"
-        myUser.put("name", name);
-        myUser.put("surname", surname);
-        myUser.put("sex", sex);
-        myUser.put("address", address);
-        myUser.put("city", city);
-        myUser.put("country", country);
-        myUser.put("geopoint", position);
-        myUser.put("greenpass", greenpass);
-        myUser.put("lendingPoint", 0);
+        if(sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
+            throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
-        DocumentReference addedDocRef;// db.collection("users").add(myUser);        //push on db
-        try {
-            addedDocRef = addToCollection("users", myUser);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return new User(addedDocRef.getId(), name, surname, sex, address, city, country, position,
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
                 greenpass, null, 0, new ArrayList<>(),
                 new ArrayList<>(), new ArrayList<>(),
                 new ArrayList<>(), null);
 
+        Task<Void> future = db.collection("users").document(id).set(user);
+        future.getResult();
+
+        return user;
     }
 
     public static User getUserById(String id) throws Exception {
@@ -330,6 +314,7 @@ public class User {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    //TODO controllare se lavora la funzione
     public boolean updatePositiveSince(Date date) {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
@@ -349,10 +334,9 @@ public class User {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists() && val >= 0) {
+        if (document.exists() && val >= 0)
             return docRef.update("LendingPoint", val);
-            //this.lendingPoint = val;
-        } else
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -375,11 +359,9 @@ public class User {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists()) {
+        if (document.exists())
             return docRef.update("Devices", FieldValue.arrayUnion(device));
-            //this.devices.add(device);
-            //return true;
-        } else
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 

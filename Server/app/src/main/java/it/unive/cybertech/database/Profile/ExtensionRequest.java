@@ -49,8 +49,6 @@ public class ExtensionRequest {
         return new ExtensionRequest(docRef, addedDocRef.getId() );
     }
 
-    //TODO verificare la possibilita di fare un controllo cosi in caso da eliminare dalla tabella lending
-    // in progress i lendingID no piu riferiti
     public boolean removeExtensionRequest(){
         this.id = null;
         this.lendingID = null;
