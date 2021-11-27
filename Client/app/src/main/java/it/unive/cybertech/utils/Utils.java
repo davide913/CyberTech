@@ -1,5 +1,7 @@
 package it.unive.cybertech.utils;
+
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
@@ -15,20 +17,70 @@ import java.util.concurrent.atomic.AtomicReference;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
-    public static void showGenericDialog(String title, String message, Context c) {
-        new AlertDialog.Builder(c)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
-                .show();
+    public interface DialogResult {
+        void onSuccess();
+
+        void onCancel();
     }
 
-    public static Sex convertToSex(@NonNull String sex){
-        switch(sex.toLowerCase()){
-            case"maschio":
+    public static class Dialog {
+        private DialogResult result;
+        private boolean showOkButton, showCancelButton;
+        private String okButtonText, cancelButtonText;
+        private Context c;
+
+        public Dialog(Context c) {
+            showOkButton = true;
+            showCancelButton = true;
+            okButtonText = c.getString(android.R.string.ok);
+            cancelButtonText = c.getString(android.R.string.cancel);
+            this.c = c;
+        }
+
+        public Dialog(Context c, boolean showOkButton, String okButtonText, boolean showCancelButton, String cancelButtonText) {
+            this.showOkButton = showOkButton;
+            this.showCancelButton = showCancelButton;
+            this.okButtonText = okButtonText;
+            this.cancelButtonText = cancelButtonText;
+            this.c = c;
+        }
+
+        public Dialog setCallback(DialogResult fun) {
+            result = fun;
+            return this;
+        }
+
+        public Dialog hideCancelButton(){
+            showCancelButton = false;
+            return this;
+        }
+
+        public void showDialog(String title, String message) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(c)
+                    .setTitle(title)
+                    .setMessage(message);
+            if (showOkButton)
+                builder.setPositiveButton(okButtonText, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (result != null)
+                        result.onSuccess();
+                });
+            if (showCancelButton)
+                builder.setNegativeButton(cancelButtonText, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (result != null)
+                        result.onCancel();
+                });
+            builder.show();
+        }
+    }
+
+    public static Sex convertToSex(@NonNull String sex) {
+        switch (sex.toLowerCase()) {
+            case "maschio":
                 return Sex.male;
             case "femmina":
-                return  Sex.female;
+                return Sex.female;
             default:
                 return Sex.nonBinary;
         }

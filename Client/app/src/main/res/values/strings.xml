@@ -25,8 +25,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="button">Button</string>
     <string name="textview">TextView</string>
-    <string name="name">Nome:</string>
-    <string name="surname">Cognome:</string>
+    <string name="name_dotted">Nome:</string>
+    <string name="surname_dotted">Cognome:</string>
     <string name="date_alert">Data Segnalazione:</string>
     <string name="state_alert">Stato Segnalazione:</string>
     <string name="nulls">Null</string>
@@ -37,8 +37,8 @@
     <string name="no_sign_received">Nessuna Segnalazione ricevuta</string>
     <string name="ultime_sign">Segnalazioni di positività ricevute:</string>
     <string name="effettua_sign">Effettua una segnalazione</string>
-    <string name="name2">Nome</string>
-    <string name="surname2">Cognome</string>
+    <string name="name">Nome</string>
+    <string name="surname">Cognome</string>
     <string name="date">Data del contagio</string>
     <string name="send_sign">Invia segnalazione</string>
     <string name="anonymous">Segnalazione anonima?</string>
@@ -71,6 +71,17 @@
     <string name="rent_feedback_negative">Feedback negativo</string>
     <string name="field_required">Campo obbligatorio</string>
     <string name="password_mismatch">Le password deveono corrispondere</string>
+    <string name="login">Accedi</string>
+    <string name="not_registered">Non sei registrato? Registrati</string>
+    <string name="google">Google</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login_welcome">Benvenuto in families share plugin</string>
+    <string name="other_provider">oppure, autenticati con un provider</string>
+    <string name="signin_description">Benvenuto in families share plugin\nCompila i seguenti campi per registrarti</string>
+    <string name="confirm_password">Conferma password</string>
+    <string name="position_required">Richiesta posizione</string>
+    <string name="position_required_description">L\'app ultilizza la posizione per mostrarti i gruppi e le informazioni della tua zona. Senza questi dati l\'app non può funzionare</string>
 
     <array name="sex">
         <item>Maschio</item>

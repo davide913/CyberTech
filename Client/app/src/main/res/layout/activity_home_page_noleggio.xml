@@ -32,7 +32,7 @@
         android:src="@drawable/ic_baseline_add_64_black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="TODO" />
+        />
 
     <Button
         android:id="@+id/test_showcase"

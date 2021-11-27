@@ -11,13 +11,17 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
@@ -43,6 +47,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         View header = navigationView.getHeaderView(0);
         ((TextView) header.findViewById(R.id.user_name)).setText(user.getName() + " " + user.getSurname());
+        ImageView profilePicture = header.findViewById(R.id.profile_picture);
+        FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+        ((TextView) header.findViewById(R.id.user_email)).setText(fUser.getEmail());
+        /*if (fUser.getPhotoUrl() != null)
+            profilePicture.setImageURI(fUser.getPhotoUrl());*/
+
+        profilePicture.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+        });
         //initViews();
     }
 

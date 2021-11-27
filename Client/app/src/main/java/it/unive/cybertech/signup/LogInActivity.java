@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.SplashScreen;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
@@ -100,27 +101,42 @@ public class LogInActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        String name = user.getDisplayName(), surname = null;
-                        if (name.contains(" ")) {
-                            surname = name.substring(name.indexOf(" "));
-                            name = name.split(" ", 1)[0];
-                        }
-                        try {
-                            User.createUser(user.getUid(),name, surname, Sex.nonBinary, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        new Thread(() -> {
+                            User u = null;
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            String name = user.getDisplayName(), surname = null;
+                            if (name.contains(" ")) {
+                                surname = name.substring(name.indexOf(" "));
+                                name = name.split(" ")[0];
+                            }
+                            try {
+                                u = User.getUserById(user.getUid());
+                            } catch (NoUserFoundException e) {
+                                e.printStackTrace();
+                                try {
+                                    u = User.createUser(user.getUid(), name, surname, Sex.nonBinary, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                                } catch (ExecutionException | InterruptedException executionException) {
+                                    executionException.printStackTrace();
+                                }
+                            } catch (InterruptedException | ExecutionException e) {
+                                e.printStackTrace();
+                            }
+                            if (u != null) {
+                                startActivity(new Intent(getApplicationContext(), SplashScreen.class));
+                                finish();
+                            } else
+                                mAuth.signOut();
+                        }).start();
                     } else {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            Utils.showGenericDialog("Login fallito", "Credenziali errate", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Credenziali errate");
                             e.printStackTrace();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            Utils.showGenericDialog("Login fallito", "Utente inesistente", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Utente inesistente");
                         } catch (Exception e) {
-                            Utils.showGenericDialog("Login fallito", "Errore generico", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Errore generico");
                         }
                     }
                 });
@@ -136,12 +152,12 @@ public class LogInActivity extends AppCompatActivity {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            Utils.showGenericDialog("Login fallito", "Credenziali errate", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Credenziali errate");
                             e.printStackTrace();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            Utils.showGenericDialog("Login fallito", "Utente inesistente", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Utente inesistente");
                         } catch (Exception e) {
-                            Utils.showGenericDialog("Login fallito", "Errore generico", c);
+                            new Utils.Dialog(c).showDialog("Login fallito", "Errore generico");
                         }
                     }
                 });
@@ -154,19 +170,22 @@ public class LogInActivity extends AppCompatActivity {
     }
 
     private void showGPSDialogInformation() {
-        AppCompatActivity c = this;
-        new AlertDialog.Builder(this)
-                .setTitle("Delete entry")
-                .setMessage("Are you sure you want to delete this entry?")
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(c, new String[]{
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION},
-                                1);
-                    }
-                })
-                .show();
+        final AppCompatActivity ac = this;
+        Utils.Dialog dialog = new Utils.Dialog(this);
+        dialog.setCallback(new Utils.DialogResult() {
+            @Override
+            public void onSuccess() {
+                ActivityCompat.requestPermissions(ac, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION},
+                        1);
+            }
+
+            @Override
+            public void onCancel() {
+                finish();
+            }
+        }).showDialog(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 
     private void checkGPSPermission() {
@@ -194,7 +213,20 @@ public class LogInActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
-            Utils.showGenericDialog("Impossibile continuare", "Senxa l'accesso alla posizione non è possibile continuare la registrazione", this);
+            new Utils.Dialog(this)
+                    .setCallback(new Utils.DialogResult() {
+                        @Override
+                        public void onSuccess() {
+                            finish();
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    })
+                    .hideCancelButton()
+                    .showDialog("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
         else
             initGPS();
     }
@@ -208,7 +240,7 @@ public class LogInActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                Utils.showGenericDialog("Login fallito", "Si prega di riprovare più tardi", this);
+                new Utils.Dialog(this).showDialog("Login fallito", "Si prega di riprovare più tardi");
                 e.printStackTrace();
             }
         }

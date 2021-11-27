@@ -1,7 +1,9 @@
 package it.unive.cybertech.signup;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -99,41 +101,42 @@ public class SignUpActivity extends AppCompatActivity {
     private void signInWithEmailAndPassword(String email, String password, String name, String surname, String sex, Context c) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                String address = "", city = "", country = "";
-                Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
-                try {
-                    List<Address> addresses = gcd.getFromLocation(location.getLatitude(),
-                            location.getLongitude(), 1);
-                    if (addresses.size() > 0) {
-                        Address adr = addresses.get(0);
-                        city = adr.getLocality();
-                        country = adr.getCountryName();
-                        address = adr.getThoroughfare();
+                new Thread(() -> {
+                    try {
+                        String address = "", city = "", country = "";
+                        Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
+                        List<Address> addresses = gcd.getFromLocation(location.getLatitude(),
+                                location.getLongitude(), 1);
+                        if (addresses.size() > 0) {
+                            Address adr = addresses.get(0);
+                            city = adr.getLocality();
+                            country = adr.getCountryName();
+                            address = adr.getThoroughfare();
+                        }
+                        User u = User.createUser(task.getResult().getUser().getUid(), name, surname, Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                        if (u != null) {
+                            Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    User u = User.createUser(task.getResult().getUser().getUid(), name, surname, Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
-                    if(u != null) {
-                        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                }).start();
             } else {
                 try {
                     throw task.getException();
                 } catch (FirebaseAuthWeakPasswordException e) {
-                    Utils.showGenericDialog("Registrazione fallita", "Usa una password più sicura", c);
+                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Usa una password più sicura");
                     e.printStackTrace();
                 } catch (FirebaseAuthInvalidCredentialsException e) {
-                    Utils.showGenericDialog("Registrazione fallita", "Indirizzo email malformato", c);
+                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Indirizzo email malformato");
                 } catch (FirebaseAuthUserCollisionException e) {
-                    Utils.showGenericDialog("Registrazione fallita", "Utente già registrato", c);
+                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Utente già registrato");
                 } catch (Exception e) {
-                    Utils.showGenericDialog("Registrazione fallita", "Errore generico", c);
+                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Errore generico");
                 }
             }
         });
     }
-
 }
