@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.SplashScreen;
+import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
@@ -106,7 +107,7 @@ public class LogInActivity extends AppCompatActivity {
                             name = name.split(" ", 1)[0];
                         }
                         try {
-                            User.createUser(user.getUid(),name, surname, null, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                            User.createUser(user.getUid(),name, surname, Sex.nonBinary, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
                         } catch (ExecutionException | InterruptedException e) {
                             e.printStackTrace();
                         }

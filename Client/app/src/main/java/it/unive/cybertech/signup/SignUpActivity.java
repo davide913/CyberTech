@@ -2,6 +2,7 @@ package it.unive.cybertech.signup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
@@ -108,7 +110,12 @@ public class SignUpActivity extends AppCompatActivity {
                         country = adr.getCountryName();
                         address = adr.getThoroughfare();
                     }
-                    User.createUser(task.getResult().getUser().getUid(), name, surname, null, address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                    User u = User.createUser(task.getResult().getUser().getUid(), name, surname, Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                    if(u != null) {
+                        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
