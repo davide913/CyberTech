@@ -14,7 +14,7 @@
         android:id="@+id/appBarLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/viola_mask"
+        android:background="@color/primary"
         app:layout_constraintBottom_toTopOf="@+id/viewPager_covid"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,9 +26,8 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/horyzontal_navbar_toolbar_covid"
-            android:layout_width="401dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/viola_mask"
             app:layout_collapseMode="pin"
             app:title="@string/covid_section">
 
@@ -36,7 +35,6 @@
                 android:id="@+id/tabella_covid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/viola_mask"
                 android:padding="0dp"
                 app:tabIndicatorColor="@color/grigio_mask"
                 app:tabTextColor="@color/white">

@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -22,6 +23,10 @@ import android.widget.TextView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
+
+import java.io.InputStream;
+import java.net.URL;
 
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
@@ -50,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ImageView profilePicture = header.findViewById(R.id.profile_picture);
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         ((TextView) header.findViewById(R.id.user_email)).setText(fUser.getEmail());
-        /*if (fUser.getPhotoUrl() != null)
-            profilePicture.setImageURI(fUser.getPhotoUrl());*/
+        if (fUser.getPhotoUrl() != null)
+            Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));
@@ -74,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_menu_showcase:
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.noleggio.HomePage()).commit();
+                break;
+            case R.id.nav_menu_groups:
+                ft.replace(R.id.main_fragment_content, new it.unive.cybertech.groups.HomePage()).commit();
                 break;
         }
 

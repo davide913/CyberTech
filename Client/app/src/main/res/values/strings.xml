@@ -82,6 +82,13 @@
     <string name="confirm_password">Conferma password</string>
     <string name="position_required">Richiesta posizione</string>
     <string name="position_required_description">L\'app ultilizza la posizione per mostrarti i gruppi e le informazioni della tua zona. Senza questi dati l\'app non può funzionare</string>
+    <string name="groups">Gruppi</string>
+    <string name="partecipant_dotted">Partecipanti:</string>
+    <string name="add_to_showcase">Aggiungi materiale in prestito</string>
+    <string name="profile">Profilo</string>
+    <string name="create_group">Crea gruppo</string>
+    <string name="create_group_title">Qui potrai creare un nuovo gruppo nella tua zona</string>
+    <string name="create_group_warning_description">Creando un nuovo gruppo ti assicuri che non ne esista già uno della stessa tipologia nella tua zona e accetti la responsabilità di diventare l\'amministratore e di adottare un comportamento adeguato alle linee della community</string>
 
     <array name="sex">
         <item>Maschio</item>

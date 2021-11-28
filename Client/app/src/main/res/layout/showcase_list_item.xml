@@ -23,7 +23,7 @@
             app:srcCompat="@drawable/coronavirus_5107715_1280" />
 
         <TextView
-            android:id="@+id/shwcase_item_title"
+            android:id="@+id/showcase_item_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="TextView"
-            app:layout_constraintStart_toStartOf="@+id/shwcase_item_title"
-            app:layout_constraintTop_toBottomOf="@+id/shwcase_item_title" />
+            app:layout_constraintStart_toStartOf="@+id/showcase_item_title"
+            app:layout_constraintTop_toBottomOf="@+id/showcase_item_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

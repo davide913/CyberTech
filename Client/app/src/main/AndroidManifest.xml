@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".groups.GroupDetails"
+            android:exported="false" />
+        <activity
+            android:name=".groups.CreateGroup"
+            android:exported="false" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity

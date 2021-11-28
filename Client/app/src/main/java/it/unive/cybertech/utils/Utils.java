@@ -3,6 +3,7 @@ package it.unive.cybertech.utils;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +22,10 @@ public class Utils {
         void onSuccess();
 
         void onCancel();
+    }
+
+    public interface ItemClickListener {
+        void onItemClick(View view, int position);
     }
 
     public static class Dialog {

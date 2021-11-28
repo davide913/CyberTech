@@ -152,6 +152,16 @@
     <color name="DarkBlue">#00008B</color>
     <color name="Navy">#000080</color>
     <color name="Black">#000000</color>
+    <!-- FAMILIES SHARE COLORS-->
+    <color name="primary">#056088</color>
+    <color name="primary_variant">#05567a</color>
+    <color name="secondary">#2799d7</color>
+    <color name="secondary_variant">#36b1f3</color>
+    <color name="dark_green_fs">#607914</color>
+    <color name="light_green_fs">#90c024</color>
+    <color name="red_fs">#e5042e</color>
+    <color name="orange_fs">#f29200</color>
+
     <color name="viola_mask">#8A3264</color>
     <color name="grigio_mask">#C8D2EB</color>
     <color name="ciuc">#00788B</color>

@@ -20,8 +20,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.utils.Utils;
 
-public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListener {
+public class HomePage extends Fragment implements Utils.ItemClickListener {
 
     private ArrayList<String> items;
 
@@ -48,7 +49,6 @@ public class HomePage extends Fragment implements ShowcaseAdapter.ItemClickListe
         return view;
     }
 
-    @Override
     public void onItemClick(View view, int position) {
         Intent i = new Intent(getActivity(), ProductDetails.class);
         i.putExtra("ID", items.get(position));

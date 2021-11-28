@@ -113,7 +113,7 @@ public class SignUpActivity extends AppCompatActivity {
                             country = adr.getCountryName();
                             address = adr.getThoroughfare();
                         }
-                        User u = User.createUser(task.getResult().getUser().getUid(), name, surname, Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                        User u = User.createUser(task.getResult().getUser().getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
                         if (u != null) {
                             Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
