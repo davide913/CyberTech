@@ -89,6 +89,8 @@
     <string name="create_group">Crea gruppo</string>
     <string name="create_group_title">Qui potrai creare un nuovo gruppo nella tua zona</string>
     <string name="create_group_warning_description">Creando un nuovo gruppo ti assicuri che non ne esista già uno della stessa tipologia nella tua zona e accetti la responsabilità di diventare l\'amministratore e di adottare un comportamento adeguato alle linee della community</string>
+    <string name="information">Informazioni</string>
+    <string name="activity">Attività</string>
 
     <array name="sex">
         <item>Maschio</item>

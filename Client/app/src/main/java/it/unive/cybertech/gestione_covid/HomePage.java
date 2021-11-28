@@ -50,8 +50,8 @@ public class HomePage extends Fragment {
     }
 
     private void initViews(View view){
-        TabLayout tabLayout = view.findViewById(R.id.tabella_covid);
-        ViewPager viewPager = view.findViewById(R.id.viewPager_covid);
+        TabLayout tabLayout = view.findViewById(R.id.group_tabs);
+        ViewPager viewPager = view.findViewById(R.id.group_viewpager);
         Toolbar toolbar_covid_homepage = view.findViewById(R.id.main_toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar_covid_homepage);
         tabLayout.setupWithViewPager(viewPager);

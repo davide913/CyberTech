@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary"
-        app:layout_constraintBottom_toTopOf="@+id/viewPager_covid"
+        app:layout_constraintBottom_toTopOf="@+id/group_viewpager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,7 +32,7 @@
             app:title="@string/covid_section">
 
             <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabella_covid"
+                android:id="@+id/group_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="0dp"
@@ -40,14 +40,14 @@
                 app:tabTextColor="@color/white">
 
                 <com.google.android.material.tabs.TabItem
-                    android:id="@+id/manifest_pos"
+                    android:id="@+id/group_information_tab"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/manifest_posotivity"
                     android:textAlignment="center" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:id="@+id/manifest_neg"
+                    android:id="@+id/group_activity_tab"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/manifest_negativity"
@@ -67,7 +67,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager_covid"
+        android:id="@+id/group_viewpager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
