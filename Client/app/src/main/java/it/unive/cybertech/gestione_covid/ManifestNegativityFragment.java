@@ -58,7 +58,7 @@ public class ManifestNegativityFragment extends Fragment {
             statosegnalazionebordi.setVisibility(View.VISIBLE);
             datasegnalazionebordi.setVisibility(View.VISIBLE);
             dataSegnalazione.setText("Positivo");
-            statoSegnalazione.setText(convertDate(CachedUser.user.getDatePositiveSince().toString()));
+            statoSegnalazione.setText(convertDate(CachedUser.user.getPositiveSince().toString()));
             button.setVisibility(View.VISIBLE);
         }
         else{

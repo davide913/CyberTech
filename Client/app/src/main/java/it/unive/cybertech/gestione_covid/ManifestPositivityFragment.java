@@ -27,7 +27,6 @@ import it.unive.cybertech.R;
 
 
 public class ManifestPositivityFragment extends Fragment {
-    public static String tag = "android:switcher:"+R.id.viewPager_covid+":"+1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,7 +56,7 @@ public class ManifestPositivityFragment extends Fragment {
           mCognome.setText(user.getSurname());
 
           if(user.getPositiveSince() != null){
-                mDateSign.setText(convertDate(user.getDatePositiveSince().toString()));
+                mDateSign.setText(convertDate(user.getPositiveSince().toString()));
                 mStateSign.setText("Positivo");
           }
           else{
