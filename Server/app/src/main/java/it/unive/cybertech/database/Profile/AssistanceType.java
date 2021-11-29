@@ -1,13 +1,8 @@
 package it.unive.cybertech.database.Profile;
 
-import static it.unive.cybertech.database.Connection.Database.addToCollection;
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollection;
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getInstance;
 import static it.unive.cybertech.database.Connection.Database.getReference;
-
-import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -16,17 +11,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.sql.Connection;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
-//TODO all this function are tested
+//TODO testata e funzionante
 public class AssistanceType {
     private String Type;
     private String id;
@@ -55,7 +47,44 @@ public class AssistanceType {
         return Type;
     }
 
-    public static AssistanceType createAssistanceType(@NonNull String type) throws ExecutionException, InterruptedException {
+    protected static AssistanceType getAssistanceTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+        DocumentReference docRef = getReference("assistanceType", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        AssistanceType assistanceType = null;
+
+        if (document.exists()) {
+            assistanceType = document.toObject(AssistanceType.class);
+            assistanceType.setID(document.getId());
+
+            return assistanceType;
+        } else
+            throw new NoAssistanceTypeFoundException("No Assistance Type found with this id: " + id);
+    }
+
+    public static ArrayList<AssistanceType> getAssistanceTypes() throws ExecutionException, InterruptedException {
+        FirebaseFirestore db = getInstance();      //create of object db
+
+        Task<QuerySnapshot> future = db.collection("assistanceType").get();
+        // future.get() blocks on response
+
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        ArrayList<AssistanceType> arr = new ArrayList<>();
+        for (DocumentSnapshot t: documents) {
+            AssistanceType assistance = t.toObject(AssistanceType.class);
+            assistance.id = t.getId();
+
+            Map<String, Object> map = t.getData();
+
+            arr.add(assistance);
+        }
+
+        return arr;
+    }
+
+    /*public static AssistanceType createAssistanceType(@NonNull String type) throws ExecutionException, InterruptedException {
 
         try {
             getAssistanceType(type);
@@ -132,5 +161,5 @@ public class AssistanceType {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 }

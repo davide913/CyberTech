@@ -1,6 +1,4 @@
 package it.unive.cybertech.database.Material;
-
-import static it.unive.cybertech.database.Connection.Database.addToCollection;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getInstance;
 import static it.unive.cybertech.database.Connection.Database.getReference;
@@ -12,16 +10,21 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Material.Exception.NoTypeFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 
+
+//TODO testata e funzionante
 public class Type {
     private String typeName;
     private String id;
+
+    public Type(){};
 
     public Type(String typeName, String id) {
         this.typeName = typeName;
@@ -32,11 +35,11 @@ public class Type {
         return typeName;
     }
 
-    private void setType(String name) {
-        this.typeName = name;
+    private void setType(String typeName) {
+        this.typeName = typeName;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 
@@ -44,23 +47,61 @@ public class Type {
         this.id = id;
     }
 
+    //TODO verificare se puo servire o meno
+    private static Type getMaterialTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+        DocumentReference docRef = getReference("materialType", id);
+        DocumentSnapshot document = getDocument(docRef);
 
-    public static Type addType(String name) throws ExecutionException, InterruptedException {
+        Type type = null;
+
+        if (document.exists()) {
+            type = document.toObject(Type.class);
+            type.setId(document.getId());
+
+            return type;
+        } else
+            throw new NoTypeFoundException("No Material Type found with this id: " + id);
+    }
+
+    //TODO funzionante, il toObject non funzionava!
+    public static ArrayList<Type> getMaterialTypes() throws ExecutionException, InterruptedException {
+        FirebaseFirestore db = getInstance();      //create of object db
+
+        Task<QuerySnapshot> future = db.collection("materialType").get();
+        // future.get() blocks on response
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        ArrayList<Type> arr = new ArrayList<>();
+        for (DocumentSnapshot t: documents) {
+            Type type = new Type();
+            //type = t.toObject(Type.class);
+            Map<String, Object> map = t.getData();
+
+            type.setId(t.getId());
+            type.setType((String) map.get("typeName"));
+
+            arr.add(type);
+        }
+
+        return arr;
+    }
+
+
+
+    /*public static Type createType(String name) throws ExecutionException, InterruptedException {
         Type t;
-        try{
-            t = getTypeByName(name);
-        }
-        catch (NoTypeFoundException e) {
-            Map<String, Object> myType = new HashMap<>();          //create "table"
-            myType.put("typeName", name);
 
-            DocumentReference addedDocRef = addToCollection("type", myType);
-            t = new Type(name, addedDocRef.getId());
-        }
+        Map<String, Object> myType = new HashMap<>();          //create "table"
+        myType.put("typeName", name);
+
+        DocumentReference addedDocRef = addToCollection("materialType", myType);
+        t = new Type(name, addedDocRef.getId());
+
 
         return t;
     }
-
+    /*
     public static Type getTypeById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("type", id);
         DocumentSnapshot document = getDocument(docRef);
@@ -94,7 +135,7 @@ public class Type {
 
     /***
      This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     public Task<Void> updateTypeNameAsync(String s) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("type", id);
         DocumentSnapshot document = getDocument(docRef);
@@ -115,6 +156,6 @@ public class Type {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 
 }

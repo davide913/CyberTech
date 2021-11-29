@@ -56,6 +56,7 @@ public class Device {
 
         Task<QuerySnapshot> future = db.collection("device").whereEqualTo("name", name).get();
         // future.get() blocks on response
+        Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         if (documents.isEmpty())

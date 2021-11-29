@@ -228,12 +228,13 @@ public class User {
                 new ArrayList<>(), null);
 
         Task<Void> future = db.collection("users").document(id).set(user);
+        Tasks.await(future);
         future.getResult();
 
         return user;
     }
 
-    public static User getUserById(String id) throws Exception {
+    public static User getUserById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -246,10 +247,9 @@ public class User {
             return user;
         } else
             throw new NoUserFoundException("No user found with this id: " + id);
-
     }
 
-    public Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -274,7 +274,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -299,7 +299,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -330,7 +330,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -355,7 +355,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> addDeviceAsync(@NonNull Device device) throws Exception {
+    private Task<Void> addDeviceAsync(@NonNull Device device) throws Exception {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -380,7 +380,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> removeDeviceAsync(@NonNull Device device) throws ExecutionException, InterruptedException {
+    private Task<Void> removeDeviceAsync(@NonNull Device device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -427,7 +427,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> addLendingAsync(@NonNull LendingInProgress lending) throws Exception {
+    private Task<Void> addLendingAsync(@NonNull LendingInProgress lending) throws Exception {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -454,7 +454,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> removeLendingAsync(@NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
+    private Task<Void> removeLendingAsync(@NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -501,7 +501,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> addExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
+    private Task<Void> addExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -528,7 +528,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> removeExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
+    private Task<Void> removeExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
         if (document.exists()) {
@@ -575,7 +575,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> addRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> addRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -601,7 +601,7 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> removeRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> removeRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
         if (document.exists()) {
@@ -643,7 +643,7 @@ public class User {
         return false;
     }
 
-    public Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
+    private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
         Task<Void> t;
@@ -664,6 +664,7 @@ public class User {
         Task<Void> t = updateQuarantineAsync(quarantineAssistance);
         try {
             Tasks.await(t);
+            this.assistance = quarantineAssistance;
             return true;
         } catch (Exception a) {
             return false;
