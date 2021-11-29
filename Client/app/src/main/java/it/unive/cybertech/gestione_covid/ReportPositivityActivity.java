@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -61,7 +62,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                   updateDateOnDb();
+                    updateDateOnDb();
                 }
             });
             builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {

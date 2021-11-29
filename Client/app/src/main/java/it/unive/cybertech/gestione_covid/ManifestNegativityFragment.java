@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
@@ -43,6 +44,8 @@ public class ManifestNegativityFragment extends Fragment {
         TextView statoSegnalazione = v.findViewById(R.id.textView_stato);
         TextView dataSegnalazione = v.findViewById(R.id.textView_data);
         TextView nessunaSegnalazione = v.findViewById(R.id.textView_noSignEff);
+        TextView statosegnalazionebordi = v.findViewById(R.id.textView_statoSegnalazione);
+        TextView datasegnalazionebordi = v.findViewById(R.id.textView_dataSegnalazione2);
         Button button = v.findViewById(R.id.button_manifestNegativity);
 
 
@@ -52,11 +55,15 @@ public class ManifestNegativityFragment extends Fragment {
             nessunaSegnalazione.setVisibility(View.INVISIBLE);
             statoSegnalazione.setVisibility(View.VISIBLE);
             dataSegnalazione.setVisibility(View.VISIBLE);
-            statoSegnalazione.setText("Positivo");
-            dataSegnalazione.setText(CachedUser.user.getDatePositiveSince().toString());
+            statosegnalazionebordi.setVisibility(View.VISIBLE);
+            datasegnalazionebordi.setVisibility(View.VISIBLE);
+            dataSegnalazione.setText("Positivo");
+            statoSegnalazione.setText(convertDate(CachedUser.user.getDatePositiveSince().toString()));
             button.setVisibility(View.VISIBLE);
         }
         else{
+            statosegnalazionebordi.setVisibility(View.INVISIBLE);
+            datasegnalazionebordi.setVisibility(View.INVISIBLE);
             imageView.setVisibility(View.VISIBLE);
             nessunaSegnalazione.setVisibility(View.VISIBLE);
             statoSegnalazione.setVisibility(View.INVISIBLE);
@@ -109,6 +116,42 @@ public class ManifestNegativityFragment extends Fragment {
             e.printStackTrace();
         }
         updateFr();
+    }
+
+    private String convertDate(String date){
+        ArrayList<String> mesi = new ArrayList<>();
+        mesi.add("Jan");
+        mesi.add("Feb");
+        mesi.add("Mar");
+        mesi.add("Apr");
+        mesi.add("May");
+        mesi.add("Jun");
+        mesi.add("Jul");
+        mesi.add("Aug");
+        mesi.add("Sep");
+        mesi.add("Oct");
+        mesi.add("Nov");
+        mesi.add("Dec");
+        ArrayList<Integer> nmesi = new ArrayList<>();
+        for(int i = 0; i<12; i++){
+            nmesi.add(i);
+        }
+        char[] charmese = {date.charAt(4),date.charAt(5),date.charAt(6)};
+        String mese = new String(charmese);
+        char[] chargiorno = {date.charAt(8),date.charAt(9)};
+        String giorno = new String(chargiorno);
+        char[] charanno = {date.charAt(24),date.charAt(25),date.charAt(26),date.charAt(26)};
+        String anno = new String(charanno);
+
+        for (int i = 0; i<12; i++){
+            if (mese.equals(mesi.get(i))){
+                mese = String.valueOf(i+1);
+                break;
+            }
+        }
+
+
+        return giorno + "/" + mese + "/" + anno;
     }
 
 }
