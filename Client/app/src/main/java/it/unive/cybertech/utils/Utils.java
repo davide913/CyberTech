@@ -28,11 +28,32 @@ public class Utils {
         void onItemClick(View view, int position);
     }
 
+    /**
+     * It can be invoked in this way
+     *
+     * new Utils.Dialog(c).showDialog("title", "message");
+     *
+     * OR
+     *
+     * new Utils.Dialog(this)
+     *      .setCallback(new Utils.DialogResult() {
+     *             @Override
+     *             public void onSuccess() {
+     *             }
+     *
+     *             @Override
+     *             public void onCancel() {
+     *             }
+     *         })
+     *     [.hideCancelButton()]
+     *     [.hideOkButton()]
+     *     .showDialog("", "");
+     * */
     public static class Dialog {
         private DialogResult result;
         private boolean showOkButton, showCancelButton;
-        private String okButtonText, cancelButtonText;
-        private Context c;
+        private final String okButtonText, cancelButtonText;
+        private final Context c;
 
         public Dialog(Context c) {
             showOkButton = true;
@@ -57,6 +78,11 @@ public class Utils {
 
         public Dialog hideCancelButton(){
             showCancelButton = false;
+            return this;
+        }
+
+        public Dialog hideOkButton(){
+            showOkButton = false;
             return this;
         }
 

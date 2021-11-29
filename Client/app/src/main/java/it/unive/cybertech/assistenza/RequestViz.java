@@ -71,14 +71,14 @@ public class RequestViz extends AppCompatActivity {
         //Pulsanti visibili solo dall'utente Negativo che presta soccorso
         this.findViewById(R.id.accept_request).setOnClickListener(v -> {
             //La richiesta viene affidata a me, la posso visualizzare nella mia sezione Taken Requests e tolta dalla lista nella Home
-            Utils.showGenericDialog("Operazione confermata!", "Hai preso in carico una richiesta", this);
+            new Utils.Dialog(this).showDialog("Operazione confermata!", "Hai preso in carico una richiesta");
             //chiamata al Db per fare in modo che la richiesta risulti presa da me e tolta dalla pull completa
             finish();
         });
 
         this.findViewById(R.id.stop_helping).setOnClickListener(v -> {
             //rinuncio a completare la richiesta, e viene inserita di nuovo nella lista generale Home, viene avvisato l'utente originale
-            Utils.showGenericDialog("Attenzione!", "Stai per abbandonare la richiesta", this);
+            new Utils.Dialog(this).showDialog("Attenzione!", "Stai per abbandonare la richiesta");
             finish();
         });
 
