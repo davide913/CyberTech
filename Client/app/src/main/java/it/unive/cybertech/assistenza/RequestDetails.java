@@ -14,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -33,11 +34,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 /*
-La classe RequestDetails permette all'utente di creare una richiesta di assistenza, secificando il titolo e in un box dedicato
-il testo della richiesta con le prime specifiche. A seguire si potrà aprire una chat privata tra i due utenti, i quali potranno
-scambiarsi informazioni più dettagliate
--> Le richieste devono avere dei pulsanti apply, (cleared), delete
--> pulsante chat visibile una volta che la richiesta di apply è stata confermata dal richiedente
+Modifica 29/11: aggiunto lo spinner che mi servirà poi come info da mandare al db per avere una lista delle richieste filtrata
  */
 
 public class RequestDetails extends AppCompatActivity {
@@ -75,28 +72,21 @@ public class RequestDetails extends AppCompatActivity {
                 "Posta"
         };
 
-        final List<String> plantsList = new ArrayList<>(Arrays.asList(options));
+        final List<String> typeList = new ArrayList<>(Arrays.asList(options));
 
         // Initializing an ArrayAdapter
-        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item,plantsList){
+        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, typeList){
 
             @Override
             public boolean isEnabled(int position){
-                if(position == 0)
-                {
-                    // Disable the first item from Spinner
-                    // First item will be use for hint
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+                // Disable the first item from Spinner
+                // First item will be use for hint
+                return position != 0;
             }
 
             @Override
             public View getDropDownView(int position, View convertView,
-                                        ViewGroup parent) {
+                                        @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView tv = (TextView) view;
                 if(position == 0){
@@ -138,7 +128,7 @@ public class RequestDetails extends AppCompatActivity {
             Date date = Calendar.getInstance().getTime();
 
             try {
-                QuarantineAssistance.createQuarantineAssistance(type[0], et_requestText.toString(), null, date);
+                QuarantineAssistance.createQuarantineAssistance(type[0], et_requestText.toString(), null, date); //TODO aggiungere tutti gli altri campi
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -147,7 +137,4 @@ public class RequestDetails extends AppCompatActivity {
             finish();
         });
     }
-
-    //Se ho del contenuto in sospeso, creo una bozza o elimino tutto? pop-up per avvertire il cliente che
-    //non ha salvato la richiesta di aiuto?
 }

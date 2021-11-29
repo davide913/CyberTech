@@ -67,20 +67,6 @@
         app:layout_constraintTop_toBottomOf="@+id/requestTitle" />
 
     <EditText
-        android:id="@+id/requestDate"
-        android:layout_width="123dp"
-        android:layout_height="48dp"
-        android:autoSizeMinTextSize="15sp"
-        android:ems="10"
-        android:inputType="date"
-        android:minHeight="48dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.539"
-        app:layout_constraintStart_toEndOf="@+id/requestLocation"
-        app:layout_constraintTop_toTopOf="@+id/requestLocation"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <EditText
         android:id="@+id/requestLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
