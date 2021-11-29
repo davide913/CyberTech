@@ -127,13 +127,13 @@ public class RequestDetails extends AppCompatActivity {
             //upload tutte le info nel db
             Date date = Calendar.getInstance().getTime();
 
-            try {
+            /*try {
                 QuarantineAssistance.createQuarantineAssistance(type[0], et_requestText.toString(), null, date); //TODO aggiungere tutti gli altri campi
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
             finish();
         });
     }
