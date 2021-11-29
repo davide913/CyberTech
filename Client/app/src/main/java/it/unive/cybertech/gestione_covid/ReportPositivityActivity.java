@@ -4,19 +4,29 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+import static it.unive.cybertech.utils.CachedUser.user;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
+
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import it.unive.cybertech.R;
 
 public class ReportPositivityActivity extends AppCompatActivity {
     private Button bSendSign;
+    EditText insertDate;
 
 
     @Override
@@ -30,6 +40,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
     private void initViews(){
         Toolbar toolbar = findViewById(R.id.toolbar_sendSign);
         bSendSign = findViewById(R.id.button_sendSign);
+        insertDate = findViewById(R.id.editText_insertDate);
 
 
         setSupportActionBar(toolbar);
@@ -51,7 +62,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    finish();
+                    updateDateOnDb();
                 }
             });
             builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
@@ -63,4 +74,27 @@ public class ReportPositivityActivity extends AppCompatActivity {
             builder.create().show();
         });
     }
+
+
+    private void updateDateOnDb(){
+        String data = insertDate.getText().toString();
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
+            Date d = sdf.parse(data);
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    user.updatePositiveSince(d); //TODO vedere se funziona
+                }
+            });
+            t.start();
+            t.join();
+        }catch(ParseException | InterruptedException ex){
+            // handle parsing exception if date string was different from the pattern applying into the SimpleDateFormat contructor
+        }
+        setResult(Activity.RESULT_OK);
+        finish();
+    }
+
+
 }

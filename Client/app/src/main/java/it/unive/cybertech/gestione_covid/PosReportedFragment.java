@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
+import it.unive.cybertech.utils.CachedUser;
 
 public class PosReportedFragment extends Fragment {
 

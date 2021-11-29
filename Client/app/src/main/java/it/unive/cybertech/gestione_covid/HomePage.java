@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import java.util.List;
 import it.unive.cybertech.R;
 
 public class HomePage extends Fragment {
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,6 @@ public class HomePage extends Fragment {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);*/
 
-
     }
 
     @Override
@@ -84,6 +85,11 @@ public class HomePage extends Fragment {
             super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
+        @Override
+        public int getItemPosition(Object object) {
+            // POSITION_NONE makes it possible to reload the PagerAdapter
+            return POSITION_NONE;
+        }
 
         @Override
         public Fragment getItem(int position) {
