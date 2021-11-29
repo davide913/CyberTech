@@ -1,6 +1,5 @@
 package it.unive.cybertech.database.Profile;
 
-import static it.unive.cybertech.database.Connection.Database.addToCollection;
 import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getReference;
@@ -18,27 +17,35 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 public class RentMaterial {
-    private DocumentReference idMaterial;
+    private DocumentReference referenceMaterial;
     private String id;
 
     public RentMaterial(){}
 
-    public RentMaterial(DocumentReference idMaterial, String id) {
-        this.idMaterial = idMaterial;
+    public RentMaterial(DocumentReference referenceMaterial, String id) {
+        this.referenceMaterial = referenceMaterial;
         this.id = id;
     }
 
-    public DocumentReference getIdMaterial() {
-        return idMaterial;
+    public DocumentReference getReferenceMaterial() {
+        return referenceMaterial;
     }
 
-    private void setIdMaterial(DocumentReference idMaterial) {
-        this.idMaterial = idMaterial;
+    public Material getMaterial() throws ExecutionException, InterruptedException {
+        DocumentSnapshot document = getDocument(referenceMaterial);
+
+        if(document.exists())
+            return Material.getMaterialById(document.getId());
+
+        return null;
+    }
+
+    private void setReferenceMaterial(DocumentReference referenceMaterial) {
+        this.referenceMaterial = referenceMaterial;
     }
 
     public String getId() {
@@ -50,14 +57,28 @@ public class RentMaterial {
     }
 
 
+    public static RentMaterial getRentMaterialById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
+        DocumentReference docRef = getReference("rentMaterial", id);
+        DocumentSnapshot document = getDocument(docRef);
 
-    public RentMaterial addRentMaterial(Material material) throws ExecutionException, InterruptedException {
+        RentMaterial rentMaterial = null;
+
+        if (document.exists()) {
+            rentMaterial = document.toObject(RentMaterial.class);
+            rentMaterial.setId(document.getId());
+
+            return rentMaterial;
+        } else
+            throw new NoRentMaterialFoundException("No rent material found with this id: " + id);
+    }
+
+    public static RentMaterial createRentMaterial(Material material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", material.getId());
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
             Map<String, Object> myRent = new HashMap<>();
-            myRent.put("reference", docRef);
+            myRent.put("referenceMaterial", docRef);
 
             DocumentReference addedDocRef = Database.addToCollection("rentMaterial", myRent);
 
@@ -66,10 +87,7 @@ public class RentMaterial {
             throw new NoRentMaterialFoundException("No material found with this id: " + material.getId());
     }
 
-    public void removeRentMaterial(){
-
-    }
-    public Task<Void> deleteRentMaterialAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteRentMaterialAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("rentMaterial", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -84,7 +102,7 @@ public class RentMaterial {
             Task<Void> t = this.deleteRentMaterialAsync();
             Tasks.await(t);
             this.id = null;
-            this.idMaterial = null;
+            this.referenceMaterial = null;
             return true;
         } catch (ExecutionException | InterruptedException | NoRentMaterialFoundException e) {
             e.printStackTrace();
@@ -92,18 +110,19 @@ public class RentMaterial {
         }
     }
 
-    public Task<Void> updateRentMaterialAsync(@NonNull Material material) throws ExecutionException, InterruptedException {
+    private Task<Void> updateRentMaterialAsync(@NonNull Material material) throws ExecutionException, InterruptedException {
         DocumentReference matDoc = getReference("material", material.getId());
 
         //check if they are the same material
-        if (!this.idMaterial.getId().equals(matDoc.getId()) ) {
-            DocumentReference docRef = getReference("material", this.id);
+        if (!this.referenceMaterial.getId().equals(matDoc.getId()) ) {
+            DocumentReference docRef = getReference("rentMaterial", this.id);
             DocumentSnapshot document = getDocument(docRef);
 
             if (document.exists()) {
-                return docRef.update("reference", matDoc);
+                return docRef.update("referenceMaterial", matDoc);
             }
-            throw new NoRentMaterialFoundException("Update of rent material can't work if the material with this id:" +material.getId()+" is not save in db");
+            throw new NoRentMaterialFoundException("Update of rent material can't work if the material with this id:" +
+                    material.getId()+" is not save in db");
         }
         throw new NoRentMaterialFoundException("You are tring to update a rentMaterial with the same object with id: " + material.getId());
     }
@@ -112,7 +131,7 @@ public class RentMaterial {
         try {
             Task<Void> t = this.updateRentMaterialAsync(material);
             Tasks.await(t);
-            this.idMaterial = getReference("material", material.getId());
+            this.referenceMaterial = getReference("material", material.getId());
             return true;
         } catch (ExecutionException | InterruptedException | NoRentMaterialFoundException e) {
             e.printStackTrace();
@@ -120,17 +139,12 @@ public class RentMaterial {
         }
     }
 
-
-
-
-
-
-    @Override
+    /*@Override
     public boolean equals(Object o){
         if(o instanceof RentMaterial){
             RentMaterial r = (RentMaterial) o;
-            return r.idMaterial.equals(this.idMaterial);
+            return r.referenceMaterial.equals(this.referenceMaterial);
         }
         return false;
-    }
+    }*/
 }

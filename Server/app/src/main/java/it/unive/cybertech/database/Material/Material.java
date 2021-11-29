@@ -21,28 +21,28 @@ import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
-//TODO metodo |statico| che non prende nulla e ritorna un arraylist di utenti della coda.
+//TODO testata e funzionante!
 
 public class Material {
     private String id;
-    private DocumentReference proprietario;
-    private String titolo;
-    private String descrizione;
-    private String foto;
-    private ArrayList<DocumentReference> coda;
-    private DocumentReference idTipologia;
+    private DocumentReference owner;
+    private String title;
+    private String decription;
+    private String photo;
+    private ArrayList<User> queue;
+    private DocumentReference type;
 
     public Material() {}
 
-    public Material(String id, DocumentReference proprietario, String titolo, String descrizione, String foto,
-                    ArrayList<DocumentReference> coda, DocumentReference idTipologia) {
+    public Material(String id, DocumentReference owner, String title, String decription, String photo,
+                    ArrayList<User> queue, DocumentReference type) {
         this.id = id;
-        this.proprietario = proprietario;
-        this.titolo = titolo;
-        this.descrizione = descrizione;
-        this.foto = foto;
-        this.coda = coda;
-        this.idTipologia = idTipologia;
+        this.owner = owner;
+        this.title = title;
+        this.decription = decription;
+        this.photo = photo;
+        this.queue = queue;
+        this.type = type;
     }
 
     public String getId() {
@@ -53,83 +53,72 @@ public class Material {
         this.id = id;
     }
 
-    public DocumentReference getProprietario() {
-        return proprietario;
+    public DocumentReference getOwner() {
+        return owner;
     }
 
-    private void setProprietario(DocumentReference proprietario) {
-        this.proprietario = proprietario;
+    private void setOwner(DocumentReference owner) {
+        this.owner = owner;
     }
 
-    public String getTitolo() {
-        return titolo;
+    public String getTitle() {
+        return title;
     }
 
-    private void setTitolo(String titolo) {
-        this.titolo = titolo;
+    private void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getDescrizione() {
-        return descrizione;
+    public String getDescription() {
+        return decription;
     }
 
-    private void setDescrizione(String descrizione) {
-        this.descrizione = descrizione;
+    private void setDescription(String decription) {
+        this.decription = decription;
     }
 
-    public String getFoto() {
-        return foto;
+    public String getPhoto() {
+        return photo;
     }
 
-    private void setFoto(String foto) {
-        this.foto = foto;
+    private void setPhoto(String photo) {
+        this.photo = photo;
     }
 
-    public ArrayList<DocumentReference> getCoda() {
-        return coda;
+    public ArrayList<User> getQueue() {
+        return queue;
     }
 
-    //TODO da testare
-    public ArrayList<User> getCodaUsers() throws Exception {
-        ArrayList<User> arrayList = new ArrayList<>();
-
-        for (DocumentReference document: coda)
-            arrayList.add(User.getUserById(getDocument(document).getId()));
-
-
-        return arrayList;
+    private void setQueue(ArrayList<User> queue) {
+        this.queue = queue;
     }
 
-    private void setCoda(ArrayList<DocumentReference> coda) {
-        this.coda = coda;
+    public DocumentReference getType() {
+        return type;
     }
 
-    public DocumentReference getIdTipologia() {
-        return idTipologia;
-    }
-
-    private void setIdTipologia(DocumentReference idTipologia) {
-        this.idTipologia = idTipologia;
+    private void setType(DocumentReference type) {
+        this.type = type;
     }
 
 
     //TODO fare i test per la add e la get user coda
-    public static Material addMaterial(@NonNull User proprietario, String titolo, String descrizione, String foto,
-                                       @NonNull Type idTipologia) throws ExecutionException, InterruptedException {
+    public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
+                                       @NonNull Type type) throws ExecutionException, InterruptedException {
 
-        DocumentReference docPro = getReference("users", proprietario.getId());
-        DocumentReference docType = getReference("type", idTipologia.getId());
+        DocumentReference docPro = getReference("users", owner.getId());
+        DocumentReference docType = getReference("type", type.getID());
 
         Map<String, Object> myMaterial = new HashMap<>();          //create "table"
-        myMaterial.put("Title", titolo);
-        myMaterial.put("Owner", docPro);
-        myMaterial.put("Description", descrizione);
-        myMaterial.put("Photo", foto);
-        myMaterial.put("Type", docType);
+        myMaterial.put("title", title);
+        myMaterial.put("owner", docPro);
+        myMaterial.put("description", description);
+        myMaterial.put("photo", photo);
+        myMaterial.put("type", docType);
 
         DocumentReference addedDocRef = addToCollection("material", myMaterial);
 
-        return new Material(addedDocRef.getId(), docPro, titolo, descrizione, foto, new ArrayList<>(), docType);
+        return new Material(addedDocRef.getId(), docPro, title, description, photo, new ArrayList<>(), docType);
     }
 
     //TODO vedere se ha senso fatre un getbyname perche potrebbero esserci piu materiali con lo stesso nome
@@ -154,33 +143,36 @@ public class Material {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists())
-            throw new NoMaterialFoundException("No material found with this id: " + id);
+        Material material = null;
 
-        Material material = document.toObject(Material.class);
-        material.id = document.getId();
+        if (document.exists()){
+            material = document.toObject(Material.class);
+            material.id = document.getId();
 
-        return material;
+            return material;
+        }
+
+        throw new NoMaterialFoundException("No material found with this id: " + id);
     }
 
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updateTitleAsync(@NonNull String titolo) throws ExecutionException, InterruptedException {
+    private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Title", titolo);
+            return docRef.update("Title", title);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
-    public boolean updateTitle(@NonNull String titolo) {
+    public boolean updateTitle(@NonNull String title) {
         try {
-            Task<Void> t = updateTitleAsync(titolo);
+            Task<Void> t = updateTitleAsync(title);
             Tasks.await(t);
-            setTitolo(titolo);
+            setTitle(title);
             return true;
         } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
             e.printStackTrace();
@@ -191,21 +183,21 @@ public class Material {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updateDescriptionAsync(@NonNull String descrizione) throws ExecutionException, InterruptedException {
+    private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Description", descrizione);
+            return docRef.update("Description", description);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
-    public boolean updateDescription(@NonNull String descrizione) {
+    public boolean updateDescription(@NonNull String description) {
         try {
-            Task<Void> t = updateDescriptionAsync(descrizione);
+            Task<Void> t = updateDescriptionAsync(description);
             Tasks.await(t);
-            setDescrizione(descrizione);
+            setDescription(description);
             return true;
         } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
             e.printStackTrace();
@@ -216,21 +208,21 @@ public class Material {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> updatePhotoAsync(@NonNull String foto) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePhotoAsync(@NonNull String photo) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Photo", foto);
+            return docRef.update("Photo", photo);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
-    public boolean updatePhoto(String foto) {
+    public boolean updatePhoto(String photo) {
         try {
-            Task<Void> t = updatePhotoAsync(foto);
+            Task<Void> t = updatePhotoAsync(photo);
             Tasks.await(t);
-            setFoto(foto);
+            setPhoto(photo);
             return true;
         } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
             e.printStackTrace();
@@ -238,10 +230,11 @@ public class Material {
         }
     }
 
+    //TODO cercare prima che l'utente sia presente nell'array per rimuoverlo o per agiungerlo
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> addUserToQueueAsync(@NonNull User user) throws Exception {
+    private Task<Void> addUserToQueueAsync(@NonNull User user) throws Exception {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -253,9 +246,11 @@ public class Material {
 
     public boolean addUserToQueue(@NonNull User user) throws Exception {
         try {
+            if(this.queue.contains(user)) //|| owner.getId().equals(user.getId()))
+                return false;
             Task<Void> t = addUserToQueueAsync(user);
             Tasks.await(t);
-            this.coda.add(getReference("users", user.getId()));
+            this.queue.add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -266,7 +261,7 @@ public class Material {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    public Task<Void> removeUserToQueueAsync(@NonNull User user) throws ExecutionException, InterruptedException {
+    private Task<Void> removeUserToQueueAsync(@NonNull User user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -278,9 +273,11 @@ public class Material {
 
     public boolean removeUserToQueue(@NonNull User user) {
         try {
+            if(!queue.contains(user))
+                return false;
             Task<Void> t = removeUserToQueueAsync(user);
             Tasks.await(t);
-            this.coda.remove(getReference("users", user.getId()));
+            this.queue.remove(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
