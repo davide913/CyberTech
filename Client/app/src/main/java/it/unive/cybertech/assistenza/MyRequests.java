@@ -25,14 +25,14 @@ public class MyRequests extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_requests);
+        setContentView(R.layout.activity_my_requests); //TODO scambiarla con request_viz oppure
 
         Toolbar toolbar = findViewById(R.id.toolbar_myRequest);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        setTitle("Le mie richieste");
+        setTitle("La mia richiesta");
 
         myUploadedRequests = new ArrayList<String>();
         listMyView = findViewById(R.id.list_MyRequests);

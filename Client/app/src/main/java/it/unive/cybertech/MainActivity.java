@@ -14,7 +14,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,8 +27,8 @@ import com.squareup.picasso.Picasso;
 import java.io.InputStream;
 import java.net.URL;
 
-import it.unive.cybertech.database.Profile.User;
-import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.assistenza.HomePageNegative;
+import it.unive.cybertech.assistenza.HomePagePositive;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
                 break;
             case R.id.nav_menu_quarantine_assistance:
-                ft.replace(R.id.main_fragment_content, new it.unive.cybertech.assistenza.HomePage()).commit();
+                ft.replace(R.id.main_fragment_content, new HomePageNegative()).commit();
                 break;
             case R.id.nav_menu_showcase:
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.noleggio.HomePage()).commit();
