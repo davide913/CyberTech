@@ -38,6 +38,14 @@ public class ExtensionRequest {
         return lendingID;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    private void setId(String id) {
+        this.id = id;
+    }
+
     public static ExtensionRequest addExtensionRequest(LendingInProgress lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("lendingInProgress", lending.getId());
 

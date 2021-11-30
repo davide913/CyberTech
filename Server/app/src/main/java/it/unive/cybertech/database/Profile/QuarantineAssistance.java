@@ -2,6 +2,8 @@ package it.unive.cybertech.database.Profile;
 
 import static it.unive.cybertech.database.Connection.Database.*;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
@@ -10,11 +12,15 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -131,7 +137,7 @@ public class QuarantineAssistance {
         Map<String, Object> myQuarantine = new HashMap<>();
         myQuarantine.put("description", description);
         myQuarantine.put("inCharge", userRef);
-        myQuarantine.put("date", t);
+        myQuarantine.put("deliveryDate", t);
         myQuarantine.put("assistanceType", AssTypeRef);
         myQuarantine.put("location", geoPoint);
         myQuarantine.put("title", title);
@@ -164,14 +170,62 @@ public class QuarantineAssistance {
             return quarantineAssistance;
         } else
             throw new NoQuarantineAssistanceFoundException("No quarantine assistance found with this id: " + id);
-
     }
 
-    //TODO fare funzione
-    public static ArrayList<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint location, double raggio, Date date){
+
+    //TODO sistemare
+    //modificata 30/11/2021, testata manca la "storia" del geopoint e il where equal to a documentReference non funziona ( fatto a mano )
+    public static ArrayList<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint location,
+                                                                                  double radius, Date date) throws ExecutionException, InterruptedException {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
+        FirebaseFirestore db = getInstance();
 
+        Query query = db.collection("quarantineAssistance");
 
+        if(type != null){
+            DocumentReference document = getReference("assistanceType", type.getID());
+            Log.d("log", document.getPath());
+            query = query.whereEqualTo("assistanceType", document);
+        }
+
+        if(date != null){
+            Timestamp timestamp = new Timestamp(date);
+            query = query.whereGreaterThanOrEqualTo("date", timestamp);
+        }
+
+        //TODO fare il filtro per la geopoint
+
+        Task<QuerySnapshot> future = query.get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        DocumentReference docAssistance = null;
+        /*if(type != null) {
+            docAssistance = getReference("assistanceType", type.getID());
+
+            for (DocumentSnapshot doc : documents) {
+                QuarantineAssistance assistance = null;
+
+                assistance = doc.toObject(QuarantineAssistance.class);
+                assistance.id = doc.getId();
+
+                //non si possono fare query su campi che non esistono, unica soluzione
+                if (assistance.inCharge == null && ( assistance.assistanceType == docAssistance))
+                    arr.add(assistance);
+            }
+        }
+        else{
+            for (DocumentSnapshot doc : documents ) {
+                QuarantineAssistance assistance = null;
+
+                assistance = doc.toObject(QuarantineAssistance.class);
+                assistance.id = doc.getId();
+
+                //non si possono fare query su campi che non esistono, unica soluzione
+                if(assistance.inCharge == null)
+                    arr.add(assistance);
+            }
+        }*/
 
         return arr;
     }

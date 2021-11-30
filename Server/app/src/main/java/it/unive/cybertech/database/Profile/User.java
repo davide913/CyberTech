@@ -234,6 +234,7 @@ public class User {
         return user;
     }
 
+    //TODO verificare che se ci sono degli array a null di inizializzarli! ( in caso cotrario le update dei rispettivi array andrebbero in errore )
     public static User getUserById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
@@ -254,7 +255,7 @@ public class User {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return deleteFromCollectionAsync("users", id);//db.collection("users").document(Id).delete();
+            return deleteFromCollectionAsync("users", id);
         else
             throw new NoUserFoundException("No user found with this id: " + id);
     }
@@ -274,12 +275,13 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, greenpass era maiuscolo
     private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Greenpass", val);
+            return docRef.update("greenpass", val);
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
@@ -306,15 +308,14 @@ public class User {
         if (document.exists()) {
             if (date != null) {                    //if the date is null is possible to delete the field date from db
                 Timestamp timestamp = new Timestamp(date);            //conversion from date to timestamp
-                return docRef.update("PositiveSince", timestamp);
+                return docRef.update("positiveSince", timestamp);
             } else {
-                return docRef.update("PositiveSince", FieldValue.delete());
+                return docRef.update("positiveSince", FieldValue.delete());
             }
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    //TODO controllare se lavora la funzione
     public boolean updatePositiveSince(Date date) {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
@@ -335,7 +336,7 @@ public class User {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists() && val >= 0)
-            return docRef.update("LendingPoint", val);
+            return docRef.update("lendingPoint", val);
         else
             throw new NoUserFoundException("User not found, id: " + id);
     }
@@ -358,9 +359,10 @@ public class User {
     private Task<Void> addDeviceAsync(@NonNull Device device) throws Exception {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference devDoc = getReference("device", device.getId());
 
         if (document.exists())
-            return docRef.update("Devices", FieldValue.arrayUnion(device));
+            return docRef.update("devices", FieldValue.arrayUnion(devDoc));
         else
             throw new NoUserFoundException("User not found, id: " + id);
     }
@@ -383,12 +385,11 @@ public class User {
     private Task<Void> removeDeviceAsync(@NonNull Device device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference devDoc = getReference("device", device.getId());
 
-        if (document.exists()) {
-            return docRef.update("Devices", FieldValue.arrayRemove(device));
-            //this.devices.remove(device);
-            //return true;
-        } else
+        if (document.exists())
+            return docRef.update("devices", FieldValue.arrayRemove(devDoc));
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -427,15 +428,15 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> addLendingAsync(@NonNull LendingInProgress lending) throws Exception {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference lenDoc = getReference("lendingInProgress", lending.getId());
 
-        if (document.exists()) {
-            return docRef.update("LendingInProgress", FieldValue.arrayUnion(lending));
-            //this.lendingInProgresses.add(lending);
-            //return true;
-        } else
+        if (document.exists())
+            return docRef.update("lendingInProgress", FieldValue.arrayUnion(lenDoc));
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -454,15 +455,15 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> removeLendingAsync(@NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference lenDoc = getReference("lendingInProgress", lending.getId());
 
-        if (document.exists()) {
-            return docRef.update("LendingInProgress", FieldValue.arrayRemove(lending));
-            //this.lendingInProgresses.remove(lending);
-            //return true;
-        } else
+        if (document.exists())
+            return docRef.update("lendingInProgress", FieldValue.arrayRemove(lenDoc));
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -501,15 +502,15 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
     private Task<Void> addExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference extDoc = getReference("extensionRequest", extensionRequest.getId());
 
-        if (document.exists()) {
-            return docRef.update("ExtensionRequest", FieldValue.arrayUnion(extensionRequest));
-            //this.extensionRequests.add(extensionRequest);
-            //return true;
-        } else
+        if (document.exists())
+            return docRef.update("extensionRequest", FieldValue.arrayUnion(extDoc));
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
@@ -531,15 +532,15 @@ public class User {
     private Task<Void> removeExtensionRequestAsync(@NonNull ExtensionRequest extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
-        if (document.exists()) {
-            return docRef.update("ExtensionRequest", FieldValue.arrayRemove(extensionRequest));
-            //this.extensionRequests.remove(extensionRequest);
-            //return true;
-        } else
+        DocumentReference extDoc = getReference("extensionRequest", extensionRequest.getId());
+
+        if (document.exists())
+            return docRef.update("extensionRequest", FieldValue.arrayRemove(extDoc));
+        else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-
+    //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
     public boolean removeExtensionRequest(@NonNull ExtensionRequest extensionRequest) {
         try {
             Task<Void> t = removeExtensionRequestAsync(extensionRequest);
@@ -575,13 +576,14 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> addRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference rentDoc = getReference("rentMaterial", rentMaterial.getId());
 
         if (document.exists()) {
-            return docRef.update("RentMaterial", FieldValue.arrayUnion(rentMaterial));
-            //this.rentMaterials.add(rentMaterial);
+            return docRef.update("rentMaterial", FieldValue.arrayUnion(rentDoc));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
@@ -601,13 +603,14 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
+    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> removeRentMaterialAsync(@NonNull RentMaterial rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference rentDoc = getReference("rentMaterial", rentMaterial.getId());
+
         if (document.exists()) {
-            //this.rentMaterials.remove(rentMaterial);
-            return docRef.update("RentMaterial", FieldValue.arrayRemove(rentMaterial));
-            //return true;
+            return docRef.update("rentMaterial", FieldValue.arrayRemove(rentDoc));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
@@ -643,13 +646,16 @@ public class User {
         return false;
     }
 
+    //modificata 30/11/2021, non salvo la classe intera quarantine assistance ma solo la sua reference sul db
     private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
+        DocumentReference assDoc = getReference("quarantineAssistance", quarantineAssistance.getId());
+
         Task<Void> t;
         if (document.exists()) {
             if (quarantineAssistance != null) {                  //if the quarantineAssistance is null is possible to delete the field date from db
-                t = docRef.update("quarantineAssistance", quarantineAssistance);
+                t = docRef.update("quarantineAssistance", assDoc);
                 this.assistance = quarantineAssistance;
             } else {
                 t = docRef.update("quarantineAssistance", FieldValue.delete());
@@ -669,5 +675,16 @@ public class User {
         } catch (Exception a) {
             return false;
         }
+    }
+
+    //metodo equal per confronti
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof User){
+            User user = (User)o;
+
+            return user.getId().equals(this.getId());
+        }
+        return false;
     }
 }

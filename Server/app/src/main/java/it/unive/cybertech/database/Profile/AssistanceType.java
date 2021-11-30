@@ -47,7 +47,7 @@ public class AssistanceType {
         return Type;
     }
 
-    protected static AssistanceType getAssistanceTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+    public static AssistanceType getAssistanceTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
         DocumentReference docRef = getReference("assistanceType", id);
         DocumentSnapshot document = getDocument(docRef);
 

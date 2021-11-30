@@ -1,20 +1,37 @@
 package it.unive.cybertech.database;
 
+import static it.unive.cybertech.database.Connection.Database.getInstance;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.getJoinableQuarantineAssistance;
+
 import android.content.Context;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import it.unive.cybertech.database.Connection.Database;
+import it.unive.cybertech.database.Groups.Activity;
+import it.unive.cybertech.database.Groups.Chat;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Material.Type;
+import it.unive.cybertech.database.Profile.AssistanceType;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.RentMaterial;
+import it.unive.cybertech.database.Profile.User;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -31,29 +48,20 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        //Log.d("prima chiamata di log:", "sono qui");
+        User u = User.getUserById("davide.finesso@hotmail.it");
+        //User u1 = User.getUserById("davide.finesso@hotmail.it");
 
+        Activity a = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
 
-        //User u = User.getUserById("davide.finesso@hotmail.it");
+        a.addPartecipant(u);
 
-        //ArrayList<AssistanceType> assistances = AssistanceType.getAssistanceTypes();
+        Activity b = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
 
-        ArrayList<Type> types = Type.getMaterialTypes();
+        ArrayList<User> arr = b.getMaterializedParticipants();
 
-        Material m = Material.getMaterialById("PSrmt3MH9kKWeLVIdQfI");
-        Material m1 = Material.getMaterialById("DADbMms4X9q4FtliexmZ");
+        //a.addPartecipant(u);
 
-        RentMaterial r =  RentMaterial.getRentMaterialById("wBWVJnLe5I44aMrrdhu6");
-
-        r.updateRentMaterial(m);
-        //errore
-        Log.d("log", r.getMaterial().getDescription());
-
-        r.deleteRentMaterial();
-
-
-
-
+        //Activity b = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
 
     }
 }
