@@ -46,7 +46,6 @@ public class HomePage extends Fragment {
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getChildFragmentManager());
         adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività");
-        adapter.addFragment(new ManifestNegativityFragment(), "Segnala Guarigione");
         adapter.addFragment(new PosReportedFragment(), "Segnalazioni Ricevute");
         viewPager.setAdapter(adapter);
     }

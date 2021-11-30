@@ -20,7 +20,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
@@ -49,20 +52,56 @@ public class ManifestPositivityFragment extends Fragment {
         TextView mDateSign = v.findViewById(R.id.textView_dateAlert2);
         TextView mStateSign = v.findViewById(R.id.textView_stateAlert2);
         Button signPosButton = v.findViewById(R.id.button_alertPos);
-
-
+        Button bManifestNegativity = v.findViewById(R.id.button_signGua);
 
           mNome.setText(user.getName());
           mCognome.setText(user.getSurname());
 
           if(user.getPositiveSince() != null){
-                mDateSign.setText(convertDate(user.getPositiveSince().toString()));
+                mDateSign.setText(convertDate(user.getPositiveSince().toDate().toString()));
                 mStateSign.setText("Positivo");
+                signPosButton.setVisibility(View.INVISIBLE);
+                bManifestNegativity.setVisibility(View.VISIBLE);
           }
           else{
-                mDateSign.setText("Nessuna segnalazione inviata");
+                mDateSign.setHint("Nessuna segnalazione inviata");
                 mStateSign.setText("Negativo");
+              signPosButton.setVisibility(View.VISIBLE);
+              bManifestNegativity.setVisibility(View.INVISIBLE);
           }
+
+
+          bManifestNegativity.setOnClickListener(v1 -> {
+              AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+              builder.setTitle("Invia Guarigione");
+              builder.setMessage("Confermi di voler inviare la segnalazione di guarigione?\n");
+              builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface dialog, int which) {
+                      Thread t = new Thread(new Runnable() {
+                          @Override
+                          public void run() {
+                              user.updatePositiveSince(null); //Imposta la data a Null sul database
+                          }
+                      });
+                      t.start();
+                      try {
+                          t.join();                           //Aspetta che il thread abbia finito prima di riaggiornare i fragments
+                      } catch (InterruptedException e) {
+                          e.printStackTrace();
+                      }
+                      updateFr();
+                      dialog.cancel();
+                  }
+              });
+              builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface dialog, int which) {
+                      dialog.cancel();
+                  }
+              });
+              builder.create().show();
+          });
 
 
 
@@ -71,34 +110,41 @@ public class ManifestPositivityFragment extends Fragment {
         signPosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(user.getPositiveSince() != null){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                    builder.setTitle("Segnalazione già inviata precedentemente");
-                    builder.setMessage("Hai già effettuato una segnalazione, confermi di voler segnalarne un'altra?\n");
-                    builder.setPositiveButton("Conferma", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(getActivity(), ReportPositivityActivity.class);
-                            startActivityForResult(intent, 10001);
-                            dialog.cancel();
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setTitle("Inviare Segnalazione?");
+                builder.setMessage("Sei sicuro di voler inviare la segnalazione?\n");
+                builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String data = mDateSign.getText().toString();
+                        try{
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
+                            Date d = sdf.parse(data);
+                            Thread t = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    user.updatePositiveSince(d); //TODO vedere se funziona
+                                }
+                            });
+                            t.start();
+                            t.join();
+                        }catch(ParseException | InterruptedException ex){
+                            // handle parsing exception if date string was different from the pattern applying into the SimpleDateFormat contructor
                         }
-                    });
-                    builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.create().show();
-                }
-                else {
-                    Intent intent = new Intent(getActivity(), ReportPositivityActivity.class);
-                    startActivityForResult(intent, 10001);
-                }
+                        updateFr();
+                        dialog.cancel();
+                    }
+                });
+                builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.create().show();
 
             }
         });
-
 
 
     }
@@ -109,14 +155,6 @@ public class ManifestPositivityFragment extends Fragment {
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == 10001) && (resultCode == Activity.RESULT_OK))
-            // recreate your fragment here
-            updateFr();
-    }
 
     private String convertDate(String date){
         ArrayList<String> mesi = new ArrayList<>();
@@ -153,5 +191,7 @@ public class ManifestPositivityFragment extends Fragment {
 
         return giorno + "/" + mese + "/" + anno;
     }
+
+
 
 }
