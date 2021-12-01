@@ -2,23 +2,32 @@ package it.unive.cybertech.database.Groups;
 
 import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
+import static it.unive.cybertech.database.Connection.Database.getInstance;
 import static it.unive.cybertech.database.Connection.Database.getReference;
+
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
 public class Group {
@@ -140,8 +149,12 @@ public class Group {
 
         DocumentReference addedDocRef = Database.addToCollection("groups", myGroup);
 
-        return new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>());
+        Group group = new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<DocumentReference>(),
+                    new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>());
+
+        group.addMember(creator);
+
+        return group;
     }
 
     public static Group getGroupById(String id) throws ExecutionException, InterruptedException {
@@ -280,7 +293,7 @@ public class Group {
         }
     }
 
-    private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws Exception {
+    private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("groups", id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -290,7 +303,7 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
-    public boolean addMember(@NonNull User user) throws Exception {
+    public boolean addMember(@NonNull User user) {
         try {
             DocumentReference userDoc = getReference("users", user.getId());
             Task<Void> t = addMemberAsync(userDoc);
@@ -315,11 +328,14 @@ public class Group {
 
     public boolean removeMember(@NonNull User user) throws Exception {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
-            Task<Void> t = removeMemberAsync(userDoc);
-            Tasks.await(t);
-            this.members.remove(userDoc);
-            return true;
+            if(!user.getId().equals(owner.getId())) {
+                DocumentReference userDoc = getReference("users", user.getId());
+                Task<Void> t = removeMemberAsync(userDoc);
+                Tasks.await(t);
+                this.members.remove(userDoc);
+                return true;
+            }
+            return false;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
             return false;
@@ -370,6 +386,49 @@ public class Group {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static ArrayList<Group> getPositiveGroups(User user) throws ExecutionException, InterruptedException {
+        ArrayList<Group> arr = new ArrayList<>();
+        FirebaseFirestore db = getInstance();
+        DocumentReference userDoc = getReference("users", user.getId());
+
+        Task<QuerySnapshot> future = db.collection("groups").whereArrayContains("members", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents) {
+            Group g = getGroupById(doc.getId());
+            ArrayList<User> members = g.getMaterializedMembers();
+
+            for (User u : members) {
+                if (u.getPositiveSince() != null) {
+                    arr.add(g);
+                    break;
+                }
+            }
+        }
+
+        return arr;
+    }
+
+    //TODO vedere se si puo fare con una query
+    public ArrayList<Activity> getPositiveActivities() throws ExecutionException, InterruptedException {
+        ArrayList<Activity> result = new ArrayList<>();
+        ArrayList<Activity> activities = getMaterializedActivities();
+
+        for (Activity activity: activities) {
+            ArrayList<User> participants = activity.getMaterializedParticipants();
+
+            for (User user : participants) {
+                if(user.getPositiveSince() !=null){
+                    result.add(activity);
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 
 }

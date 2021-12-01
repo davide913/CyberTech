@@ -173,7 +173,7 @@ public class QuarantineAssistance {
     }
 
 
-    //TODO sistemare
+
     //modificata 30/11/2021, testata manca la "storia" del geopoint e il where equal to a documentReference non funziona ( fatto a mano )
     public static ArrayList<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint location,
                                                                                   double radius, Date date) throws ExecutionException, InterruptedException {
@@ -199,33 +199,16 @@ public class QuarantineAssistance {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        DocumentReference docAssistance = null;
-        /*if(type != null) {
-            docAssistance = getReference("assistanceType", type.getID());
+        for (DocumentSnapshot doc : documents) {
+            QuarantineAssistance assistance = null;
 
-            for (DocumentSnapshot doc : documents) {
-                QuarantineAssistance assistance = null;
+            assistance = doc.toObject(QuarantineAssistance.class);
 
-                assistance = doc.toObject(QuarantineAssistance.class);
+            if (assistance.inCharge == null ) {
                 assistance.id = doc.getId();
-
-                //non si possono fare query su campi che non esistono, unica soluzione
-                if (assistance.inCharge == null && ( assistance.assistanceType == docAssistance))
-                    arr.add(assistance);
+                arr.add(assistance);
             }
         }
-        else{
-            for (DocumentSnapshot doc : documents ) {
-                QuarantineAssistance assistance = null;
-
-                assistance = doc.toObject(QuarantineAssistance.class);
-                assistance.id = doc.getId();
-
-                //non si possono fare query su campi che non esistono, unica soluzione
-                if(assistance.inCharge == null)
-                    arr.add(assistance);
-            }
-        }*/
 
         return arr;
     }
