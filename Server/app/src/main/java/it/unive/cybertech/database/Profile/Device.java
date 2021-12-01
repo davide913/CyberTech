@@ -23,6 +23,7 @@ import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 public class Device {
     private String name;
@@ -49,6 +50,21 @@ public class Device {
 
     private void setId(String id) {
         this.id = id;
+    }
+
+    protected static Device getDeviceById(String id) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("device", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        Device device = null;
+
+        if (document.exists()) {
+            device = document.toObject(Device.class);
+            device.setId(document.getId());
+
+            return device;
+        } else
+            throw new NoDeviceFoundException("No device found with this id: " + id);
     }
 
     public static Device getDevice(String name) throws ExecutionException, InterruptedException {

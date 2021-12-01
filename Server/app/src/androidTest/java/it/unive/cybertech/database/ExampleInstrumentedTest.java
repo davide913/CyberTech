@@ -53,11 +53,11 @@ public class ExampleInstrumentedTest{
 
         Activity a = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
 
-        a.addPartecipant(u);
+        //a.addPartecipant(u);
 
-        Activity b = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
+        //Activity b = Activity.getActivityById("GAlx1uQ3lceEQpslHj7T");
 
-        ArrayList<User> arr = b.getMaterializedParticipants();
+        ArrayList<User> arr = a.getMaterializedParticipants();
 
         //a.addPartecipant(u);
 

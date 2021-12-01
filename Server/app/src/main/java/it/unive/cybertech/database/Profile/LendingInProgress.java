@@ -6,6 +6,8 @@ import static it.unive.cybertech.database.Connection.Database.deleteFromCollecti
 import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getReference;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -20,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 
 //TODO fare test delle funzioni scritte, NESSUNA É TESTATA
@@ -79,6 +82,21 @@ public class LendingInProgress {
         return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
     }
 
+    protected static LendingInProgress getLendingInProgressById(String id) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("lendingInProgress", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        LendingInProgress lending = null;
+
+        if (document.exists()) {
+            lending = document.toObject(LendingInProgress.class);
+            lending.setId(document.getId());
+
+            return lending;
+        } else
+            throw new NoLendingInProgressFoundException("No lending in progress found with this id: " + id);
+    }
+
     public boolean removeLendingInProgress() {
         return deleteFromCollection("lendingInProgress", this.id);
     }
@@ -106,25 +124,24 @@ public class LendingInProgress {
         }
     }
 
-    //TODO vedere se ha senso eliminare i material che non sono piu usati
-    public Task<Void> updateMaterialAsync(Material material) throws ExecutionException, InterruptedException {
+
+    private Task<Void> updateMaterialAsync(DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("lendingInProgress", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists()) {
-            DocumentReference docRefMaterial = getReference("material", material.getId());//db.collection("material").document(material.getId());
-
-            return docRef.update("material", docRefMaterial);
-        } else
+        if (document.exists())
+            return docRef.update("material", material);
+        else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
 
-    public boolean updateMaterial(Material material) {
+    public boolean updateMaterial(@NonNull Material material) {
         try {
-            Task<Void> t = this.updateMaterialAsync(material);
+            DocumentReference docRefMaterial = getReference("material", material.getId());
+            Task<Void> t = this.updateMaterialAsync(docRefMaterial);
             Tasks.await(t);
-            this.idMaterial = getReference("material", material.getId());
+            this.idMaterial = docRefMaterial;
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();

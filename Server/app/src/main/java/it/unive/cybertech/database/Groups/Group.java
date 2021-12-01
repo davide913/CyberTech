@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -19,10 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Connection.Database;
-import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
 import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
-import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 
 public class Group {
@@ -30,14 +26,15 @@ public class Group {
     private String name;
     private String description;
     private DocumentReference owner;
-    private ArrayList<User> members;
-    private ArrayList<Chat> messages;
-    private ArrayList<Activity> activities;
+    private ArrayList<DocumentReference> members;
+    private ArrayList<DocumentReference> messages;
+    private ArrayList<DocumentReference> activities;
 
     public Group() {}
 
     private Group(String id, String name, String description, DocumentReference owner,
-                 ArrayList<User> members, ArrayList<Chat> messages, ArrayList<Activity> activities) {
+                 ArrayList<DocumentReference> members, ArrayList<DocumentReference> messages,
+                  ArrayList<DocumentReference> activities) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -79,28 +76,58 @@ public class Group {
         this.owner = owner;
     }
 
-    public ArrayList<User> getMembers() {
+    public ArrayList<DocumentReference> getMembers() {
         return members;
     }
 
-    private void setMembers(ArrayList<User> members) {
+    private void setMembers(ArrayList<DocumentReference> members) {
         this.members = members;
     }
 
-    public ArrayList<Chat> getMessages() {
+    public ArrayList<DocumentReference> getMessages() {
         return messages;
     }
 
-    private void setMessages(ArrayList<Chat> messages) {
+    private void setMessages(ArrayList<DocumentReference> messages) {
         this.messages = messages;
     }
 
-    public ArrayList<Activity> getActivities() {
+    public ArrayList<DocumentReference> getActivities() {
         return activities;
     }
 
-    private void setActivities(ArrayList<Activity> activities) {
+    private void setActivities(ArrayList<DocumentReference> activities) {
         this.activities = activities;
+    }
+
+    public ArrayList<User> getMaterializedMembers() throws ExecutionException, InterruptedException {
+        ArrayList<User> arr = new ArrayList<>();
+
+        for (DocumentReference doc : members) {
+            arr.add(User.getUserById(doc.getId()));
+        }
+
+        return arr;
+    }
+
+    public ArrayList<Chat> getMaterializedMessages() throws ExecutionException, InterruptedException {
+        ArrayList<Chat> arr = new ArrayList<>();
+
+        for (DocumentReference doc : messages) {
+            arr.add(Chat.getChatById(doc.getId()));
+        }
+
+        return arr;
+    }
+
+    public ArrayList<Activity> getMaterializedActivities() throws ExecutionException, InterruptedException {
+        ArrayList<Activity> arr = new ArrayList<>();
+
+        for (DocumentReference doc : activities) {
+            arr.add(Activity.getActivityById(doc.getId()));
+        }
+
+        return arr;
     }
 
     public static Group CreateGroup(String name, String description, User creator) throws ExecutionException, InterruptedException {
@@ -113,7 +140,8 @@ public class Group {
 
         DocumentReference addedDocRef = Database.addToCollection("groups", myGroup);
 
-        return new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<User>(), new ArrayList<Chat>(), new ArrayList<Activity>());
+        return new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<DocumentReference>(),
+                new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>());
     }
 
     public static Group getGroupById(String id) throws ExecutionException, InterruptedException {
@@ -127,13 +155,13 @@ public class Group {
             group.setId(document.getId());
 
             if(group.members == null)
-                group.members = new ArrayList<User>();
+                group.members = new ArrayList<DocumentReference>();
 
             if(group.activities == null)
-                group.activities = new ArrayList<Activity>();
+                group.activities = new ArrayList<DocumentReference>();
 
             if(group.messages == null)
-                group.messages = new ArrayList<Chat>();
+                group.messages = new ArrayList<DocumentReference>();
 
             return group;
         } else
@@ -206,22 +234,22 @@ public class Group {
         }
     }
 
-    private Task<Void> addMessageAsync(@NonNull Chat message) throws Exception {
+    private Task<Void> addMessageAsync(@NonNull DocumentReference message) throws Exception {
         DocumentReference docRef = getReference("groups", id);
         DocumentSnapshot document = getDocument(docRef);
-        DocumentReference messDoc = getReference("chat", message.getId());
 
         if (document.exists())
-            return docRef.update("messages", FieldValue.arrayUnion(messDoc));
+            return docRef.update("messages", FieldValue.arrayUnion(message));
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
     public boolean addMessage(@NonNull Chat message) throws Exception {
         try {
-            Task<Void> t = addMessageAsync(message);
+            DocumentReference messDoc = getReference("chat", message.getId());
+            Task<Void> t = addMessageAsync(messDoc);
             Tasks.await(t);
-            this.messages.add(message);
+            this.messages.add(messDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -229,20 +257,20 @@ public class Group {
         }
     }
 
-    private Task<Void> removeMessageAsync(@NonNull Chat message) throws Exception {
+    private Task<Void> removeMessageAsync(@NonNull DocumentReference message) throws Exception {
         DocumentReference docRef = getReference("groups", id);
         DocumentSnapshot document = getDocument(docRef);
-        DocumentReference userDoc = getReference("chat", message.getId());
 
         if (document.exists())
-            return docRef.update("members", FieldValue.arrayRemove(userDoc));
+            return docRef.update("members", FieldValue.arrayRemove(message));
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
     public boolean removeMessage(@NonNull Chat message) throws Exception {
         try {
-            Task<Void> t = removeMessageAsync(message);
+            DocumentReference messDoc = getReference("chat", message.getId());
+            Task<Void> t = removeMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.remove(message);
             return true;
@@ -252,22 +280,22 @@ public class Group {
         }
     }
 
-    private Task<Void> addMemberAsync(@NonNull User user) throws Exception {
+    private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws Exception {
         DocumentReference docRef = getReference("groups", id);
         DocumentSnapshot document = getDocument(docRef);
-        DocumentReference userDoc = getReference("users", user.getId());
 
         if (document.exists())
-            return docRef.update("members", FieldValue.arrayUnion(userDoc));
+            return docRef.update("members", FieldValue.arrayUnion(user));
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
     public boolean addMember(@NonNull User user) throws Exception {
         try {
-            Task<Void> t = addMemberAsync(user);
+            DocumentReference userDoc = getReference("users", user.getId());
+            Task<Void> t = addMemberAsync(userDoc);
             Tasks.await(t);
-            this.members.add(user);
+            this.members.add(userDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -275,22 +303,22 @@ public class Group {
         }
     }
 
-    private Task<Void> removeMemberAsync(@NonNull User user) throws Exception {
+    private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws Exception {
         DocumentReference docRef = getReference("groups", id);
         DocumentSnapshot document = getDocument(docRef);
-        DocumentReference userDoc = getReference("users", user.getId());
 
         if (document.exists())
-            return docRef.update("members", FieldValue.arrayRemove(userDoc));
+            return docRef.update("members", FieldValue.arrayRemove(user));
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
     public boolean removeMember(@NonNull User user) throws Exception {
         try {
-            Task<Void> t = removeMemberAsync(user);
+            DocumentReference userDoc = getReference("users", user.getId());
+            Task<Void> t = removeMemberAsync(userDoc);
             Tasks.await(t);
-            this.members.remove(user);
+            this.members.remove(userDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -298,6 +326,50 @@ public class Group {
         }
     }
 
-    //TODO finire add e remove di activity
+    private Task<Void> addActivityAsync(@NonNull DocumentReference user) throws Exception {
+        DocumentReference docRef = getReference("groups", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return docRef.update("activities", FieldValue.arrayUnion(user));
+        else
+            throw new NoGroupFoundException("No group found with this id: " + id);
+    }
+
+    public boolean addActivity(@NonNull Activity activity) throws Exception {
+        try {
+            DocumentReference actDoc = getReference("activity", activity.getId());
+            Task<Void> t = addActivityAsync(actDoc);
+            Tasks.await(t);
+            this.activities.add(actDoc);
+            return true;
+        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws Exception {
+        DocumentReference docRef = getReference("groups", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return docRef.update("activities", FieldValue.arrayRemove(activity));
+        else
+            throw new NoGroupFoundException("No group found with this id: " + id);
+    }
+
+    public boolean removeActivity(@NonNull Activity activity) throws Exception {
+        try {
+            DocumentReference actDoc = getReference("activity", activity.getId());
+            Task<Void> t = removeActivityAsync(actDoc);
+            Tasks.await(t);
+            this.activities.remove(actDoc);
+            return true;
+        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

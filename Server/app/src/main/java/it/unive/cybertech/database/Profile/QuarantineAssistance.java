@@ -159,7 +159,7 @@ public class QuarantineAssistance {
     }
 
     //tested
-    public static QuarantineAssistance getQuarantineAssistance(String id) throws ExecutionException, InterruptedException {
+    protected static QuarantineAssistance getQuarantineAssistanceById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("quarantineAssistance", id);
         DocumentSnapshot document = getDocument(docRef);
 

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoExtensionRequestException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 public class ExtensionRequest {
     private DocumentReference lendingID;
@@ -57,30 +58,43 @@ public class ExtensionRequest {
         return new ExtensionRequest(docRef, addedDocRef.getId() );
     }
 
+    protected static ExtensionRequest getExtensionRequestById(String id) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("extensionRequest", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        ExtensionRequest request = null;
+
+        if (document.exists()) {
+            request = document.toObject(ExtensionRequest.class);
+            request.setId(document.getId());
+
+            return request;
+        } else
+            throw new NoExtensionRequestException("No extension request found with this id: " + id);
+    }
+
     public boolean removeExtensionRequest(){
         this.id = null;
         this.lendingID = null;
         return deleteFromCollection("extensionRequest", this.id);
     }
 
-    public Task<Void> updateExtensionRequestAsync(@NonNull LendingInProgress lending) throws ExecutionException, InterruptedException {
+    public Task<Void> updateExtensionRequestAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("extensionRequest", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if(document.exists()) {
-            DocumentReference docRefLending = getReference("lendingInProgress", lending.getId());
-
-            return docRef.update("lendingID", docRefLending);
-        }
+        if(document.exists())
+            return docRef.update("lendingID", lending);
         else
             throw new NoExtensionRequestException("No extension request found with this id: " + id);
     }
 
     public boolean updateExtensionRequest(@NonNull LendingInProgress lending) {
         try {
-            Task<Void> t = this.updateExtensionRequestAsync(lending);
+            DocumentReference docRefLending = getReference("lendingInProgress", lending.getId());
+            Task<Void> t = this.updateExtensionRequestAsync(docRefLending);
             Tasks.await(t);
-            this.lendingID = getReference("lendingInProgress", lending.getId());
+            this.lendingID = docRefLending;
             return true;
         } catch (ExecutionException | InterruptedException | NoExtensionRequestException e) {
             e.printStackTrace();

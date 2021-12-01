@@ -29,13 +29,13 @@ public class Material {
     private String title;
     private String decription;
     private String photo;
-    private ArrayList<User> queue;
+    private ArrayList<DocumentReference> queue;
     private DocumentReference type;
 
     public Material() {}
 
     public Material(String id, DocumentReference owner, String title, String decription, String photo,
-                    ArrayList<User> queue, DocumentReference type) {
+                    ArrayList<DocumentReference> queue, DocumentReference type) {
         this.id = id;
         this.owner = owner;
         this.title = title;
@@ -85,11 +85,11 @@ public class Material {
         this.photo = photo;
     }
 
-    public ArrayList<User> getQueue() {
+    public ArrayList<DocumentReference> getQueue() {
         return queue;
     }
 
-    private void setQueue(ArrayList<User> queue) {
+    private void setQueue(ArrayList<DocumentReference> queue) {
         this.queue = queue;
     }
 
@@ -101,8 +101,17 @@ public class Material {
         this.type = type;
     }
 
+    public ArrayList<User> getMaterializedQueue() throws ExecutionException, InterruptedException {
+        ArrayList<User> arr = new ArrayList<>();
 
-    //TODO fare i test per la add e la get user coda
+        for (DocumentReference doc : queue) {
+            arr.add(User.getUserById(doc.getId()));
+        }
+
+        return arr;
+    }
+
+
     public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
                                        @NonNull Type type) throws ExecutionException, InterruptedException {
 
@@ -121,24 +130,6 @@ public class Material {
         return new Material(addedDocRef.getId(), docPro, title, description, photo, new ArrayList<>(), docType);
     }
 
-    //TODO vedere se ha senso fatre un getbyname perche potrebbero esserci piu materiali con lo stesso nome
-    /*public static Material getMaterialByName(String name){
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection("material").whereEqualTo("name", name).get();
-        // future.get() blocks on response
-        List<DocumentSnapshot> documents = future.getResult().getDocuments();
-
-        if (documents.isEmpty())
-            throw new NoMaterialFoundException("No material found with this name: " + name);
-
-        Material material = documents.get(0).toObject(Material.class);
-        material.id = documents.get(0).getId();
-
-        return material;
-    }*/
-
-    //TODO verificare la get per la parte degli user ( salvati come document reference ma usati come ipo user )
     public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
@@ -234,25 +225,24 @@ public class Material {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    private Task<Void> addUserToQueueAsync(@NonNull User user) throws Exception {
+    private Task<Void> addUserToQueueAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update("Queue", FieldValue.arrayUnion(getReference("users", user.getId())));
+            return docRef.update("Queue", FieldValue.arrayUnion(user));
         else
             throw new NoMaterialFoundException("Material not found, id: " + id);
     }
 
-    public boolean addUserToQueue(@NonNull User user) throws Exception {
+    public boolean addUserToQueue(@NonNull User user){
         try {
-            if(this.queue.contains(user)) //|| owner.getId().equals(user.getId()))
-                return false;
-            Task<Void> t = addUserToQueueAsync(user);
+            DocumentReference userDoc = getReference("users", user.getId());
+            Task<Void> t = addUserToQueueAsync(userDoc);
             Tasks.await(t);
-            this.queue.add(user);
+            this.queue.add(userDoc);
             return true;
-        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
+        } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
             e.printStackTrace();
             return false;
         }
@@ -261,23 +251,22 @@ public class Material {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    private Task<Void> removeUserToQueueAsync(@NonNull User user) throws ExecutionException, InterruptedException {
+    private Task<Void> removeUserToQueueAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Queue", FieldValue.arrayRemove(getReference("users", user.getId())));
+            return docRef.update("Queue", FieldValue.arrayRemove(user));
         } else
             throw new NoMaterialFoundException("Material not found, id: " + id);
     }
 
     public boolean removeUserToQueue(@NonNull User user) {
         try {
-            if(!queue.contains(user))
-                return false;
-            Task<Void> t = removeUserToQueueAsync(user);
+            DocumentReference userDoc = getReference("users", user.getId());
+            Task<Void> t = removeUserToQueueAsync(userDoc);
             Tasks.await(t);
-            this.queue.remove(user);
+            this.queue.remove(userDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();

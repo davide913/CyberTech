@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
 import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Chat {
@@ -76,9 +77,9 @@ public class Chat {
         this.message = message;
     }
 
-    public static Chat createChat(Date date, User user, String message) throws ExecutionException, InterruptedException {
+    public static Chat createChat(Date date, User sender, String message) throws ExecutionException, InterruptedException {
         Timestamp t = new Timestamp(date);
-        DocumentReference userRef = getReference("users", user.getId());
+        DocumentReference userRef = getReference("users", sender.getId());
 
         Map<String, Object> myChat = new HashMap<>();
         myChat.put("sender", userRef);
@@ -88,6 +89,21 @@ public class Chat {
         DocumentReference addedDocRef = Database.addToCollection("chat", myChat);
 
         return new Chat(addedDocRef.getId(), t, userRef, message);
+    }
+
+    protected static Chat getChatById(String id) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("chat", id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        Chat chat = null;
+
+        if (document.exists()) {
+            chat = document.toObject(Chat.class);
+            chat.setId(document.getId());
+
+            return chat;
+        } else
+            throw new NoChatFoundException("No chat found with this id: " + id);
     }
 
     private Task<Void> deleteChatAsync() throws ExecutionException, InterruptedException {
