@@ -1,5 +1,7 @@
 package it.unive.cybertech.utils;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
@@ -8,13 +10,18 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
@@ -30,25 +37,23 @@ public class Utils {
 
     /**
      * It can be invoked in this way
-     *
+     * <p>
      * new Utils.Dialog(c).showDialog("title", "message");
-     *
+     * <p>
      * OR
-     *
+     * <p>
      * new Utils.Dialog(this)
-     *      .setCallback(new Utils.DialogResult() {
-     *             @Override
-     *             public void onSuccess() {
-     *             }
+     * .setCallback(new Utils.DialogResult() {
      *
-     *             @Override
-     *             public void onCancel() {
-     *             }
-     *         })
-     *     [.hideCancelButton()]
-     *     [.hideOkButton()]
-     *     .showDialog("", "");
-     * */
+     * @Override public void onSuccess() {
+     * }
+     * @Override public void onCancel() {
+     * }
+     * })
+     * [.hideCancelButton()]
+     * [.hideOkButton()]
+     * .showDialog("", "");
+     */
     public static class Dialog {
         private DialogResult result;
         private boolean showOkButton, showCancelButton;
@@ -76,12 +81,12 @@ public class Utils {
             return this;
         }
 
-        public Dialog hideCancelButton(){
+        public Dialog hideCancelButton() {
             showCancelButton = false;
             return this;
         }
 
-        public Dialog hideOkButton(){
+        public Dialog hideOkButton() {
             showOkButton = false;
             return this;
         }
@@ -115,5 +120,37 @@ public class Utils {
             default:
                 return Sex.nonBinary;
         }
+    }
+
+    public static int createNotification(Context ctx, String channelID, String title, String text) {
+        int id = (int)Timestamp.from(Instant.now()).getTime();
+        createNotificationChannelIfNotExists(channelID, ctx);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, channelID)
+                .setSmallIcon(R.drawable.home)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ctx);
+        notificationManager.notify(id, builder.build());
+        return id;
+    }
+
+    public static void createNotificationChannelIfNotExists(String channelID, Context ctx) {
+        String name = "", description = "";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        switch (channelID) {
+            case "default":
+                name = "Generico";
+                description = "Canale generico di test";
+                importance = NotificationManager.IMPORTANCE_DEFAULT;
+                break;
+            default:
+                throw new RuntimeException("NOTIFICATION: the channel '" + channelID + "' was not found");
+        }
+        NotificationChannel channel = new NotificationChannel(channelID, name, importance);
+        channel.setDescription(description);
+        NotificationManager notificationManager = ctx.getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 }

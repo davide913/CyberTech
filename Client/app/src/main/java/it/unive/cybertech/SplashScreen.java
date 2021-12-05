@@ -16,6 +16,7 @@ import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.signup.LogInActivity;
 import it.unive.cybertech.signup.SignUpActivity;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -31,6 +32,7 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Utils.createNotificationChannelIfNotExists( "default", this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             new Thread(() -> {

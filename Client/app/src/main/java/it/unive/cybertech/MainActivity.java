@@ -14,11 +14,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,6 +32,7 @@ import java.net.URL;
 
 import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
+import it.unive.cybertech.messages.MessageService;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -60,7 +64,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profilePicture.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));
         });
-        //initViews();
+        MessageService.getCurrentToken(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if(task.isSuccessful())
+                    Log.d("MAIN", "TOKEN: "+task.getResult());
+                else
+                    Log.e("MAIN", "Error retriving token");
+            }
+        });
     }
 
     @SuppressLint("NonConstantResourceId")

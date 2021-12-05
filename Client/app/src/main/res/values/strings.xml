@@ -91,6 +91,7 @@
     <string name="create_group_warning_description">Creando un nuovo gruppo ti assicuri che non ne esista già uno della stessa tipologia nella tua zona e accetti la responsabilità di diventare l\'amministratore e di adottare un comportamento adeguato alle linee della community</string>
     <string name="information">Informazioni</string>
     <string name="activity">Attività</string>
+    <string name="default_notification_channel_id" translatable="false">testt</string>
 
     <array name="sex">
         <item>Maschio</item>

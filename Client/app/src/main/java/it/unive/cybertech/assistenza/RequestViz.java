@@ -17,6 +17,7 @@ import org.w3c.dom.Text;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
@@ -38,7 +39,11 @@ public class RequestViz extends AppCompatActivity {
 
         setTitle("Dettagli richiesta");
 
-        QuarantineAssistance request = user.getAssistance();
+        try {
+            QuarantineAssistance request = user.getMaterializedQuarantineAssistance();//.getAssistance();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
         TextView textTitle = findViewById(R.id.textTitle);
         TextView text = findViewById(R.id.textFull);
