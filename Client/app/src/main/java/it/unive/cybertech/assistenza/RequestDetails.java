@@ -3,6 +3,7 @@ package it.unive.cybertech.assistenza;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,17 +31,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.ProfileActivity;
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 /*
 Modifica 29/11: aggiunto lo spinner che mi servirà poi come info da mandare al db per avere una lista delle richieste filtrata
  */
 
 public class RequestDetails extends AppCompatActivity {
-    List<RequestInfo> requestInfoList;
-
     EditText et_requestTitle, et_requestLocation, et_requestText;
+    //User thisUser = ; //TODO: come passo il current User?
+    CachedUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,13 +132,26 @@ public class RequestDetails extends AppCompatActivity {
             //upload tutte le info nel db
             Date date = Calendar.getInstance().getTime();
 
-            /*try {
-                QuarantineAssistance.createQuarantineAssistance(type[0], et_requestText.toString(), null, date); //TODO aggiungere tutti gli altri campi
-            } catch (ExecutionException e) {
+            ArrayList<AssistanceType> buffertType = null;
+            AssistanceType choosen = null;
+            try {
+                AssistanceType.getAssistanceTypes();
+            } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-            } catch (InterruptedException e) {
+            }
+
+            assert false;
+            for (AssistanceType a: buffertType) {
+                if(a.getType().equals(type[0]))
+                    choosen = a;
+            }
+
+            //TODO aggiungere tutti gli altri campi
+            try {
+                QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), user,  date, et_requestLocation.toString());
+            } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-            }*/
+            }
             finish();
         });
     }
