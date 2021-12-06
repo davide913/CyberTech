@@ -122,11 +122,21 @@ public class Utils {
         }
     }
 
-    public static int createNotification(Context ctx, String channelID, String title, String text) {
-        int id = (int)Timestamp.from(Instant.now()).getTime();
+    public static int createNotification(Context ctx, String channelID, String title, String text, String icon) {
+        int id = (int) Timestamp.from(Instant.now()).getTime();
         createNotificationChannelIfNotExists(channelID, ctx);
+        int iconResource = R.drawable.ic_baseline_notifications_24;
+        if (icon != null)
+            switch (icon) {
+                case "coronavirus":
+                    iconResource = R.drawable.ic_baseline_coronavirus_24;
+                    break;
+                case "assistance_chat":
+                    iconResource = R.drawable.ic_baseline_chat_64;
+                    break;
+            }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, channelID)
-                .setSmallIcon(R.drawable.home)
+                .setSmallIcon(iconResource)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -136,14 +146,24 @@ public class Utils {
         return id;
     }
 
-    public static void createNotificationChannelIfNotExists(String channelID, Context ctx) {
+    public static void createNotificationChannelIfNotExists(@NonNull String channelID, Context ctx) {
         String name = "", description = "";
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         switch (channelID) {
             case "default":
-                name = "Generico";
-                description = "Canale generico di test";
+                name = "Avvisi";
+                description = "Canale per le notifiche";
                 importance = NotificationManager.IMPORTANCE_DEFAULT;
+                break;
+            case "assistance_chat":
+                name = "Chat di assistenza";
+                description = "Canale utilizzato per le notifiche relative alla chat di assistenza in quarantena";
+                importance = NotificationManager.IMPORTANCE_DEFAULT;
+                break;
+            case "coronavirus":
+                name = "Notifica di esposizione";
+                description = "Canale utilizzato per avvisarti di una eventuale espoizione al nuovo coronavirus SARS-CoV-2 (COVID-19)";
+                importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
             default:
                 throw new RuntimeException("NOTIFICATION: the channel '" + channelID + "' was not found");
@@ -152,5 +172,11 @@ public class Utils {
         channel.setDescription(description);
         NotificationManager notificationManager = ctx.getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
+    }
+
+    public static void initNotificationChannels(Context ctx) {
+        createNotificationChannelIfNotExists("default", ctx);
+        createNotificationChannelIfNotExists("assistance_chat", ctx);
+        createNotificationChannelIfNotExists("coronavirus", ctx);
     }
 }

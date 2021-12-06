@@ -33,6 +33,7 @@ import java.net.URL;
 import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
+import it.unive.cybertech.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -62,16 +63,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
-            startActivity(new Intent(this, ProfileActivity.class));
+            MessageService.sendMessage("cE0FzgSnT6qSVOFFPQCwbb:APA91bFR7GD5AEDtRf5rTwqpNiJsMN1eOqUm6jDoWnrQMQ7aPBuzXsw9HISHyrYWcEt8K7djlj531EGTCZ3estsAC8uhBH1PdKPymYnk5VODqHIFY75GlnvTvAnYO1aBOHfVrBL3vTSx",
+                    "test","aaaaa", this);
+            //startActivity(new Intent(this, ProfileActivity.class));
         });
-        MessageService.getCurrentToken(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NonNull Task<String> task) {
-                if(task.isSuccessful())
-                    Log.d("MAIN", "TOKEN: "+task.getResult());
-                else
+        profilePicture.setOnLongClickListener(v -> {
+            MessageService.getCurrentToken(task -> {
+                if(task.isSuccessful()) {
+                    new Utils.Dialog(this).showDialog("Token", task.getResult());
+                    Log.d("TOKEN", task.getResult());
+                }else
                     Log.e("MAIN", "Error retriving token");
-            }
+            });
+            return false;
         });
     }
 

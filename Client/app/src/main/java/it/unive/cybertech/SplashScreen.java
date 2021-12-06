@@ -32,11 +32,16 @@ public class SplashScreen extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Utils.createNotificationChannelIfNotExists( "default", this);
+        Utils.initNotificationChannels(this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (getIntent().getExtras() != null) {
+            for (String key : getIntent().getExtras().keySet()) {
+                String value = getIntent().getExtras().getString(key);
+
+            }
+        }
         if (currentUser != null) {
             new Thread(() -> {
-                //User u = User.createUser("Mario", "Rossi", "M", "Via Torino", "Venezia", "Itala", 10, 10, true);
                 try {
                     User u = User.getUserById(currentUser.getUid());
                     if (u != null) {
