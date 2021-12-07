@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.Tag;
@@ -18,18 +19,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
 
 
 public class ManifestPositivityFragment extends Fragment {
+    final Calendar myCalendar = Calendar.getInstance();
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,19 +55,19 @@ public class ManifestPositivityFragment extends Fragment {
 
     private void initViews(View v){
 
-
         TextView mNome = v.findViewById(R.id.textView_nome2);
         TextView mCognome = v.findViewById(R.id.textView_cognome2);
-        TextView mDateSign = v.findViewById(R.id.textView_dateAlert2);
+        EditText mDateSign = v.findViewById(R.id.textView_dateAlert2);
         TextView mStateSign = v.findViewById(R.id.textView_stateAlert2);
         Button signPosButton = v.findViewById(R.id.button_alertPos);
         Button bManifestNegativity = v.findViewById(R.id.button_signGua);
 
-          mNome.setText(user.getName());
+
+        mNome.setText(user.getName());
           mCognome.setText(user.getSurname());
 
           if(user.getPositiveSince() != null){
-                mDateSign.setText(convertDate(user.getPositiveSince().toDate().toString()));
+                mDateSign.setHint(convertDate(user.getPositiveSince().toDate().toString()));
                 mStateSign.setText("Positivo");
                 signPosButton.setVisibility(View.INVISIBLE);
                 bManifestNegativity.setVisibility(View.VISIBLE);
@@ -69,6 +78,34 @@ public class ManifestPositivityFragment extends Fragment {
               signPosButton.setVisibility(View.VISIBLE);
               bManifestNegativity.setVisibility(View.INVISIBLE);
           }
+
+        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                // TODO Auto-generated method stub
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateLabel(v);
+            }
+
+        };
+
+        mDateSign.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                new DatePickerDialog(getContext(), date, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+
+
 
 
           bManifestNegativity.setOnClickListener(v1 -> {
@@ -149,6 +186,16 @@ public class ManifestPositivityFragment extends Fragment {
 
     }
 
+    private void updateLabel(View v) {
+        String myFormat = "dd/MM/yy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        EditText selectDate = v.findViewById(R.id.textView_dateAlert2);
+
+        selectDate.setText(sdf.format(myCalendar.getTime()));
+    }
+
+
     private void updateFr(){  //Permette di aggiornare i fragments
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -178,8 +225,9 @@ public class ManifestPositivityFragment extends Fragment {
         String mese = new String(charmese);
         char[] chargiorno = {date.charAt(8),date.charAt(9)};
         String giorno = new String(chargiorno);
-        char[] charanno = {date.charAt(24),date.charAt(25),date.charAt(26),date.charAt(26)};
+        char[] charanno = {date.charAt(24),date.charAt(25)};
         String anno = new String(charanno);
+        anno = "20"+anno;
 
         for (int i = 0; i<12; i++){
             if (mese.equals(mesi.get(i))){
