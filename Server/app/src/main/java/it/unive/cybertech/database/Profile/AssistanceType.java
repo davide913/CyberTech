@@ -4,6 +4,8 @@ import static it.unive.cybertech.database.Connection.Database.getDocument;
 import static it.unive.cybertech.database.Connection.Database.getInstance;
 import static it.unive.cybertech.database.Connection.Database.getReference;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
@@ -60,6 +62,22 @@ public class AssistanceType {
             return assistanceType;
         } else
             throw new NoAssistanceTypeFoundException("No Assistance Type found with this id: " + id);
+    }
+
+    public static AssistanceType getAssistanceTypeByName(@NonNull String name) throws ExecutionException, InterruptedException {
+        FirebaseFirestore db = getInstance();      //create of object db
+
+        Task<QuerySnapshot> future = db.collection("assistanceType").whereEqualTo("type", name).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        if (documents.isEmpty())
+            throw new NoAssistanceTypeFoundException("No assistance type found with this type: " + name);
+
+        AssistanceType assistance = documents.get(0).toObject(AssistanceType.class);
+        assistance.id = documents.get(0).getId();
+
+        return assistance;
     }
 
     public static ArrayList<AssistanceType> getAssistanceTypes() throws ExecutionException, InterruptedException {

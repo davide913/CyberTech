@@ -6,6 +6,9 @@ import static it.unive.cybertech.database.Connection.Database.getReference;
 
 import androidx.annotation.NonNull;
 
+import com.firebase.geofire.GeoFireUtils;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQueryBounds;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -14,10 +17,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
@@ -258,6 +264,7 @@ public class User {
 
     //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
 
+    //modificata il 05/12/2021-> tlto il getResult()
     public static User createUser(String id, String name, String surname, Sex sex, String address,
                                   String city, String country, long latitude, long longitude, boolean greenpass) throws ExecutionException, InterruptedException {
 
@@ -273,7 +280,7 @@ public class User {
 
         Task<Void> future = db.collection("users").document(id).set(user);
         Tasks.await(future);
-        future.getResult();
+        //future.getResult();
 
         return user;
     }
@@ -728,6 +735,21 @@ public class User {
         }
     }
 
+    //aggiunta il 7/12/2021
+    public static List<LendingInProgress> getUserLandingsInProgress(String id) throws ExecutionException, InterruptedException {
+        User user = getUserById(id);
+
+        return user.getMaterializedLendingInProgress();
+    }
+
+    //aggiunta il 7/12/2021
+    public static List<Device> getUserDevices(String id) throws ExecutionException, InterruptedException {
+        User user = getUserById(id);
+
+        return user.getMaterializedDevices();
+    }
+
+
     //metodo equal per confronti
     @Override
     public boolean equals(Object o){
@@ -737,5 +759,41 @@ public class User {
             return user.getId().equals(this.getId());
         }
         return false;
+    }
+
+    //Aggiunta il 5/12/2021 funzionante
+    protected static List<DocumentSnapshot> getGeoQueries(Query query, double radiusInM, GeoLocation center)
+            throws ExecutionException, InterruptedException {
+        List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
+
+        final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+        for (GeoQueryBounds b : bounds) {
+            Query q = query.orderBy("geohash")
+                    .startAt(b.startHash)
+                    .endAt(b.endHash);
+
+            Task<QuerySnapshot> t = q.get();
+            Tasks.await(t);
+            tasks.add(t);
+        }
+
+        List<DocumentSnapshot> matchingDocs = new ArrayList<>();
+
+        for (Task<QuerySnapshot> task : tasks) {
+            List<DocumentSnapshot> snap = task.getResult().getDocuments();
+            for (DocumentSnapshot doc : snap) {
+                GeoPoint geoPoint = doc.getGeoPoint("location");
+
+                // We have to filter out a few false positives due to GeoHash
+                // accuracy, but most will match
+                GeoLocation docLocation = new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude());
+                double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
+                if (distanceInM <= radiusInM) {
+                    matchingDocs.add(doc);
+                }
+            }
+        }
+
+        return matchingDocs;
     }
 }
