@@ -1,18 +1,17 @@
 package it.unive.cybertech.messages;
 
-import static it.unive.cybertech.utils.CachedUser.user;
-
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,14 +22,20 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
-import it.unive.cybertech.database.Profile.Device;
-import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.R;
 
 public class MessageService extends FirebaseMessagingService {
+
+    public enum NotificationType {
+        base,
+        coronavirus,
+        assistance_chat
+    }
 
     private final static String TAG = "FirebaseMessage";
 
@@ -39,94 +44,64 @@ public class MessageService extends FirebaseMessagingService {
                 .addOnCompleteListener(listener);
     }
 
-    public static void sendMessage(@NonNull String token, String title, String message, Context ctx) {//, Map<String, String> datas
-        /*RemoteMessage.Builder msg = new RemoteMessage.Builder("5807486351@fcm.googleapis.com")
-                .setMessageId("jghkgj")
-                .addData("title", title)
-                .addData("message", message);
-        //if (datas != null)
-        //    datas.forEach(msg::addData);
-        //TODO update last used token
-        FirebaseMessaging.getInstance().send(msg.build());*/
+    public static void sendMessage(@NonNull String token, @NonNull NotificationType type, String title, String message, Context ctx) {//, Map<String, String> datas
+        //TODO update last used token passing user instead of token
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String url ="https://fcm.googleapis.com/fcm/send";
-
-// Request a string response from the provided URL.
+        String url = "https://fcm.googleapis.com/fcm/send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d(TAG,response);
-                        // Display the first 500 characters of the response string.
-                        //textView.setText("Response is: "+ response.substring(0,500));
-                    }
-                }, new Response.ErrorListener() {
+                response -> {
+                    Log.d(TAG, response);
+                }, error -> {
+            Log.e(TAG, error.getMessage());
+        }) {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG,error.getMessage());
-                //textView.setText("That didn't work!");
-            }
-        }){
-
-            @Override
-            public byte[] getBody() throws com.android.volley.AuthFailureError {
-                Map<String,String> rawParameters = new Hashtable<String, String>();
-                JSONObject msg = new JSONObject();
+            public byte[] getBody() {
+                JSONObject parameters = new JSONObject();
                 try {
-                    JSONObject ob = new JSONObject();
-                    ob.put("title", title);
-                    ob.put("body", message);
-                    ob.put("channel_id", "coronavirus");
-                    ob.put("image", "coronavirus");
-                    Log.d(TAG, ob.toString());
-                    msg.put("notification",ob);
-                    msg.put("to", token);
-                    rawParameters.put("notification", ob.toString());
+                    JSONObject notification = new JSONObject();
+                    notification.put("title", title);
+                    notification.put("body", message);
+                    switch (type) {
+                        default:
+                        case base:
+                            notification.put("android_channel_id", "base");
+                            notification.put("icon", "notification_icon");
+                            break;
+                        case coronavirus:
+                            notification.put("android_channel_id", "coronavirus");
+                            notification.put("icon", "notification_coronavirus_icon");
+                            break;
+                        case assistance_chat:
+                            notification.put("android_channel_id", "assistance_chat");
+                            notification.put("icon", "notification_assistance_chat_icon");
+                            break;
+                    }
+                    notification.put("click_action", "OPEN_SPLASH_SCREEN");
+                    Log.d(TAG, notification.toString());
+                    parameters.put("notification", notification);
+                    parameters.put("to", token);
+                    JSONObject data = new JSONObject();
+                    data.put("type", type);
+                    parameters.put("data", data);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                Log.d(TAG, parameters.toString());
+                return parameters.toString().getBytes();
+            }
 
-                rawParameters.put("to", token);
-                Log.d(TAG, msg.toString());
-                return msg.toString().getBytes();
-            };
-
-            public String getBodyContentType()
-            {
+            public String getBodyContentType() {
                 return "application/json; charset=utf-8";
             }
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Authorization", "key=AAAAAVonNY8:APA91bGJJ6W629ZfdorEtiTDssz8C39mc9a4LFUxbDtourqN-OotX9cxkkSSpJ_bemZuyX7KBvC-1pMVa6UpPTiKOFrTwfl8fBVfnreDWwhJibp8Lp_HdpioEQgO4haWl0sqWydbQ8n2");
                 return headers;
             }
-            @Nullable
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("registration_ids", "num1");
-                params.put("data", "num2");
-                return params;
-            }
         };
-
-// Add the request to the RequestQueue.
         queue.add(stringRequest);
-        Log.d(TAG, "SENDING MESSAGE");
-    }
-
-    @Override
-    public void onMessageSent(@NonNull String s) {
-        super.onMessageSent(s);
-        Log.d(TAG, s);
-    }
-
-    @Override
-    public void onSendError(@NonNull String s, @NonNull Exception e) {
-        super.onSendError(s, e);
-        Log.e(TAG, s);
-        Log.e(TAG, e.getMessage());
     }
 
     @Override
@@ -137,21 +112,94 @@ public class MessageService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        //super.onMessageReceived(remoteMessage);
-        // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
+        super.onMessageReceived(remoteMessage);
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
-        // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-        }
-        // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             RemoteMessage.Notification not = remoteMessage.getNotification();
+            Log.d(TAG, "Message Notification Data: " + remoteMessage.getData());
             Log.d(TAG, "Message Notification Body: " + not.getBody());
             Log.d(TAG, "Message Notification channel: " + not.getChannelId());
             Log.d(TAG, "Message Notification icon: " + not.getIcon());
-            Utils.createNotification(getApplicationContext(), not.getChannelId(), not.getTitle(), not.getBody(), not.getIcon());
+            createNotification(getApplicationContext(), NotificationType.valueOf(remoteMessage.getData().get("type")), not.getTitle(), not.getBody());
         }
+    }
+
+    public static int createNotification(Context ctx, NotificationType type, String title, String text) {
+        int id = (int) Timestamp.from(Instant.now()).getTime();
+        int iconResource;
+        String channelID = getChannelIDByType(type);
+        int argb;
+        switch (type) {
+            default:
+            case base:
+                iconResource = R.drawable.notification_icon;
+                argb = ctx.getColor(R.color.primary);
+                break;
+            case coronavirus:
+                iconResource = R.drawable.notification_coronavirus_icon;
+                argb = ctx.getColor(R.color.red_fs);
+                break;
+            case assistance_chat:
+                iconResource = R.drawable.notification_assistance_chat_icon;
+                argb = ctx.getColor(R.color.light_green_fs);
+                break;
+        }
+        createNotificationChannelIfNotExists(type, ctx);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, channelID)
+                .setSmallIcon(iconResource)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setColor(argb)
+                .setAutoCancel(true);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ctx);
+        notificationManager.notify(id, builder.build());
+        return id;
+    }
+
+    public static void createNotificationChannelIfNotExists(@NonNull NotificationType type, Context ctx) {
+        String name, description, channelID = getChannelIDByType(type);
+        int importance;
+        switch (type) {
+            default:
+            case base:
+                name = "Avvisi";
+                description = "Canale per le notifiche generiche";
+                importance = NotificationManager.IMPORTANCE_DEFAULT;
+                break;
+            case assistance_chat:
+                name = "Chat di assistenza";
+                description = "Canale utilizzato per le notifiche relative alla chat di assistenza in quarantena";
+                importance = NotificationManager.IMPORTANCE_DEFAULT;
+                break;
+            case coronavirus:
+                name = "Notifica di esposizione";
+                description = "Canale utilizzato per avvisarti di una eventuale espoizione al nuovo coronavirus SARS-CoV-2 (COVID-19)";
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                break;
+        }
+
+        NotificationChannel channel = new NotificationChannel(channelID, name, importance);
+        channel.setDescription(description);
+        NotificationManager notificationManager = ctx.getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    private static String getChannelIDByType(NotificationType type) {
+        switch (type) {
+            default:
+            case base:
+                return "base";
+            case coronavirus:
+                return "coronavirus";
+            case assistance_chat:
+                return "assistance_chat";
+        }
+    }
+
+    public static void initNotificationChannels(Context ctx) {
+        createNotificationChannelIfNotExists(NotificationType.base, ctx);
+        createNotificationChannelIfNotExists(NotificationType.coronavirus, ctx);
+        createNotificationChannelIfNotExists(NotificationType.assistance_chat, ctx);
     }
 }

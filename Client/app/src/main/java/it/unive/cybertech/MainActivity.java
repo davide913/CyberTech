@@ -63,29 +63,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
-            MessageService.sendMessage("cE0FzgSnT6qSVOFFPQCwbb:APA91bFR7GD5AEDtRf5rTwqpNiJsMN1eOqUm6jDoWnrQMQ7aPBuzXsw9HISHyrYWcEt8K7djlj531EGTCZ3estsAC8uhBH1PdKPymYnk5VODqHIFY75GlnvTvAnYO1aBOHfVrBL3vTSx",
-                    "test","aaaaa", this);
+            MessageService.sendMessage("d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
+                    MessageService.NotificationType.assistance_chat, "test", "aaaaa", this);
             //startActivity(new Intent(this, ProfileActivity.class));
         });
         profilePicture.setOnLongClickListener(v -> {
             MessageService.getCurrentToken(task -> {
-                if(task.isSuccessful()) {
+                if (task.isSuccessful()) {
                     new Utils.Dialog(this).showDialog("Token", task.getResult());
                     Log.d("TOKEN", task.getResult());
-                }else
+                } else
                     Log.e("MAIN", "Error retriving token");
             });
             return false;
         });
     }
 
-    @SuppressLint("NonConstantResourceId")
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MessageService.NotificationType type = null;
+        if (getIntent().getExtras() != null) {
+            for (String key : getIntent().getExtras().keySet()) {
+                String value = getIntent().getExtras().getString(key);
+                Log.d("MAIN", "Key: " + key + " Value: " + value);
+                if (key.equals("open")) {
+                    type = MessageService.NotificationType.valueOf(value);
+                }
+            }
+        }
+        if(type != null)
+            switch (type) {
+                default:
+                case base:
+                    break;
+                case coronavirus:
+                    openSection(R.id.nav_menu_covid);
+                    break;
+                case assistance_chat:
+                    openSection(R.id.nav_menu_quarantine_assistance);
+                    break;
+            }
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawer.close();
+        openSection(item.getItemId());
+        return false;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    private void openSection(int id){
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        switch (item.getItemId()) {
+        switch (id) {
             case R.id.nav_menu_covid:
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
                 break;
@@ -99,7 +131,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.groups.HomePage()).commit();
                 break;
         }
-
-        return false;
     }
 }
