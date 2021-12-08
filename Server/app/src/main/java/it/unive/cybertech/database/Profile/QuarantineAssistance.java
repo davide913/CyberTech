@@ -286,8 +286,6 @@ public class QuarantineAssistance {
             return false;
     }
 
-    //TODO aggiungere update description
-
     //query che mi ritorna la richiesta dove incharge = user passato, fatta 7/12/2021
     public static QuarantineAssistance getQuarantineAssistanceByInCharge(User user) throws ExecutionException, InterruptedException {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();

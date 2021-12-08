@@ -2,6 +2,7 @@ package it.unive.cybertech.database.Profile;
 
 import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Connection.Database.getDocument;
+import static it.unive.cybertech.database.Connection.Database.getInstance;
 import static it.unive.cybertech.database.Connection.Database.getReference;
 
 import androidx.annotation.NonNull;
@@ -22,10 +23,12 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 
@@ -39,13 +42,14 @@ public class User {
     private String city;
     private String country;
     private GeoPoint position;
+    private String geohash;
     private boolean greenPass;
     private Timestamp positiveSince;
     private long lendingPoint;
     private ArrayList<DocumentReference> devices;
     private ArrayList<DocumentReference> lendingInProgresses;
-    private ArrayList<DocumentReference> extensionRequests;
-    private ArrayList<DocumentReference> rentMaterials;
+    private ArrayList<DocumentReference> extensionLending;
+    private ArrayList<DocumentReference> materials;
     private DocumentReference quarantineAssistance;
 
     public User() {
@@ -61,6 +65,7 @@ public class User {
         this.city = city;
         this.country = country;
         this.position = position;
+        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(position.getLatitude(), position.getLongitude()));
         this.greenPass = greenPass;
         this.positiveSince = positiveSince;
         this.lendingPoint = lendingPoint;
@@ -69,8 +74,8 @@ public class User {
     private User(String id, String name, String surname, Sex sex, String address,
                  String city, String country, GeoPoint position, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
-                 ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> extensionRequest,
-                 ArrayList<DocumentReference> rentMaterials, DocumentReference quarantineAssistance) {
+                 ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> extensionLending,
+                 ArrayList<DocumentReference> materials, DocumentReference quarantineAssistance) {
 
         this.id = id;
         this.name = name;
@@ -80,13 +85,14 @@ public class User {
         this.city = city;
         this.country = country;
         this.position = position;
+        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(position.getLatitude(), position.getLongitude()));
         this.greenPass = greenPass;
         this.positiveSince = positiveSince;
         this.lendingPoint = lendingPoint;
         this.devices = devices;
         this.lendingInProgresses = lendingInProgresses;
-        extensionRequests = extensionRequest;
-        this.rentMaterials = rentMaterials;
+        this.extensionLending = extensionLending;
+        this.materials = materials;
         this.quarantineAssistance = quarantineAssistance;
     }
 
@@ -154,6 +160,14 @@ public class User {
         this.position = position;
     }
 
+    private String getGeohash() {
+        return geohash;
+    }
+
+    private void setGeohash(String geohash) {
+        this.geohash = geohash;
+    }
+
     public boolean isGreenPass() {
         return greenPass;
     }
@@ -194,20 +208,20 @@ public class User {
         this.lendingInProgresses = lendingInProgresses;
     }
 
-    public ArrayList<DocumentReference> getExtensionRequests() {
-        return extensionRequests;
+    public ArrayList<DocumentReference> getExtensionLending() {
+        return extensionLending;
     }
 
-    private void setExtensionRequests(ArrayList<DocumentReference> extensionRequests) {
-        this.extensionRequests = extensionRequests;
+    private void setExtensionLending(ArrayList<DocumentReference> extensionLending) {
+        this.extensionLending = extensionLending;
     }
 
-    public ArrayList<DocumentReference> getRentMaterials() {
-        return rentMaterials;
+    public ArrayList<DocumentReference> getMaterials() {
+        return materials;
     }
 
-    private void setRentMaterials(ArrayList<DocumentReference> rentMaterials) {
-        this.rentMaterials = rentMaterials;
+    private void setMaterials(ArrayList<DocumentReference> materials) {
+        this.materials = materials;
     }
 
     public DocumentReference getQuarantineAssistance() {
@@ -238,21 +252,21 @@ public class User {
         return arr;
     }
 
-    public ArrayList<ExtensionRequest> getMaterializedExtensionRequest() throws ExecutionException, InterruptedException {
-        ArrayList<ExtensionRequest> arr = new ArrayList<>();
+    public ArrayList<LendingInProgress> getMaterializedExtensionRequest() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> arr = new ArrayList<>();
 
-        for (DocumentReference doc : extensionRequests) {
-            arr.add(ExtensionRequest.getExtensionRequestById(doc.getId()));
+        for (DocumentReference doc : extensionLending) {
+            arr.add(LendingInProgress.getLendingInProgressById(doc.getId()));
         }
 
         return arr;
     }
 
-    public ArrayList<RentMaterial> getMaterializedRentMaterial() throws ExecutionException, InterruptedException {
-        ArrayList<RentMaterial> arr = new ArrayList<>();
+    public ArrayList<Material> getMaterializedRentMaterial() throws ExecutionException, InterruptedException {
+        ArrayList<Material> arr = new ArrayList<>();
 
-        for (DocumentReference doc : rentMaterials) {
-            arr.add(RentMaterial.getRentMaterialById(doc.getId()));
+        for (DocumentReference doc : materials) {
+            arr.add(Material.getMaterialById(doc.getId()));
         }
 
         return arr;
@@ -274,13 +288,12 @@ public class User {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
-                greenpass, null, 0, new ArrayList<>(),
-                new ArrayList<>(), new ArrayList<>(),
-                new ArrayList<>(), null);
+                greenpass, null, 0, new ArrayList<DocumentReference>(),
+                new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>(),
+                new ArrayList<DocumentReference>(), null);
 
         Task<Void> future = db.collection("users").document(id).set(user);
         Tasks.await(future);
-        //future.getResult();
 
         return user;
     }
@@ -417,7 +430,9 @@ public class User {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean addDevice(@NonNull Device device){
+
+
+    public boolean addDevice(@NonNull Device device) {
         try {
             DocumentReference devDoc = getReference("device", device.getId());
             Task<Void> t = addDeviceAsync(devDoc);
@@ -457,7 +472,7 @@ public class User {
     }
 
     //1/12/2021 modificata le update sulla equals ( faccio un confronto sugli id ) e usata la getMaterialized(TYPE) per vedere se gia presente l'oggetto
-    public boolean updateDevice(@NonNull Device oldDevice, @NonNull Device newDevice) throws Exception {
+    /*public boolean updateDevice(@NonNull Device oldDevice, @NonNull Device newDevice) throws ExecutionException, InterruptedException {
         if (!oldDevice.getId().equals(newDevice.getId())) {          //if old and new device are different
             boolean flag = false;
             ArrayList<Device> devices = getMaterializedDevices();
@@ -470,13 +485,12 @@ public class User {
             }
 
             if (flag) {             //if find the old device it can update that
-                removeDevice(oldDevice);
-                addDevice(newDevice);
+                oldDevice.updateToken(newDevice.getToken());
                 return true;
             }
         }
         return false;
-    }
+    }*/
 
     /***
      This method invocation doesn't update the state of object, you need to do it manually
@@ -532,7 +546,7 @@ public class User {
         }
     }
 
-    public boolean updateLending(@NonNull LendingInProgress oldLending, @NonNull LendingInProgress newLending) throws Exception {
+    /*public boolean updateLending(@NonNull LendingInProgress oldLending, @NonNull LendingInProgress newLending) throws Exception {
         if (!oldLending.getId().equals(newLending.getId())) {          //if old and new device are different
             boolean flag = false;
             ArrayList<LendingInProgress> lendingInProgresses = getMaterializedLendingInProgress();
@@ -551,28 +565,29 @@ public class User {
             }
         }
         return false;
-    }
+    }*/
 
+    //TODO vedere se la storia dei lending e corretta
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
     //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
-    private Task<Void> addExtensionRequestAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
+    private Task<Void> addExtensionLendingAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update("extensionRequest", FieldValue.arrayUnion(extensionRequest));
+            return docRef.update("extensionLending", FieldValue.arrayUnion(extensionRequest));
         else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean addExtensionRequest(@NonNull ExtensionRequest extensionRequest) {
+    public boolean addExtensionLending(@NonNull LendingInProgress lending) {
         try {
-            DocumentReference extDoc = getReference("extensionRequest", extensionRequest.getId());
-            Task<Void> t = addExtensionRequestAsync(extDoc);
+            DocumentReference extDoc = getReference("lendingInProgress", lending.getId());
+            Task<Void> t = addExtensionLendingAsync(extDoc);
             Tasks.await(t);
-            this.extensionRequests.add(extDoc);
+            this.extensionLending.add(extDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -583,23 +598,23 @@ public class User {
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
-    private Task<Void> removeExtensionRequestAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
+    private Task<Void> removeExtensionLendingAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update("extensionRequest", FieldValue.arrayRemove(extensionRequest));
+            return docRef.update("extensionLending", FieldValue.arrayRemove(extensionRequest));
         else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
     //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
-    public boolean removeExtensionRequest(@NonNull ExtensionRequest extensionRequest) {
+    public boolean removeExtensionLending(@NonNull LendingInProgress lending) {
         try {
-            DocumentReference extDoc = getReference("extensionRequest", extensionRequest.getId());
-            Task<Void> t = removeExtensionRequestAsync(extDoc);
+            DocumentReference extDoc = getReference("lendingInProgress", lending.getId());
+            Task<Void> t = removeExtensionLendingAsync(extDoc);
             Tasks.await(t);
-            this.extensionRequests.remove(extDoc);
+            this.extensionLending.remove(extDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -607,7 +622,7 @@ public class User {
         }
     }
 
-    public boolean updateExtensionRequest(@NonNull ExtensionRequest oldextensionRequest, @NonNull ExtensionRequest newextensionRequest) throws Exception {
+    /*public boolean updateExtensionRequest(@NonNull ExtensionRequest oldextensionRequest, @NonNull ExtensionRequest newextensionRequest) throws Exception {
         if (!oldextensionRequest.getId().equals(newextensionRequest.getId())) {
             boolean flag = false;
             ArrayList<ExtensionRequest> extensionRequests = getMaterializedExtensionRequest();
@@ -626,28 +641,28 @@ public class User {
             }
         }
         return false;
-    }
+    }*/
 
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
-    private Task<Void> addRentMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> addMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("rentMaterial", FieldValue.arrayUnion(rentMaterial));
+            return docRef.update("materials", FieldValue.arrayUnion(rentMaterial));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean addRentMaterial(@NonNull RentMaterial rentMaterial) {
+    public boolean addMaterial(@NonNull Material material) {
         try {
-            DocumentReference rentDoc = getReference("rentMaterial", rentMaterial.getId());
-            Task<Void> t = addRentMaterialAsync(rentDoc);
+            DocumentReference rentDoc = getReference("material", material.getId());
+            Task<Void> t = addMaterialAsync(rentDoc);
             Tasks.await(t);
-            this.rentMaterials.add(rentDoc);
+            this.materials.add(rentDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -659,22 +674,22 @@ public class User {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
-    private Task<Void> removeRentMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> removeMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("users", id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("rentMaterial", FieldValue.arrayRemove(rentMaterial));
+            return docRef.update("materials", FieldValue.arrayRemove(rentMaterial));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean removeRentMaterial(@NonNull RentMaterial rentMaterial) {
+    public boolean removeMaterial(@NonNull Material material) {
         try {
-            DocumentReference rentDoc = getReference("rentMaterial", rentMaterial.getId());
-            Task<Void> t = removeRentMaterialAsync(rentDoc);
+            DocumentReference rentDoc = getReference("material", material.getId());
+            Task<Void> t = removeMaterialAsync(rentDoc);
             Tasks.await(t);
-            this.rentMaterials.remove(rentDoc);
+            this.materials.remove(rentDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -682,7 +697,7 @@ public class User {
         }
     }
 
-    public boolean updateRentMaterial(@NonNull RentMaterial oldrentMaterial, @NonNull RentMaterial newrentMaterial) throws Exception {
+    /*public boolean updateRentMaterial(@NonNull RentMaterial oldrentMaterial, @NonNull RentMaterial newrentMaterial) throws Exception {
         if (!oldrentMaterial.getId().equals(newrentMaterial.getId())) {
             boolean flag = false;
             ArrayList<RentMaterial> rentMaterials = getMaterializedRentMaterial();
@@ -700,7 +715,7 @@ public class User {
             }
         }
         return false;
-    }
+    }*/
 
     //modificata 30/11/2021, non salvo la classe intera quarantine assistance ma solo la sua reference sul db
     private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
@@ -795,5 +810,23 @@ public class User {
         }
 
         return matchingDocs;
+    }
+
+    //funzione per mattia!
+    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm)
+            throws ExecutionException, InterruptedException {
+        ArrayList<Material> arr = new ArrayList<>();
+        FirebaseFirestore db = getInstance();
+
+        Query query = db.collection("users");
+
+        List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
+                    new GeoLocation(latitude, longitude));
+
+        for (DocumentSnapshot doc : documents) {
+            arr.add(Material.getMaterialById(doc.getId()));
+        }
+
+        return arr;
     }
 }

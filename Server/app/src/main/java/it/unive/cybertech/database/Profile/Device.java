@@ -12,9 +12,13 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,24 +31,42 @@ import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFound
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 public class Device {
-    private String name;
-    //private Timestamp lastUsed;
-    //private String token;
+    private Timestamp lastUsed;
+    private String token;
+    private String deviceId;
     private String id;
 
     public Device(){}
 
-    public Device(String name, String id) {
-        this.name = name;
+    public Device(Timestamp lastUsed, String token, String deviceId, String id) {
+        this.lastUsed = lastUsed;
+        this.token = token;
+        this.deviceId = deviceId;
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    private void setName(String name) {
-        this.name = name;
+    private void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public Timestamp getLastUsed() {
+        return lastUsed;
+    }
+
+    private void setLastUsed(Timestamp lastUsed) {
+        this.lastUsed = lastUsed;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    private void setToken(String token) {
+        this.token = token;
     }
 
     public String getId() {
@@ -70,16 +92,16 @@ public class Device {
             throw new NoDeviceFoundException("No device found with this id: " + id);
     }
 
-    public static Device getDevice(String name) throws ExecutionException, InterruptedException {
+    private static Device getDeviceByDeviceId(String deviceId) throws ExecutionException, InterruptedException {
         FirebaseFirestore db = getInstance();      //create of object db
 
-        Task<QuerySnapshot> future = db.collection("device").whereEqualTo("name", name).get();
-        // future.get() blocks on response
+        Task<QuerySnapshot> future = db.collection("device")
+                .whereEqualTo("deviceId", deviceId).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         if (documents.isEmpty())
-            throw new NoDeviceFoundException("No device found with this name: " + name);
+            throw new NoDeviceFoundException("No device found with this deviceId: " + deviceId);
 
         Device device = documents.get(0).toObject(Device.class);
         device.id = documents.get(0).getId();
@@ -87,21 +109,31 @@ public class Device {
         return device;
     }
 
-    public static Device createDevice(String name) throws ExecutionException, InterruptedException {
+    public static Device createDevice(String token, String deviceId) throws ExecutionException, InterruptedException {
+        Timestamp t = new Timestamp(new Date());
         try{
-            return getDevice(name);
+            Device device = getDeviceByDeviceId(deviceId);
+
+            device.updateToken(token);
+            device.updateLastUsed(t.toDate());
+
+            return device;
         }
         catch (NoDeviceFoundException e) {
+
             Map<String, Object> myDevice = new HashMap<>();
-            myDevice.put("name", name);
+            myDevice.put("token", token);
+            myDevice.put("lastUsed", t);
+            myDevice.put("deviceId", deviceId);
 
             DocumentReference addedDocRef = Database.addToCollection("device", myDevice);
 
-            return new Device(name, addedDocRef.getId());
+            return new Device(t, token, deviceId, addedDocRef.getId());
         }
     }
 
-    public Task<Void> deleteDeviceAsync() throws ExecutionException, InterruptedException {
+    //TODO da sistemare
+    private Task<Void> deleteDeviceAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("device", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -111,7 +143,7 @@ public class Device {
             throw new NoDeviceFoundException("No device found with this id: " + id);
     }
 
-    public boolean deleteAssistanceType() {
+    public boolean deleteDevice() {
         try {
             Task<Void> t = this.deleteDeviceAsync();
             Tasks.await(t);
@@ -123,24 +155,44 @@ public class Device {
         }
     }
 
-    public Task<Void> updateDeviceNameAsync(@NonNull String new_name) throws ExecutionException, InterruptedException {
-        if (!this.name.equals(new_name) && getDevice(new_name) == null) {
-            DocumentReference docRef = getReference("device", this.id);
-            DocumentSnapshot document = getDocument(docRef);
+    private Task<Void> updateLastUsedAsync(Timestamp timestamp) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("device", this.id);
+        DocumentSnapshot document = getDocument(docRef);
 
-            if (document.exists()) {
-                return docRef.update("name", new_name);
-            }
-            throw new NoDeviceFoundException("Update can't work if the device is not saved in the db");
+        if (document.exists()) {
+            return docRef.update("lastUsed", timestamp);
         }
-        throw new NoAssistanceTypeFoundException("same name or this device already exist");
+        throw new NoDeviceFoundException("Device not found with this id: "+ id);
     }
 
-    public boolean updateAssistanceType(@NonNull String new_name) {
+    public boolean updateLastUsed(@NonNull Date date) {
         try {
-            Task<Void> t = this.updateDeviceNameAsync(new_name);
+            Timestamp timestamp = new Timestamp(date);
+            Task<Void> t = this.updateLastUsedAsync(timestamp);
             Tasks.await(t);
-            this.name = new_name;
+            this.lastUsed = timestamp;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoAssistanceTypeFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Task<Void> updateTokenAsync(@NonNull String token) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("device", this.id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            return docRef.update("token", token);
+        }
+        throw new NoDeviceFoundException("Device not found with this id: "+ id);
+    }
+
+    protected boolean updateToken(@NonNull String token) {
+        try {
+            Task<Void> t = this.updateTokenAsync(token);
+            Tasks.await(t);
+            this.token = token;
             return true;
         } catch (ExecutionException | InterruptedException | NoAssistanceTypeFoundException e) {
             e.printStackTrace();
@@ -152,7 +204,7 @@ public class Device {
     public boolean equals(Object o){
         if(o instanceof Device) {
             Device d = (Device) o;
-            return d.id.equals(this.id);
+            return d.deviceId.equals(this.deviceId);
         }
         return false;
     }
