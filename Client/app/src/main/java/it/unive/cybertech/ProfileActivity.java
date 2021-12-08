@@ -33,7 +33,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-
+/**
+ * ProfileActivity is the main activity that allow user to view and edit some personal, account or
+ * localization info:
+ * - Position can be updated from {@link #updateGPS()}
+ * - Email update is manage in "{@link it.unive.cybertech.EditEmail}"
+ * - Password update is manage in "{@link it.unive.cybertech.EditPassword}"
+ * @author Daniele Dotto
+ * @since 1.0
+ */
 public class ProfileActivity extends AppCompatActivity {
     private final @NonNull Context context = ProfileActivity.this;
     private static final int PERMISSIONS_FINE_LOCATION = 99;
@@ -128,6 +136,11 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Function that update GPS coordinates (latitude and longitude);
+     * the user is asked to give permission for geolocalisation if they have not been given yet.
+     * @since 1.0
+     */
     private void updateGPS() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
@@ -142,6 +155,13 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Function that update EditText values about geolocalisation:
+     * @see "{@link #country}"
+     * @see "{@link #city}"
+     * @see "{@link #address}"
+     * @since 1.0
+     */
     private void updateValues(@NonNull Location location) {
         @NonNull Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         @NonNull List<Address> addresses;
@@ -170,6 +190,10 @@ public class ProfileActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Useful function that create and show a short-length toast (@see "{@link Toast}".
+     * @since 1.0
+     */
     private void showShortToast(@NonNull String message) {
         @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();

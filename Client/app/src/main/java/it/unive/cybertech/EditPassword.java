@@ -25,6 +25,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
 
+/**
+ * EditPassword is the activity that allow user to edit own password to login on "Families Share".
+ * @author Daniele Dotto
+ * @since 1.0
+ */
 public class EditPassword extends AppCompatActivity {
     @NonNull Context context = EditPassword.this;
     @NonNull FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
@@ -63,11 +68,20 @@ public class EditPassword extends AppCompatActivity {
         });
     }
 
+    /**
+     * Useful function that create and show a short-length toast (@see "{@link Toast}".
+     * @since 1.0
+     */
     private void showShortToast(@NonNull String message) {
         @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
     }
 
+    /**
+     * Method that allow user to reauthenticate if too much time is passed from the last session
+     * login.
+     * @since 1.0
+     */
     public void showDialog(@NonNull String currentEmail, @NonNull String newPwd) {
         @NonNull LayoutInflater layoutInflater = this.getLayoutInflater();
         @NonNull View view = layoutInflater.inflate(R.layout.dialog_rilogin, null);
@@ -86,6 +100,11 @@ public class EditPassword extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Method that allow user to change password;
+     * The user will have to login again.
+     * @since 1.0
+     */
     private void changePwdAndLogout(@NonNull String newPwd) {
         currentUser.updatePassword(newPwd)
                 .addOnCompleteListener( task -> {
