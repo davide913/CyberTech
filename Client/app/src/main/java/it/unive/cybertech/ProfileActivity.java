@@ -1,13 +1,11 @@
 package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -16,28 +14,27 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import it.unive.cybertech.gestione_covid.ReportPositivityActivity;
+
+
 
 public class ProfileActivity extends AppCompatActivity {
     private Location location;
     private FusedLocationProviderClient fusedLocationClient;
-    Map<String, EditText> editTexts = new HashMap();            // editTexts container
-    AtomicBoolean editing = new AtomicBoolean(false);   // show if user can edit fields
-    FloatingActionButton editInfo;    // edit button
+    Map<String, EditText> editTexts = new HashMap(); // editTexts container
+    FloatingActionButton editInfo;                   // edit button
+    Context context = ProfileActivity.this;
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +78,9 @@ public class ProfileActivity extends AppCompatActivity {
 
 
         EditText email = findViewById(R.id.profile_email);
-        email.setText(user.getName()); // todo getEmail() al posto di getName()
+        email.setText(currentUser.getEmail());
         editTexts.put("Email", email);
-        email.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, EditEmail.class)));
+        email.setOnClickListener(v -> startActivity(new Intent(context, EditEmail.class)));
 
 
         EditText pwd = findViewById(R.id.profile_pwd);
@@ -92,7 +89,7 @@ public class ProfileActivity extends AppCompatActivity {
         pwd.setOnClickListener( v -> {
             String provider = FirebaseAuth.getInstance().getCurrentUser().getProviderId();
             if(!provider.equals("google.com")) {
-                startActivity(new Intent(ProfileActivity.this, EditPassword.class));
+                startActivity(new Intent(context, EditPassword.class));
             }
         });
 
@@ -108,11 +105,21 @@ public class ProfileActivity extends AppCompatActivity {
             }
             if (addresses.size() > 0) {             // todo nuovi campi location da inserire nel DB
                 Address adr = addresses.get(0);
-                country.setText(adr.getCountryName());
-                city.setText(adr.getLocality());
-                address.setText(adr.getThoroughfare());
+
+                String newCountry = adr.getCountryName();
+                country.setText(newCountry);
+                //user.updateCountry(newCountry);        // todo updateCountry()
+
+                String newCity = adr.getLocality();
+                city.setText(newCity);
+                //user.updateCity(city);                 // todo updateCity()
+
+                String newAddress = adr.getThoroughfare();
+                address.setText(newAddress);
+                //user.updateAddress(newAddress);        // todo updateAddress()
             }
         });
+
 
 
         /*
@@ -137,26 +144,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-
-    /*
-    private boolean changePassword() {    // check if values are correct
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String newPassword = "SOME-SECURE-PASSWORD";
-
-        user.updatePassword(newPassword)    // vedi exceptions
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                        }
-                    }
-                });
-
-        return true;
-    }
-
-     */
 
 
     private void initGPS() {

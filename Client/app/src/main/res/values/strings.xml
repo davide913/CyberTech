@@ -70,7 +70,7 @@
     <string name="rent_feedback_positive">Tutto a buon fine</string>
     <string name="rent_feedback_negative">Feedback negativo</string>
     <string name="field_required">Campo obbligatorio</string>
-    <string name="password_mismatch">Le password deveono corrispondere</string>
+    <string name="password_mismatch">Le password devono corrispondere</string>
     <string name="login">Accedi</string>
     <string name="not_registered">Non sei registrato? Registrati</string>
     <string name="google">Google</string>
@@ -92,8 +92,35 @@
     <string name="information">Informazioni</string>
     <string name="activity">Attività</string>
     <string name="profile_infopersonali">Info personali</string>
-    <string name="profile_infourbane">Informazioni urbane</string>
+    <string name="profile_infourbane">Localizzazione</string>
     <string name="profile_credenziali">Credenziali</string>
+    <string name="EditPassword">Cambio password</string>
+    <string name="EditEmail">Cambio e-mail</string>
+    <string name="oldPassword">Vecchia password</string>
+    <string name="newPassword">Nuova password</string>
+    <string name="confirmNewPassword">Conferma nuova password</string>
+    <string name="oldEmail">Vecchia e-mail</string>
+    <string name="newEmail">Nuova e-mail</string>
+    <string name="confirmNewEmail">Conferma nuova e-mail</string>
+    <string name="requiredField">Campo obbligatorio</string>
+    <string name="email_updated">Email modificata con successo!</string>
+    <string name="email_mismatch">Gli indirizzi email devono corrispondere</string>
+    <string name="editpwd">Cambio password</string>
+    <string name="malformedEmail">Formato e-mail errato!</string>
+    <string name="WrongFormatEmail">Formato e-mail errato!</string>
+    <string name="existingUser">L\'indirizzo e-mail è già utilizzato!</string>
+    <string name="InvalidUser">Utilizza un altro indirizzo e-mail!</string>
+    <string name="genericError">Errore!</string>
+    <string name="Hidden">********</string>
+    <string name="profile_account">Account</string>
+    <string name="DescriptionEmailEdit">Puoi inserire una qualsiasi e-mail (di tua proprietà) che non corrisponda ad un altro account Families Share.</string>
+    <string name="DescriptionPwdEdit"><![CDATA[La nuova password deve contenere almeno 8 caratteri, preferibilmente con almeno una lettera maiuscola (es. A), una lettera minuscola (es. a), un simbolo (es. &) e un numero (es. 1).]]></string>
+    <string name="editPwd">Quì puoi cambiare la tua password!</string>
+    <string name="TitleEmailEdit">Quì puoi aggiornare la tua e-mail!</string>
+    <string name="Rilogin">NOTA: dovrai rieseguire l\'accesso dopo la modifica delle credenziali.</string>
+    <string name="pwdUpdated">La password è stata modificata con successo!</string>
+    <string name="WeakPwd">La password non rispetta i criteri minimi di sicurezza!</string>
+    <string name="same_password">Scegli un\'altra password!</string>
 
     <array name="sex">
         <item>Maschio</item>

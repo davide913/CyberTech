@@ -19,9 +19,6 @@
         <activity
             android:name=".EditEmail"
             android:exported="true" />
-        <activity
-            android:name=".EditProfileActivity"
-            android:exported="true" />
 
         <meta-data
             android:name="com.google.android.gms.car.application"
