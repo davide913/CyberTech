@@ -1,8 +1,11 @@
 package it.unive.cybertech.messages;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -15,6 +18,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.common.collect.Collections2;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -26,8 +30,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.Device;
+import it.unive.cybertech.database.Profile.User;
 
 public class MessageService extends FirebaseMessagingService {
 
@@ -44,9 +51,23 @@ public class MessageService extends FirebaseMessagingService {
                 .addOnCompleteListener(listener);
     }
 
-    public static void sendMessage(@NonNull String token, @NonNull NotificationType type, String title, String message, Context ctx) {//, Map<String, String> datas
-        //TODO update last used token passing user instead of token
+    public static void sendMessageToUserDevices(@NonNull User user, @NonNull NotificationType type, String title, String message, Context ctx) {
+        try {
+            RequestQueue queue = Volley.newRequestQueue(ctx);
+            for (Device device : user.getMaterializedDevices())
+                sendMessage(device, type, title, message, queue);
+        } catch (InterruptedException | ExecutionException e) {
+
+        }
+    }
+
+    public static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, Context ctx) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
+        sendMessage(device, type, title, message, queue);
+    }
+
+    private static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, RequestQueue queue) {
+        //device.updateLastUsed();
         String url = "https://fcm.googleapis.com/fcm/send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
@@ -79,7 +100,7 @@ public class MessageService extends FirebaseMessagingService {
                     notification.put("click_action", "OPEN_SPLASH_SCREEN");
                     Log.d(TAG, notification.toString());
                     parameters.put("notification", notification);
-                    parameters.put("to", token);
+                    parameters.put("to", device.getToken());
                     JSONObject data = new JSONObject();
                     data.put("type", type);
                     parameters.put("data", data);
@@ -107,7 +128,19 @@ public class MessageService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
-        //todo update token to server
+        String deviceID = Settings.Secure.ANDROID_ID;
+        try {
+            Device[] devices = (Device[]) Collections2.filter(user.getMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
+            if (devices.length > 0) {
+                Device device = devices[0];
+                if (device == null) {
+                    device = Device.createDevice(s, deviceID);
+                    user.addDevice(device);
+                } /*else
+                    device.updateLastUsed();*/
+            }
+        } catch (InterruptedException | ExecutionException e) {
+        }
     }
 
     @Override

@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
-            MessageService.sendMessage("d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
+            MessageService.sendMessage(null,//"d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
                     MessageService.NotificationType.assistance_chat, "test", "aaaaa", this);
             //startActivity(new Intent(this, ProfileActivity.class));
         });
