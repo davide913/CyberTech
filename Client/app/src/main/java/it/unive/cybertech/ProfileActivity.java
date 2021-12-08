@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import it.unive.cybertech.utils.Utils;
@@ -36,7 +35,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public void onCancel() {
 
                 }
-            }).showDialog("Logout","Sei sicuro di voler effettuare il logout?");
+            }).show("Logout","Sei sicuro di voler effettuare il logout?");
         });
     }
 

@@ -11,8 +11,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -20,18 +18,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
-import java.io.InputStream;
-import java.net.URL;
-
 import it.unive.cybertech.assistenza.HomePageNegative;
-import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.Utils;
 
@@ -70,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profilePicture.setOnLongClickListener(v -> {
             MessageService.getCurrentToken(task -> {
                 if (task.isSuccessful()) {
-                    new Utils.Dialog(this).showDialog("Token", task.getResult());
+                    new Utils.Dialog(this).show("Token", task.getResult());
                     Log.d("TOKEN", task.getResult());
                 } else
                     Log.e("MAIN", "Error retriving token");

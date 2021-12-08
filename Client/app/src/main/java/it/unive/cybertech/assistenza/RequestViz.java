@@ -5,14 +5,10 @@ import static it.unive.cybertech.utils.CachedUser.user;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
-import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
 public class RequestViz extends AppCompatActivity {
@@ -76,14 +71,14 @@ public class RequestViz extends AppCompatActivity {
         //Pulsanti visibili solo dall'utente Negativo che presta soccorso
         this.findViewById(R.id.accept_request).setOnClickListener(v -> {
             //La richiesta viene affidata a me, la posso visualizzare nella mia sezione Taken Requests e tolta dalla lista nella Home
-            new Utils.Dialog(this).showDialog("Operazione confermata!", "Hai preso in carico una richiesta");
+            new Utils.Dialog(this).show("Operazione confermata!", "Hai preso in carico una richiesta");
             //chiamata al Db per fare in modo che la richiesta risulti presa da me e tolta dalla pull completa
             finish();
         });
 
         this.findViewById(R.id.stop_helping).setOnClickListener(v -> {
             //rinuncio a completare la richiesta, e viene inserita di nuovo nella lista generale Home, viene avvisato l'utente originale
-            new Utils.Dialog(this).showDialog("Attenzione!", "Stai per abbandonare la richiesta");
+            new Utils.Dialog(this).show("Attenzione!", "Stai per abbandonare la richiesta");
             finish();
         });
 

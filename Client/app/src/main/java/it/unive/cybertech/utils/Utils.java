@@ -91,7 +91,7 @@ public class Utils {
             return this;
         }
 
-        public void showDialog(String title, String message) {
+        public void show(String title, String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
                     .setMessage(message);
