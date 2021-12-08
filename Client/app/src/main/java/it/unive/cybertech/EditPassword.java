@@ -1,47 +1,50 @@
 package it.unive.cybertech;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Objects;
+
 public class EditPassword extends AppCompatActivity {
+    @NonNull Context context = EditPassword.this;
+    @NonNull FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
     FloatingActionButton editPwd;
-    Context context = EditPassword.this;
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_password);
-        ActionBar actionBar = getSupportActionBar();
+        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.EditPassword);
 
-        EditText oldPwd = findViewById(R.id.EditPassword_currentPwd);
-        EditText newPwd = findViewById(R.id.EditPassword_newPwd);
-        EditText confirmNewPwd = findViewById(R.id.EditPassword_confirmNewPwd);
+        @NonNull EditText newPwd = findViewById(R.id.EditPassword_newPwd);
+        @NonNull EditText confirmNewPwd = findViewById(R.id.EditPassword_confirmNewPwd);
         editPwd = findViewById(R.id.EditPassword_confirmButton);
 
 
         editPwd.setOnClickListener( v -> {
             boolean stato = true;
-            if(oldPwd.length() <= 0) {
-                oldPwd.setError(getString(R.string.requiredField));
-            }
             if (newPwd.length() <= 0) {
                 newPwd.setError(getString(R.string.requiredField));
                 stato = false;
@@ -50,16 +53,8 @@ public class EditPassword extends AppCompatActivity {
                 confirmNewPwd.setError(getString(R.string.requiredField));
                 stato = false;
             }
-            if (newPwd.getText().toString().equals(oldPwd.getText().toString())) {
-                String message = getString(R.string.same_password);
-                Toast samePwd = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-                samePwd.show();
-                stato = false;
-            }
             if (!newPwd.getText().toString().equals(confirmNewPwd.getText().toString())) {
-                String message = getString(R.string.password_mismatch);
-                Toast differentPwds = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-                differentPwds.show();
+                showShortToast(getString(R.string.password_mismatch));
                 stato = false;
             }
             if (stato) {
@@ -68,29 +63,52 @@ public class EditPassword extends AppCompatActivity {
         });
     }
 
-    private void changePwdAndLogout(String newPwd) {
+    private void showShortToast(@NonNull String message) {
+        @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+    public void showDialog(@NonNull String currentEmail, @NonNull String newPwd) {
+        @NonNull LayoutInflater layoutInflater = this.getLayoutInflater();
+        @NonNull View view = layoutInflater.inflate(R.layout.dialog_rilogin, null);
+        @NonNull AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle(R.string.authNecessary)
+                .setPositiveButton(R.string.Ok, (dialog, which) -> {
+                    dialog.dismiss();
+                    @NonNull EditText pwd = view.findViewById(R.id.dialogRilogin);
+                    @NonNull String passwd = pwd.getText().toString();
+                    @NonNull AuthCredential credential = EmailAuthProvider
+                            .getCredential(currentEmail, passwd);
+                    currentUser.reauthenticate(credential).addOnCompleteListener(task -> changePwdAndLogout(newPwd));
+                })
+                .setNegativeButton(R.string.Cancel, (dialog, which) -> dialog.dismiss())
+                .setView(view);
+        builder.show();
+    }
+
+    private void changePwdAndLogout(@NonNull String newPwd) {
         currentUser.updatePassword(newPwd)
-                .addOnCompleteListener( (task) -> {
+                .addOnCompleteListener( task -> {
                         if (task.isSuccessful()) {
-                            String message = getString(R.string.pwdUpdated);
-                            Toast editPwdOk = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-                            editPwdOk.show();
-                            Handler handler = new Handler();
+                            showShortToast(getString(R.string.pwdUpdated));
+                            @NonNull Handler handler = new Handler();
                             handler.postDelayed( () -> {
                                 FirebaseAuth.getInstance().signOut();
-                                startActivity(new Intent(context, SplashScreen.class));
+                                @NonNull Intent intent = new Intent(context, SplashScreen.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
                             }, 800);
                         } else {
                             try {
-                                throw task.getException();
+                                throw Objects.requireNonNull(task.getException());
                             } catch (FirebaseAuthWeakPasswordException e) {
-                                String message = getString(R.string.WeakPwd);
-                                Toast invalidCretentials = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-                                invalidCretentials.show();
-                            } catch (Exception e) {
-                                String message = getString(R.string.genericError);
-                                Toast invalidCretentials = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-                                invalidCretentials.show();
+                                showShortToast(getString(R.string.WeakPwd));
+                            } catch (FirebaseAuthRecentLoginRequiredException e) {
+                                if (currentUser.getEmail() != null)
+                                    showDialog(currentUser.getEmail(), newPwd);
+                            }
+                            catch (Exception e) {
+                                showShortToast(getString(R.string.genericError));
                             }
                         }
                 });

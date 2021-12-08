@@ -81,7 +81,7 @@
     <string name="signin_description">Benvenuto in families share plugin\nCompila i seguenti campi per registrarti</string>
     <string name="confirm_password">Conferma password</string>
     <string name="position_required">Richiesta posizione</string>
-    <string name="position_required_description">L\'app ultilizza la posizione per mostrarti i gruppi e le informazioni della tua zona. Senza questi dati l\'app non può funzionare</string>
+    <string name="position_required_description">L\'app utilizza la posizione per mostrarti i gruppi e le informazioni della tua zona. Senza questi dati l\'app non può funzionare</string>
     <string name="groups">Gruppi</string>
     <string name="partecipant_dotted">Partecipanti:</string>
     <string name="add_to_showcase">Aggiungi materiale in prestito</string>
@@ -121,6 +121,14 @@
     <string name="pwdUpdated">La password è stata modificata con successo!</string>
     <string name="WeakPwd">La password non rispetta i criteri minimi di sicurezza!</string>
     <string name="same_password">Scegli un\'altra password!</string>
+    <string name="insertPwd">Inserisci la tua password</string>
+    <string name="authNecessary">Autenticazione necessaria</string>
+    <string name="Ok">Ok</string>
+    <string name="Cancel">Annulla</string>
+    <string name="googleProvider">google.com</string>
+    <string name="googleProviderAlert">Non puoi modificare la password Google!</string>
+    <string name="positionPrivilegeNeeded">Accesso alla posizione necessario!</string>
+    <string name="localizationUpdated">La localizzazione è stata aggiornata!</string>
 
     <array name="sex">
         <item>Maschio</item>
