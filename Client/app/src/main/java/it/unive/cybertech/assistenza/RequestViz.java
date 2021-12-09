@@ -75,11 +75,14 @@ public class RequestViz extends AppCompatActivity implements Utils.DialogResult 
             this.findViewById(R.id.accept_request).setOnClickListener(v -> {
                 //La richiesta viene affidata a me, la posso visualizzare nella mia sezione Taken Requests e tolta dalla lista nella Home
                 new Utils.Dialog(this).showDialog("Operazione confermata!", "Hai preso in carico una richiesta");
+                //TODO: onSuccess -> notificare al DB che ho accettato la richiesta, updateincharge....
             });
 
             this.findViewById(R.id.stop_helping).setOnClickListener(v -> {
                 //rinuncio a completare la richiesta, e viene inserita di nuovo nella lista generale Home, viene avvisato l'utente originale
                 new Utils.Dialog(this).showDialog("Attenzione!", "Stai per abbandonare la richiesta");
+                //TODO: onSuccess -> updateincharge a null
+                QuarantineAssistance
             });
 
             this.findViewById(R.id.btn_changeFields).setVisibility(View.GONE);
@@ -90,10 +93,12 @@ public class RequestViz extends AppCompatActivity implements Utils.DialogResult 
             //Pulsanti visibili solo dall'utente positivo che richiede soccorso
             this.findViewById(R.id.btn_changeFields).setOnClickListener(v -> { //per modificare i campi, nel DB verificare e sostituire i campi nuovi con quelli vecchi della stessa richiesta
                 startActivity(new Intent(this, RequestDetails.class));
+                //TODO: getQuarantineAssistence, poi modifica del testo
                 finish();
             });
 
             this.findViewById(R.id.btn_deleteRequest).setOnClickListener(v -> { //per eliminare dal Db la richiesta
+                //la getto e chiamo la remove
                 finish();
             });
 

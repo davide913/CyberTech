@@ -123,6 +123,7 @@ public class HomePageNegative extends Fragment {
             newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
             newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
 
+            //
             newIntent.putExtra("class", "negative");
             startActivity(newIntent);
         }));

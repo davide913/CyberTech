@@ -37,11 +37,15 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.activity_request_home_visualisation, null);
 
+
+        myList = QuarantineAssistance.getJoinableQuarantineAssistance();
+
+
         TextView title = view.findViewById(R.id.title_request);
         title.setText(myList.get(index).getTitle());
 
         TextView location = view.findViewById(R.id.location_request);
-        location.setText(myList.get(index).getLocation().toString());
+        location.setText(myList.get(index).getLocation().toString()); //TODO: convertire una Stringa in GeoPoint
 
         TextView date = view.findViewById(R.id.date_request);
         date.setText(myList.get(index).getDeliveryDate().toString());

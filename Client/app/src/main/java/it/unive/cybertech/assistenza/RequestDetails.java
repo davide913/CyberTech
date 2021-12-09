@@ -147,8 +147,9 @@ public class RequestDetails extends AppCompatActivity {
             }
 
             //TODO aggiungere tutti gli altri campi
+            //TODO : Trovare modo di far inserire all'utente non una stringa ma un GeoPoint
             try {
-                QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), user,  date, et_requestLocation.toString());
+                QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), CachedUser.user,  date, 5, 5);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
