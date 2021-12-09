@@ -32,6 +32,7 @@ import java.util.Locale;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Group;
 
 
 public class ManifestPositivityFragment extends Fragment {
@@ -52,7 +53,6 @@ public class ManifestPositivityFragment extends Fragment {
         return v;
     }
 
-
     private void initViews(View v){
 
         TextView mNome = v.findViewById(R.id.textView_nome2);
@@ -62,12 +62,15 @@ public class ManifestPositivityFragment extends Fragment {
         Button signPosButton = v.findViewById(R.id.button_alertPos);
         Button bManifestNegativity = v.findViewById(R.id.button_signGua);
 
+        
 
         mNome.setText(user.getName());
-          mCognome.setText(user.getSurname());
+        mCognome.setText(user.getSurname());
 
           if(user.getPositiveSince() != null){
-                mDateSign.setHint(convertDate(user.getPositiveSince().toDate().toString()));
+                String myFormat = "dd/MM/yyyy";
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                mDateSign.setHint(sdf.format(user.getPositiveSince().toDate()));
                 mStateSign.setText("Positivo");
                 signPosButton.setVisibility(View.INVISIBLE);
                 bManifestNegativity.setVisibility(View.VISIBLE);
@@ -187,7 +190,7 @@ public class ManifestPositivityFragment extends Fragment {
     }
 
     private void updateLabel(View v) {
-        String myFormat = "dd/MM/yy"; //In which you need put here
+        String myFormat = "dd/MM/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
         EditText selectDate = v.findViewById(R.id.textView_dateAlert2);
@@ -201,45 +204,5 @@ public class ManifestPositivityFragment extends Fragment {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
-
-
-    private String convertDate(String date){
-        ArrayList<String> mesi = new ArrayList<>();
-        mesi.add("Jan");
-        mesi.add("Feb");
-        mesi.add("Mar");
-        mesi.add("Apr");
-        mesi.add("May");
-        mesi.add("Jun");
-        mesi.add("Jul");
-        mesi.add("Aug");
-        mesi.add("Sep");
-        mesi.add("Oct");
-        mesi.add("Nov");
-        mesi.add("Dec");
-        ArrayList<Integer> nmesi = new ArrayList<>();
-        for(int i = 0; i<12; i++){
-            nmesi.add(i);
-        }
-        char[] charmese = {date.charAt(4),date.charAt(5),date.charAt(6)};
-        String mese = new String(charmese);
-        char[] chargiorno = {date.charAt(8),date.charAt(9)};
-        String giorno = new String(chargiorno);
-        char[] charanno = {date.charAt(24),date.charAt(25)};
-        String anno = new String(charanno);
-        anno = "20"+anno;
-
-        for (int i = 0; i<12; i++){
-            if (mese.equals(mesi.get(i))){
-                mese = String.valueOf(i+1);
-                break;
-            }
-        }
-
-
-        return giorno + "/" + mese + "/" + anno;
-    }
-
-
 
 }

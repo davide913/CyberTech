@@ -16,41 +16,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Group;
 
 public class CustomSignReceivedAdapter extends ArrayAdapter {
     private static final String TAG = "CustomOrderArrayAdapterTrader";
     private Context context;
-    private List<String> sign;
-    /*TODO
-    private User user;
-     */
+    private List<Group> groups;
 
-    public CustomSignReceivedAdapter(@NonNull Context context, int resource, ArrayList<String> sign)/*TODO qua prenderà in ingresso un array di USER userList*/ {
-        super(context, resource, sign);
+    private Group group;
+
+
+    public CustomSignReceivedAdapter(@NonNull Context context, int resource, ArrayList<Group> groups)/*TODO qua prenderà in ingresso un array di USER userList*/ {
+        super(context, resource, groups);
         this.context = context;
-        this.sign = sign;
+        this.groups = groups;
     }
 
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, ViewGroup parent){
         Log.d(TAG, "call getView");
-        //user = userList.get(position);
+        group = groups.get(position);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.raw_list_sign_reported, null);
 
 
 
-        TextView DateTamp = view.findViewById(R.id.textView_changeDate);
+        TextView nameGroup = view.findViewById(R.id.textView_changeDate);
         TextView StatusTamp = view.findViewById(R.id.textView_changeStatus);
 
-        /*TODO
-        DateTamp.setText(user.getDateSign);
-        StatusTamp.setText("Positivo");
 
-         */
-
-
-        DateTamp.setText("28/10/2021");
+        nameGroup.setText(group.getName());
         StatusTamp.setText("Positivo");
 
         return view;

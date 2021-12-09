@@ -38,7 +38,7 @@ public class RequestViz extends AppCompatActivity {
 
         setTitle("Dettagli richiesta");
 
-        QuarantineAssistance request = user.getAssistance();
+
 
         TextView textTitle = findViewById(R.id.textTitle);
         TextView text = findViewById(R.id.textFull);
