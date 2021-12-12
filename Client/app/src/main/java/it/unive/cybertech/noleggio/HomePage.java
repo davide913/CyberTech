@@ -10,8 +10,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +27,7 @@ import android.widget.Button;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -58,11 +66,23 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     @Override
     public void onStart() {
         super.onStart();
+
+        //TODO get posizione
+        Thread t = new Thread(() -> {
+            try {
+                items = User.getRentableMaterials(45, 12, 10000);
+                Log.d("noleggio.HomePage", "Size: "+items.size());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
         try {
-            //TODO get posizione
-            items = User.getRentableMaterials(0, 0, 10);
-            adapter.notifyDataSetChanged();
-        }catch(InterruptedException | ExecutionException e){}
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        adapter.notifyDataSetChanged();
     }
 
     public void onItemClick(View view, int position) {
