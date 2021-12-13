@@ -1,15 +1,14 @@
 package it.unive.cybertech.database.Profile;
 
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getInstance;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getReference;
+import static it.unive.cybertech.database.Profile.Device.createDevice;
 
 import androidx.annotation.NonNull;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQueryBounds;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -18,22 +17,22 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 
 //TODO all the function are tested
-public class User {
+public class User extends Geoquerable {
+    private final static String table = "users";
     private String id;
     private String name;
     private String surname;
@@ -41,22 +40,20 @@ public class User {
     private String address;
     private String city;
     private String country;
-    private GeoPoint position;
+    private GeoPoint location;
     private String geohash;
     private boolean greenPass;
     private Timestamp positiveSince;
     private long lendingPoint;
     private ArrayList<DocumentReference> devices;
     private ArrayList<DocumentReference> lendingInProgresses;
-    private ArrayList<DocumentReference> extensionLending;
     private ArrayList<DocumentReference> materials;
     private DocumentReference quarantineAssistance;
 
-    public User() {
-    }
+    public User() {}
 
     private User(String id, String name, String surname, Sex sex, String address, String city,
-                 String country, GeoPoint position, boolean greenPass, Timestamp positiveSince, long lendingPoint) {
+                 String country, GeoPoint location, boolean greenPass, Timestamp positiveSince, long lendingPoint) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -64,18 +61,18 @@ public class User {
         this.address = address;
         this.city = city;
         this.country = country;
-        this.position = position;
-        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(position.getLatitude(), position.getLongitude()));
+        this.location = location;
+        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
         this.greenPass = greenPass;
         this.positiveSince = positiveSince;
         this.lendingPoint = lendingPoint;
     }
 
     private User(String id, String name, String surname, Sex sex, String address,
-                 String city, String country, GeoPoint position, boolean greenPass,
+                 String city, String country, GeoPoint location, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
-                 ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> extensionLending,
-                 ArrayList<DocumentReference> materials, DocumentReference quarantineAssistance) {
+                 ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> materials,
+                 DocumentReference quarantineAssistance) {
 
         this.id = id;
         this.name = name;
@@ -84,14 +81,13 @@ public class User {
         this.address = address;
         this.city = city;
         this.country = country;
-        this.position = position;
-        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(position.getLatitude(), position.getLongitude()));
+        this.location = location;
+        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
         this.greenPass = greenPass;
         this.positiveSince = positiveSince;
         this.lendingPoint = lendingPoint;
         this.devices = devices;
         this.lendingInProgresses = lendingInProgresses;
-        this.extensionLending = extensionLending;
         this.materials = materials;
         this.quarantineAssistance = quarantineAssistance;
     }
@@ -152,12 +148,12 @@ public class User {
         this.country = country;
     }
 
-    public GeoPoint getPosition() {
-        return position;
+    public GeoPoint getLocation() {
+        return location;
     }
 
-    private void setPosition(GeoPoint position) {
-        this.position = position;
+    private void setLocation(GeoPoint location) {
+        this.location = location;
     }
 
     private String getGeohash() {
@@ -208,14 +204,6 @@ public class User {
         this.lendingInProgresses = lendingInProgresses;
     }
 
-    public ArrayList<DocumentReference> getExtensionLending() {
-        return extensionLending;
-    }
-
-    private void setExtensionLending(ArrayList<DocumentReference> extensionLending) {
-        this.extensionLending = extensionLending;
-    }
-
     public ArrayList<DocumentReference> getMaterials() {
         return materials;
     }
@@ -252,17 +240,7 @@ public class User {
         return arr;
     }
 
-    public ArrayList<LendingInProgress> getMaterializedExtensionRequest() throws ExecutionException, InterruptedException {
-        ArrayList<LendingInProgress> arr = new ArrayList<>();
-
-        for (DocumentReference doc : extensionLending) {
-            arr.add(LendingInProgress.getLendingInProgressById(doc.getId()));
-        }
-
-        return arr;
-    }
-
-    public ArrayList<Material> getMaterializedRentMaterial() throws ExecutionException, InterruptedException {
+    public ArrayList<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
         for (DocumentReference doc : materials) {
@@ -289,10 +267,10 @@ public class User {
 
         User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
                 greenpass, null, 0, new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>(),
+                new ArrayList<DocumentReference>(),
                 new ArrayList<DocumentReference>(), null);
 
-        Task<Void> future = db.collection("users").document(id).set(user);
+        Task<Void> future = db.collection(table).document(id).set(user);
         Tasks.await(future);
 
         return user;
@@ -300,7 +278,7 @@ public class User {
 
     //TODO verificare che se ci sono degli array a null di inizializzarli! ( in caso cotrario le update dei rispettivi array andrebbero in errore )
     public static User getUserById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         User user = null;
@@ -309,17 +287,26 @@ public class User {
             user = document.toObject(User.class);
             user.setId(document.getId());
 
+            if(user.devices == null)
+                user.devices = new ArrayList<>();
+
+            if(user.lendingInProgresses == null)
+                user.lendingInProgresses = new ArrayList<>();
+
+            if(user.materials == null)
+                user.materials = new ArrayList<>();
+
             return user;
         } else
             throw new NoUserFoundException("No user found with this id: " + id);
     }
 
     private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return deleteFromCollectionAsync("users", id);
+            return deleteFromCollectionAsync(table, id);
         else
             throw new NoUserFoundException("No user found with this id: " + id);
     }
@@ -341,7 +328,7 @@ public class User {
      */
     //modificata 30/11/2021, greenpass era maiuscolo
     private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -366,7 +353,7 @@ public class User {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -396,7 +383,7 @@ public class User {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists() && val >= 0)
@@ -421,23 +408,24 @@ public class User {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
             return docRef.update("devices", FieldValue.arrayUnion(device));
         else
-            throw new NoUserFoundException("User not found, id: " + id);
+            throw new NoUserFoundException("User not found with this id: " + id);
     }
 
-
-
-    public boolean addDevice(@NonNull Device device) {
+    public boolean addDevice(@NonNull String token, @NonNull String deviceId) {
         try {
-            DocumentReference devDoc = getReference("device", device.getId());
-            Task<Void> t = addDeviceAsync(devDoc);
-            Tasks.await(t);
-            this.devices.add(devDoc);
+            Device device = createDevice(token, deviceId, this.id);
+            DocumentReference devDoc = getReference("devices", device.getId());
+
+            if(notContainDevice(device.getId())) {
+                Tasks.await(addDeviceAsync(devDoc));
+                this.devices.add(devDoc);
+            }
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -449,26 +437,35 @@ public class User {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
             return docRef.update("devices", FieldValue.arrayRemove(device));
         else
-            throw new NoUserFoundException("User not found, id: " + id);
+            throw new NoUserFoundException("User not found with this id: " + id);
     }
 
     public boolean removeDevice(@NonNull Device device) {
         try {
-            DocumentReference devDoc = getReference("device", device.getId());
-            Task<Void> t = removeDeviceAsync(devDoc);
-            Tasks.await(t);
+            DocumentReference devDoc = getReference("devices", device.getId());
+            Tasks.await(removeDeviceAsync(devDoc));
             this.devices.remove(devDoc);
+            device.deleteDevice();
             return true;
-        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
+        } catch ( NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    private boolean notContainDevice(String deviceId){
+        for (DocumentReference document: this.devices ) {
+            if(deviceId.equals(document.getId()))
+                return false;
+        }
+        return true;
     }
 
     //1/12/2021 modificata le update sulla equals ( faccio un confronto sugli id ) e usata la getMaterialized(TYPE) per vedere se gia presente l'oggetto
@@ -497,7 +494,7 @@ public class User {
      */
     //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -524,7 +521,7 @@ public class User {
      */
     //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -567,88 +564,12 @@ public class User {
         return false;
     }*/
 
-    //TODO vedere se la storia dei lending e corretta
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
-    //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
-    private Task<Void> addExtensionLendingAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists())
-            return docRef.update("extensionLending", FieldValue.arrayUnion(extensionRequest));
-        else
-            throw new NoUserFoundException("User not found, id: " + id);
-    }
-
-    public boolean addExtensionLending(@NonNull LendingInProgress lending) {
-        try {
-            DocumentReference extDoc = getReference("lendingInProgress", lending.getId());
-            Task<Void> t = addExtensionLendingAsync(extDoc);
-            Tasks.await(t);
-            this.extensionLending.add(extDoc);
-            return true;
-        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
-    private Task<Void> removeExtensionLendingAsync(@NonNull DocumentReference extensionRequest) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists())
-            return docRef.update("extensionLending", FieldValue.arrayRemove(extensionRequest));
-        else
-            throw new NoUserFoundException("User not found, id: " + id);
-    }
-
-    //modificata 30/11/2021, non salvo la classe intera ExtensionRequest ma solo la sua reference sul db
-    public boolean removeExtensionLending(@NonNull LendingInProgress lending) {
-        try {
-            DocumentReference extDoc = getReference("lendingInProgress", lending.getId());
-            Task<Void> t = removeExtensionLendingAsync(extDoc);
-            Tasks.await(t);
-            this.extensionLending.remove(extDoc);
-            return true;
-        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /*public boolean updateExtensionRequest(@NonNull ExtensionRequest oldextensionRequest, @NonNull ExtensionRequest newextensionRequest) throws Exception {
-        if (!oldextensionRequest.getId().equals(newextensionRequest.getId())) {
-            boolean flag = false;
-            ArrayList<ExtensionRequest> extensionRequests = getMaterializedExtensionRequest();
-
-            for (ExtensionRequest l : extensionRequests) {               //check if the old ExtensionRequest is present in the list of that user
-                if (l.equals(oldextensionRequest)) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (flag) {             //if find the old ExtensionRequest it can update that
-                removeExtensionRequest(oldextensionRequest);
-                addExtensionRequest(newextensionRequest);
-                return true;
-            }
-        }
-        return false;
-    }*/
-
     /***
      This method invocation doesn't update the state of object, you need to do it manually
      */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> addMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -675,7 +596,7 @@ public class User {
      */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> removeMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -719,7 +640,7 @@ public class User {
 
     //modificata 30/11/2021, non salvo la classe intera quarantine assistance ma solo la sua reference sul db
     private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("users", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Task<Void> t;
@@ -774,59 +695,5 @@ public class User {
             return user.getId().equals(this.getId());
         }
         return false;
-    }
-
-    //Aggiunta il 5/12/2021 funzionante
-    protected static List<DocumentSnapshot> getGeoQueries(Query query, double radiusInM, GeoLocation center)
-            throws ExecutionException, InterruptedException {
-        List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
-
-        final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-        for (GeoQueryBounds b : bounds) {
-            Query q = query.orderBy("geohash")
-                    .startAt(b.startHash)
-                    .endAt(b.endHash);
-
-            Task<QuerySnapshot> t = q.get();
-            Tasks.await(t);
-            tasks.add(t);
-        }
-
-        List<DocumentSnapshot> matchingDocs = new ArrayList<>();
-
-        for (Task<QuerySnapshot> task : tasks) {
-            List<DocumentSnapshot> snap = task.getResult().getDocuments();
-            for (DocumentSnapshot doc : snap) {
-                GeoPoint geoPoint = doc.getGeoPoint("location");
-
-                // We have to filter out a few false positives due to GeoHash
-                // accuracy, but most will match
-                GeoLocation docLocation = new GeoLocation(geoPoint.getLatitude(), geoPoint.getLongitude());
-                double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
-                if (distanceInM <= radiusInM) {
-                    matchingDocs.add(doc);
-                }
-            }
-        }
-
-        return matchingDocs;
-    }
-
-    //funzione per mattia!
-    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm)
-            throws ExecutionException, InterruptedException {
-        ArrayList<Material> arr = new ArrayList<>();
-        FirebaseFirestore db = getInstance();
-
-        Query query = db.collection("users");
-
-        List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
-                    new GeoLocation(latitude, longitude));
-
-        for (DocumentSnapshot doc : documents) {
-            arr.add(Material.getMaterialById(doc.getId()));
-        }
-
-        return arr;
     }
 }

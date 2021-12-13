@@ -1,16 +1,11 @@
 package it.unive.cybertech.database.Profile;
 
-import static it.unive.cybertech.database.Connection.Database.*;
-import static it.unive.cybertech.database.Profile.User.getGeoQueries;
-import static it.unive.cybertech.database.Profile.User.getUserDevices;
-
-import android.util.Log;
+import static it.unive.cybertech.database.Database.*;
 
 import androidx.annotation.NonNull;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQueryBounds;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -30,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
+import it.unive.cybertech.database.Database;
+import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 
-//ALL TESTED
-//Aggiunto string geohash per la gestione della posizione e un campo false per la gestione delle query su inCharge
-public class QuarantineAssistance {
+public class QuarantineAssistance extends Geoquerable {
+    private final static String table = "quarantineAssistance";
     private DocumentReference assistanceType;
     private String description;
     private DocumentReference inCharge;
@@ -46,8 +41,6 @@ public class QuarantineAssistance {
     private String title;
     private String id;
     //private raccolta chatPrivata
-
-    //TODO fare la update della descrizione
 
     public QuarantineAssistance() {}
 
@@ -63,13 +56,17 @@ public class QuarantineAssistance {
         this.id = id;
     }
 
-    public AssistanceType getAssistanceType() throws ExecutionException, InterruptedException {
+    public AssistanceType getAssistanceTypeMaterialized() throws ExecutionException, InterruptedException {
         DocumentSnapshot document = getDocument(assistanceType);
 
         if(document.exists())
             return AssistanceType.getAssistanceTypeById(document.getId());
 
         return null;
+    }
+
+    public DocumentReference getAssistanceType(){
+        return assistanceType;
     }
 
     private void setAssistanceType(DocumentReference assistanceType) {
@@ -84,7 +81,11 @@ public class QuarantineAssistance {
         this.description = description;
     }
 
-    public User getInCharge() throws InterruptedException, ExecutionException {
+    public DocumentReference getInCharge(){
+        return inCharge;
+    }
+
+    public User getInChargeMaterialized() throws InterruptedException, ExecutionException {
         DocumentSnapshot document = getDocument(inCharge);
 
         if(document.exists())
@@ -109,7 +110,7 @@ public class QuarantineAssistance {
         return id;
     }
 
-    public void setId(String id) {
+    private void setId(String id) {
         this.id = id;
     }
 
@@ -117,7 +118,7 @@ public class QuarantineAssistance {
         return deliveryDate;
     }
 
-    public Date getDateDeliveryDate() {
+    public Date getDateDeliveryToDate() {
         return deliveryDate.toDate();
     }
 
@@ -131,7 +132,6 @@ public class QuarantineAssistance {
 
     private void setLocation(GeoPoint location) {
         this.location = location;
-        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
     }
 
     private boolean isInCharge() {
@@ -168,21 +168,21 @@ public class QuarantineAssistance {
         myQuarantine.put("title", title);
         myQuarantine.put("isInCharge", false);
 
-        DocumentReference addedDocRef = Database.addToCollection("quarantineAssistance", myQuarantine);
+        DocumentReference addedDocRef = Database.addToCollection(table, myQuarantine);
 
         return new QuarantineAssistance(AssTypeRef, description, t, geoPoint, geohash, title, addedDocRef.getId());
     }
 
     //tested
     public void removeQuarantineAssistance() throws ExecutionException, InterruptedException {
-        deleteFromCollection("quarantineAssistance", this.id);
+        deleteFromCollection(table, this.id);
 
         this.id = null;
     }
 
     //tested
     public static QuarantineAssistance getQuarantineAssistanceById(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("quarantineAssistance", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -196,7 +196,7 @@ public class QuarantineAssistance {
 
     //tested
     private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("quarantineAssistance", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -222,7 +222,7 @@ public class QuarantineAssistance {
     //tested, aggiornata 6/12/2021 con modifica del campo isInCharge
     //TODO vedere se conviene tenere il controllo se l'utente é realemnte presente nel db
     private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("quarantineAssistance", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if(user == null) {
@@ -263,7 +263,7 @@ public class QuarantineAssistance {
 
     //tested
     /*public boolean updateDeliveryDate(@NonNull Date date) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("quarantineAssistance", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -275,7 +275,7 @@ public class QuarantineAssistance {
     }*/
 
     public boolean updateDescription(@NonNull String description) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("quarantineAssistance", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -291,7 +291,7 @@ public class QuarantineAssistance {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
 
-        Task<QuerySnapshot> future = db.collection("quarantineAssistance")
+        Task<QuerySnapshot> future = db.collection(table)
                 .whereEqualTo("isInCharge", true)
                 .whereEqualTo("inCharge", getReference("users", user.getId())).get();
 
@@ -313,7 +313,7 @@ public class QuarantineAssistance {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
 
-        Query query = db.collection("quarantineAssistance")
+        Query query = db.collection(table)
                 .whereEqualTo("isInCharge", false);
 
         if(type != null)
@@ -342,7 +342,7 @@ public class QuarantineAssistance {
         arr.sort(new Comparator<QuarantineAssistance>() {
             @Override
             public int compare(QuarantineAssistance o1, QuarantineAssistance o2) {
-                return o1.getDateDeliveryDate().compareTo(o2.getDateDeliveryDate());
+                return o1.getDateDeliveryToDate().compareTo(o2.getDateDeliveryToDate());
             }
         });
 

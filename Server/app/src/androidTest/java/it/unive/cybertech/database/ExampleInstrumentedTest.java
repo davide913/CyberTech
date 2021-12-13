@@ -1,10 +1,9 @@
 package it.unive.cybertech.database;
 
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getInstance;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -14,10 +13,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Date;
+import java.util.ArrayList;
 
-import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Profile.Device;
+import it.unive.cybertech.database.Profile.User;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -36,17 +35,29 @@ public class ExampleInstrumentedTest{
 
         FirebaseFirestore db = getInstance();
 
-        //QuarantineAssistance quarantineAssistance = QuarantineAssistance.getQuarantineAssistanceByInCharge(User.getUserById("davide.finesso@hotmail.it"));
+        User u = User.getUserById("davide.finesso@hotmail.it");
 
-        //Device.createDevice("token", "deviceid");
-        //Device.createDevice("token2", "deviceid2");
+        //u.addDevice("token", "deviceId");
+        //u.addDevice("token2", "deviceId2 di prova");
 
-        Device device = Device.createDevice("token22222222222", "deviceid");
+        ArrayList<Device> arr = u.getMaterializedDevices();
 
-        device.deleteDevice();
+        arr.get(0).updateToken("token numero 2");
+
+        u.removeDevice(arr.get(0));
 
 
 
-        Log.d("date", new Date().toString());
+
+
+
+        //Task<DocumentReference> s = db.collection("users").document(u.getId()).collection("devices").add(d);
+
+
+
+
+
+
+        //Log.d("date", new Date().toString());
     }
 }

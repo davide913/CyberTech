@@ -1,8 +1,8 @@
 package it.unive.cybertech.database.Groups;
 
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getReference;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -10,16 +10,13 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
-import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
+import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Chat {

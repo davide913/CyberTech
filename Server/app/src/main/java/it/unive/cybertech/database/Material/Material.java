@@ -1,48 +1,62 @@
 package it.unive.cybertech.database.Material;
 
-import static it.unive.cybertech.database.Connection.Database.addToCollection;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.addToCollection;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
+import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
 
+import com.firebase.geofire.GeoFireUtils;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.User;
 
-//TODO testata e funzionante!
-
-public class Material {
+public class Material extends Geoquerable {
     private String id;
     private DocumentReference owner;
+    private DocumentReference renter;
     private String title;
-    private String decription;
+    private String description;
     private String photo;
-    private ArrayList<DocumentReference> queue;
+    private GeoPoint location;
+    private String geohash;
+    private Timestamp expiryDate;
     private DocumentReference type;
 
     public Material() {}
 
-    public Material(String id, DocumentReference owner, String title, String decription, String photo,
-                    ArrayList<DocumentReference> queue, DocumentReference type) {
+    private Material(String id, DocumentReference owner, String title,
+                    String description, String photo, DocumentReference renter,
+                    GeoPoint location, String geohash, DocumentReference type, Timestamp expiryDate) {
         this.id = id;
         this.owner = owner;
         this.title = title;
-        this.decription = decription;
+        this.description = description;
         this.photo = photo;
-        this.queue = queue;
+        this.renter = renter;
+        this.location = location;
+        this.geohash = geohash;
         this.type = type;
+        this.expiryDate = expiryDate;
     }
 
     public String getId() {
@@ -69,28 +83,12 @@ public class Material {
         this.title = title;
     }
 
-    public String getDescription() {
-        return decription;
-    }
-
-    private void setDescription(String decription) {
-        this.decription = decription;
-    }
-
     public String getPhoto() {
         return photo;
     }
 
     private void setPhoto(String photo) {
         this.photo = photo;
-    }
-
-    public ArrayList<DocumentReference> getQueue() {
-        return queue;
-    }
-
-    private void setQueue(ArrayList<DocumentReference> queue) {
-        this.queue = queue;
     }
 
     public DocumentReference getType() {
@@ -101,33 +99,72 @@ public class Material {
         this.type = type;
     }
 
-    public ArrayList<User> getMaterializedQueue() throws ExecutionException, InterruptedException {
-        ArrayList<User> arr = new ArrayList<>();
-
-        for (DocumentReference doc : queue) {
-            arr.add(User.getUserById(doc.getId()));
-        }
-
-        return arr;
+    public String getDescription() {
+        return description;
     }
 
+    private void setDescription(String description) {
+        this.description = description;
+    }
 
-    public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
-                                       @NonNull Type type) throws ExecutionException, InterruptedException {
+    public DocumentReference getRenter() {
+        return renter;
+    }
+
+    private void setRenter(DocumentReference renter) {
+        this.renter = renter;
+    }
+
+    public GeoPoint getLocation() {
+        return location;
+    }
+
+    private void setLocation(GeoPoint location) {
+        this.location = location;
+    }
+
+    private String getGeohash() {
+        return geohash;
+    }
+
+    private void setGeohash(String geohash) {
+        this.geohash = geohash;
+    }
+
+    public Timestamp getExpiryDate() {
+        return expiryDate;
+    }
+
+    private void setExpiryDate(Timestamp expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public static Material createMaterial(@NonNull User owner, User renter, String title, String description, String photo,
+                                          @NonNull Type type, double latitude, double longitude, Date date)
+            throws ExecutionException, InterruptedException {
 
         DocumentReference docPro = getReference("users", owner.getId());
+        DocumentReference docRen= getReference("users", renter.getId());
         DocumentReference docType = getReference("type", type.getID());
+        String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
+        Timestamp timestamp = new Timestamp(date);
+        GeoPoint location = new GeoPoint(latitude, longitude);
 
         Map<String, Object> myMaterial = new HashMap<>();          //create "table"
         myMaterial.put("title", title);
         myMaterial.put("owner", docPro);
+        myMaterial.put("renter", docRen);
         myMaterial.put("description", description);
         myMaterial.put("photo", photo);
+        myMaterial.put("expiryDate", timestamp);
         myMaterial.put("type", docType);
+        myMaterial.put("location", location);
+        myMaterial.put("geohash", geohash);
 
         DocumentReference addedDocRef = addToCollection("material", myMaterial);
 
-        return new Material(addedDocRef.getId(), docPro, title, description, photo, new ArrayList<>(), docType);
+        return new Material(addedDocRef.getId(), docPro, title, description,
+                photo, docRen, location, geohash, docType, timestamp);
     }
 
     public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
@@ -154,7 +191,7 @@ public class Material {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Title", title);
+            return docRef.update("title", title);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -179,7 +216,7 @@ public class Material {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Description", description);
+            return docRef.update("description", description);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -204,7 +241,7 @@ public class Material {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Photo", photo);
+            return docRef.update("photo", photo);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -221,26 +258,32 @@ public class Material {
         }
     }
 
-    //TODO cercare prima che l'utente sia presente nell'array per rimuoverlo o per agiungerlo
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
-    private Task<Void> addUserToQueueAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateRenterAsync(DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference("material", id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists())
-            return docRef.update("Queue", FieldValue.arrayUnion(user));
-        else
-            throw new NoMaterialFoundException("Material not found, id: " + id);
+        if (document.exists()) {
+            if(user == null)
+                return docRef.update("renter", null);
+            else
+                return docRef.update("renter", user);
+        } else
+            throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
-    public boolean addUserToQueue(@NonNull User user){
+    public boolean updateRenter(User user) {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
-            Task<Void> t = addUserToQueueAsync(userDoc);
+            Task<Void> t;
+            if (user == null){
+                t = updateRenterAsync(null);
+                setRenter(null);
+            }
+            else {
+                DocumentReference docUser = getReference("users", user.getId());
+                t = updateRenterAsync(docUser);
+                setRenter(docUser);
+            }
             Tasks.await(t);
-            this.queue.add(userDoc);
             return true;
         } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
             e.printStackTrace();
@@ -248,29 +291,44 @@ public class Material {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
-    private Task<Void> removeUserToQueueAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+    private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference("material", this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("Queue", FieldValue.arrayRemove(user));
-        } else
-            throw new NoMaterialFoundException("Material not found, id: " + id);
+            return docRef.update("expiryDate", date);
+        }else
+            throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
-    public boolean removeUserToQueue(@NonNull User user) {
+    public boolean updateExpiryDate(Date date) {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
-            Task<Void> t = removeUserToQueueAsync(userDoc);
+            Timestamp timestamp = new Timestamp(date);
+            Task<Void> t = this.updateExpiryDateAsync(timestamp);
             Tasks.await(t);
-            this.queue.remove(userDoc);
+            setExpiryDate(timestamp);
             return true;
-        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
+        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    //funzione per mattia!
+    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm)
+            throws ExecutionException, InterruptedException {
+        ArrayList<Material> arr = new ArrayList<>();
+        FirebaseFirestore db = getInstance();
+
+        Query query = db.collection("users");
+
+        List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
+                new GeoLocation(latitude, longitude));
+
+        for (DocumentSnapshot doc : documents) {
+            arr.add(Material.getMaterialById(doc.getId()));
+        }
+
+        return arr;
     }
 }

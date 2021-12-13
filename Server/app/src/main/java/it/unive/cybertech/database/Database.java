@@ -1,4 +1,5 @@
-package it.unive.cybertech.database.Connection;
+package it.unive.cybertech.database;
+
 
 import android.content.Context;
 
@@ -8,7 +9,6 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 

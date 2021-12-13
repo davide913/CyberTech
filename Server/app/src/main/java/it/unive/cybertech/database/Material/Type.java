@@ -1,7 +1,9 @@
 package it.unive.cybertech.database.Material;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getInstance;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
+import static it.unive.cybertech.database.Database.getReference;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -87,7 +89,11 @@ public class Type {
         return arr;
     }
 
-
+    @NonNull
+    @Override
+    public String toString() {
+        return typeName;
+    }
 
     /*public static Type createType(String name) throws ExecutionException, InterruptedException {
         Type t;

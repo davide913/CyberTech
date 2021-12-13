@@ -1,8 +1,8 @@
 package it.unive.cybertech.database.Groups;
 
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
 
@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
+import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
 import it.unive.cybertech.database.Profile.User;
 

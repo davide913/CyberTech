@@ -1,22 +1,18 @@
 package it.unive.cybertech.database.Groups;
 
-import static it.unive.cybertech.database.Connection.Database.deleteFromCollectionAsync;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getInstance;
-import static it.unive.cybertech.database.Connection.Database.getReference;
-
-import android.util.Log;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
+import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -25,9 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Connection.Database;
+import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
-import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
 public class Group {
