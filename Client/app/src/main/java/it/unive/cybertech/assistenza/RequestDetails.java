@@ -44,8 +44,6 @@ Modifica 29/11: aggiunto lo spinner che mi servirà poi come info da mandare al 
 
 public class RequestDetails extends AppCompatActivity {
     EditText et_requestTitle, et_requestLocation, et_requestText;
-    //User thisUser = ; //TODO: come passo il current User?
-    CachedUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,32 +126,50 @@ public class RequestDetails extends AppCompatActivity {
             }
         });
 
+        String callerClass = getIntent().getStringExtra("changeFields"); //per capire se mi chiama la RequestViz o la HomePage
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            //upload tutte le info nel db
-            Date date = Calendar.getInstance().getTime();
+            if(callerClass.equals("false")) {
+                //upload tutte le info nel db
+                Date date = Calendar.getInstance().getTime();
 
-            ArrayList<AssistanceType> buffertType = null;
-            AssistanceType choosen = null;
-            try {
-                AssistanceType.getAssistanceTypes();
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+                ArrayList<AssistanceType> buffertType = null;
+                AssistanceType choosen = null;
+                try {
+                    AssistanceType.getAssistanceTypes();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            assert false;
-            for (AssistanceType a: buffertType) {
-                if(a.getType().equals(type[0]))
-                    choosen = a;
-            }
+                assert false;
+                for (AssistanceType a : buffertType) {
+                    if (a.getType().equals(type[0]))
+                        choosen = a;
+                }
 
-            //TODO aggiungere tutti gli altri campi
-            //TODO : Trovare modo di far inserire all'utente non una stringa ma un GeoPoint
-            try {
-                QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), CachedUser.user,  date, 5, 5);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                //TODO modificare i campi lat e long
+                //TODO : Trovare modo di far inserire all'utente non una stringa ma un GeoPoint, o convertire la stringa in GeoPoint
+                try {
+                    QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), CachedUser.user, date, 5, 5);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                finish();
             }
-            finish();
+            else {
+                String id = getIntent().getStringExtra("id");
+                QuarantineAssistance thisAssistance;
+                try {
+                    thisAssistance = QuarantineAssistance.getQuarantineAssistance(id);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                //if(!et_requestTitle.toString().equals(thisAssistance.getTitle())) //TODO: quando il Db sarà pronto, chiamare le varie update
+                    //thisAssistance.updateTitle(et_requestTitle.toString());
+
+                //if( et_requestText.toString().equals(thisAssistance.getDescription()))
+                    //thisAssistance.updateDescription(et_requestText.toString());
+            }
         });
     }
 }

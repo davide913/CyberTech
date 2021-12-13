@@ -38,7 +38,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.activity_request_home_visualisation, null);
 
 
-        myList = QuarantineAssistance.getJoinableQuarantineAssistance();
+        //myList = QuarantineAssistance.getJoinableQuarantineAssistance();
 
 
         TextView title = view.findViewById(R.id.title_request);
