@@ -3,6 +3,7 @@ package it.unive.cybertech.assistenza;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,16 +31,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.ProfileActivity;
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 /*
 Modifica 29/11: aggiunto lo spinner che mi servirà poi come info da mandare al db per avere una lista delle richieste filtrata
  */
 
 public class RequestDetails extends AppCompatActivity {
-    List<RequestInfo> requestInfoList;
-
     EditText et_requestTitle, et_requestLocation, et_requestText;
 
     @Override
@@ -123,18 +126,50 @@ public class RequestDetails extends AppCompatActivity {
             }
         });
 
+        String callerClass = getIntent().getStringExtra("changeFields"); //per capire se mi chiama la RequestViz o la HomePage
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            //upload tutte le info nel db
-            Date date = Calendar.getInstance().getTime();
+            if(callerClass.equals("false")) {
+                //upload tutte le info nel db
+                Date date = Calendar.getInstance().getTime();
 
-            /*try {
-                QuarantineAssistance.createQuarantineAssistance(type[0], et_requestText.toString(), null, date); //TODO aggiungere tutti gli altri campi
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
-            finish();
+                ArrayList<AssistanceType> buffertType = null;
+                AssistanceType choosen = null;
+                try {
+                    AssistanceType.getAssistanceTypes();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                assert false;
+                for (AssistanceType a : buffertType) {
+                    if (a.getType().equals(type[0]))
+                        choosen = a;
+                }
+
+                //TODO modificare i campi lat e long
+                //TODO : Trovare modo di far inserire all'utente non una stringa ma un GeoPoint, o convertire la stringa in GeoPoint
+                /*try {
+                    QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), CachedUser.user, date, 5, 5);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+                finish();
+            }
+            else {
+                /*String id = getIntent().getStringExtra("id");
+                QuarantineAssistance thisAssistance;
+                try {
+                    thisAssistance = QuarantineAssistance.getQuarantineAssistance(id);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }*/
+
+                //if(!et_requestTitle.toString().equals(thisAssistance.getTitle())) //TODO: quando il Db sarà pronto, chiamare le varie update
+                    //thisAssistance.updateTitle(et_requestTitle.toString());
+
+                //if( et_requestText.toString().equals(thisAssistance.getDescription()))
+                    //thisAssistance.updateDescription(et_requestText.toString());
+            }
         });
     }
 }

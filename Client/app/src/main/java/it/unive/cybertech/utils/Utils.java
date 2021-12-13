@@ -1,5 +1,7 @@
 package it.unive.cybertech.utils;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
@@ -8,13 +10,18 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
@@ -30,25 +37,23 @@ public class Utils {
 
     /**
      * It can be invoked in this way
-     *
+     * <p>
      * new Utils.Dialog(c).showDialog("title", "message");
-     *
+     * <p>
      * OR
-     *
+     * <p>
      * new Utils.Dialog(this)
-     *      .setCallback(new Utils.DialogResult() {
-     *             @Override
-     *             public void onSuccess() {
-     *             }
+     * .setCallback(new Utils.DialogResult() {
      *
-     *             @Override
-     *             public void onCancel() {
-     *             }
-     *         })
-     *     [.hideCancelButton()]
-     *     [.hideOkButton()]
-     *     .showDialog("", "");
-     * */
+     * @Override public void onSuccess() {
+     * }
+     * @Override public void onCancel() {
+     * }
+     * })
+     * [.hideCancelButton()]
+     * [.hideOkButton()]
+     * .showDialog("", "");
+     */
     public static class Dialog {
         private DialogResult result;
         private boolean showOkButton, showCancelButton;
@@ -76,17 +81,17 @@ public class Utils {
             return this;
         }
 
-        public Dialog hideCancelButton(){
+        public Dialog hideCancelButton() {
             showCancelButton = false;
             return this;
         }
 
-        public Dialog hideOkButton(){
+        public Dialog hideOkButton() {
             showOkButton = false;
             return this;
         }
 
-        public void showDialog(String title, String message) {
+        public void show(String title, String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
                     .setMessage(message);

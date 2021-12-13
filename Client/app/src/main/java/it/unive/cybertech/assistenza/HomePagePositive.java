@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 public class HomePagePositive extends Fragment {
-    private ArrayList<String> takenRequestsList;
     ListView listTakenView;
 
     @Override
@@ -28,12 +29,14 @@ public class HomePagePositive extends Fragment {
 
         return view;
     }
+
 //Modificato 29/11: Aggiunta ListView per mostrare solo le richieste di aiuto caricate da me
     private void initView(View view) {
-        takenRequestsList = new ArrayList<String>(); //Da sostituire con <QuarantineAssistance>
+        ArrayList<QuarantineAssistance> takenRequestsList = new ArrayList<>();
         listTakenView = view.findViewById(R.id.lst_myRequests);
-        ArrayAdapter<String> adapter;
-        takenRequestsList.add("La prova nella seconda home");
+        ArrayAdapter<QuarantineAssistance> adapter;
+
+        //takenRequestsList.add("La prova nella seconda home");
 
         adapter = new CastomRequestsAdapter(getContext(), 0, takenRequestsList);
         listTakenView.setAdapter(adapter);
@@ -41,7 +44,14 @@ public class HomePagePositive extends Fragment {
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listTakenView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class); //Qui dal lato Positivo devo poter modificare la richiesta oppure eliminarla
-            newIntent.putExtra("title", adapter.getItem(position));
+
+            //i seguenti campi andranno compilati con le info
+            newIntent.putExtra("title", adapter.getItem(position).getTitle());
+            newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
+            //newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+
+
+            newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative
             startActivity(newIntent);
         }));
 

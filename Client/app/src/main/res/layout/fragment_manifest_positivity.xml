@@ -17,7 +17,7 @@
             android:background="@color/GhostWhite"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
@@ -32,7 +32,7 @@
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/name"
-            android:textColor="#455A64"
+            android:textColor="#212121"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.135"
             app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +82,7 @@
             android:text="@string/state_alert"
             android:textColor="#616161"
             app:layout_constraintEnd_toEndOf="@+id/textView_dateAlert"
-            app:layout_constraintHorizontal_bias="0.509"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/textView_dateAlert"
             app:layout_constraintTop_toBottomOf="@+id/textView_dateAlert" />
 
@@ -111,31 +111,43 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_nome" />
 
-        <TextView
+        <EditText
             android:id="@+id/textView_dateAlert2"
-            android:layout_width="216dp"
-            android:layout_height="29dp"
-            android:layout_marginTop="28dp"
+            android:layout_width="205dp"
+            android:layout_height="44dp"
+            android:hint="@string/no_sign"
+            android:inputType="date"
             android:paddingTop="10dp"
-            android:text="@string/no_sign"
             android:textColor="#455A64"
-            app:layout_constraintEnd_toEndOf="@+id/view"
-            app:layout_constraintHorizontal_bias="0.82"
-            app:layout_constraintStart_toStartOf="@+id/view"
-            app:layout_constraintTop_toBottomOf="@+id/textView_cognome" />
+            android:textSize="12sp"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_dateAlert"
+            app:layout_constraintEnd_toEndOf="@+id/textView_dateAlert"
+            app:layout_constraintHorizontal_bias="0.943"
+            app:layout_constraintStart_toStartOf="@+id/textView_dateAlert"
+            app:layout_constraintTop_toTopOf="@+id/textView_dateAlert"
+            app:layout_constraintVertical_bias="0.0"
+            tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck" />
 
         <TextView
             android:id="@+id/textView_stateAlert2"
-            android:layout_width="218dp"
-            android:layout_height="28dp"
-            android:layout_marginTop="28dp"
+            android:layout_width="195dp"
+            android:layout_height="41dp"
+            android:inputType="text"
             android:paddingTop="10dp"
             android:text="@string/no_sign"
             android:textColor="#455A64"
-            app:layout_constraintEnd_toEndOf="@+id/view"
-            app:layout_constraintHorizontal_bias="0.865"
-            app:layout_constraintStart_toStartOf="@+id/view"
-            app:layout_constraintTop_toBottomOf="@+id/textView_dateAlert" />
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_stateAlert"
+            app:layout_constraintEnd_toEndOf="@+id/textView_stateAlert"
+            app:layout_constraintHorizontal_bias="0.953"
+            app:layout_constraintStart_toStartOf="@+id/textView_stateAlert"
+            app:layout_constraintTop_toTopOf="@+id/textView_stateAlert"
+            app:layout_constraintVertical_bias="1.0"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <Button
             android:id="@+id/button_alertPos"
@@ -162,6 +174,21 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
             tools:ignore="ImageContrastCheck" />
+
+        <Button
+            android:id="@+id/button_signGua"
+            android:layout_width="198dp"
+            android:layout_height="58dp"
+            android:backgroundTint="@color/ciuc"
+            android:text="@string/manifest_negativity"
+            android:theme="@style/Button.ciuc"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.492"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
+            app:layout_constraintVertical_bias="0.545" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

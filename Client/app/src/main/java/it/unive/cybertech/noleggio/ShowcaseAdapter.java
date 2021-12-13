@@ -12,13 +12,14 @@ import java.util.List;
 import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Material.Material;
 
 public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>{
 
-    private final List<String> showcaseList;
+    private final List<Material> showcaseList;
     private ItemClickListener clickListener;
 
-    public ShowcaseAdapter(List<String> showcaseList) {
+    public ShowcaseAdapter(List<Material> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
@@ -38,9 +39,9 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final String item, int position) {
-            title.setText(item);
-            description.setText(item);
+        public void bind(final Material item, int position) {
+            title.setText(item.getTitle());
+            description.setText(item.getDescription());
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
         }
     }

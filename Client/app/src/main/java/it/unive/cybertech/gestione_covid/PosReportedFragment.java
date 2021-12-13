@@ -1,5 +1,7 @@
 package it.unive.cybertech.gestione_covid;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+
 import androidx.fragment.app.Fragment;
 import android.os.Bundle;
 
@@ -12,8 +14,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
 import it.unive.cybertech.utils.CachedUser;
 
@@ -26,59 +30,60 @@ public class PosReportedFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_pos_reported, container, false);
 
-        initViews(v);
+        try {
+            initViews(v);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return v;
     }
 
-    private void initViews(View v){
-        Boolean var = false;
+    private void initViews(View v) throws ExecutionException, InterruptedException {
 
-        /*TODO
-        if(ObjectClient.getPositiveUsers() != null){
-            var = true;
-        }
-         */
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ArrayList<Group> groupList = Group.getPositiveGroups(user);
+                    Boolean var = false;
+                    ImageView imageView = v.findViewById(R.id.imageView_PosReported);
+                    TextView textView = v.findViewById(R.id.TextView_PosReported);
+                    TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
+                    ListView listView = v.findViewById(R.id.ListView_signReported);
 
+                    if(var){
+                        imageView.setVisibility(View.INVISIBLE);
+                        textView.setVisibility(View.INVISIBLE);
+                        listView.setVisibility(View.VISIBLE);
+                        textView1.setVisibility(View.VISIBLE);
 
-        ImageView imageView = v.findViewById(R.id.imageView_PosReported);
-        TextView textView = v.findViewById(R.id.TextView_PosReported);
-        TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
-        ListView listView = v.findViewById(R.id.ListView_signReported);
+                        ArrayAdapter<Group> adapter;
 
-        if(var){
-            imageView.setVisibility(View.INVISIBLE);
-            textView.setVisibility(View.INVISIBLE);
-            listView.setVisibility(View.VISIBLE);
-            textView1.setVisibility(View.VISIBLE);
-            ArrayList<String> sign = new ArrayList<>();
+                        adapter = new CustomSignReceivedAdapter(getContext(), 0, groupList); //TODO qua prenderà in ingresso userList
 
-            /* TODO passa il vero ArrayList di utenti positivi
-            ArrayList<User> userList = ObjectClient.getPositiveUsers();
-             */
+                        listView.setAdapter(adapter);
+                    }
+                    else{
+                        imageView.setVisibility(View.VISIBLE);
+                        textView.setVisibility(View.VISIBLE);
+                        listView.setVisibility(View.INVISIBLE);
+                        textView1.setVisibility(View.INVISIBLE);
+                    }
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            ArrayAdapter<String> adapter;
-
-            //Prove ListView con Adapter
-            sign.add("rawlist1");
-            sign.add("rawlist2");
-            sign.add("rawlist3");
-            sign.add("rawlist4");
-            sign.add("rawlist5");
-            sign.add("rawlist6");
-
-            adapter = new CustomSignReceivedAdapter(getContext(), 0, sign); //TODO qua prenderà in ingresso userList
-
-            listView.setAdapter(adapter);
-        }
-        else{
-            imageView.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
-            listView.setVisibility(View.INVISIBLE);
-            textView1.setVisibility(View.INVISIBLE);
-        }
-
+            }
+        });
+        t.start();
+        t.join();
 
     }
+
 
 }

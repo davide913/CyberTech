@@ -17,12 +17,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/takenRequests"
+        android:id="@+id/takenRequest"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginStart="40dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/prese_in_carico"
+        android:text="Presa in carico"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -30,7 +30,7 @@
         android:id="@+id/listRequests"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/takenRequests"
+        app:layout_constraintBottom_toTopOf="@+id/takenRequest"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/homeNegSpinner"></ListView>
@@ -42,7 +42,7 @@
         android:layout_marginEnd="24dp"
         android:text="Vai alla chat"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/takenRequests" />
+        app:layout_constraintTop_toTopOf="@+id/takenRequest" />
 
     <Spinner
         android:id="@+id/homeNegSpinner"

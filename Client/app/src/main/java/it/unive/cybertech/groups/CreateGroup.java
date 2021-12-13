@@ -10,7 +10,6 @@ import android.widget.EditText;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Groups.Groups;
 
 public class CreateGroup extends AppCompatActivity {
 

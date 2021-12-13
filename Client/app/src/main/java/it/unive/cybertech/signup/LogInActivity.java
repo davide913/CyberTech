@@ -2,14 +2,12 @@ package it.unive.cybertech.signup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -26,10 +24,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
@@ -114,7 +110,7 @@ public class LogInActivity extends AppCompatActivity {
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
                                 try {
-                                    u = User.createUser(user.getUid(), name.trim(), surname, Sex.nonBinary, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                                    u = User.createUser(user.getUid(), name.trim(), surname, Sex.nonBinary, null, null,null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
                                 } catch (ExecutionException | InterruptedException executionException) {
                                     executionException.printStackTrace();
                                 }
@@ -131,12 +127,12 @@ public class LogInActivity extends AppCompatActivity {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Credenziali errate");
+                            new Utils.Dialog(c).show("Login fallito", "Credenziali errate");
                             e.printStackTrace();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Utente inesistente");
+                            new Utils.Dialog(c).show("Login fallito", "Utente inesistente");
                         } catch (Exception e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Errore generico");
+                            new Utils.Dialog(c).show("Login fallito", "Errore generico");
                         }
                     }
                 });
@@ -152,12 +148,12 @@ public class LogInActivity extends AppCompatActivity {
                         try {
                             throw task.getException();
                         } catch (FirebaseAuthInvalidCredentialsException e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Credenziali errate");
+                            new Utils.Dialog(c).show("Login fallito", "Credenziali errate");
                             e.printStackTrace();
                         } catch (FirebaseAuthInvalidUserException e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Utente inesistente");
+                            new Utils.Dialog(c).show("Login fallito", "Utente inesistente");
                         } catch (Exception e) {
-                            new Utils.Dialog(c).showDialog("Login fallito", "Errore generico");
+                            new Utils.Dialog(c).show("Login fallito", "Errore generico");
                         }
                     }
                 });
@@ -185,7 +181,7 @@ public class LogInActivity extends AppCompatActivity {
             public void onCancel() {
                 finish();
             }
-        }).showDialog(getString(R.string.position_required), getString(R.string.position_required_description));
+        }).show(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 
     private void checkGPSPermission() {
@@ -226,7 +222,7 @@ public class LogInActivity extends AppCompatActivity {
                         }
                     })
                     .hideCancelButton()
-                    .showDialog("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
+                    .show("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
         else
             initGPS();
     }
@@ -240,7 +236,7 @@ public class LogInActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                new Utils.Dialog(this).showDialog("Login fallito", "Si prega di riprovare più tardi");
+                new Utils.Dialog(this).show("Login fallito", "Si prega di riprovare più tardi");
                 e.printStackTrace();
             }
         }
