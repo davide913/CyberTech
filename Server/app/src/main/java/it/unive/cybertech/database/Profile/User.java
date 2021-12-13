@@ -2,6 +2,7 @@ package it.unive.cybertech.database.Profile;
 
 import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
 
@@ -15,7 +16,6 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 
@@ -30,13 +30,13 @@ import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 
-//TODO all the function are tested
 public class User extends Geoquerable {
     private final static String table = "users";
     private String id;
     private String name;
     private String surname;
     private Sex sex;
+    private Timestamp birthday;
     private String address;
     private String city;
     private String country;
@@ -52,24 +52,8 @@ public class User extends Geoquerable {
 
     public User() {}
 
-    private User(String id, String name, String surname, Sex sex, String address, String city,
-                 String country, GeoPoint location, boolean greenPass, Timestamp positiveSince, long lendingPoint) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-        this.sex = sex;
-        this.address = address;
-        this.city = city;
-        this.country = country;
-        this.location = location;
-        this.geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
-        this.greenPass = greenPass;
-        this.positiveSince = positiveSince;
-        this.lendingPoint = lendingPoint;
-    }
-
-    private User(String id, String name, String surname, Sex sex, String address,
-                 String city, String country, GeoPoint location, boolean greenPass,
+    private User(String id, String name, String surname, Sex sex, Timestamp birthday,
+                 String address, String city, String country, GeoPoint location, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
                  ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> materials,
                  DocumentReference quarantineAssistance) {
@@ -78,6 +62,7 @@ public class User extends Geoquerable {
         this.name = name;
         this.surname = surname;
         this.sex = sex;
+        this.birthday = birthday;
         this.address = address;
         this.city = city;
         this.country = country;
@@ -220,6 +205,18 @@ public class User extends Geoquerable {
         this.quarantineAssistance = quarantineAssistance;
     }
 
+    public Timestamp getBirthday() {
+        return birthday;
+    }
+
+    public Date getBirthDayToDate() {
+        return birthday.toDate();
+    }
+
+    private void setBirthday(Timestamp birthday) {
+        this.birthday = birthday;
+    }
+
     public ArrayList<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
         ArrayList<Device> arr = new ArrayList<>();
 
@@ -254,23 +251,20 @@ public class User extends Geoquerable {
         return QuarantineAssistance.getQuarantineAssistanceById(quarantineAssistance.getId());
     }
 
-    //The setter are private just for don't permit to the library user to change the value. Firebase library needs setters!
-
-    //modificata il 05/12/2021-> tlto il getResult()
-    public static User createUser(String id, String name, String surname, Sex sex, String address,
-                                  String city, String country, long latitude, long longitude, boolean greenpass) throws ExecutionException, InterruptedException {
+    //modificata il 13/12/2021 -> aggiunta la data di compleanno
+    public static User createUser(String id, String name, String surname, Sex sex, Date birthDay,
+                                  String address, String city, String country, long latitude, long longitude,
+                                  boolean greenpass) throws ExecutionException, InterruptedException {
 
         if(sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        User user = new User(id, name, surname, sex, address, city, country, new GeoPoint(latitude, longitude),
+        User user = new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country, new GeoPoint(latitude, longitude),
                 greenpass, null, 0, new ArrayList<DocumentReference>(),
                 new ArrayList<DocumentReference>(),
                 new ArrayList<DocumentReference>(), null);
 
-        Task<Void> future = db.collection(table).document(id).set(user);
+        Task<Void> future = getInstance().collection(table).document(id).set(user);
         Tasks.await(future);
 
         return user;
@@ -332,16 +326,16 @@ public class User extends Geoquerable {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("greenpass", val);
+            return docRef.update("greenPass", val);
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean updateGreenPass(boolean val) {
+    public boolean updateGreenPass() {
         try {
-            Task<Void> t = updateGreenPassAsync(val);
+            Task<Void> t = updateGreenPassAsync(!this.greenPass);
             Tasks.await(t);
-            this.greenPass = val;
+            this.greenPass = !this.greenPass;
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -379,9 +373,39 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+    private Task<Void> updateLocationAsync(String newCountry, String newCity, String newAddress, GeoPoint geoPoint)
+            throws ExecutionException, InterruptedException {
+
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            docRef.update("address", newAddress);
+            docRef.update("city", newCity);
+            docRef.update("country", newCountry);
+            return docRef.update("location", geoPoint);
+
+        } else
+            throw new NoUserFoundException("User not found, id: " + id);
+    }
+
+    public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude){
+        try {
+            GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+            Task<Void> t = updateLocationAsync(newCountry, newCity, newAddress, geoPoint);
+            Tasks.await(t);
+            this.country = newCountry;
+            this.city = newCity;
+            this.address = newAddress;
+            this.location = geoPoint;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
     private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -468,30 +492,6 @@ public class User extends Geoquerable {
         return true;
     }
 
-    //1/12/2021 modificata le update sulla equals ( faccio un confronto sugli id ) e usata la getMaterialized(TYPE) per vedere se gia presente l'oggetto
-    /*public boolean updateDevice(@NonNull Device oldDevice, @NonNull Device newDevice) throws ExecutionException, InterruptedException {
-        if (!oldDevice.getId().equals(newDevice.getId())) {          //if old and new device are different
-            boolean flag = false;
-            ArrayList<Device> devices = getMaterializedDevices();
-
-            for (Device d : devices) {               //check if the old device is present in the list of that user
-                if (d.equals(oldDevice)) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (flag) {             //if find the old device it can update that
-                oldDevice.updateToken(newDevice.getToken());
-                return true;
-            }
-        }
-        return false;
-    }*/
-
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -516,9 +516,6 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
     private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -543,30 +540,6 @@ public class User extends Geoquerable {
         }
     }
 
-    /*public boolean updateLending(@NonNull LendingInProgress oldLending, @NonNull LendingInProgress newLending) throws Exception {
-        if (!oldLending.getId().equals(newLending.getId())) {          //if old and new device are different
-            boolean flag = false;
-            ArrayList<LendingInProgress> lendingInProgresses = getMaterializedLendingInProgress();
-
-            for (LendingInProgress l : lendingInProgresses) {               //check if the old LendingInProgress is present in the list of that user
-                if (l.equals(oldLending)) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (flag) {             //if find the old LendingInProgress it can update that
-                removeLending(oldLending);
-                addLending(newLending);
-                return true;
-            }
-        }
-        return false;
-    }*/
-
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> addMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -591,9 +564,6 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> removeMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -617,26 +587,6 @@ public class User extends Geoquerable {
             return false;
         }
     }
-
-    /*public boolean updateRentMaterial(@NonNull RentMaterial oldrentMaterial, @NonNull RentMaterial newrentMaterial) throws Exception {
-        if (!oldrentMaterial.getId().equals(newrentMaterial.getId())) {
-            boolean flag = false;
-            ArrayList<RentMaterial> rentMaterials = getMaterializedRentMaterial();
-
-            for (RentMaterial l : rentMaterials) {               //check if the old RentMaterial is present in the list of that user
-                if (l.equals(oldrentMaterial)) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (flag) {             //if find the old RentMaterial it can update that
-                removeRentMaterial(oldrentMaterial);
-                addRentMaterial(newrentMaterial);
-                return true;
-            }
-        }
-        return false;
-    }*/
 
     //modificata 30/11/2021, non salvo la classe intera quarantine assistance ma solo la sua reference sul db
     private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
