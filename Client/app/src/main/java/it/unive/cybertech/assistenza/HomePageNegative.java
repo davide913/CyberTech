@@ -20,9 +20,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 /*
@@ -33,6 +35,9 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
 public class HomePageNegative extends Fragment {
     ListView listView;
 
+    public HomePageNegative() throws ExecutionException, InterruptedException {
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -42,7 +47,7 @@ public class HomePageNegative extends Fragment {
         return view;
     }
 
-    private void initViews(View view) {
+    private void initViews(View view) throws ExecutionException, InterruptedException {
         ArrayAdapter<QuarantineAssistance> adapter;
         ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<QuarantineAssistance>();
         listView = view.findViewById(R.id.listRequests);
@@ -56,18 +61,15 @@ public class HomePageNegative extends Fragment {
         Spinner myHomeSpinner = view.findViewById(R.id.homeNegSpinner);
 
         // Initializing a String Array
-        String[] typeOptions = new String[]{
-                "Tutte le categorie...",
-                "Medicinali",
-                "Spesa",
-                "Commissioni",
-                "Posta"
+        ArrayList<AssistanceType> typeOptions = AssistanceType.getAssistanceTypes();
+
+                //TODO: get types
         };
 
-        final List<String> typeList = new ArrayList<>(Arrays.asList(typeOptions));
+        List<AssistanceType> typeList = AssistanceType.getAssistanceTypes();
 
         // Initializing an ArrayAdapter
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, typeList){
+        ArrayAdapter<AssistanceType> spinnerArrayAdapter = new ArrayAdapter<AssistanceType>(getContext(), R.layout.spinner_item, typeList){
 
             @Override
             public boolean isEnabled(int position){
@@ -115,7 +117,6 @@ public class HomePageNegative extends Fragment {
             }
         });
 
-
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
@@ -133,6 +134,7 @@ public class HomePageNegative extends Fragment {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
             newIntent.putExtra("class", "negative"); //TODO: da vedere se c'è bisogno di passare altre info per identificare chi sta chiedendo la proprie richiesta presa in carico
+            //TODO: dalla taken non devo prendere di nuovo in carico
             startActivity(newIntent);
         });
 

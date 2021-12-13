@@ -74,7 +74,6 @@ public class RequestViz extends AppCompatActivity {
         QuarantineAssistance thisAssistance = null;
 //Modificato 29/11: questa pagina ha due funzioni dipendentemente dal fatto che ci acceda un malato o uno sano, quello sano può accettare o smettere di eseguire una richiesta
         //l'utente malato invece può modificare la propria richiesta (dopo controlli lato DB dei vari campi modificati), eliminarla o accedere alla chat
-        //manca da mettere i vari set GONE per la visibilità
 
         //Pulsanti visibili solo dall'utente Negativo che presta soccorso
         if(callerClass.equals("negative")) {
@@ -130,6 +129,7 @@ public class RequestViz extends AppCompatActivity {
             this.findViewById(R.id.btn_changeFields).setOnClickListener(v -> { //per modificare i campi, nel DB verificare e sostituire i campi nuovi con quelli vecchi della stessa richiesta
                 Intent newIntent = new Intent(this, RequestDetails.class);
 
+                assert request != null;
                 newIntent.putExtra("id", request.getId());
                 newIntent.putExtra("changeFields", "true");
                 startActivity(newIntent);
