@@ -86,29 +86,28 @@
         android:id="@+id/btn_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
         android:text="Chat"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/accept_request" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_deleteRequest" />
 
     <Button
         android:id="@+id/btn_changeFields"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="104dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="68dp"
         android:text="Modifica richiesta"
-        app:layout_constraintStart_toEndOf="@+id/btn_chat"
-        app:layout_constraintTop_toBottomOf="@+id/stop_helping" />
+        app:layout_constraintStart_toEndOf="@+id/btn_deleteRequest"
+        app:layout_constraintTop_toTopOf="@+id/btn_deleteRequest" />
 
     <Button
         android:id="@+id/btn_deleteRequest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
         android:text="Elimina richiesta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_chat" />
+        app:layout_constraintTop_toBottomOf="@+id/accept_request" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,23 +19,16 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 public class CastomRequestsAdapter extends ArrayAdapter {
-    private List<String> myList;
-    private List<QuarantineAssistance> myOtherList; //aggiunta questa lista
+    private List<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
     private int index = 0;
 
-    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<String> myList) { //TODO: non array di stringhe ma array di richieste prese su dal db
+    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList) {
         super(context, resource, myList);
         this.myList = myList;
         this.context = context;
     }
-
-    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList, int unused) { //TODO: non array di stringhe ma array di richieste prese su dal db
-        super(context, resource, myList);
-        this.myOtherList = myList;
-        this.context = context;
-    } //aggiunto questo secondo costruttore per i test
 
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -44,14 +37,18 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.activity_request_home_visualisation, null);
 
+
+        //myList = QuarantineAssistance.getJoinableQuarantineAssistance();
+
+
         TextView title = view.findViewById(R.id.title_request);
-        title.setText(myList.get(index)); ////TODO: request.getTitle();
+        title.setText(myList.get(index).getTitle());
 
         TextView location = view.findViewById(R.id.location_request);
-        location.setText(myList.get(index)); //TODO: request.getLocation();
+        location.setText(myList.get(index).getLocation().toString()); //TODO: convertire una Stringa in GeoPoint
 
         TextView date = view.findViewById(R.id.date_request);
-        date.setText(myList.get(index)); // TODO: myOtherList.get(index).getDate().toString();
+        date.setText(myList.get(index).getDeliveryDate().toString());
 
         return view;
     }

@@ -3,13 +3,12 @@ package it.unive.cybertech.signup;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -18,7 +17,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
@@ -99,44 +97,59 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void signInWithEmailAndPassword(String email, String password, String name, String surname, String sex, Context c) {
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                new Thread(() -> {
-                    try {
-                        String address = "", city = "", country = "";
-                        Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
-                        List<Address> addresses = gcd.getFromLocation(location.getLatitude(),
-                                location.getLongitude(), 1);
-                        if (addresses.size() > 0) {
-                            Address adr = addresses.get(0);
-                            city = adr.getLocality();
-                            country = adr.getCountryName();
-                            address = adr.getThoroughfare();
+        try {
+            String address = "", city = "", country = "";
+            Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
+            List<Address> addresses = gcd.getFromLocation(location.getLatitude(),
+                    location.getLongitude(), 1);
+            if (addresses.size() > 0) {
+                Address adr = addresses.get(0);
+                city = adr.getLocality();
+                country = adr.getCountryName();
+                address = adr.getThoroughfare();
+                String finalAddress = address;
+                String finalCity = city;
+                String finalCountry = country;
+                mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        new Thread(() -> {
+                            try {
+                                User u = User.createUser(task.getResult().getUser().getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex),null, finalAddress, finalCity, finalCountry, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                                if (u != null) {
+                                    Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+                    } else {
+                        try {
+                            throw task.getException();
+                        } catch (FirebaseAuthWeakPasswordException e) {
+                            new Utils.Dialog(c).show("Registrazione fallita", "Usa una password più sicura");
+                            e.printStackTrace();
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            new Utils.Dialog(c).show("Registrazione fallita", "Indirizzo email malformato");
+                        } catch (FirebaseAuthUserCollisionException e) {
+                            new Utils.Dialog(c).show("Registrazione fallita", "Utente già registrato");
+                        } catch (Exception e) {
+                            new Utils.Dialog(c).show("Registrazione fallita", "Errore generico");
                         }
-                        User u = User.createUser(task.getResult().getUser().getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), address, city, country, (long) location.getLatitude(), (long) location.getLongitude(), false);
-                        if (u != null) {
-                            Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }).start();
-            } else {
-                try {
-                    throw task.getException();
-                } catch (FirebaseAuthWeakPasswordException e) {
-                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Usa una password più sicura");
-                    e.printStackTrace();
-                } catch (FirebaseAuthInvalidCredentialsException e) {
-                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Indirizzo email malformato");
-                } catch (FirebaseAuthUserCollisionException e) {
-                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Utente già registrato");
-                } catch (Exception e) {
-                    new Utils.Dialog(c).showDialog("Registrazione fallita", "Errore generico");
-                }
-            }
-        });
+                });
+            }else
+                new Utils.Dialog(c).show("Registrazione fallita", "Impossibile ottenere l'indirizzo civico");
+        }catch(IOException e){}
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

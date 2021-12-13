@@ -20,6 +20,7 @@ di prenderlo in carico
  */
 
 public class TakenRequests extends AppCompatActivity {
+    /*
     private ArrayList<String> takenRequestsList;
     ListView listTakenView;
 
@@ -53,4 +54,6 @@ public class TakenRequests extends AppCompatActivity {
 
 
     }
+
+     */
 }
