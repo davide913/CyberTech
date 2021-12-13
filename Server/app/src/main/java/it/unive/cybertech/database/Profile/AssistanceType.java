@@ -65,7 +65,7 @@ public class AssistanceType {
             throw new NoAssistanceTypeFoundException("No Assistance Type found with this id: " + id);
     }
 
-    public static AssistanceType getAssistanceTypeByName(@NonNull String name) throws ExecutionException, InterruptedException {
+    /*public static AssistanceType getAssistanceTypeByName(@NonNull String name) throws ExecutionException, InterruptedException {
         FirebaseFirestore db = getInstance();      //create of object db
 
         Task<QuerySnapshot> future = db.collection(table).whereEqualTo("type", name).get();
@@ -79,7 +79,7 @@ public class AssistanceType {
         assistance.id = documents.get(0).getId();
 
         return assistance;
-    }
+    }*/
 
     public static ArrayList<AssistanceType> getAssistanceTypes() throws ExecutionException, InterruptedException {
         FirebaseFirestore db = getInstance();      //create of object db
@@ -97,5 +97,10 @@ public class AssistanceType {
         }
 
         return arr;
+    }
+
+    @Override
+    public String toString() {
+        return Type;
     }
 }

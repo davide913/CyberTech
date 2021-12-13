@@ -270,7 +270,7 @@ public class User extends Geoquerable {
         return user;
     }
 
-    //TODO verificare che se ci sono degli array a null di inizializzarli! ( in caso cotrario le update dei rispettivi array andrebbero in errore )
+
     public static User getUserById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -317,9 +317,7 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     //modificata 30/11/2021, greenpass era maiuscolo
     private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
@@ -331,11 +329,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean updateGreenPass() {
+    public boolean updateGreenPass(boolean val) {
         try {
-            Task<Void> t = updateGreenPassAsync(!this.greenPass);
+            Task<Void> t = updateGreenPassAsync(val);
             Tasks.await(t);
-            this.greenPass = !this.greenPass;
+            this.greenPass = val;
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -343,9 +341,6 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -483,7 +478,7 @@ public class User extends Geoquerable {
         }
     }
 
-
+    //nuova, inserita il 13/12/2021
     private boolean notContainDevice(String deviceId){
         for (DocumentReference document: this.devices ) {
             if(deviceId.equals(document.getId()))

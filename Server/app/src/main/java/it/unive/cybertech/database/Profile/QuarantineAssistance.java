@@ -219,8 +219,6 @@ public class QuarantineAssistance extends Geoquerable {
         }
     }
 
-    //tested, aggiornata 6/12/2021 con modifica del campo isInCharge
-    //TODO vedere se conviene tenere il controllo se l'utente é realemnte presente nel db
     private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -279,8 +277,20 @@ public class QuarantineAssistance extends Geoquerable {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            docRef.update("description", description);
+            Tasks.await(docRef.update("description", description));
             this.setDescription(description);
+            return true;
+        } else
+            return false;
+    }
+
+    public boolean updateTitle(@NonNull String title) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            Tasks.await(docRef.update("title", title));
+            this.setTitle(title);
             return true;
         } else
             return false;
