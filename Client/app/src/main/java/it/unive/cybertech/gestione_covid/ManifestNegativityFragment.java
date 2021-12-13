@@ -1,3 +1,6 @@
+//INUTILIZZATA
+
+
 package it.unive.cybertech.gestione_covid;
 
 import android.content.DialogInterface;
