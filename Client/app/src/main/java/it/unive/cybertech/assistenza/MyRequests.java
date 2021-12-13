@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 /*
 Qui ogni utente potrà vedere le proprie richieste pubblicate, avrà la possibilità di editarle, cancellarle, e vedere
@@ -19,13 +20,12 @@ gli utenti che si sono offerti per l'aiuto
  */
 
 public class MyRequests extends AppCompatActivity {
-    private ArrayList<String> myUploadedRequests;
     ListView listMyView;
 
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my_requests); //TODO scambiarla con request_viz oppure
+        setContentView(R.layout.activity_my_requests);
 
         Toolbar toolbar = findViewById(R.id.toolbar_myRequest);
         setSupportActionBar(toolbar);
@@ -34,10 +34,10 @@ public class MyRequests extends AppCompatActivity {
 
         setTitle("La mia richiesta");
 
-        myUploadedRequests = new ArrayList<String>();
+        ArrayList<QuarantineAssistance> myUploadedRequests = new ArrayList<>();
         listMyView = findViewById(R.id.list_MyRequests);
-        ArrayAdapter<String> adapter;
-        myUploadedRequests.add("La terza prova ");
+        ArrayAdapter<QuarantineAssistance> adapter;
+
 
         adapter = new CastomRequestsAdapter(this, 0, myUploadedRequests);
         listMyView.setAdapter(adapter);
@@ -45,9 +45,12 @@ public class MyRequests extends AppCompatActivity {
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listMyView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(this, RequestViz.class);
-            newIntent.putExtra("title", adapter.getItem(position));
+            newIntent.putExtra("title", adapter.getItem(position).getTitle());
+            newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
+            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+
+            newIntent.putExtra("class", "positive");
             startActivity(newIntent);
         }));
-
     }
 }

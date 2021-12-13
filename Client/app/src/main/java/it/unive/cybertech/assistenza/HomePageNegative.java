@@ -2,15 +2,11 @@ package it.unive.cybertech.assistenza;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import static it.unive.cybertech.utils.CachedUser.user;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,22 +17,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.Timestamp;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
-import it.unive.cybertech.database.Profile.User;
-import it.unive.cybertech.utils.CachedUser;
 
 /*
 La home page di assistenza si occupa di mostrare le richieste in primo piano (in un qualche ordine)
@@ -44,12 +33,10 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
  quelle già create, andare sul suo profilo
  */
 public class HomePageNegative extends Fragment {
-    private ArrayList<String> requestInfoList;
-    private ArrayList<QuarantineAssistance> myQuarantineList;
     ListView listView;
 
-    ListView myNewListView;
-
+    public HomePageNegative() throws ExecutionException, InterruptedException {
+    }
 
     @Nullable
     @Override
@@ -60,27 +47,12 @@ public class HomePageNegative extends Fragment {
         return view;
     }
 
-    private void initViews(View view) {
-        requestInfoList = new ArrayList<String>();
-        ArrayAdapter<String> adapter; //TODO: non più String, ma QuarantineAssistance
-
+    private void initViews(View view) throws ExecutionException, InterruptedException {
+        ArrayAdapter<QuarantineAssistance> adapter;
+        ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<QuarantineAssistance>();
         listView = view.findViewById(R.id.listRequests);
-        requestInfoList.add("stringa di prova");
-        requestInfoList.add("La seconda prova della Home");
-
-        adapter = new CastomRequestsAdapter(getContext(), 0, requestInfoList); // myQuarantineList
+        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList);
         listView.setAdapter(adapter);
-
-        /*
-        myQuarantineList = new ArrayList<QuarantineAssistance>();
-        ArrayAdapter<QuarantineAssistance> myAdapter;
-        myNewListView = view.findViewById(R.id.listRequests);
-
-        myAdapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList, 0);
-        myNewListView.setAdapter(myAdapter);
-        */
-
-
 
         final String[] homeType = new String[1];
 
@@ -89,18 +61,15 @@ public class HomePageNegative extends Fragment {
         Spinner myHomeSpinner = view.findViewById(R.id.homeNegSpinner);
 
         // Initializing a String Array
-        String[] typeOptions = new String[]{
-                "Seleziona una Categoria...",
-                "Medicinali",
-                "Spesa",
-                "Commissioni",
-                "Posta"
+        ArrayList<AssistanceType> typeOptions = AssistanceType.getAssistanceTypes();
+
+                //TODO: get types
         };
 
-        final List<String> typeList = new ArrayList<>(Arrays.asList(typeOptions));
+        List<AssistanceType> typeList = AssistanceType.getAssistanceTypes();
 
         // Initializing an ArrayAdapter
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item, typeList){
+        ArrayAdapter<AssistanceType> spinnerArrayAdapter = new ArrayAdapter<AssistanceType>(getContext(), R.layout.spinner_item, typeList){
 
             @Override
             public boolean isEnabled(int position){
@@ -148,23 +117,31 @@ public class HomePageNegative extends Fragment {
             }
         });
 
-
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
-            newIntent.putExtra("title", adapter.getItem(position));
-            newIntent.putExtra("location", adapter.getItem(position));
+            newIntent.putExtra("title",  adapter.getItem(position).getTitle());
+            newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
+            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+
+            //
+            newIntent.putExtra("class", "negative");
             startActivity(newIntent);
         }));
 
         //Poter prendere in carico una richiesta solo se sei negativo
-        view.findViewById(R.id.takenRequests).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), TakenRequests.class));
+        view.findViewById(R.id.takenRequest).setOnClickListener(v -> {
+            Intent newIntent = new Intent(getContext(), RequestViz.class);
+
+            newIntent.putExtra("class", "negative"); //TODO: da vedere se c'è bisogno di passare altre info per identificare chi sta chiedendo la proprie richiesta presa in carico
+            //TODO: dalla taken non devo prendere di nuovo in carico
+            startActivity(newIntent);
         });
 
 
         view.findViewById(R.id.btn_chatNeg).setOnClickListener(v -> {
             //ci metto il collegamento alla chat
         });
+
     }
 }
