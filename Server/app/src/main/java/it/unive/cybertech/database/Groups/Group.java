@@ -26,6 +26,7 @@ import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Group {
+    private final static String table = "groups";
     private String id;
     private String name;
     private String description;
@@ -142,7 +143,7 @@ public class Group {
         myGroup.put("description", description);
         myGroup.put("owner", userRef);
 
-        DocumentReference addedDocRef = Database.addToCollection("groups", myGroup);
+        DocumentReference addedDocRef = Database.addToCollection(table, myGroup);
 
         Group group = new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<DocumentReference>(),
                     new ArrayList<DocumentReference>(), new ArrayList<DocumentReference>());
@@ -153,7 +154,7 @@ public class Group {
     }
 
     public static Group getGroupById(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Group group = null;
@@ -177,11 +178,11 @@ public class Group {
     }
 
     private Task<Void> deleteGroupAsync() throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return deleteFromCollectionAsync("groups", id);
+            return deleteFromCollectionAsync(table, id);
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
@@ -199,7 +200,7 @@ public class Group {
     }
 
     private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("groups", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -221,7 +222,7 @@ public class Group {
     }
 
     private Task<Void> updateNameAsync(String name) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("groups", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -243,7 +244,7 @@ public class Group {
     }
 
     private Task<Void> addMessageAsync(@NonNull DocumentReference message) throws Exception {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -266,7 +267,7 @@ public class Group {
     }
 
     private Task<Void> removeMessageAsync(@NonNull DocumentReference message) throws Exception {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -289,7 +290,7 @@ public class Group {
     }
 
     private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -312,7 +313,7 @@ public class Group {
     }
 
     private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws Exception {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -338,7 +339,7 @@ public class Group {
     }
 
     private Task<Void> addActivityAsync(@NonNull DocumentReference user) throws Exception {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -361,7 +362,7 @@ public class Group {
     }
 
     private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws Exception {
-        DocumentReference docRef = getReference("groups", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
@@ -388,7 +389,7 @@ public class Group {
         FirebaseFirestore db = getInstance();
         DocumentReference userDoc = getReference("users", user.getId());
 
-        Task<QuerySnapshot> future = db.collection("groups").whereArrayContains("members", userDoc).get();
+        Task<QuerySnapshot> future = db.collection(table).whereArrayContains("members", userDoc).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 

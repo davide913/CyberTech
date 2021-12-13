@@ -26,6 +26,7 @@ import it.unive.cybertech.database.Profile.User;
 //TESTATED
 //TODO modificare tutti gli array con documentreference e fare un metodo che "materializza" gli oggetti
 public class Activity {
+    private final static String table = "activity";
     private String id;
     private DocumentReference owner;
     private String name;
@@ -127,13 +128,13 @@ public class Activity {
         activity.put("date", t);
         activity.put("owner", userDoc);
 
-        DocumentReference addedDocRef = Database.addToCollection("activity", activity);
+        DocumentReference addedDocRef = Database.addToCollection(table, activity);
 
         return new Activity(addedDocRef.getId(), userDoc, name, description, place, t, new ArrayList<DocumentReference>());
     }
 
     public static Activity getActivityById(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Activity activity = null;
@@ -151,11 +152,11 @@ public class Activity {
     }
 
     private Task<Void> deleteActivityAsync() throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return deleteFromCollectionAsync("activity", id);
+            return deleteFromCollectionAsync(table, id);
         else
             throw new NoActivityFoundException("No activity found with this id: " + id);
     }
@@ -173,7 +174,7 @@ public class Activity {
     }
 
     private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -195,7 +196,7 @@ public class Activity {
     }
 
     private Task<Void> updatePlaceAsync(String place) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -217,7 +218,7 @@ public class Activity {
     }
 
     private Task<Void> updateDateAsync(Timestamp timestamp) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -240,7 +241,7 @@ public class Activity {
     }
 
     private Task<Void> addPartecipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -263,7 +264,7 @@ public class Activity {
     }
 
     private Task<Void> removePartecipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("activity", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {

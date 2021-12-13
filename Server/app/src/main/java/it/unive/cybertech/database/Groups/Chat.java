@@ -20,6 +20,7 @@ import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Chat {
+    private final static String table = "chat";
     private String id;
     private Timestamp dateTime;
     private DocumentReference sender;
@@ -83,13 +84,13 @@ public class Chat {
         myChat.put("dateTime", t);
         myChat.put("message", message);
 
-        DocumentReference addedDocRef = Database.addToCollection("chat", myChat);
+        DocumentReference addedDocRef = Database.addToCollection(table, myChat);
 
         return new Chat(addedDocRef.getId(), t, userRef, message);
     }
 
     protected static Chat getChatById(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("chat", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Chat chat = null;
@@ -104,11 +105,11 @@ public class Chat {
     }
 
     private Task<Void> deleteChatAsync() throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("chat", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return deleteFromCollectionAsync("chat", id);
+            return deleteFromCollectionAsync(table, id);
         else
             throw new NoChatFoundException("No chat found with this id: " + id);
     }

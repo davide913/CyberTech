@@ -31,6 +31,7 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 import it.unive.cybertech.database.Profile.User;
 
 public class Material extends Geoquerable {
+    private final static String table = "material";
     private String id;
     private DocumentReference owner;
     private DocumentReference renter;
@@ -161,14 +162,14 @@ public class Material extends Geoquerable {
         myMaterial.put("location", location);
         myMaterial.put("geohash", geohash);
 
-        DocumentReference addedDocRef = addToCollection("material", myMaterial);
+        DocumentReference addedDocRef = addToCollection(table, myMaterial);
 
         return new Material(addedDocRef.getId(), docPro, title, description,
                 photo, docRen, location, geohash, docType, timestamp);
     }
 
     public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Material material = null;
@@ -187,7 +188,7 @@ public class Material extends Geoquerable {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -212,7 +213,7 @@ public class Material extends Geoquerable {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -237,7 +238,7 @@ public class Material extends Geoquerable {
      This method invocation doesn't update the state of object, you need to do it manually
      */
     private Task<Void> updatePhotoAsync(@NonNull String photo) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -259,7 +260,7 @@ public class Material extends Geoquerable {
     }
 
     private Task<Void> updateRenterAsync(DocumentReference user) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
@@ -292,7 +293,7 @@ public class Material extends Geoquerable {
     }
 
     private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("material", this.id);
+        DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
