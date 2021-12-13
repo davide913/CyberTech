@@ -67,7 +67,7 @@ public class MessageService extends FirebaseMessagingService {
     }
 
     private static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, RequestQueue queue) {
-        device.updateLastUsed(new Timestamp(System.currentTimeMillis()));
+        device.updateLastUsed();
         String url = "https://fcm.googleapis.com/fcm/send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
@@ -134,10 +134,10 @@ public class MessageService extends FirebaseMessagingService {
             if (devices.length > 0) {
                 Device device = devices[0];
                 if (device == null) {
-                    device = Device.createDevice(s, deviceID);
-                    user.addDevice(device);
+                    //device = Device.createDevice(s, deviceID);
+                    user.addDevice(s, deviceID);
                 } else
-                    device.updateLastUsed(new Timestamp(System.currentTimeMillis()));
+                    device.updateLastUsed();
             }
         } catch (InterruptedException | ExecutionException e) {
         }

@@ -110,7 +110,7 @@ public class LogInActivity extends AppCompatActivity {
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
                                 try {
-                                    u = User.createUser(user.getUid(), name.trim(), surname, Sex.nonBinary, null, null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                                    u = User.createUser(user.getUid(), name.trim(), surname, Sex.nonBinary, null, null,null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
                                 } catch (ExecutionException | InterruptedException executionException) {
                                     executionException.printStackTrace();
                                 }

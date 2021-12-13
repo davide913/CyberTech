@@ -35,7 +35,7 @@ La home page di assistenza si occupa di mostrare le richieste in primo piano (in
 public class HomePageNegative extends Fragment {
     ListView listView;
 
-    public HomePageNegative() throws ExecutionException, InterruptedException {
+    public HomePageNegative()  {
     }
 
     @Nullable

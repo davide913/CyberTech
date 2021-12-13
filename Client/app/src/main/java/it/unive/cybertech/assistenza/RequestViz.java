@@ -54,8 +54,8 @@ public class RequestViz extends AppCompatActivity {
         String location = getIntent().getStringExtra("location");
         textLocation.setText(location);
 
-        if(request != null)
-            text.setText(request.getDescription());
+        /*if(request != null)
+            text.setText(request.getDescription());*/
 
         //text.setText("La prova che non la prende");
 
@@ -64,10 +64,10 @@ public class RequestViz extends AppCompatActivity {
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         //assert request != null;
 
-        if(request != null) {
+        /*if(request != null) {
             String strDate = dateFormat.format(request.getDeliveryDate());
             textDate.setText(strDate);
-        }
+        }*/
 
         //textDate.setText("La data");
 
@@ -82,12 +82,12 @@ public class RequestViz extends AppCompatActivity {
                 //La richiesta viene affidata a me, la posso visualizzare nella mia sezione Taken Requests e tolta dalla lista nella Home
 
                 Utils.Dialog dialog = new Utils.Dialog(this);
-                dialog.showDialog("Operazione confermata!", "Hai preso in carico una richiesta");
+                dialog.show("Operazione confermata!", "Hai preso in carico una richiesta");
                 dialog.setCallback(new Utils.DialogResult() {
                     @Override
                     public void onSuccess() {
-                        assert request != null;
-                        request.updateInCharge_QuarantineAssistance(CachedUser.user);
+                        //assert request != null;
+                        //request.updateInCharge_QuarantineAssistance(CachedUser.user);
                         finish();
                     }
 
@@ -104,12 +104,12 @@ public class RequestViz extends AppCompatActivity {
                 //QuarantineAssistance
 
                 Utils.Dialog dialog = new Utils.Dialog(this);
-                dialog.showDialog("Attenzione!", "Stai per abbandonare la richiesta");
+                dialog.show("Attenzione!", "Stai per abbandonare la richiesta");
                 dialog.setCallback(new Utils.DialogResult() {
                     @Override
                     public void onSuccess() {
-                        assert request != null;
-                        request.updateInCharge_QuarantineAssistance(null);
+                        //assert request != null;
+                        //request.updateInCharge_QuarantineAssistance(null);
                         finish();
                     }
 
@@ -130,20 +130,20 @@ public class RequestViz extends AppCompatActivity {
             this.findViewById(R.id.btn_changeFields).setOnClickListener(v -> { //per modificare i campi, nel DB verificare e sostituire i campi nuovi con quelli vecchi della stessa richiesta
                 Intent newIntent = new Intent(this, RequestDetails.class);
 
-                assert request != null;
-                newIntent.putExtra("id", request.getId());
+                //assert request != null;
+                //newIntent.putExtra("id", request.getId());
                 newIntent.putExtra("changeFields", "true");
                 startActivity(newIntent);
                 finish();
             });
 
             this.findViewById(R.id.btn_deleteRequest).setOnClickListener(v -> { //per eliminare dal Db la richiesta
-                try {
-                    assert request != null;
+                /*try {
+                    //assert request != null;
                     request.removeQuarantineAssistance();
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
                 finish();
             });
 

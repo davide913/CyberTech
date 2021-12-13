@@ -70,7 +70,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
         //TODO get posizione
         Thread t = new Thread(() -> {
             try {
-                items = User.getRentableMaterials(45, 12, 10000);
+                items = Material.getRentableMaterials(45, 12, 10000);
                 Log.d("noleggio.HomePage", "Size: "+items.size());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

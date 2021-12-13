@@ -114,7 +114,7 @@ public class SignUpActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         new Thread(() -> {
                             try {
-                                User u = User.createUser(task.getResult().getUser().getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), finalAddress, finalCity, finalCountry, (long) location.getLatitude(), (long) location.getLongitude(), false);
+                                User u = User.createUser(task.getResult().getUser().getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex),null, finalAddress, finalCity, finalCountry, (long) location.getLatitude(), (long) location.getLongitude(), false);
                                 if (u != null) {
                                     Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

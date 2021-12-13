@@ -148,21 +148,21 @@ public class RequestDetails extends AppCompatActivity {
 
                 //TODO modificare i campi lat e long
                 //TODO : Trovare modo di far inserire all'utente non una stringa ma un GeoPoint, o convertire la stringa in GeoPoint
-                try {
+                /*try {
                     QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), CachedUser.user, date, 5, 5);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
                 finish();
             }
             else {
-                String id = getIntent().getStringExtra("id");
+                /*String id = getIntent().getStringExtra("id");
                 QuarantineAssistance thisAssistance;
                 try {
                     thisAssistance = QuarantineAssistance.getQuarantineAssistance(id);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
 
                 //if(!et_requestTitle.toString().equals(thisAssistance.getTitle())) //TODO: quando il Db sarà pronto, chiamare le varie update
                     //thisAssistance.updateTitle(et_requestTitle.toString());

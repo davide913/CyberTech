@@ -47,7 +47,7 @@ public class MyRequests extends AppCompatActivity {
             Intent newIntent = new Intent(this, RequestViz.class);
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
             newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
-            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+            //newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
 
             newIntent.putExtra("class", "positive");
             startActivity(newIntent);

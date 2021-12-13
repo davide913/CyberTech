@@ -48,7 +48,7 @@ public class HomePagePositive extends Fragment {
             //i seguenti campi andranno compilati con le info
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
             newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
-            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+            //newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
 
 
             newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative

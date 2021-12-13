@@ -59,21 +59,17 @@ public class SplashScreen extends AppCompatActivity {
                         CachedUser.user = u;
                         SharedPreferences sh = getPreferences(Context.MODE_PRIVATE);
                         String deviceID = Settings.Secure.ANDROID_ID;
-                        if (sh.getBoolean("FirstTime", true) || Collections2.filter(u.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
+                        /*if (sh.getBoolean("FirstTime", true) || Collections2.filter(u.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
                             sh.edit().putBoolean("FirstTime", false).apply();
                             MessageService.getCurrentToken(task -> {
                                 if (task.isSuccessful()) {
 
                                     new Thread(() -> {
-                                        try {
-                                            u.addDevice(Device.createDevice(task.getResult(), deviceID));
-                                        } catch (ExecutionException | InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
+                                            u.addDevice(task.getResult(), deviceID);
                                     }).start();
                                 }
                             });
-                        }
+                        }*/
                         Intent i = new Intent(this, MainActivity.class);
                         if (finalType != null) {
                             i.putExtra("open", finalType.toString());

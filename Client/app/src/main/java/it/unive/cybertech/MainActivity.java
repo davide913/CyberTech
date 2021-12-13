@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import it.unive.cybertech.assistenza.HomePageNegative;
+import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.Utils;
 
@@ -56,9 +57,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
-            MessageService.sendMessage(null,//"d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
-                    MessageService.NotificationType.assistance_chat, "test", "aaaaa", this);
-            //startActivity(new Intent(this, ProfileActivity.class));
+            /*MessageService.sendMessage(null,//"d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
+                    MessageService.NotificationType.assistance_chat, "test", "aaaaa", this);*/
+            startActivity(new Intent(this, ProfileActivity.class));
         });
         profilePicture.setOnLongClickListener(v -> {
             MessageService.getCurrentToken(task -> {
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         }
-        if(type != null)
+        if (type != null)
             switch (type) {
                 default:
                 case base:
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @SuppressLint("NonConstantResourceId")
-    private void openSection(int id){
+    private void openSection(int id) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         switch (id) {
@@ -115,7 +116,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
                 break;
             case R.id.nav_menu_quarantine_assistance:
-                ft.replace(R.id.main_fragment_content, new HomePageNegative()).commit();
+                if (user.getPositiveSince() == null)
+                    ft.replace(R.id.main_fragment_content, new HomePageNegative()).commit();
+                else
+                    ft.replace(R.id.main_fragment_content, new HomePagePositive()).commit();
                 break;
             case R.id.nav_menu_showcase:
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.noleggio.HomePage()).commit();
