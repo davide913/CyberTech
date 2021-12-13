@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
@@ -35,6 +36,7 @@ public class Material extends Geoquerable {
     private String id;
     private DocumentReference owner;
     private DocumentReference renter;
+    private boolean isRent;
     private String title;
     private String description;
     private String photo;
@@ -46,7 +48,7 @@ public class Material extends Geoquerable {
     public Material() {}
 
     private Material(String id, DocumentReference owner, String title,
-                    String description, String photo, DocumentReference renter,
+                    String description, String photo, DocumentReference renter, boolean isRent,
                     GeoPoint location, String geohash, DocumentReference type, Timestamp expiryDate) {
         this.id = id;
         this.owner = owner;
@@ -54,6 +56,7 @@ public class Material extends Geoquerable {
         this.description = description;
         this.photo = photo;
         this.renter = renter;
+        this.isRent = isRent;
         this.location = location;
         this.geohash = geohash;
         this.type = type;
@@ -140,12 +143,11 @@ public class Material extends Geoquerable {
         this.expiryDate = expiryDate;
     }
 
-    public static Material createMaterial(@NonNull User owner, User renter, String title, String description, String photo,
+    public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
                                           @NonNull Type type, double latitude, double longitude, Date date)
             throws ExecutionException, InterruptedException {
 
         DocumentReference docPro = getReference("users", owner.getId());
-        DocumentReference docRen= getReference("users", renter.getId());
         DocumentReference docType = getReference("type", type.getID());
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
         Timestamp timestamp = new Timestamp(date);
@@ -154,7 +156,7 @@ public class Material extends Geoquerable {
         Map<String, Object> myMaterial = new HashMap<>();          //create "table"
         myMaterial.put("title", title);
         myMaterial.put("owner", docPro);
-        myMaterial.put("renter", docRen);
+        myMaterial.put("isRent", false);
         myMaterial.put("description", description);
         myMaterial.put("photo", photo);
         myMaterial.put("expiryDate", timestamp);
@@ -165,7 +167,7 @@ public class Material extends Geoquerable {
         DocumentReference addedDocRef = addToCollection(table, myMaterial);
 
         return new Material(addedDocRef.getId(), docPro, title, description,
-                photo, docRen, location, geohash, docType, timestamp);
+                photo, null, false,  location, geohash, docType, timestamp);
     }
 
     public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
@@ -184,9 +186,6 @@ public class Material extends Geoquerable {
         throw new NoMaterialFoundException("No material found with this id: " + id);
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
     private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -209,9 +208,7 @@ public class Material extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -234,9 +231,7 @@ public class Material extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     private Task<Void> updatePhotoAsync(@NonNull String photo) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -263,12 +258,9 @@ public class Material extends Geoquerable {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists()) {
-            if(user == null)
-                return docRef.update("renter", null);
-            else
-                return docRef.update("renter", user);
-        } else
+        if (document.exists())
+            return docRef.update("renter", user);
+        else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
@@ -319,9 +311,8 @@ public class Material extends Geoquerable {
     public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm)
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
-        FirebaseFirestore db = getInstance();
 
-        Query query = db.collection("users");
+        Query query = getInstance().collection("users").whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
                 new GeoLocation(latitude, longitude));

@@ -221,7 +221,10 @@ public class User extends Geoquerable {
         ArrayList<Device> arr = new ArrayList<>();
 
         for (DocumentReference doc : devices) {
-            arr.add(Device.getDeviceById(doc.getId()));
+            try {
+                arr.add(Device.getDeviceById(doc.getId()));
+            }
+            catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
         }
 
         return arr;

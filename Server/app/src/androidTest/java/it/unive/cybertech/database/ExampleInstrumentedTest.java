@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
+import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Device;
 import it.unive.cybertech.database.Profile.User;
 
@@ -33,21 +34,23 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        FirebaseFirestore db = getInstance();
+        //FirebaseFirestore db = getInstance();
 
         User u = User.getUserById("davide.finesso@hotmail.it");
 
         //u.addDevice("token", "deviceId");
         //u.addDevice("token2", "deviceId2 di prova");
 
-        ArrayList<Device> arr = u.getMaterializedDevices();
+        //ArrayList<Device> arr = u.getMaterializedDevices();
 
-        arr.get(0).updateToken("token numero 2");
+        //arr.get(0).updateToken("token numero 2");
 
-        u.removeDevice(arr.get(0));
+        //u.removeDevice(arr.get(0));
+
+        //Material.getRentableMaterials(10,10,50);
 
 
-
+        u.updateLocation("italy", "montegrotto", "via de amicis, 1", 20,20);
 
 
 
