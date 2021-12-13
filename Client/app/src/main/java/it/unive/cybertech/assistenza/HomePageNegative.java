@@ -47,7 +47,7 @@ public class HomePageNegative extends Fragment {
         return view;
     }
 
-    private void initViews(View view) throws ExecutionException, InterruptedException {
+    private void initViews(View view) {
         ArrayAdapter<QuarantineAssistance> adapter;
         ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<QuarantineAssistance>();
         listView = view.findViewById(R.id.listRequests);
@@ -61,7 +61,7 @@ public class HomePageNegative extends Fragment {
         Spinner myHomeSpinner = view.findViewById(R.id.homeNegSpinner);
 
         // Initializing a String Array
-        ArrayList<AssistanceType> typeOptions = AssistanceType.getAssistanceTypes();
+        /*ArrayList<AssistanceType> typeOptions = AssistanceType.getAssistanceTypes();
 
                 //TODO: get types
         };
@@ -92,8 +92,8 @@ public class HomePageNegative extends Fragment {
                 }
                 return view;
             }
-        };
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
+        };*/
+        /*spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
         myHomeSpinner.setAdapter(spinnerArrayAdapter);
 
         myHomeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -141,7 +141,7 @@ public class HomePageNegative extends Fragment {
 
         view.findViewById(R.id.btn_chatNeg).setOnClickListener(v -> {
             //ci metto il collegamento alla chat
-        });
+        });*/
 
     }
 }
