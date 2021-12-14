@@ -20,7 +20,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/coronavirus_5107715_1280" />
+            app:srcCompat="@drawable/generic_material" />
 
         <TextView
             android:id="@+id/showcase_item_title"

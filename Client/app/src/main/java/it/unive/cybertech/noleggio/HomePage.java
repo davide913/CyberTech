@@ -82,6 +82,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        adapter.setItems(items);
         adapter.notifyDataSetChanged();
     }
 
