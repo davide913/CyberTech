@@ -24,6 +24,9 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -77,8 +80,8 @@ public class AddProductForRent extends AppCompatActivity {
                 AtomicReference<Material> m = new AtomicReference<>();
                 Thread t = new Thread(() -> {
                     try {
-                        m.set(Material.createMaterial(user,null, title.getText().toString(), description.getText().toString(), null, (Type) type.getSelectedItem(),5,5,null));
-                    } catch (ExecutionException | InterruptedException e) {
+                        m.set(Material.createMaterial(user, title.getText().toString(), description.getText().toString(), null, (Type) type.getSelectedItem(), 45, 12, new SimpleDateFormat("dd/MM/yyyy").parse(date.getText().toString())));
+                    } catch (ExecutionException | InterruptedException | ParseException e) {
                         e.printStackTrace();
                     }
                 });
