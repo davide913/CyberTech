@@ -3,10 +3,16 @@ package it.unive.cybertech.assistenza;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,115 +23,121 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.GeoPoint;
+
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
-/*
-La home page di assistenza si occupa di mostrare le richieste in primo piano (in un qualche ordine)
- e di indirizzare l'utente verso le altre view a seconda se vuole creare una nuova richiesta, visualizzare
- quelle già create, andare sul suo profilo
- */
 public class HomePageNegative extends Fragment {
     ListView listView;
-
-    public HomePageNegative()  {
-    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home_page_assistenza, container, false);
-        initViews(view);
+
+        try {
+            initViews(view);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
         //TODO use CachedUser to work with database
         return view;
     }
 
-    private void initViews(View view) {
-        ArrayAdapter<QuarantineAssistance> adapter;
-        ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<QuarantineAssistance>();
-        listView = view.findViewById(R.id.listRequests);
-        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList);
-        listView.setAdapter(adapter);
+    private void showShortToast(@NonNull String message) {
+        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.show();
+    }
 
+    private void initViews(View view) throws ExecutionException, InterruptedException {
+        ArrayAdapter<QuarantineAssistance> adapter;
+        ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<>();
+        listView = view.findViewById(R.id.listRequests);
+
+        final ArrayList<AssistanceType> adapterList = new ArrayList<>();
         final String[] homeType = new String[1];
 
+        Spinner sp = view.findViewById(R.id.homeNegSpinner);
+        ArrayList<String> names = new ArrayList<>();
 
-        // Get reference of widgets from XML layout
-        Spinner myHomeSpinner = view.findViewById(R.id.homeNegSpinner);
-
-        // Initializing a String Array
-        /*ArrayList<AssistanceType> typeOptions = AssistanceType.getAssistanceTypes();
-
-                //TODO: get types
-        };
-
-        List<AssistanceType> typeList = AssistanceType.getAssistanceTypes();
-
-        // Initializing an ArrayAdapter
-        ArrayAdapter<AssistanceType> spinnerArrayAdapter = new ArrayAdapter<AssistanceType>(getContext(), R.layout.spinner_item, typeList){
-
-            @Override
-            public boolean isEnabled(int position){
-                // Disable the first item from Spinner
-                // First item will be use for hint
-                return position != 0;
+        Thread t = new Thread(() -> {
+            ArrayList<AssistanceType> tList = null;
+            try {
+                tList = AssistanceType.getAssistanceTypes();
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public View getDropDownView(int position, View convertView,
-                                        @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView tv = (TextView) view;
-                if(position == 0){
-                    // Set the hint text color gray
-                    tv.setTextColor(Color.GRAY);
-                }
-                else {
-                    tv.setTextColor(Color.BLACK);
-                }
-                return view;
+            for (AssistanceType a: tList) {
+                names.add(a.getType());
+                adapterList.add(a);
             }
-        };*/
-        /*spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_item);
-        myHomeSpinner.setAdapter(spinnerArrayAdapter);
+        });
+        t.start();
+        t.join();
 
-        myHomeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        ArrayAdapter<String> arr = new ArrayAdapter<>(getContext(), R.layout.spinner_item, names);
+        sp.setAdapter(arr);
+        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+        {
+
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
                 String selectedItemText = (String) parent.getItemAtPosition(position);
                 homeType[0] = selectedItemText;
-                // If user change the default selection
-                // First item is disable and it is used for hint
-                if(position > 0){
-                    // Notify the selected item text
-                    Toast.makeText
-                            (getContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
-                            .show();
-                }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                if(position >= 0){
+                    // Notify the selected item text
+                    showShortToast("Selected : " + selectedItemText);
+                }
+            } // to close the onItemSelected
+            public void onNothingSelected(AdapterView<?> parent)
+            {
 
             }
         });
 
+        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList, adapterList);
+        listView.setAdapter(adapter);
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
-            newIntent.putExtra("title",  adapter.getItem(position).getTitle());
-            newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
-            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryDate().toString());
+            GeoPoint point = adapter.getItem(position).getLocation();
 
-            //
-            newIntent.putExtra("class", "negative");
+            @NonNull Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+            @NonNull List<Address> addresses;
+            try {
+                addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+
+                @NonNull String newCountry = addresses.get(0).getCountryName();
+                newIntent.putExtra("country", newCountry);
+
+                @NonNull String newCity = addresses.get(0).getLocality();
+                newIntent.putExtra("city", newCity);
+
+                @NonNull String newAddress = addresses.get(0).getThoroughfare();
+                newIntent.putExtra("address", newAddress);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            newIntent.putExtra("title",  adapter.getItem(position).getTitle());
+            //newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryToDate().toString()); //la prendo dall'altra parte
+            newIntent.putExtra("id", adapter.getItem(position).getId());
+
+            newIntent.putExtra("class", "Homenegative");
             startActivity(newIntent);
         }));
 
@@ -133,15 +145,14 @@ public class HomePageNegative extends Fragment {
         view.findViewById(R.id.takenRequest).setOnClickListener(v -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
-            newIntent.putExtra("class", "negative"); //TODO: da vedere se c'è bisogno di passare altre info per identificare chi sta chiedendo la proprie richiesta presa in carico
-            //TODO: dalla taken non devo prendere di nuovo in carico
+            newIntent.putExtra("class", "taken");
             startActivity(newIntent);
         });
 
 
         view.findViewById(R.id.btn_chatNeg).setOnClickListener(v -> {
             //ci metto il collegamento alla chat
-        });*/
+        });
 
     }
 }

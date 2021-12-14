@@ -16,24 +16,24 @@
         <item name="colorAccent">@color/secondary</item>
         <item name="colorControlNormal">@color/white</item> <!-- Icone bianche -->
         <item name="android:textAppearanceButton">@style/ButtonText</item>
-    </style>
+     </style>
 
-    <style name="ButtonText">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
+     <style name="ButtonText">
+         <item name="android:textColor">@color/white</item>
+         <item name="android:textSize">16sp</item>
+         <item name="android:textAllCaps">true</item>
+     </style>
 
-    <style name="Theme.Cybertech.NoActionBar" parent="Theme.Cybertech">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
+     <style name="Theme.Cybertech.NoActionBar" parent="Theme.Cybertech">
+         <item name="windowActionBar">false</item>
+         <item name="windowNoTitle">true</item>
+     </style>
 
-    <style name="Theme.Cybertech.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+     <style name="Theme.Cybertech.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.Cybertech.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+     <style name="Theme.Cybertech.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Button.ciuc" parent="ThemeOverlay.AppCompat">
-        <item name="colorAccent">@color/ciuc</item>
-    </style>
-</resources>
+     <style name="Button.ciuc" parent="ThemeOverlay.AppCompat">
+         <item name="colorAccent">@color/ciuc</item>
+     </style>
+ </resources>

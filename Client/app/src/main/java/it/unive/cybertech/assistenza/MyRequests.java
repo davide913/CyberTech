@@ -32,13 +32,13 @@ public class MyRequests extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        setTitle("La mia richiesta");
+        setTitle("Le mie richieste");
 
         ArrayList<QuarantineAssistance> myUploadedRequests = new ArrayList<>();
         listMyView = findViewById(R.id.list_MyRequests);
         ArrayAdapter<QuarantineAssistance> adapter;
 
-
+        //TODO: sistemare qui l'adapter
         adapter = new CastomRequestsAdapter(this, 0, myUploadedRequests);
         listMyView.setAdapter(adapter);
 
