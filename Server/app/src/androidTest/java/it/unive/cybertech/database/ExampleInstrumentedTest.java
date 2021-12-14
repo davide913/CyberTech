@@ -36,7 +36,7 @@ public class ExampleInstrumentedTest{
 
         //FirebaseFirestore db = getInstance();
 
-        User u = User.getUserById("davide.finesso@hotmail.it");
+        //User u = User.getUserById("davide.finesso@hotmail.it");
 
         //u.addDevice("token", "deviceId");
         //u.addDevice("token2", "deviceId2 di prova");
@@ -50,11 +50,13 @@ public class ExampleInstrumentedTest{
         //Material.getRentableMaterials(10,10,50);
 
 
-        u.updateLocation("italy", "montegrotto", "via de amicis, 1", 20,20);
+        //u.updateLocation("italy", "montegrotto", "via de amicis, 1", 20,20);
 
 
 
         //Task<DocumentReference> s = db.collection("users").document(u.getId()).collection("devices").add(d);
+
+        ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
 
 
 
