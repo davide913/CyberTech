@@ -100,6 +100,25 @@
                 app:layout_constraintTop_toBottomOf="@+id/name_signup" />
 
             <EditText
+                android:id="@+id/dateOfBirth_signup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/trans"
+                android:drawableStart="@drawable/ic_baseline_person_24_black"
+                android:hint="@string/dateOfBirth"
+                android:inputType="date"
+                android:clickable="false"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/surname_signup" />
+
+            <EditText
                 android:id="@+id/email_signup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,7 +131,7 @@
                 android:inputType="textEmailAddress"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/surname_signup" />
+                app:layout_constraintTop_toBottomOf="@+id/dateOfBirth_signup" />
 
             <EditText
                 android:id="@+id/password_signup"
