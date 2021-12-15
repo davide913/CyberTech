@@ -1,12 +1,10 @@
 package it.unive.cybertech.noleggio;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
+import static it.unive.cybertech.utils.CachedUser.user;
 
-import android.app.Dialog;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -18,11 +16,12 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
 public class ProductDetails extends AppCompatActivity {
@@ -31,6 +30,9 @@ public class ProductDetails extends AppCompatActivity {
     private String id;
     private ImageView photo;
     private TextView title, description, date;
+    static final int RENT_SUCCESS = 1;
+    static final int RENT_FAIL = 0;
+    private int pos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class ProductDetails extends AppCompatActivity {
         setContentView(R.layout.activity_product_details_noleggio);
         Intent i = getIntent();
         id = i.getStringExtra("ID");
+        pos = i.getIntExtra("Position", -1);
         if (id == null || id.isEmpty())
             finish();
         photo = findViewById(R.id.product_image_details_showcase);
@@ -74,19 +77,43 @@ public class ProductDetails extends AppCompatActivity {
         }
         FloatingActionButton confirm = findViewById(R.id.confirm_rent_showcase);
         confirm.setOnClickListener(view -> {
-            new Utils.Dialog(this)
-                    .setCallback(new Utils.DialogResult() {
-                        @Override
-                        public void onSuccess() {
+            if (user.getLendingPoint() < 0)
+                new Utils.Dialog(this)
+                        .hideCancelButton()
+                        .show(getString(R.string.unreliable), getString(R.string.unreliable_description));
+            else
+                new Utils.Dialog(this)
+                        .setCallback(new Utils.DialogResult() {
+                            @Override
+                            public void onSuccess() {
+                                AtomicBoolean done = new AtomicBoolean(false);
+                                Thread t = new Thread(() -> {
+                                    try {
+                                        material.updateRenter(user);
+                                        LendingInProgress.createLendingInProgress(material, material.getExpiryDate().toDate());
+                                    done.set(true);
+                                    } catch (ExecutionException | InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                                t.start();
+                                try {
+                                    t.join();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                Intent res = new Intent();
+                                res.putExtra("Position", pos);
+                                setResult(done.get() ? RENT_SUCCESS : RENT_FAIL, res);
+                                finish();
+                            }
 
-                        }
+                            @Override
+                            public void onCancel() {
 
-                        @Override
-                        public void onCancel() {
-
-                        }
-                    })
-                    .show(getString(R.string.rent_disclosure), getString(R.string.rent_disclosure_description));
+                            }
+                        })
+                        .show(getString(R.string.rent_disclosure), getString(R.string.rent_disclosure_description));
         });
     }
 

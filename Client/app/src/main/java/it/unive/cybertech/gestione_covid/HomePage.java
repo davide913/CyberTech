@@ -7,7 +7,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
@@ -52,7 +51,7 @@ public class HomePage extends Fragment {
 
     private void initViews(View view){
         TabLayout tabLayout = view.findViewById(R.id.group_tabs);
-        ViewPager viewPager = view.findViewById(R.id.group_viewpager);
+        ViewPager viewPager = view.findViewById(R.id.groups_viewpager);
         Toolbar toolbar_covid_homepage = view.findViewById(R.id.main_toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar_covid_homepage);
         tabLayout.setupWithViewPager(viewPager);
