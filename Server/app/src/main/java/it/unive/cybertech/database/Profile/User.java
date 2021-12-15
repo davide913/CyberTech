@@ -50,7 +50,8 @@ public class User extends Geoquerable {
     private ArrayList<DocumentReference> materials;
     private DocumentReference quarantineAssistance;
 
-    public User() {}
+    public User() {
+    }
 
     private User(String id, String name, String surname, Sex sex, Timestamp birthday,
                  String address, String city, String country, GeoPoint location, boolean greenPass,
@@ -223,8 +224,8 @@ public class User extends Geoquerable {
         for (DocumentReference doc : devices) {
             try {
                 arr.add(Device.getDeviceById(doc.getId()));
+            } catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored) {
             }
-            catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
         }
 
         return arr;
@@ -251,7 +252,10 @@ public class User extends Geoquerable {
     }
 
     public QuarantineAssistance getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
-        return QuarantineAssistance.getQuarantineAssistanceById(quarantineAssistance.getId());
+        if (quarantineAssistance != null)
+            return QuarantineAssistance.getQuarantineAssistanceById(quarantineAssistance.getId());
+        else
+            return null;
     }
 
     //modificata il 13/12/2021 -> aggiunta la data di compleanno
@@ -259,7 +263,7 @@ public class User extends Geoquerable {
                                   String address, String city, String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
-        if(sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
+        if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
         User user = new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country, new GeoPoint(latitude, longitude),
@@ -274,7 +278,7 @@ public class User extends Geoquerable {
     }
 
 
-    public static User getUserById(String id) throws  InterruptedException, ExecutionException, NoUserFoundException {
+    public static User getUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -284,13 +288,13 @@ public class User extends Geoquerable {
             user = document.toObject(User.class);
             user.setId(document.getId());
 
-            if(user.devices == null)
+            if (user.devices == null)
                 user.devices = new ArrayList<>();
 
-            if(user.lendingInProgresses == null)
+            if (user.lendingInProgresses == null)
                 user.lendingInProgresses = new ArrayList<>();
 
-            if(user.materials == null)
+            if (user.materials == null)
                 user.materials = new ArrayList<>();
 
             return user;
@@ -387,7 +391,7 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
-    public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude){
+    public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude) {
         try {
             GeoPoint geoPoint = new GeoPoint(latitude, longitude);
             Task<Void> t = updateLocationAsync(newCountry, newCity, newAddress, geoPoint);
@@ -444,7 +448,7 @@ public class User extends Geoquerable {
             Device device = createDevice(token, deviceId, this.id);
             DocumentReference devDoc = getReference("devices", device.getId());
 
-            if(notContainDevice(device.getId())) {
+            if (notContainDevice(device.getId())) {
                 Tasks.await(addDeviceAsync(devDoc));
                 this.devices.add(devDoc);
             }
@@ -475,16 +479,16 @@ public class User extends Geoquerable {
             this.devices.remove(devDoc);
             device.deleteDevice();
             return true;
-        } catch ( NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
+        } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }
     }
 
     //nuova, inserita il 13/12/2021
-    private boolean notContainDevice(String deviceId){
-        for (DocumentReference document: this.devices ) {
-            if(deviceId.equals(document.getId()))
+    private boolean notContainDevice(String deviceId) {
+        for (DocumentReference document : this.devices) {
+            if (deviceId.equals(document.getId()))
                 return false;
         }
         return true;
@@ -596,8 +600,7 @@ public class User extends Geoquerable {
             if (quarantineAssistance != null) {                 //if the quarantineAssistance is null is possible to delete the field date from db
                 DocumentReference assDoc = getReference("quarantineAssistance", quarantineAssistance.getId());
                 t = docRef.update("quarantineAssistance", assDoc);
-            }
-            else
+            } else
                 t = docRef.update("quarantineAssistance", FieldValue.delete());
             return t;
         } else
@@ -608,7 +611,7 @@ public class User extends Geoquerable {
         try {
             Task<Void> t = updateQuarantineAsync(quarantineAssistance);
             Tasks.await(t);
-            if(quarantineAssistance == null)
+            if (quarantineAssistance == null)
                 this.quarantineAssistance = null;
             else
                 this.quarantineAssistance = getReference("quarantineAssistance", quarantineAssistance.getId());
@@ -636,9 +639,9 @@ public class User extends Geoquerable {
 
     //metodo equal per confronti
     @Override
-    public boolean equals(Object o){
-        if(o instanceof User){
-            User user = (User)o;
+    public boolean equals(Object o) {
+        if (o instanceof User) {
+            User user = (User) o;
 
             return user.getId().equals(this.getId());
         }

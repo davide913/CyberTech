@@ -1,5 +1,7 @@
 package it.unive.cybertech;
 
+import static it.unive.cybertech.utils.Utils.logout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -11,6 +13,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -122,7 +125,7 @@ public class EditEmail extends AppCompatActivity {
             if (task.isSuccessful()) {
                 showShortToast(getString(R.string.email_updated));
                 @NonNull Handler handler = new Handler();
-                handler.postDelayed(this::logout, 800);
+                handler.postDelayed(()->logout(context), 800);
             } else {
                 try {
                     throw Objects.requireNonNull(task.getException());
@@ -143,14 +146,12 @@ public class EditEmail extends AppCompatActivity {
         });
     }
 
-    /**
-     * Logout from application and disconnect user from database access
-     * @since 1.0
-     */
-    private void logout() {
-        FirebaseAuth.getInstance().signOut();
-        @NonNull Intent intent = new Intent(context, SplashScreen.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

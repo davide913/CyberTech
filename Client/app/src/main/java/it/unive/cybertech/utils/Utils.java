@@ -4,6 +4,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.util.Pair;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -29,6 +31,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
@@ -157,5 +160,16 @@ public class Utils {
         public CharSequence getPageTitle(int position) {
             return  mFragmentList.get(position).first;
         }
+    }
+
+    /**
+     * Logout from application and disconnect user from database access
+     * @since 1.0
+     */
+    public static void logout(Context context){
+        FirebaseAuth.getInstance().signOut();
+        @NonNull Intent intent = new Intent(context, SplashScreen.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }
