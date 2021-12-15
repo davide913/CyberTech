@@ -1,20 +1,23 @@
 package it.unive.cybertech.database;
 
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
+
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
-import it.unive.cybertech.database.Connection.Database;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Material.Type;
-import it.unive.cybertech.database.Profile.RentMaterial;
+import it.unive.cybertech.database.Profile.Device;
+import it.unive.cybertech.database.Profile.User;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -31,29 +34,35 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        //Log.d("prima chiamata di log:", "sono qui");
-
+        //FirebaseFirestore db = getInstance();
 
         //User u = User.getUserById("davide.finesso@hotmail.it");
 
-        //ArrayList<AssistanceType> assistances = AssistanceType.getAssistanceTypes();
+        //u.addDevice("token", "deviceId");
+        //u.addDevice("token2", "deviceId2 di prova");
 
-        ArrayList<Type> types = Type.getMaterialTypes();
+        //ArrayList<Device> arr = u.getMaterializedDevices();
 
-        Material m = Material.getMaterialById("PSrmt3MH9kKWeLVIdQfI");
-        Material m1 = Material.getMaterialById("DADbMms4X9q4FtliexmZ");
+        //arr.get(0).updateToken("token numero 2");
 
-        RentMaterial r =  RentMaterial.getRentMaterialById("wBWVJnLe5I44aMrrdhu6");
+        //u.removeDevice(arr.get(0));
 
-        r.updateRentMaterial(m);
-        //errore
-        Log.d("log", r.getMaterial().getDescription());
+        //Material.getRentableMaterials(10,10,50);
 
-        r.deleteRentMaterial();
 
+        //u.updateLocation("italy", "montegrotto", "via de amicis, 1", 20,20);
 
 
 
+        //Task<DocumentReference> s = db.collection("users").document(u.getId()).collection("devices").add(d);
 
+        //ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
+
+
+
+
+
+
+        //Log.d("date", new Date().toString());
     }
 }

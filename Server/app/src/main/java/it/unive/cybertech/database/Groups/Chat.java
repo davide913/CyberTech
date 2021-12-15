@@ -1,58 +1,128 @@
 package it.unive.cybertech.database.Groups;
 
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getReference;
+
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import it.unive.cybertech.database.Database;
+import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
+import it.unive.cybertech.database.Profile.User;
 
 public class Chat {
-    private String ID;
-    private Timestamp DateTime;
-    private CollectionReference SenderID;
-    private String Message;
+    private final static String table = "chat";
+    private String id;
+    private Timestamp dateTime;
+    private DocumentReference sender;
+    private String message;
 
     public Chat(){}
 
-    public Chat(String ID, Timestamp dateTime, CollectionReference senderID, String message) {
-        this.ID = ID;
-        DateTime = dateTime;
-        SenderID = senderID;
-        Message = message;
+    private Chat(String id, Timestamp dateTime, DocumentReference sender, String message) {
+        this.id = id;
+        this.dateTime = dateTime;
+        this.sender = sender;
+        this.message = message;
     }
 
-    public String getID() {
-        return ID;
+    public String getId() {
+        return id;
     }
 
-    private void setID(String ID) {
-        this.ID = ID;
+    private void setId(String id) {
+        this.id = id;
     }
 
     public Timestamp getDateTime() {
-        return DateTime;
+        return dateTime;
     }
 
     public Date getDateTimeD() {
-        return DateTime.toDate();
+        return dateTime.toDate();
     }
 
     private void setDateTime(Timestamp dateTime) {
-        DateTime = dateTime;
+        this.dateTime = dateTime;
     }
 
-    public CollectionReference getSenderID() {
-        return SenderID;
+    public DocumentReference getSender() {
+        return sender;
     }
 
-    private void setSenderID(CollectionReference senderID) {
-        SenderID = senderID;
+    public User getSenderUser() throws ExecutionException, InterruptedException {
+        return User.getUserById(sender.getId());
+    }
+
+    private void setSender(DocumentReference sender) {
+        this.sender = sender;
     }
 
     public String getMessage() {
-        return Message;
+        return message;
     }
 
     private void setMessage(String message) {
-        Message = message;
+        this.message = message;
+    }
+
+    public static Chat createChat(Date date, User sender, String message) throws ExecutionException, InterruptedException {
+        Timestamp t = new Timestamp(date);
+        DocumentReference userRef = getReference("users", sender.getId());
+
+        Map<String, Object> myChat = new HashMap<>();
+        myChat.put("sender", userRef);
+        myChat.put("dateTime", t);
+        myChat.put("message", message);
+
+        DocumentReference addedDocRef = Database.addToCollection(table, myChat);
+
+        return new Chat(addedDocRef.getId(), t, userRef, message);
+    }
+
+    protected static Chat getChatById(String id) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        Chat chat = null;
+
+        if (document.exists()) {
+            chat = document.toObject(Chat.class);
+            chat.setId(document.getId());
+
+            return chat;
+        } else
+            throw new NoChatFoundException("No chat found with this id: " + id);
+    }
+
+    private Task<Void> deleteChatAsync() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return deleteFromCollectionAsync(table, id);
+        else
+            throw new NoChatFoundException("No chat found with this id: " + id);
+    }
+
+    public boolean deleteChat() {
+        try {
+            Task<Void> t = deleteChatAsync();
+            Tasks.await(t);
+            this.id = null;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoChatFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
