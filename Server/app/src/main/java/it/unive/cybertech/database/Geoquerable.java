@@ -24,8 +24,8 @@ public class Geoquerable {
                                                           GeoLocation center)
             throws ExecutionException, InterruptedException {
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
-
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+
         for (GeoQueryBounds b : bounds) {
             Query q = query.orderBy("geohash")
                     .startAt(b.startHash)

@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -321,7 +322,8 @@ public class Material extends Geoquerable {
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
-        Query query = getInstance().collection(table).whereEqualTo("isRent", false);
+        Query query = getInstance().collection(table)
+                .whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
                 new GeoLocation(latitude, longitude));
@@ -329,9 +331,9 @@ public class Material extends Geoquerable {
         Timestamp timestamp = new Timestamp(new Date());
 
         for (DocumentSnapshot doc : documents) {
-            Material material = Material.getMaterialById(doc.getId());
-            if(material.expiryDate.compareTo(timestamp) > 0) {
-                arr.add(material);
+            Timestamp t =  doc.getTimestamp("expiryDate");
+            if(t!= null && t.compareTo(timestamp) > 0) {
+                arr.add(Material.getMaterialById(doc.getId()));
             }
         }
 
