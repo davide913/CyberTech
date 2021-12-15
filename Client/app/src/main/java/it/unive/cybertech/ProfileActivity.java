@@ -27,6 +27,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -46,8 +49,7 @@ public class ProfileActivity extends AppCompatActivity {
     private final @NonNull Context context = ProfileActivity.this;
     private static final int PERMISSIONS_FINE_LOCATION = 99;
     private final @NonNull FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
-    private Map<String, EditText> editTexts;
-    private FloatingActionButton editInfo;
+    private FloatingActionButton editInfo, logoutButton;
     private EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
@@ -58,63 +60,42 @@ public class ProfileActivity extends AppCompatActivity {
         @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.profile);
-        /*findViewById(R.id.logout).setOnClickListener(v -> {
-            Utils.Dialog dialog = new Utils.Dialog(this);
-            dialog.setCallback(new Utils.DialogResult() {
-                @Override
-                public void onSuccess() {
-                    FirebaseAuth.getInstance().signOut();
-                    Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
 
-                @Override
-                public void onCancel() {
-
-                }
-            }).show("Logout","Sei sicuro di voler effettuare il logout?");*/
         setContentView(R.layout.activity_profile);
 
-        editTexts = new HashMap<>();
         editInfo = findViewById(R.id.profile_editInfo);
 
         name = findViewById(R.id.profile_name);
         name.setText(user.getName());
-        editTexts.put("Name", name);
 
         surname = findViewById(R.id.profile_surname);
         surname.setText(user.getSurname());
-        editTexts.put("Surname", surname);
 
         dateOfBirth = findViewById(R.id.profile_dateOfBirth);
-        dateOfBirth.setText(user.getName()); //todo getDateOfBirth al posto di getName()
-        editTexts.put("Date", dateOfBirth);
+        // @NonNull Date dateOfBirthDB = user.getBirthDayToDate();
+        // @NonNull String pattern = "dd/MM/yyyy";
+        // @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
+        // @NonNull String dateOfBirthString = df.format(dateOfBirthDB);
+        //dateOfBirth.setText(dateOfBirthString); todo registrazione con data di nascita
 
         sex = findViewById(R.id.profile_sex);
         sex.setText(user.getSex().toString().toUpperCase().substring(0, 1));
-        editTexts.put("Sex", sex);
 
         country = findViewById(R.id.profile_country);
         country.setText(user.getCountry());
-        editTexts.put("Country", country);
 
         address = findViewById(R.id.profile_city);
         address.setText(user.getAddress());
-        editTexts.put("Address", address);
 
         city = findViewById(R.id.profile_address);
         city.setText(user.getCity());
-        editTexts.put("City", city);
 
         email = findViewById(R.id.profile_email);
         email.setText(currentUser.getEmail());
-        editTexts.put("Email", email);
         email.setOnClickListener(v -> startActivity(new Intent(context, EditEmail.class)));
 
         pwd = findViewById(R.id.profile_pwd);
         pwd.setText("********");
-        editTexts.put("Password", pwd);
         pwd.setOnClickListener(v -> {
             @NonNull String provider = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getProviderId();
             if (!provider.equals(getString(R.string.googleProvider))) {
@@ -126,7 +107,6 @@ public class ProfileActivity extends AppCompatActivity {
 
 
 
-
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(30000);
         locationRequest.setFastestInterval(1000);
@@ -135,9 +115,12 @@ public class ProfileActivity extends AppCompatActivity {
 
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-        editInfo.setOnClickListener(v -> {
-            updateGPS();
-        });
+        editInfo.setOnClickListener(v -> updateGPS());
+
+
+
+        logoutButton = findViewById(R.id.profile_logout);
+        logoutButton.setOnClickListener(v -> logout());
 
     }
 
@@ -191,7 +174,7 @@ public class ProfileActivity extends AppCompatActivity {
             city.setText(newCity);
             @NonNull String newAddress = addresses.get(0).getThoroughfare();
             address.setText(newAddress);
-            // user.updateLocationDB(newCountry, newCity, newAddress, latitude, longitude);   // salva l'ultima posizione nel DB todo updateLocationDB()
+            // user.updateLocation(newCountry, newCity, newAddress, latitude, longitude);  // todo non funziona @Davide
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -213,5 +196,16 @@ public class ProfileActivity extends AppCompatActivity {
     private void showShortToast(@NonNull String message) {
         @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    /**
+     * Logout from application and disconnect user from database access
+     * @since 1.0
+     */
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        @NonNull Intent intent = new Intent(context, SplashScreen.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

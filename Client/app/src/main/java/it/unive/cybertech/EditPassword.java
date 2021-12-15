@@ -111,12 +111,7 @@ public class EditPassword extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             showShortToast(getString(R.string.pwdUpdated));
                             @NonNull Handler handler = new Handler();
-                            handler.postDelayed( () -> {
-                                FirebaseAuth.getInstance().signOut();
-                                @NonNull Intent intent = new Intent(context, SplashScreen.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }, 800);
+                            handler.postDelayed(this::logout, 800);
                         } else {
                             try {
                                 throw Objects.requireNonNull(task.getException());
@@ -131,5 +126,16 @@ public class EditPassword extends AppCompatActivity {
                             }
                         }
                 });
+    }
+
+    /**
+     * Logout from application and disconnect user from database access
+     * @since 1.0
+     */
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+        @NonNull Intent intent = new Intent(context, SplashScreen.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

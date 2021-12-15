@@ -136,6 +136,12 @@
     <string name="showcase">Vetrina</string>
     <string name="rented_materials">Materiali in prestito</string>
     <string name="rent_materials">Materiali messi in prestito</string>
+    <string name="dateOfBirth">Data di nascita</string>
+    <string name="FailedSignup">Registrazione fallita</string>
+    <string name="SaferPwd">Usa una password più sicura</string>
+    <string name="wrongEmailFormat">Formato indirizzo email non valido</string>
+    <string name="ExistingUser">Utente già registrato</string>
+    <string name="LocalizationError">Errore di localizzazione</string>
 
     <array name="sex">
         <item>Maschio</item>
