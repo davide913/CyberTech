@@ -82,8 +82,8 @@ public class CastomRequestsAdapter extends ArrayAdapter {
                 city.setText(newCity);
 
                 @NonNull String newAddress = addresses.get(0).getThoroughfare();
-                TextView address = view.findViewById(R.id.address_location);
-                address.setText(newAddress);
+                /*TextView address = view.findViewById(R.id.address_location);
+                address.setText(newAddress);*/
             }
             else{//TODO: da togliere e verificare
                 TextView country = view.findViewById(R.id.country_request);
@@ -92,8 +92,8 @@ public class CastomRequestsAdapter extends ArrayAdapter {
                 TextView city = view.findViewById(R.id.city_location);
                 city.setText("newCity");
 
-                TextView address = view.findViewById(R.id.address_location);
-                address.setText("newAddress");
+                /*TextView address = view.findViewById(R.id.address_location);
+                address.setText("newAddress");*/
             }
 
         } catch (IOException e) {
