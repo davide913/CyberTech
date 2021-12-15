@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -258,8 +259,13 @@ public class Material extends Geoquerable {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists())
+        if (document.exists()) {
+            if (user == null)
+                docRef.update("isRent", false);
+            else
+                docRef.update("isRent", true);
             return docRef.update("renter", user);
+        }
         else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -270,11 +276,13 @@ public class Material extends Geoquerable {
             if (user == null){
                 t = updateRenterAsync(null);
                 setRenter(null);
+                this.isRent = false;
             }
             else {
                 DocumentReference docUser = getReference("users", user.getId());
                 t = updateRenterAsync(docUser);
                 setRenter(docUser);
+                this.isRent = true;
             }
             Tasks.await(t);
             return true;
@@ -313,13 +321,18 @@ public class Material extends Geoquerable {
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
-        Query query = getInstance().collection("material").whereEqualTo("isRent", false);
+        Query query = getInstance().collection(table).whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
                 new GeoLocation(latitude, longitude));
 
+        Timestamp timestamp = new Timestamp(new Date());
+
         for (DocumentSnapshot doc : documents) {
-            arr.add(Material.getMaterialById(doc.getId()));
+            Material material = Material.getMaterialById(doc.getId());
+            if(material.expiryDate.compareTo(timestamp) > 0) {
+                arr.add(material);
+            }
         }
 
         return arr;
