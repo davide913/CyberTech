@@ -1,5 +1,7 @@
 package it.unive.cybertech.noleggio;
 
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +18,7 @@ import it.unive.cybertech.database.Material.Material;
 
 public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>{
 
-    private final List<Material> showcaseList;
+    private List<Material> showcaseList;
     private ItemClickListener clickListener;
 
     public ShowcaseAdapter(List<Material> showcaseList) {
@@ -43,6 +45,10 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
             title.setText(item.getTitle());
             description.setText(item.getDescription());
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
+            if (item.getPhoto() != null) {
+                byte[] arr = Base64.decode(item.getPhoto(), Base64.DEFAULT);
+                image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+            }
         }
     }
 
@@ -67,5 +73,9 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
 
     void setClickListener(ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
+    }
+
+    public void setItems(List<Material> materials){
+        this.showcaseList = materials;
     }
 }

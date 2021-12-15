@@ -9,10 +9,15 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,7 +28,11 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -77,8 +86,16 @@ public class AddProductForRent extends AppCompatActivity {
                 AtomicReference<Material> m = new AtomicReference<>();
                 Thread t = new Thread(() -> {
                     try {
-                        m.set(Material.createMaterial(user,null, title.getText().toString(), description.getText().toString(), null, (Type) type.getSelectedItem(),5,5,null));
-                    } catch (ExecutionException | InterruptedException e) {
+                        String baseString = null;
+                        if (image.getDrawable() != null) {
+                            Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+                            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
+                            byte[] byteArray = byteStream.toByteArray();
+                            baseString = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                        }
+                        m.set(Material.createMaterial(user, title.getText().toString(), description.getText().toString(), baseString, (Type) type.getSelectedItem(), 45, 12, new SimpleDateFormat("dd/MM/yyyy").parse(date.getText().toString())));
+                    } catch (ExecutionException | InterruptedException | ParseException e) {
                         e.printStackTrace();
                     }
                 });
@@ -159,11 +176,13 @@ public class AddProductForRent extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d("AddProductForRent", resultCode + "");
         if (requestCode == 0) {
-            if (data.getData() != null)
-                image.setImageURI(data.getData());
-            else
-                image.setImageURI(output);
+            if (resultCode == -1)
+                if (data.getData() != null)
+                    image.setImageURI(data.getData());
+                else
+                    image.setImageURI(output);
         }
     }
 }

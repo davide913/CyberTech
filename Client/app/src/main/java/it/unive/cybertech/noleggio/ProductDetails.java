@@ -8,7 +8,9 @@ import androidx.fragment.app.DialogFragment;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,31 +28,50 @@ import it.unive.cybertech.utils.Utils;
 public class ProductDetails extends AppCompatActivity {
 
     private Material material;
+    private String id;
+    private ImageView photo;
+    private TextView title, description, date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_details_noleggio);
         Intent i = getIntent();
-        String id = i.getStringExtra("ID");
+        id = i.getStringExtra("ID");
         if (id == null || id.isEmpty())
             finish();
+        photo = findViewById(R.id.product_image_details_showcase);
+        title = findViewById(R.id.title_details_showcase);
+        description = findViewById(R.id.description_details_showcase);
+        date = findViewById(R.id.expiring_date_details_showcase);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Thread t = new Thread(() -> {
+            try {
+                material = Material.getMaterialById(id);
+            } catch (ExecutionException | InterruptedException e) {
+                finish();
+            }
+        });
+        t.start();
         try {
-            material = Material.getMaterialById(id);
-        } catch (ExecutionException | InterruptedException e) {
-            finish();
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle("Dettaglio: " + material.getTitle());
-        ImageView photo = findViewById(R.id.showcase_details_image);
-        TextView title = findViewById(R.id.title_details_showcase),
-                description = findViewById(R.id.description_details_showcase),
-                date = findViewById(R.id.expiring_date_details_showcase);
         title.setText(material.getTitle());
         description.setText(material.getDescription());
-        Date expire = new Date();
-        date.setText(new SimpleDateFormat("dd/MM/yyyy").format(expire));
+        date.setText(new SimpleDateFormat("dd/MM/yyyy").format(material.getExpiryDate().toDate()));
+        if (material.getPhoto() != null) {
+            byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
+            photo.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+        }
         FloatingActionButton confirm = findViewById(R.id.confirm_rent_showcase);
         confirm.setOnClickListener(view -> {
             new Utils.Dialog(this)
@@ -65,7 +86,7 @@ public class ProductDetails extends AppCompatActivity {
 
                         }
                     })
-                    .show(getString(R.string.rent_disclosure_description), getString(R.string.rent_disclosure));
+                    .show(getString(R.string.rent_disclosure), getString(R.string.rent_disclosure_description));
         });
     }
 

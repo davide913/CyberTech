@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/coronavirus_5107715_1280" />
+        app:srcCompat="@drawable/generic_material" />
 
     <EditText
         android:id="@+id/showcase_details_title"
