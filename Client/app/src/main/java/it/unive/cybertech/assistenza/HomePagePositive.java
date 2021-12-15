@@ -1,5 +1,7 @@
 package it.unive.cybertech.assistenza;
 
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -22,6 +24,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.utils.CachedUser;
 
 public class HomePagePositive extends Fragment {
     ListView listTakenView;
@@ -38,32 +41,11 @@ public class HomePagePositive extends Fragment {
     }
 
     private void initView(View view) throws ExecutionException, InterruptedException {
-        ArrayList<QuarantineAssistance> myRequestsList = new ArrayList<>(5);
+        ArrayList<QuarantineAssistance> myRequestsList;
         listTakenView = view.findViewById(R.id.lst_myRequests);
         ArrayAdapter<QuarantineAssistance> adapter;
-        AtomicReference<ArrayList<QuarantineAssistance>> trans = new AtomicReference<>(new ArrayList<>(5));
-        boolean turn = true;
-
-        Thread m = new Thread(() -> {
-            try {
-                ArrayList<QuarantineAssistance> myParRL = new ArrayList<>(5);
-                AssistanceType ass = new AssistanceType("prova", "mmmmmm");
-                Date date = Calendar.getInstance().getTime();
-
-                QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(ass, "Titolo", "Descrizione", date, 5, 5);
-                myParRL.add(sec);
-
-                trans.set(myParRL);
-
-
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        });
-        m.start();
-        m.join(); //dovrebbe funzionare
-
+        myRequestsList = RequestDetails.myRequests;
+        //TODO: fare i test per vedere se myRequestsList contiene le richieste fatte fin'ora
 
         adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
         //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
@@ -81,7 +63,10 @@ public class HomePagePositive extends Fragment {
         }));
 
         view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RequestDetails.class));
+            Intent newIntent = new Intent(getContext(), RequestDetails.class);
+
+            newIntent.putExtra("changeFields", "true");
+            startActivity(newIntent);
         });
     }
 

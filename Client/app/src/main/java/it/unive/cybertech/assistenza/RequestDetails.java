@@ -5,18 +5,15 @@ import static it.unive.cybertech.utils.CachedUser.user;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -52,7 +49,7 @@ public class RequestDetails extends AppCompatActivity {
     private FloatingActionButton editInfo;
     private LocationRequest locationRequest;
     private double latitude, longitude;
-    ArrayList<QuarantineAssistance> myRequests = new ArrayList<>();
+    public static ArrayList<QuarantineAssistance> myRequests = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +65,6 @@ public class RequestDetails extends AppCompatActivity {
 
         et_requestTitle = findViewById(R.id.requestTitle);
         et_requestText = findViewById(R.id.requestText);
-        //et_requestLocation = findViewById(R.id.countryLoc);
         editInfo = findViewById(R.id.edit_location);
         countryReq = findViewById(R.id.countryLoc);
         countryReq.setText(user.getCountry());
@@ -81,7 +77,7 @@ public class RequestDetails extends AppCompatActivity {
 
         final String[] type = new String[1];
 
-        // Get reference of widgets from XML layout
+       //lo spinner
         Spinner spinner = findViewById(R.id.spinner_type);
         ArrayList<String> options = new ArrayList<>();
         final ArrayList<AssistanceType> adapterList = new ArrayList<>();
@@ -106,7 +102,7 @@ public class RequestDetails extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Initializing an ArrayAdapter
+        //ArrayAdapter
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
         spinner.setAdapter(spinnerArrayAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -116,10 +112,9 @@ public class RequestDetails extends AppCompatActivity {
                 type[0] = selectedItemText;
 
                 if(position >= 0){
-                    // Notify the selected item text
                     showShortToast("Selected : " + selectedItemText);
                 }
-            } // to close the onItemSelected
+            }
             public void onNothingSelected(AdapterView<?> parent)
             {
 
@@ -128,11 +123,10 @@ public class RequestDetails extends AppCompatActivity {
 
         String callerClass = getIntent().getStringExtra("changeFields"); //per capire se mi chiama la RequestViz o la HomePage
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            if(!callerClass.equals("true")) { //qui creo la nuova richiesta nel caso non ci fosse già
+            if(callerClass.equals("true")) { //qui creo la nuova richiesta nel caso non ci fosse già
                 //upload tutte le info nel db
                 Date date = Calendar.getInstance().getTime();
 
-                //TODO modificare i campi lat e long
                 locationRequest = LocationRequest.create();
                 locationRequest.setInterval(30000);
                 locationRequest.setFastestInterval(1000);
@@ -156,7 +150,9 @@ public class RequestDetails extends AppCompatActivity {
                             if (a.getType().equals(type[0]))
                                 choosen = a;
                         }
-                        QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, et_requestTitle.toString(), et_requestText.toString(), date, latitude, longitude);
+                        String title = et_requestTitle.getText().toString();
+                        String description = et_requestText.getText().toString();
+                        QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, title, description, date, latitude, longitude);
                         myRequests.add(sec); //la aggiungo a quelle create da me
 
                     } catch (ExecutionException | InterruptedException e) {
@@ -241,4 +237,5 @@ public class RequestDetails extends AppCompatActivity {
         @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
     }
+
 }

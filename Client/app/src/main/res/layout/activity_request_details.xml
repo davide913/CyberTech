@@ -34,7 +34,7 @@
         android:layout_height="48dp"
         android:layout_marginTop="48dp"
         android:hint="Titolo"
-        android:inputType="textLongMessage|textAutoCorrect"
+        android:inputType="textNoSuggestions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.131"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:hint="Inserire qui il testo della richiesta"
-        android:inputType="textLongMessage|textAutoCorrect"
+        android:inputType="textNoSuggestions"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.091"
@@ -73,7 +73,7 @@
         android:layout_marginTop="24dp"
         android:autoSizeMinTextSize="20sp"
         android:hint="Paese"
-        android:inputType="textLongMessage|textMultiLine|textPostalAddress|textCapCharacters"
+        android:inputType="textLongMessage|textPostalAddress|textCapCharacters"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.036"
@@ -86,7 +86,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Città"
-        android:inputType="textPersonName"
+        android:inputType="textPersonName|textPostalAddress"
         app:layout_constraintStart_toStartOf="@+id/countryLoc"
         app:layout_constraintTop_toBottomOf="@+id/countryLoc" />
 
@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Indirizzo"
-        android:inputType="textPersonName"
+        android:inputType="textPersonName|textPostalAddress"
         app:layout_constraintStart_toStartOf="@+id/cityLoc"
         app:layout_constraintTop_toBottomOf="@+id/cityLoc" />
 
