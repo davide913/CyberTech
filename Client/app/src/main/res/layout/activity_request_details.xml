@@ -32,9 +32,9 @@
         android:id="@+id/requestTitle"
         android:layout_width="312dp"
         android:layout_height="48dp"
-        android:layout_marginTop="76dp"
+        android:layout_marginTop="48dp"
         android:hint="Titolo"
-        android:inputType="textLongMessage|textAutoCorrect"
+        android:inputType="textNoSuggestions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.131"
         app:layout_constraintStart_toStartOf="parent"
@@ -57,36 +57,60 @@
         android:id="@+id/requestText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="24dp"
         android:hint="Inserire qui il testo della richiesta"
-        android:inputType="textLongMessage|textAutoCorrect"
+        android:inputType="textNoSuggestions"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.092"
+        app:layout_constraintHorizontal_bias="0.091"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestTitle" />
 
     <EditText
-        android:id="@+id/requestLocation"
+        android:id="@+id/countryLoc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         android:autoSizeMinTextSize="20sp"
-        android:hint="Inserire qui il luogo della richiesta"
-        android:inputType="textLongMessage|textMultiLine|textPostalAddress|textCapCharacters"
+        android:hint="Paese"
+        android:inputType="textLongMessage|textPostalAddress|textCapCharacters"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.079"
+        app:layout_constraintHorizontal_bias="0.036"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/requestText" />
+
+    <EditText
+        android:id="@+id/cityLoc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ems="10"
+        android:hint="Città"
+        android:inputType="textPersonName|textPostalAddress"
+        app:layout_constraintStart_toStartOf="@+id/countryLoc"
+        app:layout_constraintTop_toBottomOf="@+id/countryLoc" />
 
     <Spinner
         android:id="@+id/spinner_type"
         android:layout_width="365dp"
         android:layout_height="24dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.347"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/requestLocation" />
+        app:layout_constraintTop_toBottomOf="@+id/cityLoc" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/edit_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toTopOf="@+id/cardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_baseline_my_location_24" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

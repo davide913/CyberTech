@@ -16,7 +16,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/radius_cards"
-        android:backgroundTint="@color/teal_700"
+        android:backgroundTint="@color/primary_variant"
         tools:ignore="UselessParent">
 
         <TextView
@@ -32,15 +32,13 @@
             android:textColor="#000000" />
 
         <TextView
-            android:id="@+id/location_request"
-            android:layout_width="224dp"
+            android:id="@+id/country_request"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/title_request"
             android:layout_alignParentStart="true"
             android:layout_marginStart="21dp"
             android:layout_marginTop="29dp"
-            android:layout_marginEnd="39dp"
-            android:layout_toStartOf="@+id/date_request"
             android:textColor="#000000" />
 
         <TextView
@@ -49,9 +47,20 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/title_request"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="29dp"
-            android:layout_marginEnd="21dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="26dp"
             android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/city_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title_request"
+            android:layout_alignBottom="@+id/country_request"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="-1dp"
+            android:layout_toEndOf="@+id/country_request" />
     </RelativeLayout>
 
 </RelativeLayout>
