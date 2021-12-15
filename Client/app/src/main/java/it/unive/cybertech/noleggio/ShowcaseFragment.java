@@ -1,5 +1,7 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -56,7 +58,7 @@ public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListen
         //TODO get posizione
         Thread t = new Thread(() -> {
             try {
-                items = Material.getRentableMaterials(45, 12, 10000);
+                items = Material.getRentableMaterials(45, 12, 10000, user.getId());
                 Log.d("noleggio.HomePage", "Size: " + items.size());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
