@@ -145,6 +145,14 @@ public class Material extends Geoquerable {
         this.expiryDate = expiryDate;
     }
 
+    private boolean isRent() {
+        return isRent;
+    }
+
+    private void setRent(boolean rent) {
+        isRent = rent;
+    }
+
     public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
                                           @NonNull Type type, double latitude, double longitude, Date date)
             throws ExecutionException, InterruptedException {
