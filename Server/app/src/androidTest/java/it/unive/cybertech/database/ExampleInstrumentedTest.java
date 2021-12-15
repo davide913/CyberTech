@@ -56,7 +56,7 @@ public class ExampleInstrumentedTest{
 
         //Task<DocumentReference> s = db.collection("users").document(u.getId()).collection("devices").add(d);
 
-        ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
+        //ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
 
 
 

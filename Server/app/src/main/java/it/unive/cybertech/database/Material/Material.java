@@ -326,11 +326,12 @@ public class Material extends Geoquerable {
 
     //funzione per mattia!
     //TODO controllare la data di scadenza
-    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm)
+    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
+                .whereNotEqualTo("owner", getReference("users", userId))
                 .whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,

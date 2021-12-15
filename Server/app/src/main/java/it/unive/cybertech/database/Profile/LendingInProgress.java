@@ -170,7 +170,7 @@ public class LendingInProgress {
         if (document.exists()) {
             if (material == null)
                 return docRef.update("material", FieldValue.delete());
-            
+
             DocumentReference docRefMaterial = getReference("material", material.getId());
             return docRef.update("material", docRefMaterial);
         }
