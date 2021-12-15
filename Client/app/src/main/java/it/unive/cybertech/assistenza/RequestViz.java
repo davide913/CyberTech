@@ -68,7 +68,6 @@ public class RequestViz extends AppCompatActivity {
             TextView text = findViewById(R.id.textFull);
             TextView textCountry = findViewById(R.id.textCountry);
             TextView textCity = findViewById(R.id.textCity);
-            TextView textAddress = findViewById(R.id.textAddress);
             TextView textDate = findViewById(R.id.textDate);
 
             String title = getIntent().getStringExtra("title");
@@ -79,9 +78,6 @@ public class RequestViz extends AppCompatActivity {
 
             String city = getIntent().getStringExtra("city");
             textCity.setText(city);
-
-            String address = getIntent().getStringExtra("address");
-            textAddress.setText(address);
 
             if (request[0] != null)
                 text.setText(request[0].getDescription());
@@ -219,7 +215,6 @@ public class RequestViz extends AppCompatActivity {
             this.findViewById(R.id.textFull).setVisibility(View.GONE);
             this.findViewById(R.id.textCountry).setVisibility(View.GONE);
             this.findViewById(R.id.textCity).setVisibility(View.GONE);
-            this.findViewById(R.id.textAddress).setVisibility(View.GONE);
             this.findViewById(R.id.textDate).setVisibility(View.GONE);
         }
     }

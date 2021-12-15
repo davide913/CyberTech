@@ -70,7 +70,7 @@
         android:id="@+id/countryLoc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:autoSizeMinTextSize="20sp"
         android:hint="Paese"
         android:inputType="textLongMessage|textPostalAddress|textCapCharacters"
@@ -84,21 +84,12 @@
         android:id="@+id/cityLoc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:ems="10"
         android:hint="Città"
         android:inputType="textPersonName|textPostalAddress"
         app:layout_constraintStart_toStartOf="@+id/countryLoc"
         app:layout_constraintTop_toBottomOf="@+id/countryLoc" />
-
-    <EditText
-        android:id="@+id/addressLoc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Indirizzo"
-        android:inputType="textPersonName|textPostalAddress"
-        app:layout_constraintStart_toStartOf="@+id/cityLoc"
-        app:layout_constraintTop_toBottomOf="@+id/cityLoc" />
 
     <Spinner
         android:id="@+id/spinner_type"
@@ -106,9 +97,9 @@
         android:layout_height="24dp"
         android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.282"
+        app:layout_constraintHorizontal_bias="0.347"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addressLoc" />
+        app:layout_constraintTop_toBottomOf="@+id/cityLoc" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/edit_location"

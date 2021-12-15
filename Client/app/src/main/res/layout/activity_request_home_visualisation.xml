@@ -61,17 +61,6 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="-1dp"
             android:layout_toEndOf="@+id/country_request" />
-
-        <TextView
-            android:id="@+id/address_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title_request"
-            android:layout_alignBottom="@+id/city_location"
-            android:layout_marginStart="7dp"
-            android:layout_marginTop="29dp"
-            android:layout_marginBottom="1dp"
-            android:layout_toEndOf="@+id/city_location" />
     </RelativeLayout>
 
 </RelativeLayout>

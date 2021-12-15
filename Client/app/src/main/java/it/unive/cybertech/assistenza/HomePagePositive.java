@@ -3,8 +3,11 @@ package it.unive.cybertech.assistenza;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -14,9 +17,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.firebase.firestore.GeoPoint;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -52,8 +60,29 @@ public class HomePagePositive extends Fragment {
         listTakenView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class); //Qui dal lato Positivo devo poter modificare la richiesta oppure eliminarla
 
+            GeoPoint point = adapter.getItem(position).getLocation();
+
+            @NonNull Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+            @NonNull List<Address> addresses;
+            try {
+                addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+                if(addresses.size() != 0) {
+                    @NonNull String newCountry = addresses.get(0).getCountryName();
+                    newIntent.putExtra("country", newCountry);
+
+                    @NonNull String newCity = addresses.get(0).getLocality();
+                    newIntent.putExtra("city", newCity);
+                }
+                else {//TODO: da togliere e verificare
+                    newIntent.putExtra("country", "newCountry");
+                    newIntent.putExtra("city", "newCity");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
-            newIntent.putExtra("location", adapter.getItem(position).getLocation().toString());
             newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryToDate().toString());
             newIntent.putExtra("id", adapter.getItem(position).getId());
 

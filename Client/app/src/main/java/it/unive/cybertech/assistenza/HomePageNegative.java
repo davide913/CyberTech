@@ -131,14 +131,10 @@ public class HomePageNegative extends Fragment {
 
                     @NonNull String newCity = addresses.get(0).getLocality();
                     newIntent.putExtra("city", newCity);
-
-                    @NonNull String newAddress = addresses.get(0).getThoroughfare();
-                    newIntent.putExtra("address", newAddress);
                 }
                 else {//TODO: da togliere e verificare
                     newIntent.putExtra("country", "newCountry");
                     newIntent.putExtra("city", "newCity");
-                    newIntent.putExtra("address", "newAddress");
                 }
 
             } catch (IOException e) {
@@ -165,7 +161,6 @@ public class HomePageNegative extends Fragment {
 
             newIntent.putExtra("country", "newCountry");
             newIntent.putExtra("city", "newCity");
-            newIntent.putExtra("address", "newAddress");
             newIntent.putExtra("user", id);
             startActivity(newIntent);
         });

@@ -41,7 +41,7 @@ import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 
 public class RequestDetails extends AppCompatActivity {
-    EditText et_requestTitle, et_requestText, countryReq, addressReq, cityReq;
+    EditText et_requestTitle, et_requestText, countryReq, cityReq;
     private final @NonNull
     Context context = RequestDetails.this;
     private static final int PERMISSIONS_FINE_LOCATION = 99;
@@ -68,9 +68,6 @@ public class RequestDetails extends AppCompatActivity {
         editInfo = findViewById(R.id.edit_location);
         countryReq = findViewById(R.id.countryLoc);
         countryReq.setText(user.getCountry());
-
-        addressReq = findViewById(R.id.addressLoc);
-        addressReq.setText(user.getAddress());
 
         cityReq = findViewById(R.id.cityLoc);
         cityReq.setText(user.getCity());
@@ -225,8 +222,6 @@ public class RequestDetails extends AppCompatActivity {
             countryReq.setText(newCountry);
             @NonNull String newCity = addresses.get(0).getLocality();
             cityReq.setText(newCity);
-            @NonNull String newAddress = addresses.get(0).getThoroughfare();
-            addressReq.setText(newAddress);
             // user.updateLocation(newCountry, newCity, newAddress, latitude, longitude);   // salva l'ultima posizione nel DB todo updateLocationDB()
         } catch (IOException e) {
             e.printStackTrace();
