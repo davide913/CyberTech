@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class LendingInProgress {
     private Timestamp expiryDate;
     private Timestamp endExpiryDate;
     private String id;
+    private Material material;
 
     public LendingInProgress() {}
 
@@ -73,6 +75,12 @@ public class LendingInProgress {
 
     private void setEndExpiryDate(Timestamp endExpiryDate) {
         this.endExpiryDate = endExpiryDate;
+    }
+
+    public Material getMaterial() throws ExecutionException, InterruptedException {
+        if(material == null)
+            material = Material.getMaterialById(idMaterial.getId());
+        return material;
     }
 
     public static LendingInProgress createLendingInProgress(Material material, Date date) throws ExecutionException, InterruptedException {
@@ -155,23 +163,34 @@ public class LendingInProgress {
     }
 
 
-    private Task<Void> updateMaterialAsync(DocumentReference material) throws ExecutionException, InterruptedException {
+    private Task<Void> updateMaterialAsync(Material material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists())
-            return docRef.update("material", material);
+        if (document.exists()) {
+            if (material == null)
+                return docRef.update("material", FieldValue.delete());
+            
+            DocumentReference docRefMaterial = getReference("material", material.getId());
+            return docRef.update("material", docRefMaterial);
+        }
         else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
 
-    public boolean updateMaterial(@NonNull Material material) {
+    public boolean updateMaterial(Material material) {
         try {
-            DocumentReference docRefMaterial = getReference("material", material.getId());
-            Task<Void> t = this.updateMaterialAsync(docRefMaterial);
+            Task<Void> t = this.updateMaterialAsync(material);
             Tasks.await(t);
-            this.idMaterial = docRefMaterial;
+            if(material == null){
+                this.idMaterial = null;
+                this.material = null;
+            }
+            else {
+                this.idMaterial = getReference("material", material.getId());
+                this.material = material;
+            }
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();
