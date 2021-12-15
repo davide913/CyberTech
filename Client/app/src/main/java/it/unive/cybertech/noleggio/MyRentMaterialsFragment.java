@@ -29,7 +29,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_rent_materials, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.my_rented_list);
+        RecyclerView recyclerView = view.findViewById(R.id.my_rent_list);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
         adapter = new RentMaterialAdapter(items);

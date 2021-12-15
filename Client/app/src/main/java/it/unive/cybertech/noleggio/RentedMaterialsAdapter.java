@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -45,14 +46,18 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         }
 
         public void bind(final LendingInProgress item, int position) {
-            /*Material material = item.getMaterial();
-            title.setText(material.getTitle());
-            description.setText(material.getDescription());
-            itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
-            if (material.getPhoto() != null) {
-                byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
-                image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
-            }*/
+            try {
+                Material material = item.getMaterial();
+                title.setText(material.getTitle());
+                description.setText(material.getDescription());
+                itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
+                if (material.getPhoto() != null) {
+                    byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
+                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -331,17 +331,17 @@ public class Material extends Geoquerable {
         ArrayList<Material> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
-                .whereNotEqualTo("owner", getReference("users", userId))
+                //.whereNotEqualTo("owner", getReference("users", userId))
                 .whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
                 new GeoLocation(latitude, longitude));
 
         Timestamp timestamp = new Timestamp(new Date());
-
+        DocumentReference userRef = getReference("users", userId);
         for (DocumentSnapshot doc : documents) {
             Timestamp t =  doc.getTimestamp("expiryDate");
-            if(t!= null && t.compareTo(timestamp) > 0) {
+            if(t!= null && t.compareTo(timestamp) > 0 && doc.getDocumentReference("owner") != userRef) {
                 arr.add(Material.getMaterialById(doc.getId()));
             }
         }
