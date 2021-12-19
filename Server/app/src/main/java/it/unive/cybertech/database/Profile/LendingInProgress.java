@@ -26,7 +26,7 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 
 //TODO fare test delle funzioni scritte, NESSUNA É TESTATA
 public class LendingInProgress {
-    private final static String table = "lendingInProgress";
+    public final static String table = "lendingInProgress";
     private DocumentReference idMaterial;
     private Timestamp expiryDate;
     private Timestamp endExpiryDate;
@@ -84,7 +84,7 @@ public class LendingInProgress {
     }
 
     public static LendingInProgress createLendingInProgress(Material material, Date date) throws ExecutionException, InterruptedException {
-        DocumentReference docRefMaterial = getReference("material", material.getId());
+        DocumentReference docRefMaterial = getReference(Material.table, material.getId());
 
         Timestamp t = new Timestamp(date);
 
@@ -169,9 +169,9 @@ public class LendingInProgress {
 
         if (document.exists()) {
             if (material == null)
-                return docRef.update("material", FieldValue.delete());
+                return docRef.update(Material.table, FieldValue.delete());
 
-            DocumentReference docRefMaterial = getReference("material", material.getId());
+            DocumentReference docRefMaterial = getReference(Material.table, material.getId());
             return docRef.update("material", docRefMaterial);
         }
         else
@@ -188,7 +188,7 @@ public class LendingInProgress {
                 this.material = null;
             }
             else {
-                this.idMaterial = getReference("material", material.getId());
+                this.idMaterial = getReference(Material.table, material.getId());
                 this.material = material;
             }
             return true;

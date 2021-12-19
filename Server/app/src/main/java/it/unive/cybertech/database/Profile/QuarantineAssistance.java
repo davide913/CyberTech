@@ -30,7 +30,7 @@ import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 
 public class QuarantineAssistance extends Geoquerable {
-    private final static String table = "quarantineAssistance";
+    public final static String table = "quarantineAssistance";
     private DocumentReference assistanceType;
     private String description;
     private DocumentReference inCharge;
@@ -118,7 +118,7 @@ public class QuarantineAssistance extends Geoquerable {
         return deliveryDate;
     }
 
-    public Date getDateDeliveryToDate() {
+    public Date getDeliveryDateToDate() {
         return deliveryDate.toDate();
     }
 
@@ -151,9 +151,9 @@ public class QuarantineAssistance extends Geoquerable {
     }
 
     //tested, modificata tolto lo user inCharge
-    public static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
+    protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
                                                                   String description, Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
-        DocumentReference AssTypeRef = getReference("assistanceType", assistanceType.getID());
+        DocumentReference AssTypeRef = getReference(AssistanceType.table, assistanceType.getID());
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
 
@@ -174,7 +174,7 @@ public class QuarantineAssistance extends Geoquerable {
     }
 
     //tested
-    public void removeQuarantineAssistance() throws ExecutionException, InterruptedException {
+    protected void removeQuarantineAssistance() throws ExecutionException, InterruptedException {
         deleteFromCollection(table, this.id);
 
         this.id = null;
@@ -200,7 +200,7 @@ public class QuarantineAssistance extends Geoquerable {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            DocumentReference docRefAssistance = getReference("assistanceType", assistanceType.getID());
+            DocumentReference docRefAssistance = getReference(AssistanceType.table, assistanceType.getID());
             return docRef.update("assistanceType", docRefAssistance);
 
         } else
@@ -211,7 +211,7 @@ public class QuarantineAssistance extends Geoquerable {
         try {
             Task<Void> t = this.updateAssistanceType_QuarantineAssistanceAsync(assistanceType);
             Tasks.await(t);
-            this.setAssistanceType(getReference("assistanceType", assistanceType.getID()));
+            this.setAssistanceType(getReference(AssistanceType.table, assistanceType.getID()));
             return true;
         } catch (ExecutionException | InterruptedException | NoQuarantineAssistanceFoundException e) {
             e.printStackTrace();
@@ -244,7 +244,7 @@ public class QuarantineAssistance extends Geoquerable {
             Task<Void> t = this.updateInCharge_QuarantineAssistanceAsync(user);
             Tasks.await(t);
             if(user != null) {
-                this.setInCharge(getReference("users", user.getId()));
+                this.setInCharge(getReference(User.table, user.getId()));
                 this.setIsInCharge(true);
             }
             else{
@@ -298,12 +298,11 @@ public class QuarantineAssistance extends Geoquerable {
 
     //query che mi ritorna la richiesta dove incharge = user passato, fatta 7/12/2021
     public static QuarantineAssistance getQuarantineAssistanceByInCharge(User user) throws ExecutionException, InterruptedException {
-        ArrayList<QuarantineAssistance> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
 
         Task<QuerySnapshot> future = db.collection(table)
                 .whereEqualTo("isInCharge", true)
-                .whereEqualTo("inCharge", getReference("users", user.getId())).get();
+                .whereEqualTo("inCharge", getReference(User.table, user.getId())).get();
 
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
@@ -327,7 +326,7 @@ public class QuarantineAssistance extends Geoquerable {
                 .whereEqualTo("isInCharge", false);
 
         if(type != null)
-            query = query.whereEqualTo("assistanceType", getReference("assistanceType", type.getID()));
+            query = query.whereEqualTo("assistanceType", getReference(AssistanceType.table, type.getID()));
 
         List<DocumentSnapshot> documents;
 
@@ -352,7 +351,7 @@ public class QuarantineAssistance extends Geoquerable {
         arr.sort(new Comparator<QuarantineAssistance>() {
             @Override
             public int compare(QuarantineAssistance o1, QuarantineAssistance o2) {
-                return o1.getDateDeliveryToDate().compareTo(o2.getDateDeliveryToDate());
+                return o1.getDeliveryDateToDate().compareTo(o2.getDeliveryDateToDate());
             }
         });
 

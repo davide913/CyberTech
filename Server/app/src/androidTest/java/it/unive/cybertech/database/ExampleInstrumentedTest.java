@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Device;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -58,10 +59,7 @@ public class ExampleInstrumentedTest{
 
         //ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
 
-
-
-
-
+        ArrayList<QuarantineAssistance> q = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 0);
 
         //Log.d("date", new Date().toString());
     }

@@ -22,7 +22,7 @@ import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExcept
 
 //TODO testata e funzionante
 public class AssistanceType {
-    private final static String table = "assistanceType";
+    public final static String table = "assistanceType";
     private String Type;
     private String id;
 

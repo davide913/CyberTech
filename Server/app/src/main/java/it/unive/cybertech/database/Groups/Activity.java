@@ -26,7 +26,7 @@ import it.unive.cybertech.database.Profile.User;
 //TESTATED
 //TODO modificare tutti gli array con documentreference e fare un metodo che "materializza" gli oggetti
 public class Activity {
-    private final static String table = "activity";
+    public final static String table = "activity";
     private String id;
     private DocumentReference owner;
     private String name;
@@ -34,6 +34,8 @@ public class Activity {
     private String place;
     private Timestamp date;
     private ArrayList<DocumentReference> participants;
+
+    private ArrayList<User> participantsMaterialized;
 
     public Activity(){}
 
@@ -104,13 +106,15 @@ public class Activity {
     }
 
     public ArrayList<User> getMaterializedParticipants() throws ExecutionException, InterruptedException {
-        ArrayList<User> arr = new ArrayList<>();
+        if(participantsMaterialized == null) {
+            participantsMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : participants) {
-            arr.add(User.getUserById(doc.getId()));
+            for (DocumentReference doc : participants) {
+                participantsMaterialized.add(User.getUserById(doc.getId()));
+            }
         }
 
-        return arr;
+        return participantsMaterialized;
     }
 
     private void setParticipants(ArrayList<DocumentReference> participants) {
@@ -119,7 +123,7 @@ public class Activity {
 
     public static Activity createActivity(String name, String description, String place, Date date, User owner) throws ExecutionException, InterruptedException {
         Timestamp t = new Timestamp(date);
-        DocumentReference userDoc = Database.getReference("users", owner.getId());
+        DocumentReference userDoc = Database.getReference(User.table, owner.getId());
 
         Map<String, Object> activity = new HashMap<>();
         activity.put("name", name);
@@ -252,10 +256,11 @@ public class Activity {
 
     public boolean addPartecipant(@NonNull User user) {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
+            DocumentReference userDoc = getReference(User.table, user.getId());
             Task<Void> t = addPartecipantAsync(userDoc);
             Tasks.await(t);
             this.participants.add(userDoc);
+            this.getMaterializedParticipants().add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();
@@ -275,10 +280,11 @@ public class Activity {
 
     public boolean removePartecipant(@NonNull User user) {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
+            DocumentReference userDoc = getReference(User.table, user.getId());
             Task<Void> t = removePartecipantAsync(userDoc);
             Tasks.await(t);
             this.participants.remove(userDoc);
+            this.getMaterializedParticipants().remove(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();

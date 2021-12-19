@@ -20,7 +20,7 @@ import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Chat {
-    private final static String table = "chat";
+    public final static String table = "chat";
     private String id;
     private Timestamp dateTime;
     private DocumentReference sender;
@@ -77,7 +77,7 @@ public class Chat {
 
     public static Chat createChat(Date date, User sender, String message) throws ExecutionException, InterruptedException {
         Timestamp t = new Timestamp(date);
-        DocumentReference userRef = getReference("users", sender.getId());
+        DocumentReference userRef = getReference(User.table, sender.getId());
 
         Map<String, Object> myChat = new HashMap<>();
         myChat.put("sender", userRef);
