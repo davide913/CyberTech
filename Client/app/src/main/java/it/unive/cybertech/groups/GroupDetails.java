@@ -1,40 +1,87 @@
 package it.unive.cybertech.groups;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
+import it.unive.cybertech.EditPassword;
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
 
 public class GroupDetails extends AppCompatActivity {
+    private final @NonNull Context context = this;
+    private Group thisGroup;
+    private String idGroup;
+
+    private TextView nameGroup;
+    private TextView descriptionGroup;
+    private TextView nUsers;
+
+    private FloatingActionButton newActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_details);
         initTabs();
-        String id = getIntent().getStringExtra("ID");
-        if(id == null || id.length() == 0)
-            finish();
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(id);
+        initActionBar();
+
+        bindThisGroup();
+
+        // INFORMAZIONI
+        nameGroup = findViewById(R.id.group_information_tab_name);
+        descriptionGroup = findViewById(R.id.group_information_tab_description);
+        nUsers = findViewById(R.id.group_information_tab_nUsers);
+        bindInfoGroupTextViewsValues();
+
+        // ATTIVITA'
+        newActivity = findViewById(R.id.group_activity_tab_newActivity);
+        newActivity.setOnClickListener(v -> {
+            @NonNull Intent i = new Intent(context, ActivityCreation.class);
+            i.putExtra("ID", idGroup);
+            startActivity(i);
+        });
+
+    }
+
+    private void bindInfoGroupTextViewsValues() {
+        nameGroup.setText(thisGroup.getName());
+        descriptionGroup.setText(thisGroup.getDescription());
+        nUsers.setText(thisGroup.getMembers().size());
+    }
+
+    private void initActionBar() {
+        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
+        Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(idGroup);
+    }
+
+    private void bindThisGroup() {
+        Thread t = new Thread(() -> {
+            try {
+                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            idGroup = thisGroup.getId();
+            if(idGroup == null || idGroup.length() == 0)
+                finish();
+        });
+        t.start();
     }
 
     @Override

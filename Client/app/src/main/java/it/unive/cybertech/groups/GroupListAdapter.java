@@ -11,23 +11,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Group;
+
 import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.ViewHolder> {
 
-    //private List<Groups> groups;
-    private List<String> groups;
+    private final List<Group> groups;
     private ItemClickListener clickListener;
 
-    public GroupListAdapter(List<String> groups) {
+    public GroupListAdapter(@NonNull List<Group> groups) {
         this.groups = groups;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.group_list_item, parent,false);
+        @NonNull LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        @NonNull View view = inflater.inflate(R.layout.group_list_item, parent,false);
         return new GroupListAdapter.ViewHolder(view);
     }
 
@@ -41,15 +42,15 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
         return groups.size();
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    void setClickListener(@NonNull ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private final TextView title, description, participants, location;
+        private final @NonNull TextView title, description, participants, location;
         //private final ImageView image;
 
-        public ViewHolder(View view) {
+        public ViewHolder(@NonNull View view) {
             super(view);
             title = view.findViewById(R.id.group_item_title);
             description = view.findViewById(R.id.group_item_description);
@@ -63,11 +64,11 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final String item, int position) {
-            title.setText(item);//.getName());
-            description.setText(item);//.getDescription());
-            participants.setText(item);//String.valueOf(item.getMembers().size()));
-            location.setText("item.");
+        public void bind(final @NonNull Group item, int position) {
+            title.setText("item.getName()");                  // todo da togliere "" quando esisterà un gruppo creato da un utente
+            description.setText("item.getDescription()");     // todo da togliere "" quando esisterà un gruppo creato da un utente
+            participants.setText("item.getMembers().size()"); // todo da togliere "" quando esisterà un gruppo creato da un utente
+            location.setText("item.getLocation()");           // todo da togliere "" quando esisterà un gruppo creato da un utente
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
         }
     }
