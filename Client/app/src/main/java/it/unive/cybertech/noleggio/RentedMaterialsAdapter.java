@@ -1,5 +1,7 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.utils.Utils.ItemClickListener;
+
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -10,18 +12,20 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
-import static it.unive.cybertech.utils.Utils.ItemClickListener;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.LendingInProgress;
 
-public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>{
+public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder>{
 
-    private List<Material> showcaseList;
+    private List<LendingInProgress> showcaseList;
     private ItemClickListener clickListener;
 
-    public ShowcaseAdapter(List<Material> showcaseList) {
+    public RentedMaterialsAdapter(List<LendingInProgress> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
@@ -41,13 +45,18 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final Material item, int position) {
-            title.setText(item.getTitle());
-            description.setText(item.getDescription());
-            itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
-            if (item.getPhoto() != null) {
-                byte[] arr = Base64.decode(item.getPhoto(), Base64.DEFAULT);
-                image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+        public void bind(final LendingInProgress item, int position) {
+            try {
+                Material material = item.getMaterial();
+                title.setText(material.getTitle());
+                description.setText(material.getDescription());
+                itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
+                if (material.getPhoto() != null) {
+                    byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
+                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -55,7 +64,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
 
     @NonNull
     @Override
-    public ShowcaseAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RentedMaterialsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
         return new ViewHolder(view);
@@ -75,7 +84,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<Material> materials){
+    public void setItems(List<LendingInProgress> materials){
         this.showcaseList = materials;
     }
 

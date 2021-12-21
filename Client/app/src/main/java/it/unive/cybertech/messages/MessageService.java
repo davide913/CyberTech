@@ -128,18 +128,21 @@ public class MessageService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         super.onNewToken(s);
-        String deviceID = Settings.Secure.ANDROID_ID;
-        try {
-            Device[] devices = (Device[]) Collections2.filter(user.getMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
-            if (devices.length > 0) {
-                Device device = devices[0];
-                if (device == null) {
-                    //device = Device.createDevice(s, deviceID);
-                    user.addDevice(s, deviceID);
-                } else
-                    device.updateLastUsed();
+        if (user != null) {
+            String deviceID = Settings.Secure.ANDROID_ID;
+            try {
+                Device[] devices = (Device[]) Collections2.filter(user.getMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
+                if (devices.length > 0) {
+                    Device device = devices[0];
+                    if (device == null) {
+                        //device = Device.createDevice(s, deviceID);
+                        user.addDevice(s, deviceID);
+                    } else
+                        device.updateLastUsed();
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException | ExecutionException e) {
         }
     }
 

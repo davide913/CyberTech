@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.utils.Utils;
 
 public class GroupDetails extends AppCompatActivity {
 
@@ -46,42 +47,12 @@ public class GroupDetails extends AppCompatActivity {
     }
 
     private void initTabs(){
-        TabLayout tabLayout = findViewById(R.id.group_tabs);
-        ViewPager viewPager = findViewById(R.id.group_viewpager);
+        TabLayout tabLayout = findViewById(R.id.groups_tabs);
+        ViewPager viewPager = findViewById(R.id.groups_viewpager);
         tabLayout.setupWithViewPager(viewPager);
-        Adapter adapter = new Adapter(getSupportFragmentManager());
+        Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(new GroupInfo(), getString(R.string.information));
         adapter.addFragment(new GroupActivities(), getString(R.string.activity));
         viewPager.setAdapter(adapter);
-    }
-
-    private static class Adapter extends FragmentPagerAdapter {
-
-        private final List<Pair<String, Fragment>> mFragmentList = new ArrayList<>();
-
-        public Adapter(FragmentManager manager) {
-            super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        }
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position).second;
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(new Pair<>(title, fragment));
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return  mFragmentList.get(position).first;
-        }
     }
 }

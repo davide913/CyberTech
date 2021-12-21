@@ -1,5 +1,7 @@
 package it.unive.cybertech;
 
+import static it.unive.cybertech.utils.Utils.logout;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -11,6 +13,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,12 +30,15 @@ import java.util.Objects;
 
 /**
  * EditPassword is the activity that allow user to edit own password to login on "Families Share".
+ *
  * @author Daniele Dotto
  * @since 1.0
  */
 public class EditPassword extends AppCompatActivity {
-    @NonNull Context context = EditPassword.this;
-    @NonNull FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
+    @NonNull
+    Context context = EditPassword.this;
+    @NonNull
+    FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
     FloatingActionButton editPwd;
 
     @Override
@@ -48,7 +54,7 @@ public class EditPassword extends AppCompatActivity {
         editPwd = findViewById(R.id.EditPassword_confirmButton);
 
 
-        editPwd.setOnClickListener( v -> {
+        editPwd.setOnClickListener(v -> {
             boolean stato = true;
             if (newPwd.length() <= 0) {
                 newPwd.setError(getString(R.string.requiredField));
@@ -70,6 +76,7 @@ public class EditPassword extends AppCompatActivity {
 
     /**
      * Useful function that create and show a short-length toast (@see "{@link Toast}".
+     *
      * @since 1.0
      */
     private void showShortToast(@NonNull String message) {
@@ -80,6 +87,7 @@ public class EditPassword extends AppCompatActivity {
     /**
      * Method that allow user to reauthenticate if too much time is passed from the last session
      * login.
+     *
      * @since 1.0
      */
     public void showDialog(@NonNull String currentEmail, @NonNull String newPwd) {
@@ -103,33 +111,37 @@ public class EditPassword extends AppCompatActivity {
     /**
      * Method that allow user to change password;
      * The user will have to login again.
+     *
      * @since 1.0
      */
     private void changePwdAndLogout(@NonNull String newPwd) {
         currentUser.updatePassword(newPwd)
-                .addOnCompleteListener( task -> {
-                        if (task.isSuccessful()) {
-                            showShortToast(getString(R.string.pwdUpdated));
-                            @NonNull Handler handler = new Handler();
-                            handler.postDelayed( () -> {
-                                FirebaseAuth.getInstance().signOut();
-                                @NonNull Intent intent = new Intent(context, SplashScreen.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }, 800);
-                        } else {
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            } catch (FirebaseAuthWeakPasswordException e) {
-                                showShortToast(getString(R.string.WeakPwd));
-                            } catch (FirebaseAuthRecentLoginRequiredException e) {
-                                if (currentUser.getEmail() != null)
-                                    showDialog(currentUser.getEmail(), newPwd);
-                            }
-                            catch (Exception e) {
-                                showShortToast(getString(R.string.genericError));
-                            }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        showShortToast(getString(R.string.pwdUpdated));
+                        @NonNull Handler handler = new Handler();
+                        handler.postDelayed(() -> logout(context), 800);
+                    } else {
+                        try {
+                            throw Objects.requireNonNull(task.getException());
+                        } catch (FirebaseAuthWeakPasswordException e) {
+                            showShortToast(getString(R.string.WeakPwd));
+                        } catch (FirebaseAuthRecentLoginRequiredException e) {
+                            if (currentUser.getEmail() != null)
+                                showDialog(currentUser.getEmail(), newPwd);
+                        } catch (Exception e) {
+                            showShortToast(getString(R.string.genericError));
                         }
+                    }
                 });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -4,24 +4,34 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
@@ -120,5 +130,46 @@ public class Utils {
             default:
                 return Sex.nonBinary;
         }
+    }
+
+    public static class FragmentAdapter extends FragmentPagerAdapter {
+
+        private final List<Pair<String, Fragment>> mFragmentList = new ArrayList<>();
+
+        public FragmentAdapter(FragmentManager manager) {
+            super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position).second;
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragmentList.add(new Pair<>(title, fragment));
+        }
+
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return  mFragmentList.get(position).first;
+        }
+    }
+
+    /**
+     * Logout from application and disconnect user from database access
+     * @since 1.0
+     */
+    public static void logout(Context context){
+        FirebaseAuth.getInstance().signOut();
+        @NonNull Intent intent = new Intent(context, SplashScreen.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }

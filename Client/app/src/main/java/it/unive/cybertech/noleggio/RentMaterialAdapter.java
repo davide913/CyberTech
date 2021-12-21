@@ -1,5 +1,7 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.utils.Utils.ItemClickListener;
+
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -10,18 +12,18 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
-import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 
-public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>{
+public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapter.ViewHolder>{
 
     private List<Material> showcaseList;
     private ItemClickListener clickListener;
 
-    public ShowcaseAdapter(List<Material> showcaseList) {
+    public RentMaterialAdapter(List<Material> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
@@ -55,7 +57,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
 
     @NonNull
     @Override
-    public ShowcaseAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RentMaterialAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
         return new ViewHolder(view);

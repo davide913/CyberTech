@@ -1,7 +1,9 @@
 package it.unive.cybertech.database.Material;
-import static it.unive.cybertech.database.Connection.Database.getDocument;
-import static it.unive.cybertech.database.Connection.Database.getInstance;
-import static it.unive.cybertech.database.Connection.Database.getReference;
+import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
+import static it.unive.cybertech.database.Database.getReference;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -21,6 +23,7 @@ import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExcept
 
 //TODO testata e funzionante
 public class Type {
+    private final static String table = "materialType";
     private String typeName;
     private String id;
 
@@ -49,7 +52,7 @@ public class Type {
 
     //TODO verificare se puo servire o meno
     private static Type getMaterialTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
-        DocumentReference docRef = getReference("materialType", id);
+        DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         Type type = null;
@@ -67,7 +70,7 @@ public class Type {
     public static ArrayList<Type> getMaterialTypes() throws ExecutionException, InterruptedException {
         FirebaseFirestore db = getInstance();      //create of object db
 
-        Task<QuerySnapshot> future = db.collection("materialType").get();
+        Task<QuerySnapshot> future = db.collection(table).get();
         // future.get() blocks on response
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
@@ -87,75 +90,9 @@ public class Type {
         return arr;
     }
 
-
-
-    /*public static Type createType(String name) throws ExecutionException, InterruptedException {
-        Type t;
-
-        Map<String, Object> myType = new HashMap<>();          //create "table"
-        myType.put("typeName", name);
-
-        DocumentReference addedDocRef = addToCollection("materialType", myType);
-        t = new Type(name, addedDocRef.getId());
-
-
-        return t;
+    @NonNull
+    @Override
+    public String toString() {
+        return typeName;
     }
-    /*
-    public static Type getTypeById(String id) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("type", id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        Type type = null;
-
-        if (document.exists()) {
-            type = document.toObject(Type.class);
-            type.setId(document.getId());
-
-            return type;
-        } else
-            throw new NoTypeFoundException("No type found with this id: " + id);
-    }
-
-    public static Type getTypeByName(String name){
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection("assistanceType").whereEqualTo("name", name).get();
-        // future.get() blocks on response
-        List<DocumentSnapshot> documents = future.getResult().getDocuments();
-
-        if (documents.isEmpty())
-            throw new NoTypeFoundException("No type found with this name: " + name);
-
-        Type type = documents.get(0).toObject(Type.class);
-        type.id = documents.get(0).getId();
-
-        return type;
-    }
-
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-
-    public Task<Void> updateTypeNameAsync(String s) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference("type", id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists()) {
-            return docRef.update("typeName", s);
-        } else
-            throw new NoTypeFoundException("Type not found with this id: " + id);
-    }
-
-    public boolean updateTypeName(String s) {
-        try {
-            Task<Void> t = updateTypeNameAsync(s);
-            Tasks.await(t);
-            this.typeName = s;
-            return true;
-        } catch (ExecutionException | InterruptedException | NoTypeFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }*/
-
 }

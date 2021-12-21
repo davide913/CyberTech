@@ -131,6 +131,17 @@
     <string name="googleProviderAlert">Non puoi modificare la password Google!</string>
     <string name="positionPrivilegeNeeded">Accesso alla posizione necessario!</string>
     <string name="localizationUpdated">La localizzazione è stata aggiornata!</string>
+    <string name="unreliable_description">Ci dispiace, ma sembra che tu non sia stato responsabile durante i precedenti prestiti per questo motivo non potrai più effettuarne fino a quando non avrai ripagato i danni recati</string>
+    <string name="unreliable">Inaffidabile</string>
+    <string name="showcase">Vetrina</string>
+    <string name="rented_materials">Materiali in prestito</string>
+    <string name="rent_materials">Materiali messi in prestito</string>
+    <string name="dateOfBirth">Data di nascita</string>
+    <string name="FailedSignup">Registrazione fallita</string>
+    <string name="SaferPwd">Usa una password più sicura</string>
+    <string name="wrongEmailFormat">Formato indirizzo email non valido</string>
+    <string name="ExistingUser">Utente già registrato</string>
+    <string name="LocalizationError">Errore di localizzazione</string>
 
     <array name="sex">
         <item>Maschio</item>
