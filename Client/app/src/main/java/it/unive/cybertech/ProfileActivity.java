@@ -178,9 +178,8 @@ public class ProfileActivity extends AppCompatActivity {
             city.setText(newCity);
             @NonNull String newAddress = addresses.get(0).getThoroughfare();
             address.setText(newAddress);
-            new Thread(()->{
-                user.updateLocation(newCountry, newCity, newAddress, latitude, longitude);
-            }).start();
+            @NonNull Thread t = new Thread(()-> user.updateLocation(newCountry, newCity, newAddress, latitude, longitude));
+            t.start();
         } catch (IOException e) {
             e.printStackTrace();
         }

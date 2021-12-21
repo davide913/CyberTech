@@ -95,27 +95,27 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean checkFields() {
         boolean ok = true;
-        if (name.getText().length() == 0) {
+        if (name.getText().length() <= 0) {
             ok = false;
             name.setError(getString(R.string.field_required));
         }
-        if (surname.getText().length() == 0) {
+        if (surname.getText().length() <= 0) {
             ok = false;
             surname.setError(getString(R.string.field_required));
         }
-        if (dateOfBirth.getText().length() == 0) {
+        if (dateOfBirth.getText().length() <= 0) {
             ok = false;
             dateOfBirth.setError(getString(R.string.field_required));
         }
-        if (email.getText().length() == 0) {
+        if (email.getText().length() <= 0) {
             ok = false;
             email.setError(getString(R.string.field_required));
         }
-        if (pwd.getText().length() == 0) {
+        if (pwd.getText().length() <= 0) {
             ok = false;
             pwd.setError(getString(R.string.field_required));
         }
-        if (confirmPwd.getText().length() == 0) {
+        if (confirmPwd.getText().length() <= 0) {
             ok = false;
             confirmPwd.setError(getString(R.string.field_required));
         }

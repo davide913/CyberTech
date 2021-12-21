@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".groups.ActivityCreation"
+            android:exported="true" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="true" />
         <activity
@@ -33,7 +36,7 @@
             android:name=".groups.GroupDetails"
             android:exported="false" />
         <activity
-            android:name=".groups.CreateGroup"
+            android:name=".groups.GroupCreation"
             android:exported="false" />
         <activity
             android:name=".signup.SignUpActivity"
@@ -57,6 +60,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="OPEN_SPLASH_SCREEN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -88,23 +92,26 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Cybertech.NoActionBar" />
-
-        <!--<service android:name=".gestione_covid.services.MyFirebaseMessagingService">
+        <!--
+<service android:name=".gestione_covid.services.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>-->
-
+        </service>
+        -->
         <service
             android:name=".messages.MessageService"
-            android:exported="false"
-            android:directBootAware="true">
+            android:directBootAware="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-            <!-- Set custom default icon. This is used when no icon is set for incoming notification messages.
-     See README(https://goo.gl/l4GJaQ) for more. -->
+            <!--
+     Set custom default icon. This is used when no icon is set for incoming notification messages.
+     See README(https://goo.gl/l4GJaQ) for more.
+            -->
         </service>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/notification_icon" />

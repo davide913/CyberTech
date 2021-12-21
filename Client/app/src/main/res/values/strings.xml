@@ -142,6 +142,11 @@
     <string name="wrongEmailFormat">Formato indirizzo email non valido</string>
     <string name="ExistingUser">Utente già registrato</string>
     <string name="LocalizationError">Errore di localizzazione</string>
+    <string name="GroupCreationDone">Hai creato un nuovo gruppo!</string>
+    <string name="ActivityCreation">Creazione attività</string>
+    <string name="Date">Data</string>
+    <string name="place">Luogo</string>
+    <string name="activityCreated">Attività creata con successo!</string>
 
     <array name="sex">
         <item>Maschio</item>
