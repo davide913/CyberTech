@@ -4,6 +4,7 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
+import static it.unive.cybertech.database.Groups.Activity.getActivityById;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
@@ -18,18 +19,25 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
+//TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
 
 public class User extends Geoquerable {
     public final static String table = "users";
@@ -181,7 +189,7 @@ public class User extends Geoquerable {
         this.lendingPoint = lendingPoint;
     }
 
-    public ArrayList<DocumentReference> getDevices() {
+    public List<DocumentReference> getDevices() {
         return devices;
     }
 
@@ -189,7 +197,7 @@ public class User extends Geoquerable {
         this.devices = devices;
     }
 
-    public ArrayList<DocumentReference> getLendingInProgresses() {
+    public List<DocumentReference> getLendingInProgresses() {
         return lendingInProgresses;
     }
 
@@ -197,7 +205,7 @@ public class User extends Geoquerable {
         this.lendingInProgresses = lendingInProgresses;
     }
 
-    public ArrayList<DocumentReference> getMaterials() {
+    public List<DocumentReference> getMaterials() {
         return materials;
     }
 
@@ -205,7 +213,7 @@ public class User extends Geoquerable {
         this.materials = materials;
     }
 
-    public ArrayList<DocumentReference> getQuarantineAssistance() {
+    public List<DocumentReference> getQuarantineAssistance() {
         return quarantineAssistance;
     }
 
@@ -225,54 +233,49 @@ public class User extends Geoquerable {
         this.birthday = birthday;
     }
 
-    public ArrayList<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
+    public List<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
         if(devicesMaterialized == null) {
             devicesMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : devices) {
+            for (DocumentReference doc : devices)
                 //try {
                 devicesMaterialized.add(Device.getDeviceById(doc.getId()));
                 //}
                 //catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
-
-            }
         }
 
         return devicesMaterialized;
     }
 
-    public ArrayList<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
         if(lendingInProgressesMaterialized == null) {
             lendingInProgressesMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : lendingInProgresses) {
+            for (DocumentReference doc : lendingInProgresses)
                 lendingInProgressesMaterialized.add(LendingInProgress.getLendingInProgressById(doc.getId()));
-            }
         }
 
         return lendingInProgressesMaterialized;
     }
 
-    public ArrayList<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
+    public List<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
         if(materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : materials) {
+            for (DocumentReference doc : materials)
                 materialsMaterialized.add(Material.getMaterialById(doc.getId()));
-            }
         }
 
         return materialsMaterialized;
     }
 
 
-    public ArrayList<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
+    public List<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
         if(quarantineAssistanceMaterialized == null) {
             quarantineAssistanceMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : materials) {
+            for (DocumentReference doc : materials)
                 quarantineAssistanceMaterialized.add(QuarantineAssistance.getQuarantineAssistanceById(doc.getId()));
-            }
         }
 
         return quarantineAssistanceMaterialized;
@@ -680,6 +683,50 @@ public class User extends Geoquerable {
 
         return user.getMaterializedDevices();
     }
+
+    public Collection<User> getActivitiesUsers() throws ExecutionException, InterruptedException {
+        TreeSet<User> result = new TreeSet<>();
+        DocumentReference userDoc = getReference(table, this.id);
+
+        Task<QuerySnapshot> future = getInstance().collection(Activity.table)
+                .whereArrayContains("participants", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents ) {
+            Activity activity = getActivityById(doc.getId());
+
+            result.addAll(activity.getMaterializedParticipants());
+        }
+
+        result.remove(this);
+        return result;
+    }
+
+    public List<Activity> GetPositiveActivities() throws ExecutionException, InterruptedException {
+        ArrayList<Activity> result = new ArrayList<>();
+        DocumentReference userDoc = getReference(table, this.id);
+
+        Task<QuerySnapshot> future = getInstance().collection(Activity.table)
+                .whereArrayContains("participants", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents ) {
+            Activity activity = getActivityById(doc.getId());
+
+            for (User u: activity.getMaterializedParticipants() ) {
+                if(u.getPositiveSince() != null) {
+                    result.add(activity);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+
 
 
     //metodo equal per confronti

@@ -15,8 +15,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Device;
 import it.unive.cybertech.database.Profile.LendingInProgress;
@@ -38,18 +40,13 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        User u = User.getUserById("s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
+        Group group = Group.getGroupById("GomAtcIw32fv13spLHE3");
 
-        /*LendingInProgress lending = LendingInProgress.
-                createLendingInProgress(Material.getMaterialById("u1j3jyJI6vKMlN4vsH6p"),
-                        new Date(2022, 1, 5));
+        Log.d("id", group.getId());
 
+        User u = User.getUserById("davide.finesso@hotmail.com");
 
-        u.addLending(lending);*/
-
-        ArrayList<LendingInProgress> lendings = u.getMaterializedLendingInProgress();
-
-        Log.d("shish","" + lendings.size());
+        Collection<User> us= u.getActivitiesUsers();
 
 
 

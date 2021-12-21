@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -401,6 +400,7 @@ public class Group {
         }
     }
 
+    @Deprecated
     public static ArrayList<Group> getPositiveGroups(User user) throws ExecutionException, InterruptedException {
         ArrayList<Group> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
@@ -426,6 +426,7 @@ public class Group {
     }
 
     //TODO vedere se si puo fare con una query
+    @Deprecated
     public ArrayList<Activity> getPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
         ArrayList<Activity> activities = getMaterializedActivities();
@@ -440,6 +441,20 @@ public class Group {
                 }
             }
         }
+
+        return result;
+    }
+
+
+    public static List<Group> getAllGroups() throws ExecutionException, InterruptedException {
+        ArrayList<Group> result = new ArrayList<>();
+
+        Task<QuerySnapshot> future = getInstance().collection(table).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc: documents )
+            result.add(getGroupById(doc.getId()));
 
         return result;
     }

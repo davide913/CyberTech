@@ -2,6 +2,7 @@ package it.unive.cybertech.database.Groups;
 
 import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
@@ -12,10 +13,13 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -292,4 +296,15 @@ public class Activity {
         }
     }
 
+
+    public static Group GetGroupFromActivity(Activity activity) throws ExecutionException, InterruptedException {
+        DocumentReference actDoc = getReference(table, activity.getId());
+
+        Task<QuerySnapshot> future = getInstance().collection(Group.table)
+                .whereArrayContains("activities", actDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        return Group.getGroupById(documents.get(0).getId());
+    }
 }

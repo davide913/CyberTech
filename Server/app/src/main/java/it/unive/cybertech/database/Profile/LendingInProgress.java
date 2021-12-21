@@ -139,7 +139,7 @@ public class LendingInProgress {
             return false;
         }
     }
-    
+
     private Task<Void> updateEndExpiryDateAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
