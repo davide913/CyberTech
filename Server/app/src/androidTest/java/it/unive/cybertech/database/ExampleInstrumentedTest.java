@@ -4,6 +4,7 @@ import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -14,9 +15,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Device;
+import it.unive.cybertech.database.Profile.LendingInProgress;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -34,32 +40,13 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        //FirebaseFirestore db = getInstance();
+        Group group = Group.getGroupById("GomAtcIw32fv13spLHE3");
 
-        //User u = User.getUserById("davide.finesso@hotmail.it");
+        Log.d("id", group.getId());
 
-        //u.addDevice("token", "deviceId");
-        //u.addDevice("token2", "deviceId2 di prova");
+        User u = User.getUserById("davide.finesso@hotmail.com");
 
-        //ArrayList<Device> arr = u.getMaterializedDevices();
-
-        //arr.get(0).updateToken("token numero 2");
-
-        //u.removeDevice(arr.get(0));
-
-        //Material.getRentableMaterials(10,10,50);
-
-
-        //u.updateLocation("italy", "montegrotto", "via de amicis, 1", 20,20);
-
-
-
-        //Task<DocumentReference> s = db.collection("users").document(u.getId()).collection("devices").add(d);
-
-        //ArrayList<Material> arr = Material.getRentableMaterials(45,12,50);
-
-
-
+        Collection<User> us= u.getActivitiesUsers();
 
 
 

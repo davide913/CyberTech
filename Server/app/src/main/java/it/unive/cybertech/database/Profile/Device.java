@@ -26,7 +26,7 @@ import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExcept
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
 public class Device {
-    private final static String table = "devices";
+    public final static String table = "device";
     private Timestamp lastUsed;
     private String token;
     private String deviceId;

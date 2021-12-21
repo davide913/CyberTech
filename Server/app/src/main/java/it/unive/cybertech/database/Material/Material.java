@@ -14,13 +14,9 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,7 +30,7 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 import it.unive.cybertech.database.Profile.User;
 
 public class Material extends Geoquerable {
-    private final static String table = "material";
+    public final static String table = "material";
     private String id;
     private DocumentReference owner;
     private DocumentReference renter;
@@ -157,8 +153,8 @@ public class Material extends Geoquerable {
                                           @NonNull Type type, double latitude, double longitude, Date date)
             throws ExecutionException, InterruptedException {
 
-        DocumentReference docPro = getReference("users", owner.getId());
-        DocumentReference docType = getReference("type", type.getID());
+        DocumentReference docPro = getReference(User.table, owner.getId());
+        DocumentReference docType = getReference(Type.table, type.getID());
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
         Timestamp timestamp = new Timestamp(date);
         GeoPoint location = new GeoPoint(latitude, longitude);
@@ -288,7 +284,7 @@ public class Material extends Geoquerable {
                 this.isRent = false;
             }
             else {
-                DocumentReference docUser = getReference("users", user.getId());
+                DocumentReference docUser = getReference(User.table, user.getId());
                 t = updateRenterAsync(docUser);
                 setRenter(docUser);
                 this.isRent = true;
@@ -325,20 +321,18 @@ public class Material extends Geoquerable {
     }
 
     //funzione per mattia!
-    //TODO controllare la data di scadenza
     public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
-                //.whereNotEqualTo("owner", getReference("users", userId))
                 .whereEqualTo("isRent", false);
 
         List<DocumentSnapshot> documents = getGeoQueries(query, radiusInKm * 1000,
                 new GeoLocation(latitude, longitude));
 
         Timestamp timestamp = new Timestamp(new Date());
-        DocumentReference userRef = getReference("users", userId);
+        DocumentReference userRef = getReference(User.table, userId);
         for (DocumentSnapshot doc : documents) {
             Timestamp t =  doc.getTimestamp("expiryDate");
             if(t!= null && t.compareTo(timestamp) > 0 && doc.getDocumentReference("owner") != userRef) {

@@ -23,7 +23,7 @@ import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundExcept
 
 //TODO testata e funzionante
 public class Type {
-    private final static String table = "materialType";
+    public final static String table = "materialType";
     private String typeName;
     private String id;
 

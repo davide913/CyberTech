@@ -26,11 +26,12 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 
 //TODO fare test delle funzioni scritte, NESSUNA É TESTATA
 public class LendingInProgress {
-    private final static String table = "lendingInProgress";
+    public final static String table = "lendingInProgress";
     private DocumentReference idMaterial;
     private Timestamp expiryDate;
     private Timestamp endExpiryDate;
     private String id;
+
     private Material material;
 
     public LendingInProgress() {}
@@ -77,20 +78,20 @@ public class LendingInProgress {
         this.endExpiryDate = endExpiryDate;
     }
 
-    public Material getMaterial() throws ExecutionException, InterruptedException {
+    public Material getMaterializedMaterial() throws ExecutionException, InterruptedException {
         if(material == null)
             material = Material.getMaterialById(idMaterial.getId());
         return material;
     }
 
-    public static LendingInProgress createLendingInProgress(Material material, Date date) throws ExecutionException, InterruptedException {
-        DocumentReference docRefMaterial = getReference("material", material.getId());
+    public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException {
+        DocumentReference docRefMaterial = getReference(Material.table, material.getId());
 
-        Timestamp t = new Timestamp(date);
+        Timestamp t = new Timestamp(expiryDate);
 
         Map<String, Object> mylending = new HashMap<>();          //create "table"
-        mylending.put("date", t);
-        mylending.put("material", docRefMaterial);
+        mylending.put("expiryDate", t);
+        mylending.put("idMaterial", docRefMaterial);
 
         DocumentReference addedDocRef = addToCollection(table, mylending);
 
@@ -126,7 +127,7 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
-    public boolean updateExpiryDate(Date date) {
+    public boolean updateExpiryDate(@NonNull Date date) {
         try {
             Timestamp timestamp = new Timestamp(date);
             Task<Void> t = this.updateExpiryDateAsync(timestamp);
@@ -139,22 +140,24 @@ public class LendingInProgress {
         }
     }
 
-    private Task<Void> updateEndExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
+    private Task<Void> updateEndExpiryDateAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("endExpiryDate", date);
+            if(date == null){
+                return docRef.update("endExpiryDate", FieldValue.delete());
+            }
+            return docRef.update("endExpiryDate", new Timestamp(date));
         }else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
     public boolean updateEndExpiryDate(Date date) {
         try {
-            Timestamp timestamp = new Timestamp(date);
-            Task<Void> t = this.updateEndExpiryDateAsync(timestamp);
+            Task<Void> t = this.updateEndExpiryDateAsync(date);
             Tasks.await(t);
-            setEndExpiryDate(timestamp);
+            setEndExpiryDate(new Timestamp(date));
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();
@@ -169,10 +172,10 @@ public class LendingInProgress {
 
         if (document.exists()) {
             if (material == null)
-                return docRef.update("material", FieldValue.delete());
+                return docRef.update(Material.table, FieldValue.delete());
 
-            DocumentReference docRefMaterial = getReference("material", material.getId());
-            return docRef.update("material", docRefMaterial);
+            DocumentReference docRefMaterial = getReference(Material.table, material.getId());
+            return docRef.update("idMaterial", docRefMaterial);
         }
         else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
@@ -188,7 +191,7 @@ public class LendingInProgress {
                 this.material = null;
             }
             else {
-                this.idMaterial = getReference("material", material.getId());
+                this.idMaterial = getReference(Material.table, material.getId());
                 this.material = material;
             }
             return true;
@@ -197,7 +200,6 @@ public class LendingInProgress {
             return false;
         }
     }
-
 
     @Override
     public boolean equals(Object o) {
