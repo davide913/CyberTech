@@ -68,10 +68,10 @@ public class RequestDetails extends AppCompatActivity {
         et_requestText = findViewById(R.id.requestText);
         editInfo = findViewById(R.id.edit_location);
         countryReq = findViewById(R.id.countryLoc);
-        countryReq.setText(user.getCountry());
+        //countryReq.setText(user.getCountry());
 
         cityReq = findViewById(R.id.cityLoc);
-        cityReq.setText(user.getCity());
+        //cityReq.setText(user.getCity());
 
         final String[] type = new String[1];
 
@@ -119,19 +119,20 @@ public class RequestDetails extends AppCompatActivity {
             }
         });
 
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(30000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setMaxWaitTime(100);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+
+        editInfo.setOnClickListener(v -> {
+            updateGPS();
+        });
+
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
             //upload tutte le info nel db
             Date date = Calendar.getInstance().getTime();
-
-            locationRequest = LocationRequest.create();
-            locationRequest.setInterval(30000);
-            locationRequest.setFastestInterval(1000);
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setMaxWaitTime(100);
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-            editInfo.setOnClickListener(v -> {
-                updateGPS();
-            });
 
             //per l'upload
             Thread m = new Thread(() -> {
@@ -148,7 +149,7 @@ public class RequestDetails extends AppCompatActivity {
                     String description = et_requestText.getText().toString();
                     QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, title, description, date, latitude, longitude);
                     myRequests.add(sec); //la aggiungo a quelle create da me
-                    user.updateQuarantine(sec); //questa va sostituita con la funzione nuova
+                    user.updateQuarantine(sec); //todo: questa va sostituita con la funzione nuova
                     setResult(Activity.RESULT_OK);
 
                 } catch (ExecutionException | InterruptedException e) {

@@ -187,6 +187,8 @@ public class RequestViz extends AppCompatActivity {
                         });
                     });
                 }
+                else
+                    menu.setVisibility(View.GONE);
             }
 
             if(callerClass != null && callerClass.equals("positive")) { //se sono stato chiamato dalla HomePos
