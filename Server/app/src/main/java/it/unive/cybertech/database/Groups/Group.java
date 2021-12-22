@@ -26,7 +26,7 @@ import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 public class Group {
-    private final static String table = "groups";
+    public final static String table = "groups";
     private String id;
     private String name;
     private String description;
@@ -34,6 +34,10 @@ public class Group {
     private ArrayList<DocumentReference> members;
     private ArrayList<DocumentReference> messages;
     private ArrayList<DocumentReference> activities;
+
+    private ArrayList<User> membersMaterialized;
+    private ArrayList<Chat> messagesMaterialized;
+    private ArrayList<Activity> activitiesMaterialized;
 
     public Group() {}
 
@@ -106,37 +110,43 @@ public class Group {
     }
 
     public ArrayList<User> getMaterializedMembers() throws ExecutionException, InterruptedException {
-        ArrayList<User> arr = new ArrayList<>();
+        if(membersMaterialized == null) {
+            membersMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : members) {
-            arr.add(User.getUserById(doc.getId()));
+            for (DocumentReference doc : members) {
+                membersMaterialized.add(User.getUserById(doc.getId()));
+            }
         }
 
-        return arr;
+        return membersMaterialized;
     }
 
     public ArrayList<Chat> getMaterializedMessages() throws ExecutionException, InterruptedException {
-        ArrayList<Chat> arr = new ArrayList<>();
+        if(messagesMaterialized == null) {
+            messagesMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : messages) {
-            arr.add(Chat.getChatById(doc.getId()));
+            for (DocumentReference doc : messages) {
+                messagesMaterialized.add(Chat.getChatById(doc.getId()));
+            }
         }
 
-        return arr;
+        return messagesMaterialized;
     }
 
     public ArrayList<Activity> getMaterializedActivities() throws ExecutionException, InterruptedException {
-        ArrayList<Activity> arr = new ArrayList<>();
+        if(activitiesMaterialized == null) {
+            activitiesMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : activities) {
-            arr.add(Activity.getActivityById(doc.getId()));
+            for (DocumentReference doc : activities) {
+                activitiesMaterialized.add(Activity.getActivityById(doc.getId()));
+            }
         }
 
-        return arr;
+        return activitiesMaterialized;
     }
 
     public static Group CreateGroup(String name, String description, User creator) throws ExecutionException, InterruptedException {
-        DocumentReference userRef = getReference("users", creator.getId());
+        DocumentReference userRef = getReference(User.table, creator.getId());
 
         Map<String, Object> myGroup = new HashMap<>();
         myGroup.put("name", name);
@@ -255,10 +265,11 @@ public class Group {
 
     public boolean addMessage(@NonNull Chat message) throws Exception {
         try {
-            DocumentReference messDoc = getReference("chat", message.getId());
+            DocumentReference messDoc = getReference(Chat.table, message.getId());
             Task<Void> t = addMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.add(messDoc);
+            this.getMaterializedMessages().add(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -278,10 +289,11 @@ public class Group {
 
     public boolean removeMessage(@NonNull Chat message) throws Exception {
         try {
-            DocumentReference messDoc = getReference("chat", message.getId());
+            DocumentReference messDoc = getReference(Chat.table, message.getId());
             Task<Void> t = removeMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.remove(message);
+            this.getMaterializedMessages().remove(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -301,10 +313,11 @@ public class Group {
 
     public boolean addMember(@NonNull User user) {
         try {
-            DocumentReference userDoc = getReference("users", user.getId());
+            DocumentReference userDoc = getReference(User.table, user.getId());
             Task<Void> t = addMemberAsync(userDoc);
             Tasks.await(t);
             this.members.add(userDoc);
+            this.getMaterializedMembers().add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -325,10 +338,11 @@ public class Group {
     public boolean removeMember(@NonNull User user) throws Exception {
         try {
             if(!user.getId().equals(owner.getId())) {
-                DocumentReference userDoc = getReference("users", user.getId());
+                DocumentReference userDoc = getReference(User.table, user.getId());
                 Task<Void> t = removeMemberAsync(userDoc);
                 Tasks.await(t);
                 this.members.remove(userDoc);
+                this.getMaterializedMembers().remove(user);
                 return true;
             }
             return false;
@@ -350,10 +364,11 @@ public class Group {
 
     public boolean addActivity(@NonNull Activity activity) throws Exception {
         try {
-            DocumentReference actDoc = getReference("activity", activity.getId());
+            DocumentReference actDoc = getReference(Activity.table, activity.getId());
             Task<Void> t = addActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.add(actDoc);
+            this.getMaterializedActivities().add(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -373,10 +388,11 @@ public class Group {
 
     public boolean removeActivity(@NonNull Activity activity) throws Exception {
         try {
-            DocumentReference actDoc = getReference("activity", activity.getId());
+            DocumentReference actDoc = getReference(Activity.table, activity.getId());
             Task<Void> t = removeActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.remove(actDoc);
+            this.getMaterializedActivities().remove(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -384,10 +400,11 @@ public class Group {
         }
     }
 
+    @Deprecated
     public static ArrayList<Group> getPositiveGroups(User user) throws ExecutionException, InterruptedException {
         ArrayList<Group> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
-        DocumentReference userDoc = getReference("users", user.getId());
+        DocumentReference userDoc = getReference(User.table, user.getId());
 
         Task<QuerySnapshot> future = db.collection(table).whereArrayContains("members", userDoc).get();
         Tasks.await(future);
@@ -409,6 +426,7 @@ public class Group {
     }
 
     //TODO vedere se si puo fare con una query
+    @Deprecated
     public ArrayList<Activity> getPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
         ArrayList<Activity> activities = getMaterializedActivities();
@@ -417,12 +435,26 @@ public class Group {
             ArrayList<User> participants = activity.getMaterializedParticipants();
 
             for (User user : participants) {
-                if(user.getPositiveSince() !=null){
+                if(user.getPositiveSince() != null){
                     result.add(activity);
                     break;
                 }
             }
         }
+
+        return result;
+    }
+
+
+    public static List<Group> getAllGroups() throws ExecutionException, InterruptedException {
+        ArrayList<Group> result = new ArrayList<>();
+
+        Task<QuerySnapshot> future = getInstance().collection(table).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc: documents )
+            result.add(getGroupById(doc.getId()));
 
         return result;
     }

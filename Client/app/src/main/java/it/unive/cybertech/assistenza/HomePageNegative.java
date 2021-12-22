@@ -50,6 +50,7 @@ public class HomePageNegative extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home_page_assistenza, container, false);
 
+
         try {
             initViews(view);
         } catch (ExecutionException | InterruptedException e) {
@@ -71,8 +72,9 @@ public class HomePageNegative extends Fragment {
         listView = view.findViewById(R.id.listRequests);
 
         final ArrayList<AssistanceType> adapterList = new ArrayList<>();
-        final QuarantineAssistance[] inCharge = {null};
+        final QuarantineAssistance[] inCharge = {null}; //da cambiare con [1]
         final String[] homeType = new String[1];
+
 
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
@@ -119,60 +121,68 @@ public class HomePageNegative extends Fragment {
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
-            GeoPoint point = adapter.getItem(position).getLocation();
 
-            @NonNull Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-            @NonNull List<Address> addresses;
+            geoDecoder(adapter.getItem(position), newIntent);
+            String taken = null;
             try {
-                addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-                if(addresses.size() != 0) {
-                    @NonNull String newCountry = addresses.get(0).getCountryName();
-                    newIntent.putExtra("country", newCountry);
-
-                    @NonNull String newCity = addresses.get(0).getLocality();
-                    newIntent.putExtra("city", newCity);
-                }
-                else {//TODO: da togliere e verificare
-                    newIntent.putExtra("country", "newCountry");
-                    newIntent.putExtra("city", "newCity");
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                taken = inCharge[0].getId();
             }
+            catch(NullPointerException ignored) {}
 
-            newIntent.putExtra("title",  adapter.getItem(position).getTitle());
-            //newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryToDate().toString()); //la prendo dall'altra parte
+            newIntent.putExtra("alreadyTaken", taken);
             newIntent.putExtra("id", adapter.getItem(position).getId());
-
             newIntent.putExtra("class", "Homenegative");
 
-            startActivity(newIntent);
+            startActivityForResult(newIntent, 1);
         }));
 
         //Poter prendere in carico una richiesta solo se sei negativo
-        view.findViewById(R.id.takenRequest).setOnClickListener(v -> {
+        view.findViewById(R.id.alreadyTaken).setOnClickListener(v -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
             String id = null;
-            if(inCharge[0] != null)
+            if(inCharge[0] != null) {
                 id = inCharge[0].getId();
-            Log.d("InCharge", id);
+                geoDecoder(inCharge[0], newIntent);
 
-            newIntent.putExtra("country", "newCountry");
-            newIntent.putExtra("city", "newCity");
-            newIntent.putExtra("user", id);
-            startActivity(newIntent);
+                newIntent.putExtra("user", id);
+            }
+            startActivityForResult(newIntent, 0);
         });
-
-
-        view.findViewById(R.id.btn_chatNeg).setOnClickListener(v -> {
-            //ci metto il collegamento alla chat
-        });
-
     }
 
-    public void refresh(View view) throws ExecutionException, InterruptedException { //probabile bisogno di refrescìh dei dati affinchè siano sempre aggiornati
-        initViews(view);
+    private void updateFr(){  //Permette di aggiornare i fragments
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.main_fragment_content, new it.unive.cybertech.assistenza.HomePageNegative()).commit();
     }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        updateFr();
+    }
+
+    private void geoDecoder(QuarantineAssistance request, Intent newIntent){
+        GeoPoint point = request.getLocation();
+
+        @NonNull Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        @NonNull List<Address> addresses;
+        try {
+            addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            if(addresses.size() != 0) {
+                newIntent.putExtra("country",addresses.get(0).getCountryName());
+                newIntent.putExtra("city", addresses.get(0).getLocality());
+            }
+            else {      //per richieste in posizioni estreme
+                newIntent.putExtra("country", "Out of Bounds");
+                newIntent.putExtra("city", "Out of Bounds");
+            }
+            newIntent.putExtra("title",  request.getTitle());
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

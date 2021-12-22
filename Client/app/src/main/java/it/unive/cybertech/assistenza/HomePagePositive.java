@@ -2,6 +2,8 @@ package it.unive.cybertech.assistenza;
 
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -9,6 +11,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,11 +38,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
 import it.unive.cybertech.database.Profile.AssistanceType;
+import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 public class HomePagePositive extends Fragment {
-    ListView listTakenView;
+    ListView listAlreadyMade;
+    User user = CachedUser.user;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,16 +60,46 @@ public class HomePagePositive extends Fragment {
     }
 
     private void initView(View view) throws ExecutionException, InterruptedException {
-        ArrayList<QuarantineAssistance> myRequestsList;
-        listTakenView = view.findViewById(R.id.lst_myRequests);
         ArrayAdapter<QuarantineAssistance> adapter;
-        myRequestsList = RequestDetails.myRequests;
-        //TODO: fare i test per vedere se myRequestsList contiene le richieste fatte fin'ora
+        ArrayList<QuarantineAssistance> myRequestsList = new ArrayList<>();
+        final QuarantineAssistance[] myreq = new QuarantineAssistance[1];
+        listAlreadyMade = view.findViewById(R.id.lst_myRequests);
+
+        //myRequestsList = user.getMaterializedQuarantineAssistance();
+        Thread t = new Thread(() -> {
+            try {
+                myreq[0] = user.getMaterializedQuarantineAssistance();
+            }
+            catch (InterruptedException | ExecutionException |NoQuarantineAssistanceFoundException ignored) {}
+        });
+        t.start();
+        t.join();
+
+        if(myreq[0] != null)
+            myRequestsList.add(myreq[0]);
+        else{
+            Utils.Dialog dialog = new Utils.Dialog(getContext());
+            dialog.show("Informazione", "Se vuoi chiedere aiuto ad un volontario, clicca il tast 'Richiedi Assistenza' per ricevere aiuto");
+            dialog.setCallback(new Utils.DialogResult() {
+                                   @Override
+                                   public void onSuccess() {
+                                   }
+
+                                   @Override
+                                   public void onCancel() {
+                                   }
+                               });
+        }
 
         adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
-        //devo poter cliccare su ogni elemento della listRequest e visualizzare il layout request_visualisation
-        listTakenView.setOnItemClickListener(((parent, view1, position, id) -> {
-            Intent newIntent = new Intent(getContext(), RequestViz.class); //Qui dal lato Positivo devo poter modificare la richiesta oppure eliminarla
+        listAlreadyMade.setAdapter(adapter);
+        listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
+            Intent newIntent = new Intent(getContext(), RequestViz.class);
+
+            @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
+            Date date = myRequestsList.get(position).getDateDeliveryToDate();
+            String strDate = dateFormat.format(date);
+
 
             GeoPoint point = adapter.getItem(position).getLocation();
 
@@ -73,9 +114,9 @@ public class HomePagePositive extends Fragment {
                     @NonNull String newCity = addresses.get(0).getLocality();
                     newIntent.putExtra("city", newCity);
                 }
-                else {//TODO: da togliere e verificare
-                    newIntent.putExtra("country", "newCountry");
-                    newIntent.putExtra("city", "newCity");
+                else {
+                    newIntent.putExtra("country", "Out of Bounds");
+                    newIntent.putExtra("city", "Out of Bounds");
                 }
 
             } catch (IOException e) {
@@ -83,20 +124,35 @@ public class HomePagePositive extends Fragment {
             }
 
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
-            newIntent.putExtra("date", adapter.getItem(position).getDateDeliveryToDate().toString());
+            newIntent.putExtra("date", strDate);
             newIntent.putExtra("id", adapter.getItem(position).getId());
 
-
             newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative
-            startActivity(newIntent);
+            startActivityForResult(newIntent, 4);
         }));
 
-        view.findViewById(R.id.newHelpRequest).setOnClickListener(v -> {
+
+        view.findViewById(R.id.add_new_request).setOnClickListener(v -> {
             Intent newIntent = new Intent(getContext(), RequestDetails.class);
 
-            newIntent.putExtra("changeFields", "true");
-            startActivity(newIntent);
+            startActivityForResult(newIntent, 2);
         });
+    }
+
+    private void updateFr(){  //Permette di aggiornare i fragments
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.replace(R.id.main_fragment_content, new it.unive.cybertech.assistenza.HomePagePositive()).commit();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        updateFr();
+    }
+
+    private void showShortToast(@NonNull String message) {
+        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 }

@@ -3,6 +3,7 @@ package it.unive.cybertech.assistenza;
 import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -67,10 +68,10 @@ public class RequestDetails extends AppCompatActivity {
         et_requestText = findViewById(R.id.requestText);
         editInfo = findViewById(R.id.edit_location);
         countryReq = findViewById(R.id.countryLoc);
-        countryReq.setText(user.getCountry());
+        //countryReq.setText(user.getCountry());
 
         cityReq = findViewById(R.id.cityLoc);
-        cityReq.setText(user.getCity());
+        //cityReq.setText(user.getCity());
 
         final String[] type = new String[1];
 
@@ -118,80 +119,52 @@ public class RequestDetails extends AppCompatActivity {
             }
         });
 
-        String callerClass = getIntent().getStringExtra("changeFields"); //per capire se mi chiama la RequestViz o la HomePage
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(30000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setMaxWaitTime(100);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+
+        editInfo.setOnClickListener(v -> {
+            updateGPS();
+        });
+
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            if(callerClass.equals("true")) { //qui creo la nuova richiesta nel caso non ci fosse già
-                //upload tutte le info nel db
-                Date date = Calendar.getInstance().getTime();
+            //upload tutte le info nel db
+            Date date = Calendar.getInstance().getTime();
 
-                locationRequest = LocationRequest.create();
-                locationRequest.setInterval(30000);
-                locationRequest.setFastestInterval(1000);
-                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                locationRequest.setMaxWaitTime(100);
+            //per l'upload
+            Thread m = new Thread(() -> {
+                try {
+                    ArrayList<AssistanceType> buffertType = null;
+                    AssistanceType choosen = null;
+                    buffertType = AssistanceType.getAssistanceTypes();
 
-
-                fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-                editInfo.setOnClickListener(v -> {
-                    updateGPS();
-                });
-
-                //per l'upload
-                Thread m = new Thread(() -> {
-                    try {
-                        ArrayList<AssistanceType> buffertType = null;
-                        AssistanceType choosen = null;
-                        buffertType = AssistanceType.getAssistanceTypes();
-
-                        for (AssistanceType a : buffertType) {
-                            if (a.getType().equals(type[0]))
-                                choosen = a;
-                        }
-                        String title = et_requestTitle.getText().toString();
-                        String description = et_requestText.getText().toString();
-                        QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, title, description, date, latitude, longitude);
-                        myRequests.add(sec); //la aggiungo a quelle create da me
-
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                    for (AssistanceType a : buffertType) {
+                        if (a.getType().equals(type[0]))
+                            choosen = a;
                     }
+                    String title = et_requestTitle.getText().toString();
+                    String description = et_requestText.getText().toString();
+                    QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, title, description, date, latitude, longitude);
+                    myRequests.add(sec); //la aggiungo a quelle create da me
+                    user.updateQuarantine(sec); //todo: questa va sostituita con la funzione nuova
+                    setResult(Activity.RESULT_OK);
 
-                });
-                m.start();
-                try {
-                    m.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                finish();
-            }
-            else {  //altrimenti ne modifico i campi Title e Description
-                String id = getIntent().getStringExtra("id");
-                QuarantineAssistance thisAssistance = null;
-                try {
-                    thisAssistance = QuarantineAssistance.getQuarantineAssistanceById(id);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                if(!et_requestTitle.toString().equals(thisAssistance.getTitle()))
-                {
-                    try {
-                        thisAssistance.updateTitle(et_requestTitle.toString());
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if( et_requestText.toString().equals(thisAssistance.getDescription())) {
-                    try {
-                        thisAssistance.updateDescription(et_requestText.toString());
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+            });
+            m.start();
+            try {
+                m.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            finish();
+
         });
     }
 

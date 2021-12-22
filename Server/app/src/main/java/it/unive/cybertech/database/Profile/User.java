@@ -4,7 +4,9 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
+import static it.unive.cybertech.database.Groups.Activity.getActivityById;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
 import androidx.annotation.NonNull;
 
@@ -17,21 +19,28 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
+import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
+//TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
 
 public class User extends Geoquerable {
-    private final static String table = "users";
+    public final static String table = "users";
     private String id;
     private String name;
     private String surname;
@@ -48,7 +57,13 @@ public class User extends Geoquerable {
     private ArrayList<DocumentReference> devices;
     private ArrayList<DocumentReference> lendingInProgresses;
     private ArrayList<DocumentReference> materials;
-    private DocumentReference quarantineAssistance;
+    private ArrayList<DocumentReference> quarantineAssistance;
+
+    //aggiunti 17/12/2021 come cache per le materialized
+    private ArrayList<Device> devicesMaterialized;
+    private ArrayList<LendingInProgress> lendingInProgressesMaterialized;
+    private ArrayList<Material> materialsMaterialized;
+    private ArrayList<QuarantineAssistance> quarantineAssistanceMaterialized;
 
     public User() {
     }
@@ -57,7 +72,7 @@ public class User extends Geoquerable {
                  String address, String city, String country, GeoPoint location, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
                  ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> materials,
-                 DocumentReference quarantineAssistance) {
+                 ArrayList<DocumentReference> quarantineAssistance) {
 
         this.id = id;
         this.name = name;
@@ -174,7 +189,7 @@ public class User extends Geoquerable {
         this.lendingPoint = lendingPoint;
     }
 
-    public ArrayList<DocumentReference> getDevices() {
+    public List<DocumentReference> getDevices() {
         return devices;
     }
 
@@ -182,7 +197,7 @@ public class User extends Geoquerable {
         this.devices = devices;
     }
 
-    public ArrayList<DocumentReference> getLendingInProgresses() {
+    public List<DocumentReference> getLendingInProgresses() {
         return lendingInProgresses;
     }
 
@@ -190,7 +205,7 @@ public class User extends Geoquerable {
         this.lendingInProgresses = lendingInProgresses;
     }
 
-    public ArrayList<DocumentReference> getMaterials() {
+    public List<DocumentReference> getMaterials() {
         return materials;
     }
 
@@ -198,11 +213,11 @@ public class User extends Geoquerable {
         this.materials = materials;
     }
 
-    public DocumentReference getQuarantineAssistance() {
+    public List<DocumentReference> getQuarantineAssistance() {
         return quarantineAssistance;
     }
 
-    private void setQuarantineAssistance(DocumentReference quarantineAssistance) {
+    private void setQuarantineAssistance(ArrayList<DocumentReference> quarantineAssistance) {
         this.quarantineAssistance = quarantineAssistance;
     }
 
@@ -218,44 +233,52 @@ public class User extends Geoquerable {
         this.birthday = birthday;
     }
 
-    public ArrayList<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
-        ArrayList<Device> arr = new ArrayList<>();
+    public List<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
+        if(devicesMaterialized == null) {
+            devicesMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : devices) {
-            try {
-                arr.add(Device.getDeviceById(doc.getId()));
-            } catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored) {
-            }
+            for (DocumentReference doc : devices)
+                //try {
+                devicesMaterialized.add(Device.getDeviceById(doc.getId()));
+                //}
+                //catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
         }
 
-        return arr;
+        return devicesMaterialized;
     }
 
-    public ArrayList<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
-        ArrayList<LendingInProgress> arr = new ArrayList<>();
+    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+        if(lendingInProgressesMaterialized == null) {
+            lendingInProgressesMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : lendingInProgresses) {
-            arr.add(LendingInProgress.getLendingInProgressById(doc.getId()));
+            for (DocumentReference doc : lendingInProgresses)
+                lendingInProgressesMaterialized.add(LendingInProgress.getLendingInProgressById(doc.getId()));
         }
 
-        return arr;
+        return lendingInProgressesMaterialized;
     }
 
-    public ArrayList<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
-        ArrayList<Material> arr = new ArrayList<>();
+    public List<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
+        if(materialsMaterialized == null) {
+            materialsMaterialized = new ArrayList<>();
 
-        for (DocumentReference doc : materials) {
-            arr.add(Material.getMaterialById(doc.getId()));
+            for (DocumentReference doc : materials)
+                materialsMaterialized.add(Material.getMaterialById(doc.getId()));
         }
 
-        return arr;
+        return materialsMaterialized;
     }
 
-    public QuarantineAssistance getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
-        if (quarantineAssistance != null)
-            return QuarantineAssistance.getQuarantineAssistanceById(quarantineAssistance.getId());
-        else
-            return null;
+
+    public List<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
+        if(quarantineAssistanceMaterialized == null) {
+            quarantineAssistanceMaterialized = new ArrayList<>();
+
+            for (DocumentReference doc : materials)
+                quarantineAssistanceMaterialized.add(QuarantineAssistance.getQuarantineAssistanceById(doc.getId()));
+        }
+
+        return quarantineAssistanceMaterialized;
     }
 
     //modificata il 13/12/2021 -> aggiunta la data di compleanno
@@ -430,15 +453,13 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update("devices", FieldValue.arrayUnion(device));
+            return docRef.update(Device.table, FieldValue.arrayUnion(device));
         else
             throw new NoUserFoundException("User not found with this id: " + id);
     }
@@ -446,11 +467,12 @@ public class User extends Geoquerable {
     public boolean addDevice(@NonNull String token, @NonNull String deviceId) {
         try {
             Device device = createDevice(token, deviceId, this.id);
-            DocumentReference devDoc = getReference("devices", device.getId());
+            DocumentReference devDoc = getReference(Device.table, device.getId());
 
             if (notContainDevice(device.getId())) {
                 Tasks.await(addDeviceAsync(devDoc));
                 this.devices.add(devDoc);
+                //this.getMaterializedDevices().add(device);
             }
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
@@ -459,9 +481,7 @@ public class User extends Geoquerable {
         }
     }
 
-    /***
-     This method invocation doesn't update the state of object, you need to do it manually
-     */
+
     private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -474,9 +494,10 @@ public class User extends Geoquerable {
 
     public boolean removeDevice(@NonNull Device device) {
         try {
-            DocumentReference devDoc = getReference("devices", device.getId());
+            DocumentReference devDoc = getReference(Device.table, device.getId());
             Tasks.await(removeDeviceAsync(devDoc));
             this.devices.remove(devDoc);
+            this.getMaterializedDevices().remove(device);
             device.deleteDevice();
             return true;
         } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
@@ -507,10 +528,11 @@ public class User extends Geoquerable {
 
     public boolean addLending(@NonNull LendingInProgress lending) {
         try {
-            DocumentReference lenDoc = getReference("lendingInProgress", lending.getId());
+            DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
             Task<Void> t = addLendingAsync(lenDoc);
             Tasks.await(t);
             this.lendingInProgresses.add(lenDoc);
+            this.getMaterializedLendingInProgress().add(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -531,10 +553,11 @@ public class User extends Geoquerable {
 
     public boolean removeLending(@NonNull LendingInProgress lending) {
         try {
-            DocumentReference lenDoc = getReference("lendingInProgress", lending.getId());
+            DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
             Task<Void> t = removeLendingAsync(lenDoc);
             Tasks.await(t);
             this.lendingInProgresses.remove(lenDoc);
+            this.getMaterializedLendingInProgress().remove(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -543,22 +566,23 @@ public class User extends Geoquerable {
     }
 
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
-    private Task<Void> addMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> addMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("materials", FieldValue.arrayUnion(rentMaterial));
+            return docRef.update("materials", FieldValue.arrayUnion(material));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
     public boolean addMaterial(@NonNull Material material) {
         try {
-            DocumentReference rentDoc = getReference("material", material.getId());
+            DocumentReference rentDoc = getReference(Material.table, material.getId());
             Task<Void> t = addMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.add(rentDoc);
+            this.getMaterializedUserMaterials().add(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -567,22 +591,23 @@ public class User extends Geoquerable {
     }
 
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
-    private Task<Void> removeMaterialAsync(@NonNull DocumentReference rentMaterial) throws ExecutionException, InterruptedException {
+    private Task<Void> removeMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("materials", FieldValue.arrayRemove(rentMaterial));
+            return docRef.update("materials", FieldValue.arrayRemove(material));
         } else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
     public boolean removeMaterial(@NonNull Material material) {
         try {
-            DocumentReference rentDoc = getReference("material", material.getId());
+            DocumentReference rentDoc = getReference(Material.table, material.getId());
             Task<Void> t = removeMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.remove(rentDoc);
+            this.getMaterializedUserMaterials().remove(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -590,33 +615,56 @@ public class User extends Geoquerable {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera quarantine assistance ma solo la sua reference sul db
-    private Task<Void> updateQuarantineAsync(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
+    //aggiunta 17/12/2021
+    private Task<Void> addQuarantineAssistanceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        Task<Void> t;
-        if (document.exists()) {
-            if (quarantineAssistance != null) {                 //if the quarantineAssistance is null is possible to delete the field date from db
-                DocumentReference assDoc = getReference("quarantineAssistance", quarantineAssistance.getId());
-                t = docRef.update("quarantineAssistance", assDoc);
-            } else
-                t = docRef.update("quarantineAssistance", FieldValue.delete());
-            return t;
-        } else
-            throw new NoUserFoundException("User not found, id: " + id);
+        if (document.exists())
+            return docRef.update("quarantineAssistance", FieldValue.arrayUnion(device));
+        else
+            throw new NoUserFoundException("User not found with this id: " + id);
     }
 
-    public boolean updateQuarantine(QuarantineAssistance quarantineAssistance) throws ExecutionException, InterruptedException {
+    public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
+                                           String description, Date date, double latitude, double longitude) {
         try {
-            Task<Void> t = updateQuarantineAsync(quarantineAssistance);
-            Tasks.await(t);
-            if (quarantineAssistance == null)
-                this.quarantineAssistance = null;
-            else
-                this.quarantineAssistance = getReference("quarantineAssistance", quarantineAssistance.getId());
+            QuarantineAssistance assistance =
+                    createQuarantineAssistance(assistanceType, title, description, date, latitude, longitude);
+            DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
+            Tasks.await(addQuarantineAssistanceAsync(quarDoc));
+            this.quarantineAssistance.add(quarDoc);
+            this.getMaterializedQuarantineAssistance().add(assistance);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    private Task<Void> removeQuarantineAssistanceAsync(@NonNull DocumentReference assistance) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return docRef.update("quarantineAssistance", FieldValue.arrayRemove(assistance));
+        else
+            throw new NoUserFoundException("User not found with this id: " + id);
+    }
+
+    public boolean removeQuarantineAssistance(@NonNull QuarantineAssistance assistance) {
+        try {
+            if(getMaterializedDevices().contains(assistance)){
+                DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
+                Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
+                this.quarantineAssistance.remove(quarDoc);
+                this.getMaterializedQuarantineAssistance().remove(assistance);
+                quarDoc.delete();
+                return true;
+            }
+            return false;
+        } catch ( NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }
@@ -635,6 +683,50 @@ public class User extends Geoquerable {
 
         return user.getMaterializedDevices();
     }
+
+    public Collection<User> getActivitiesUsers() throws ExecutionException, InterruptedException {
+        TreeSet<User> result = new TreeSet<>();
+        DocumentReference userDoc = getReference(table, this.id);
+
+        Task<QuerySnapshot> future = getInstance().collection(Activity.table)
+                .whereArrayContains("participants", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents ) {
+            Activity activity = getActivityById(doc.getId());
+
+            result.addAll(activity.getMaterializedParticipants());
+        }
+
+        result.remove(this);
+        return result;
+    }
+
+    public List<Activity> GetPositiveActivities() throws ExecutionException, InterruptedException {
+        ArrayList<Activity> result = new ArrayList<>();
+        DocumentReference userDoc = getReference(table, this.id);
+
+        Task<QuerySnapshot> future = getInstance().collection(Activity.table)
+                .whereArrayContains("participants", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents ) {
+            Activity activity = getActivityById(doc.getId());
+
+            for (User u: activity.getMaterializedParticipants() ) {
+                if(u.getPositiveSince() != null) {
+                    result.add(activity);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+
 
 
     //metodo equal per confronti

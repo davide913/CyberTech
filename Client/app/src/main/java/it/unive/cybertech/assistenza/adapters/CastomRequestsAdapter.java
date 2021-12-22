@@ -19,7 +19,10 @@ import androidx.annotation.NonNull;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -29,12 +32,11 @@ import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 public class CastomRequestsAdapter extends ArrayAdapter {
-    private List<QuarantineAssistance> myList;
+    private ArrayList<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
     private int index = 0;
     ArrayList<AssistanceType> type;
-    private ArrayList<String> prova;
 
     public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList, ArrayList<AssistanceType> type) {
         super(context, resource, myList);
@@ -50,6 +52,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         this.context = context;
     }
 
+
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, ViewGroup parent) {
         Log.d(TAG, "call getView");
@@ -59,6 +62,12 @@ public class CastomRequestsAdapter extends ArrayAdapter {
 
         TextView title = view.findViewById(R.id.title_request);
         title.setText(request.getTitle());
+
+        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
+        Date date = request.getDateDeliveryToDate();
+        String strDate = dateFormat.format(date);
+        TextView dateView =  view.findViewById(R.id.date_request);
+        dateView.setText(strDate);
 
         GeoPoint point = request.getLocation();
         showAddress(point, view);
@@ -80,10 +89,6 @@ public class CastomRequestsAdapter extends ArrayAdapter {
                 @NonNull String newCity = addresses.get(0).getLocality();
                 TextView city = view.findViewById(R.id.city_location);
                 city.setText(newCity);
-
-                @NonNull String newAddress = addresses.get(0).getThoroughfare();
-                /*TextView address = view.findViewById(R.id.address_location);
-                address.setText(newAddress);*/
             }
             else{//TODO: da togliere e verificare
                 TextView country = view.findViewById(R.id.country_request);
@@ -91,9 +96,6 @@ public class CastomRequestsAdapter extends ArrayAdapter {
 
                 TextView city = view.findViewById(R.id.city_location);
                 city.setText("newCity");
-
-                /*TextView address = view.findViewById(R.id.address_location);
-                address.setText("newAddress");*/
             }
 
         } catch (IOException e) {
