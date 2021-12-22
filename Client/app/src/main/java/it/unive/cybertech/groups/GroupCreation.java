@@ -65,7 +65,7 @@ public class GroupCreation extends AppCompatActivity {
         showShortToast(getString(R.string.GroupCreationDone));
         @NonNull Handler handler = new Handler();
         handler.postDelayed(()-> {
-            @NonNull Intent intent = new Intent(context, GroupDetails.class);
+            @NonNull Intent intent = new Intent(context, GroupHomePage.class);
             intent.putExtra("ID", newGroup.getId());
             context.startActivity(intent);
         }, 800);

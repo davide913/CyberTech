@@ -54,8 +54,10 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     @Override
     public void onItemClick(View view, int position) {
         @NonNull Group selected = Objects.requireNonNull(groups).get(position);
-        @NonNull Intent i = new Intent(fragmentActivity, GroupDetails.class);
+        @NonNull Intent i = new Intent(fragmentActivity, GroupHomePage.class);
         i.putExtra("ID", selected.getId());
         startActivity(i);
     }
+
+
 }
