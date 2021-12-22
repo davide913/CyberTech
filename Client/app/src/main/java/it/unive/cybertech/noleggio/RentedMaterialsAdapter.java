@@ -46,6 +46,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         }
 
         public void bind(final LendingInProgress item, int position) {
+            /*
             try {
                 Material material = item.getMaterial();
                 title.setText(material.getTitle());
@@ -58,6 +59,8 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
+
+             */
         }
     }
 

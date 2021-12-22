@@ -62,6 +62,11 @@ public class GroupCreation extends AppCompatActivity {
             }
         });
         t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         showShortToast(getString(R.string.GroupCreationDone));
         @NonNull Handler handler = new Handler();
         handler.postDelayed(()-> {

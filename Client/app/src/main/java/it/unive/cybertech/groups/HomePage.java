@@ -1,5 +1,8 @@
 package it.unive.cybertech.groups;
 
+import static android.content.ContentValues.TAG;
+import static it.unive.cybertech.database.Groups.Group.getAllGroups;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +25,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
 
 public class HomePage extends Fragment implements Utils.ItemClickListener {
-    private @Nullable List<Group> groups;
+    private @NonNull List<Group> groups = new ArrayList<>();
     private @Nullable FragmentActivity fragmentActivity;
 
     @Override
@@ -36,16 +41,29 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
         @NonNull Context context = view.getContext();
         fragmentActivity = getActivity();
 
-
-        groups = new ArrayList<>(); // todo da cancellare quando esisterà getAllGroups()
-        groups.add(new Group());    // todo da cancellare quando esisterà getAllGroups()
-        //groups = getAllGroups(double latitude, double longitude);   // todo DB factory function
         @NonNull FloatingActionButton newGroupButton = view.findViewById(R.id.add_group);
         @NonNull RecyclerView groupsContainer = view.findViewById(R.id.groups_list);
         groupsContainer.setLayoutManager(new LinearLayoutManager(context));
         @NonNull GroupListAdapter adapter = new GroupListAdapter(groups);
         groupsContainer.setAdapter(adapter);
         adapter.setClickListener(this);
+
+        @NonNull Thread t = new Thread(() -> {
+            try {
+                groups = getAllGroups();
+                Log.d("Size", " " + groups.size());
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
+        try {
+            t.join();
+            adapter.setItems(groups);
+            adapter.notifyDataSetChanged();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         newGroupButton.setOnClickListener(v -> startActivity(new Intent(fragmentActivity, GroupCreation.class)));
         return view;

@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -26,7 +27,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListener{
 
-    private ArrayList<Material> items;
+    private List<Material> items;
     private ShowcaseAdapter adapter;
     static final int RENT_CODE = 0;
 

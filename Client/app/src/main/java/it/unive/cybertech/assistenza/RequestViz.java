@@ -103,9 +103,9 @@ public class RequestViz extends AppCompatActivity {
 
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
             if (request[0] != null) {
-                Date date = request[0].getDateDeliveryToDate();
-                String strDate = dateFormat.format(date);
-                textDate.setText(strDate);
+                //Date date = request[0].getDateDeliveryToDate();
+                //String strDate = dateFormat.format(date);
+                //textDate.setText(strDate);
             } else
                 textDate.setText("NAN");
 
@@ -194,7 +194,7 @@ public class RequestViz extends AppCompatActivity {
             if(callerClass != null && callerClass.equals("positive")) { //se sono stato chiamato dalla HomePos
                 //Pulsanti visibili solo dall'utente positivo che richiede soccorso
                 QuarantineAssistance finalRequest2 = request[0];
-
+/*
                 menu.setOnClickListener(v -> {
                     animatedMenu(callerClass);
                 });
@@ -228,6 +228,8 @@ public class RequestViz extends AppCompatActivity {
                         }
                     });
                 });
+
+ */
 
                 chat.setOnClickListener(v -> {
                     finish();

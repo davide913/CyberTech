@@ -67,10 +67,10 @@ public class HomePagePositive extends Fragment {
 
         //myRequestsList = user.getMaterializedQuarantineAssistance();
         Thread t = new Thread(() -> {
-            try {
-                myreq[0] = user.getMaterializedQuarantineAssistance();
-            }
-            catch (InterruptedException | ExecutionException |NoQuarantineAssistanceFoundException ignored) {}
+            //try {
+                // myreq[0] = user.getMaterializedQuarantineAssistance();
+            //}
+            //catch (InterruptedException | ExecutionException |NoQuarantineAssistanceFoundException ignored) {}
         });
         t.start();
         t.join();
@@ -97,8 +97,8 @@ public class HomePagePositive extends Fragment {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-            Date date = myRequestsList.get(position).getDateDeliveryToDate();
-            String strDate = dateFormat.format(date);
+            //Date date = myRequestsList.get(position).getDateDeliveryToDate();
+            //String strDate = dateFormat.format(date);
 
 
             GeoPoint point = adapter.getItem(position).getLocation();
@@ -124,7 +124,7 @@ public class HomePagePositive extends Fragment {
             }
 
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
-            newIntent.putExtra("date", strDate);
+            //newIntent.putExtra("date", strDate);
             newIntent.putExtra("id", adapter.getItem(position).getId());
 
             newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative

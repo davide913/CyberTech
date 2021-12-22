@@ -17,7 +17,7 @@ import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.ViewHolder> {
 
-    private final List<Group> groups;
+    private List<Group> groups;
     private ItemClickListener clickListener;
 
     public GroupListAdapter(@NonNull List<Group> groups) {
@@ -44,6 +44,10 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     void setClickListener(@NonNull ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
+    }
+
+    public void setItems(List<Group> groups) {
+        this.groups = groups;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
