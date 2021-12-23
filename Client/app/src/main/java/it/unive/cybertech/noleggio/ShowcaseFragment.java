@@ -1,5 +1,6 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;
@@ -26,9 +27,9 @@ import it.unive.cybertech.utils.Utils;
 
 public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListener{
 
+    public static final String ID = "ShowcaseFragment";
     private ArrayList<Material> items;
     private ShowcaseAdapter adapter;
-    static final int RENT_CODE = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,6 +90,7 @@ public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListen
         Intent i = new Intent(getActivity(), ProductDetails.class);
         i.putExtra("ID", items.get(position).getId());
         i.putExtra("Position", position);
+        i.putExtra("Type", ID);
         startActivityForResult(i, RENT_CODE);
     }
 }

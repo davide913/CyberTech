@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,11 +28,13 @@ import com.squareup.picasso.Picasso;
 import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
+import it.unive.cybertech.noleggio.ExpiredRents;
 import it.unive.cybertech.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +104,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawer.close();
         openSection(item.getItemId());
@@ -109,23 +119,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @SuppressLint("NonConstantResourceId")
     private void openSection(int id) {
+        MenuItem item = menu.findItem(R.id.nav_main_menu_notification_showcase);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         switch (id) {
             case R.id.nav_menu_covid:
+                item.setVisible(false);
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
                 break;
             case R.id.nav_menu_quarantine_assistance:
+                item.setVisible(false);
                 if (user.getPositiveSince() == null)
                     ft.replace(R.id.main_fragment_content, new HomePageNegative()).commit();
                 else
                     ft.replace(R.id.main_fragment_content, new HomePagePositive()).commit();
                 break;
             case R.id.nav_menu_showcase:
+                item.setVisible(true);
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.noleggio.HomePage()).commit();
                 break;
             case R.id.nav_menu_groups:
+                item.setVisible(false);
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.groups.HomePage()).commit();
+                break;
+            case R.id.nav_main_menu_notification_showcase:
+                startActivity(new Intent(this, ExpiredRents.class));
                 break;
         }
     }
