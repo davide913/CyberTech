@@ -118,6 +118,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.nav_main_menu_notification_showcase:
+                startActivity(new Intent(this, ExpiredRents.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
     private void openSection(int id) {
         MenuItem item = menu.findItem(R.id.nav_main_menu_notification_showcase);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -141,9 +153,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_menu_groups:
                 item.setVisible(false);
                 ft.replace(R.id.main_fragment_content, new it.unive.cybertech.groups.HomePage()).commit();
-                break;
-            case R.id.nav_main_menu_notification_showcase:
-                startActivity(new Intent(this, ExpiredRents.class));
                 break;
         }
     }
