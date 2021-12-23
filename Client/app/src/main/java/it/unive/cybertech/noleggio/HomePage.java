@@ -26,6 +26,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class HomePage extends Fragment {
 
+    public static final int RENT_CODE = 0;
 
     @Nullable
     @Override

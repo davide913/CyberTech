@@ -1,9 +1,12 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +27,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
+    public static final String ID = "MyRentMaterialsFragment";
     private List<Material> items;
     private RentMaterialAdapter adapter;
 
@@ -61,7 +65,28 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         adapter.notifyDataSetChanged();
     }
 
-    public void onItemClick(View view, int position) {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RENT_CODE)
+            if (resultCode == ProductDetails.RENT_SUCCESS) {
+                int pos = data.getIntExtra("Position", -1);
+                if (pos >= 0) {
+                    adapter.removeAt(pos);
+                }
+            }else if(resultCode == ProductDetails.RENT_DELETE){
+                int pos = data.getIntExtra("Position", -1);
+                if (pos >= 0) {
+                    adapter.removeAt(pos);
+                }
+            }
+    }
 
+    public void onItemClick(View view, int position) {
+        Intent i = new Intent(getActivity(), ProductDetails.class);
+        i.putExtra("ID", items.get(position).getId());
+        i.putExtra("Position", position);
+        i.putExtra("Type", ID);
+        startActivityForResult(i, RENT_CODE);
     }
 }

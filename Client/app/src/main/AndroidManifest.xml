@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".noleggio.ExpiredRents"
+            android:exported="false" />
+        <activity
             android:name=".groups.GroupHomePage"
             android:exported="true" />
         <activity

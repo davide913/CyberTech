@@ -23,9 +23,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
@@ -171,5 +175,12 @@ public class Utils {
         @NonNull Intent intent = new Intent(context, SplashScreen.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static String formatDateToString(@NotNull Date date){
+        return formatDateToString(date, "dd/MM/yyyy");
+    }
+    public static String formatDateToString(@NotNull Date date, @NotNull String pattern){
+        return new SimpleDateFormat(pattern).format(date);
     }
 }

@@ -64,8 +64,8 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         title.setText(request.getTitle());
 
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-        //Date date = request.getDateDeliveryToDate();
-        //String strDate = dateFormat.format(date);
+        Date date = request.getDeliveryDateToDate();//.getDateDeliveryToDate();
+        String strDate = dateFormat.format(date);
         TextView dateView =  view.findViewById(R.id.date_request);
         //dateView.setText(strDate);
 
