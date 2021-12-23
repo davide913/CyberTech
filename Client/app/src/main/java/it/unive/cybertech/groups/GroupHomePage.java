@@ -61,7 +61,7 @@ public class GroupHomePage extends AppCompatActivity {
     private void initActionBar() {
         @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(idGroup);
+        actionBar.setTitle(thisGroup.getName());
     }
 
     @Override
