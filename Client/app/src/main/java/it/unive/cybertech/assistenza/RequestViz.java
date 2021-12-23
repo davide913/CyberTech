@@ -206,12 +206,12 @@ public class RequestViz extends AppCompatActivity {
                         @Override
                         public void onSuccess() {
                             Thread t = new Thread(() -> {
-                                /*try {
+                                try {
                                     finalRequest2.removeQuarantineAssistance();
                                     setResult(Activity.RESULT_OK);
                                 } catch (ExecutionException | InterruptedException e) {
                                     e.printStackTrace();
-                                }*/
+                                }
                             });
                             t.start();
                             try {
