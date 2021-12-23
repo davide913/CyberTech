@@ -27,12 +27,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Profile.User;
 
 
 public class ManifestPositivityFragment extends Fragment {
@@ -167,6 +169,7 @@ public class ManifestPositivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     user.updatePositiveSince(d); //TODO vedere se funziona
+                                    //Collection<User> users = user.getActivitiesUsers();
                                 }
                             });
                             t.start();
@@ -206,6 +209,10 @@ public class ManifestPositivityFragment extends Fragment {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
+    }
+
+    private void sendNotifications(ArrayList<User> users){
+
     }
 
 }

@@ -14,9 +14,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
 import it.unive.cybertech.utils.CachedUser;
@@ -47,12 +49,15 @@ public class PosReportedFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    ArrayList<Group> groupList = Group.getPositiveGroups(user);
+                    List<Activity> activityList = user.GetPositiveActivities();
                     Boolean var = false;
                     ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                     TextView textView = v.findViewById(R.id.TextView_PosReported);
                     TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
                     ListView listView = v.findViewById(R.id.ListView_signReported);
+
+                    if(activityList != null)
+                        var = true;
 
                     if(var){
                         imageView.setVisibility(View.INVISIBLE);
@@ -60,9 +65,9 @@ public class PosReportedFragment extends Fragment {
                         listView.setVisibility(View.VISIBLE);
                         textView1.setVisibility(View.VISIBLE);
 
-                        ArrayAdapter<Group> adapter;
+                        ArrayAdapter<Activity> adapter;
 
-                        adapter = new CustomSignReceivedAdapter(getContext(), 0, groupList); //TODO qua prenderà in ingresso userList
+                        adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList);
 
                         listView.setAdapter(adapter);
                     }
