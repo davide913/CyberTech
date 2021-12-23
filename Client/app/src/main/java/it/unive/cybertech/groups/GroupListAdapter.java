@@ -1,9 +1,11 @@
 package it.unive.cybertech.groups;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,7 +54,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final @NonNull TextView title, description, participants, location;
-        //private final ImageView image;
+        //private final ImageView image; todo immagine gruppo
 
         public ViewHolder(@NonNull View view) {
             super(view);
@@ -60,7 +62,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
             description = view.findViewById(R.id.group_item_description);
             participants = view.findViewById(R.id.group_item_participants);
             location = view.findViewById(R.id.group_item_location);
-            //image = view.findViewById(R.id.showcase_item_image);
+            //image = view.findViewById(R.id.showcase_item_image); todo immagine gruppo
         }
 
         @Override
@@ -69,9 +71,9 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
         }
 
         public void bind(final @NonNull Group item, int position) {
-            title.setText("item.getName()");                  // todo da togliere "" quando esisterà un gruppo creato da un utente
-            description.setText("item.getDescription()");     // todo da togliere "" quando esisterà un gruppo creato da un utente
-            participants.setText("item.getMembers().size()"); // todo da togliere "" quando esisterà un gruppo creato da un utente
+            title.setText(item.getName());                  // todo da togliere "" quando esisterà un gruppo creato da un utente
+            description.setText(item.getDescription());     // todo da togliere "" quando esisterà un gruppo creato da un utente
+            participants.setText(String.valueOf(item.getMembers().size())); // todo da togliere "" quando esisterà un gruppo creato da un utente
             location.setText("item.getLocation()");           // todo da togliere "" quando esisterà un gruppo creato da un utente
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
         }

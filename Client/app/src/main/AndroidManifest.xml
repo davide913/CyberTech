@@ -19,7 +19,7 @@
             android:name=".groups.GroupHomePage"
             android:exported="true" />
         <activity
-            android:name=".groups.ActivityCreation"
+            android:name=".groups.activities.ActivityCreation"
             android:exported="true" />
         <activity
             android:name=".ProfileActivity"

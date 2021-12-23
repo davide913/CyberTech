@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
 
@@ -25,23 +26,28 @@ public class GroupHomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_home_page);
+        @NonNull Thread t = new Thread(this::bindThisGroup);
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         initTabs();
         initActionBar();
-        bindThisGroup();
     }
 
     private void initTabs(){
-        TabLayout tabLayout = findViewById(R.id.groups_tabs);
-        ViewPager viewPager = findViewById(R.id.groups_viewpager);
+        @NonNull TabLayout tabLayout = findViewById(R.id.groups_tabs);
+        @NonNull ViewPager viewPager = findViewById(R.id.group_infoViewPager);
         tabLayout.setupWithViewPager(viewPager);
-        Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getSupportFragmentManager());
+        @NonNull Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(new GroupInfo(), getString(R.string.information));
         adapter.addFragment(new GroupActivities(), getString(R.string.activity));
         viewPager.setAdapter(adapter);
     }
 
     private void bindThisGroup() {
-        Thread t = new Thread(() -> {
             try {
                 thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
             } catch (ExecutionException | InterruptedException e) {
@@ -50,8 +56,6 @@ public class GroupHomePage extends AppCompatActivity {
             idGroup = thisGroup.getId();
             if(idGroup == null || idGroup.length() == 0)
                 finish();
-        });
-        t.start();
     }
 
     private void initActionBar() {

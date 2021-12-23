@@ -1,4 +1,4 @@
-package it.unive.cybertech.groups;
+package it.unive.cybertech.groups.activities;
 
 import android.content.Context;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package it.unive.cybertech.groups;
+package it.unive.cybertech.groups.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
@@ -28,7 +27,6 @@ import it.unive.cybertech.database.Groups.Group;
 
 import static it.unive.cybertech.database.Groups.Activity.createActivity;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Utils.logout;
 
 public class ActivityCreation extends AppCompatActivity {
     private final @NonNull Context context = this;
