@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -27,7 +28,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
-    private ArrayList<LendingInProgress> items;
+    private List<LendingInProgress> items;
     private RentedMaterialsAdapter adapter;
 
     @Override
@@ -49,12 +50,15 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
         super.onStart();
         //TODO get posizione
         Thread t = new Thread(() -> {
+
             try {
                 items = user.getMaterializedLendingInProgress();
                 Log.d("noleggio.MyRentedMaterialsFragment", "Size: " + items.size());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+
+
         });
         t.start();
         try {

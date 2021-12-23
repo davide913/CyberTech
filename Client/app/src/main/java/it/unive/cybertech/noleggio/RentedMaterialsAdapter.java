@@ -46,8 +46,9 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         }
 
         public void bind(final LendingInProgress item, int position) {
+            /*
             try {
-                Material material = item.getMaterial();
+                Material material = item.getMaterializedMaterial();
                 title.setText(material.getTitle());
                 description.setText(material.getDescription());
                 itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
@@ -58,6 +59,8 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
+
+             */
         }
     }
 

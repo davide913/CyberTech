@@ -1,4 +1,4 @@
-package it.unive.cybertech.groups;
+package it.unive.cybertech.groups.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
@@ -28,7 +27,6 @@ import it.unive.cybertech.database.Groups.Group;
 
 import static it.unive.cybertech.database.Groups.Activity.createActivity;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Utils.logout;
 
 public class ActivityCreation extends AppCompatActivity {
     private final @NonNull Context context = this;
@@ -90,9 +88,9 @@ public class ActivityCreation extends AppCompatActivity {
             showShortToast(getString(R.string.activityCreated));
             @NonNull Handler handler = new Handler();
             handler.postDelayed(()-> {
-                @NonNull Intent i = new Intent(context, GroupDetails.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
+                // @NonNull Intent i = new Intent(context, ActivityDetails.class);
+                // i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                // startActivity(i);
             }, 800);
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();

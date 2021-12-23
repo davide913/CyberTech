@@ -147,6 +147,7 @@
     <string name="Date">Data</string>
     <string name="place">Luogo</string>
     <string name="activityCreated">Attività creata con successo!</string>
+    <string name="expired">Scadute</string>
 
     <array name="sex">
         <item>Maschio</item>
