@@ -62,13 +62,13 @@ public class HomePagePositive extends Fragment {
     private void initView(View view) throws ExecutionException, InterruptedException {
         ArrayAdapter<QuarantineAssistance> adapter;
         ArrayList<QuarantineAssistance> myRequestsList = new ArrayList<>();
-        final QuarantineAssistance[] myreq = new QuarantineAssistance[1];
-        listAlreadyMade = view.findViewById(R.id.lst_myRequests);
+        List<QuarantineAssistance> myreq;// = new QuarantineAssistance[1];
+        /*listAlreadyMade = view.findViewById(R.id.lst_myRequests);
 
         //myRequestsList = user.getMaterializedQuarantineAssistance();
         Thread t = new Thread(() -> {
             try {
-                myreq[0] = user.getMaterializedQuarantineAssistance();
+                myreq = user.getMaterializedQuarantineAssistance();
             }
             catch (InterruptedException | ExecutionException |NoQuarantineAssistanceFoundException ignored) {}
         });
@@ -89,7 +89,7 @@ public class HomePagePositive extends Fragment {
                                    public void onCancel() {
                                    }
                                });
-        }
+        }*/
 
         adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
         listAlreadyMade.setAdapter(adapter);
@@ -97,7 +97,7 @@ public class HomePagePositive extends Fragment {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-            Date date = myRequestsList.get(position).getDateDeliveryToDate();
+            Date date = myRequestsList.get(position).getDeliveryDateToDate();//.getDateDeliveryToDate();
             String strDate = dateFormat.format(date);
 
 

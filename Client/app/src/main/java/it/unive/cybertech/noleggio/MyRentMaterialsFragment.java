@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -23,7 +24,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
-    private ArrayList<Material> items;
+    private List<Material> items;
     private RentMaterialAdapter adapter;
 
     @Override
