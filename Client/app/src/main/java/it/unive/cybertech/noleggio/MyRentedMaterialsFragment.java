@@ -28,6 +28,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
+    public static final String ID ="MyRentedMaterialsFragment";
     private List<LendingInProgress> items;
     private RentedMaterialsAdapter adapter;
 
@@ -69,5 +70,18 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
 
     public void onItemClick(View view, int position) {
 
+    }
+
+    public void addLendingById(String id){
+        /*Thread t = new Thread(() -> {
+            try {
+                LendingInProgress l = LendingInProgress.getLendingById(id);
+                adapter.add(l);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();*/
+        initList();
     }
 }

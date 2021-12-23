@@ -25,7 +25,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.utils.Utils;
 
-public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListener{
+public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
     private ArrayList<Material> items;
@@ -82,6 +82,15 @@ public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListen
             int pos = data.getIntExtra("Position", -1);
             if (pos >= 0) {
                 adapter.removeAt(pos);
+                String idLending = data.getStringExtra("LendingID");
+                if(idLending != null) {
+                    HomePage h = (HomePage) getParentFragment();
+                    if (h != null) {
+                        MyRentedMaterialsFragment f = (MyRentedMaterialsFragment) h.getFragmentByID(MyRentedMaterialsFragment.ID);
+                        if(f != null)
+                            f.addLendingById(idLending);
+                    }
+                }
             }
         }
     }

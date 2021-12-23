@@ -23,8 +23,8 @@ import it.unive.cybertech.utils.Utils;
 
 public class GroupInfo extends Fragment{
 
+    public static final String ID="GroupInfo";
     private Group thisGroup;
-
     private TextView nameGroup;
     private TextView descriptionGroup;
     private TextView nUsers;

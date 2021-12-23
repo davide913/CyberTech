@@ -138,7 +138,30 @@ public class Utils {
 
     public static class FragmentAdapter extends FragmentPagerAdapter {
 
-        private final List<Pair<String, Fragment>> mFragmentList = new ArrayList<>();
+        class FragmentListAdapter{
+            private String title, id;
+            private Fragment fragment;
+
+            public FragmentListAdapter(String id,String title, Fragment fragment) {
+                this.title = title;
+                this.id = id;
+                this.fragment = fragment;
+            }
+
+            public String getTitle() {
+                return title;
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public Fragment getFragment() {
+                return fragment;
+            }
+        }
+
+        private final List<FragmentListAdapter> mFragmentList = new ArrayList<>();
 
         public FragmentAdapter(FragmentManager manager) {
             super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
@@ -147,7 +170,7 @@ public class Utils {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            return mFragmentList.get(position).second;
+            return mFragmentList.get(position).fragment;
         }
 
         @Override
@@ -155,32 +178,41 @@ public class Utils {
             return mFragmentList.size();
         }
 
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(new Pair<>(title, fragment));
+        public void addFragment(Fragment fragment, String title, String id) {
+            mFragmentList.add(new FragmentListAdapter(id, title, fragment));
         }
 
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            return  mFragmentList.get(position).first;
+            return mFragmentList.get(position).getTitle();
+        }
+
+        public Fragment getFragmentById(String id) {
+            for (FragmentListAdapter p : mFragmentList)
+                if (p.getId().equals(id))
+                    return p.fragment;
+            return null;
         }
     }
 
     /**
      * Logout from application and disconnect user from database access
+     *
      * @since 1.0
      */
-    public static void logout(Context context){
+    public static void logout(Context context) {
         FirebaseAuth.getInstance().signOut();
         @NonNull Intent intent = new Intent(context, SplashScreen.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
-    public static String formatDateToString(@NotNull Date date){
+    public static String formatDateToString(@NotNull Date date) {
         return formatDateToString(date, "dd/MM/yyyy");
     }
-    public static String formatDateToString(@NotNull Date date, @NotNull String pattern){
+
+    public static String formatDateToString(@NotNull Date date, @NotNull String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }
 }

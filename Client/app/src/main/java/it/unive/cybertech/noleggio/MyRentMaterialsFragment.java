@@ -69,12 +69,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RENT_CODE)
-            if (resultCode == ProductDetails.RENT_SUCCESS) {
-                int pos = data.getIntExtra("Position", -1);
-                if (pos >= 0) {
-                    adapter.removeAt(pos);
-                }
-            }else if(resultCode == ProductDetails.RENT_DELETE){
+            if (resultCode == ProductDetails.RENT_SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
                     adapter.removeAt(pos);

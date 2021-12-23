@@ -79,9 +79,10 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         this.showcaseList = materials;
     }
 
-    public void removeAt(int position){
-        showcaseList.remove(position);
+    public Material removeAt(int position){
+        Material removed = showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
+        return removed;
     }
 }

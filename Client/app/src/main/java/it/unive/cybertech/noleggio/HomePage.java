@@ -27,6 +27,7 @@ import it.unive.cybertech.utils.Utils;
 public class HomePage extends Fragment {
 
     public static final int RENT_CODE = 0;
+    private Utils.FragmentAdapter adapter;
 
     @Nullable
     @Override
@@ -41,10 +42,14 @@ public class HomePage extends Fragment {
         TabLayout tabLayout = view.findViewById(R.id.showcase_tabs);
         ViewPager viewPager = view.findViewById(R.id.showcase_viewpager);
         tabLayout.setupWithViewPager(viewPager);
-        Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getParentFragmentManager());
-        adapter.addFragment(new ShowcaseFragment(), getString(R.string.showcase));
-        adapter.addFragment(new MyRentedMaterialsFragment(), getString(R.string.rented_materials));
-        adapter.addFragment(new MyRentMaterialsFragment(), getString(R.string.rent_materials));
+        adapter = new Utils.FragmentAdapter(getParentFragmentManager());
+        adapter.addFragment(new ShowcaseFragment(), getString(R.string.showcase), ShowcaseFragment.ID);
+        adapter.addFragment(new MyRentedMaterialsFragment(), getString(R.string.rented_materials), MyRentedMaterialsFragment.ID);
+        adapter.addFragment(new MyRentMaterialsFragment(), getString(R.string.rent_materials), MyRentMaterialsFragment.ID);
         viewPager.setAdapter(adapter);
+    }
+
+    public Fragment getFragmentByID(String id){
+        return adapter.getFragmentById(id);
     }
 }

@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -92,5 +94,11 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
+    }
+
+    public void add(@NotNull LendingInProgress m){
+        showcaseList.add(m);
+        notifyItemInserted(showcaseList.size() - 1);
+        notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
     }
 }

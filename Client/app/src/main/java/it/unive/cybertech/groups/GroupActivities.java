@@ -22,6 +22,8 @@ import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 
 public class GroupActivities extends Fragment {
+
+    public static final String ID = "GroupActivities";
     private Group thisGroup;
     private String idGroup;
     private @Nullable List<Activity> activities;
