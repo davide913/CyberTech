@@ -565,6 +565,19 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
+    public List<LendingInProgress> getExpiredLending() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> result = new ArrayList<>();
+        Timestamp timestamp = new Timestamp(new Date());
+
+        for (LendingInProgress lending : getMaterializedLendingInProgress()) {
+            if (timestamp.compareTo(lending.getExpiryDate()) < 0)
+                result.add(lending);
+
+        }
+
+        return result;
+    }
+
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> addMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -615,19 +628,14 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    public List<LendingInProgress> getExpiredLending() throws ExecutionException, InterruptedException {
-        ArrayList<LendingInProgress> result = new ArrayList<>();
+    public List<Material> getExpiredMaterial() throws ExecutionException, InterruptedException {
+        ArrayList<Material> result = new ArrayList<>();
         Timestamp timestamp = new Timestamp(new Date());
 
-        for (LendingInProgress lending : getMaterializedLendingInProgress()) {
-            if(lending.getEndExpiryDate() != null){
-                if (timestamp.compareTo(lending.getEndExpiryDate()) < 0)
-                    result.add(lending);
-            }
-            else {
-                if (timestamp.compareTo(lending.getExpiryDate()) < 0)
-                    result.add(lending);
-            }
+        for (Material material : getMaterializedUserMaterials()) {
+            if (timestamp.compareTo(material.getExpiryDate()) < 0)
+                result.add(material);
+
         }
 
         return result;

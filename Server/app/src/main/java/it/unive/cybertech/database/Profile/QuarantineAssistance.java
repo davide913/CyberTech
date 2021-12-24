@@ -317,7 +317,7 @@ public class QuarantineAssistance extends Geoquerable {
     }
 
     //modificata 30/11/2021, testata completa e aggiunta modifica per la gestione dei 6/12/2021,
-    public static ArrayList<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint position,
+    public static List<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint position,
                                                                                   double radiusInKm) throws ExecutionException, InterruptedException {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();

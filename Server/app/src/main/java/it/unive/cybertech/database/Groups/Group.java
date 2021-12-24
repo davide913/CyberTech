@@ -85,7 +85,7 @@ public class Group {
         this.owner = owner;
     }
 
-    public ArrayList<DocumentReference> getMembers() {
+    public List<DocumentReference> getMembers() {
         return members;
     }
 
@@ -93,7 +93,7 @@ public class Group {
         this.members = members;
     }
 
-    public ArrayList<DocumentReference> getMessages() {
+    public List<DocumentReference> getMessages() {
         return messages;
     }
 
@@ -101,7 +101,7 @@ public class Group {
         this.messages = messages;
     }
 
-    public ArrayList<DocumentReference> getActivities() {
+    public List<DocumentReference> getActivities() {
         return activities;
     }
 
@@ -109,7 +109,7 @@ public class Group {
         this.activities = activities;
     }
 
-    public ArrayList<User> getMaterializedMembers() throws ExecutionException, InterruptedException {
+    public List<User> getMaterializedMembers() throws ExecutionException, InterruptedException {
         if(membersMaterialized == null) {
             membersMaterialized = new ArrayList<>();
 
@@ -121,7 +121,7 @@ public class Group {
         return membersMaterialized;
     }
 
-    public ArrayList<Chat> getMaterializedMessages() throws ExecutionException, InterruptedException {
+    public List<Chat> getMaterializedMessages() throws ExecutionException, InterruptedException {
         if(messagesMaterialized == null) {
             messagesMaterialized = new ArrayList<>();
 
@@ -133,7 +133,7 @@ public class Group {
         return messagesMaterialized;
     }
 
-    public ArrayList<Activity> getMaterializedActivities() throws ExecutionException, InterruptedException {
+    public List<Activity> getMaterializedActivities() throws ExecutionException, InterruptedException {
         if(activitiesMaterialized == null) {
             activitiesMaterialized = new ArrayList<>();
 
@@ -401,7 +401,7 @@ public class Group {
     }
 
     @Deprecated
-    public static ArrayList<Group> getPositiveGroups(User user) throws ExecutionException, InterruptedException {
+    public static List<Group> getPositiveGroups(User user) throws ExecutionException, InterruptedException {
         ArrayList<Group> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
         DocumentReference userDoc = getReference(User.table, user.getId());
@@ -412,7 +412,7 @@ public class Group {
 
         for (DocumentSnapshot doc : documents) {
             Group g = getGroupById(doc.getId());
-            ArrayList<User> members = g.getMaterializedMembers();
+            List<User> members = g.getMaterializedMembers();
 
             for (User u : members) {
                 if (u.getPositiveSince() != null) {
@@ -427,12 +427,12 @@ public class Group {
 
     //TODO vedere se si puo fare con una query
     @Deprecated
-    public ArrayList<Activity> getPositiveActivities() throws ExecutionException, InterruptedException {
+    public List<Activity> getPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
-        ArrayList<Activity> activities = getMaterializedActivities();
+        List<Activity> activities = getMaterializedActivities();
 
         for (Activity activity: activities) {
-            ArrayList<User> participants = activity.getMaterializedParticipants();
+            List<User> participants = activity.getMaterializedParticipants();
 
             for (User user : participants) {
                 if(user.getPositiveSince() != null){

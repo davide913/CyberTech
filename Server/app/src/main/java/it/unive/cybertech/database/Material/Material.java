@@ -368,7 +368,7 @@ public class Material extends Geoquerable {
     }
 
     //funzione per mattia!
-    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
+    public static List<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
