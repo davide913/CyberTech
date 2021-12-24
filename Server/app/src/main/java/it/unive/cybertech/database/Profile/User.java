@@ -39,7 +39,7 @@ import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 //TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
 
-public class User extends Geoquerable {
+public class User extends Geoquerable implements Comparable<User> {
     public final static String table = "users";
     private String id;
     private String name;
@@ -615,6 +615,24 @@ public class User extends Geoquerable {
         }
     }
 
+    public List<LendingInProgress> getExpiredLending() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> result = new ArrayList<>();
+        Timestamp timestamp = new Timestamp(new Date());
+
+        for (LendingInProgress lending : getMaterializedLendingInProgress()) {
+            if(lending.getEndExpiryDate() != null){
+                if (timestamp.compareTo(lending.getEndExpiryDate()) < 0)
+                    result.add(lending);
+            }
+            else {
+                if (timestamp.compareTo(lending.getExpiryDate()) < 0)
+                    result.add(lending);
+            }
+        }
+
+        return result;
+    }
+
     //aggiunta 17/12/2021
     private Task<Void> addQuarantineAssistanceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -726,9 +744,6 @@ public class User extends Geoquerable {
         return result;
     }
 
-
-
-
     //metodo equal per confronti
     @Override
     public boolean equals(Object o) {
@@ -738,5 +753,12 @@ public class User extends Geoquerable {
             return user.getId().equals(this.getId());
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(User o) {
+        if(o.getId().equals(this.getId()))
+            return 0;
+        return 1;
     }
 }

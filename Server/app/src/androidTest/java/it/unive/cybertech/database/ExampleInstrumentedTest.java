@@ -44,12 +44,12 @@ public class ExampleInstrumentedTest{
 
         Log.d("id", group.getId());
 
-        User u = User.getUserById("davide.finesso@hotmail.com");
+        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
 
         Collection<User> us= u.getActivitiesUsers();
 
 
 
-        //Log.d("date", new Date().toString());
+        Log.d("date", new Date().toString());
     }
 }

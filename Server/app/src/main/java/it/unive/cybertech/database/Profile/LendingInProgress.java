@@ -98,7 +98,7 @@ public class LendingInProgress {
         return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
     }
 
-    protected static LendingInProgress getLendingInProgressById(String id) throws ExecutionException, InterruptedException {
+    public static LendingInProgress getLendingInProgressById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
