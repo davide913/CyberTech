@@ -106,10 +106,30 @@ public class AddProductForRent extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 if (m.get() != null) {
+                    t = new Thread(() -> {
+                        user.addMaterial(m.get());
+                    });
+                    t.start();
+                    try {
+                        t.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     new Utils.Dialog(this)
                             .hideCancelButton()
+                            .setCallback(new Utils.DialogResult() {
+                                @Override
+                                public void onSuccess() {
+                                    finish();
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            })
                             .show("Fatto!", "Il tuo annuncio è stato pubblicato");
-                    finish();
                 } else
                     new Utils.Dialog(this).show("Errore", "Non è stato possibile aggiungere il tuo materiale in prestito. Riprova tra qualche istante");
             }

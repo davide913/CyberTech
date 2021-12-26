@@ -17,12 +17,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 
-public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder>{
+public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder> {
 
     private List<LendingInProgress> showcaseList;
     private ItemClickListener clickListener;
@@ -48,18 +49,27 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         }
 
         public void bind(final LendingInProgress item, int position) {
-            try {
-                Material material = item.getMaterializedMaterial();
-                title.setText(material.getTitle());
-                description.setText(material.getDescription());
-                itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
-                if (material.getPhoto() != null) {
-                    byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
-                    if (arr != null && arr.length > 0)
-                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+            AtomicReference<Material> material = new AtomicReference<>();
+            Thread t = new Thread(() -> {
+                try {
+                    material.set(item.getMaterializedMaterial());
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (ExecutionException | InterruptedException e) {
+            });
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+            title.setText(material.get().getTitle());
+            description.setText(material.get().getDescription());
+            itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
+            if (material.get().getPhoto() != null) {
+                byte[] arr = Base64.decode(material.get().getPhoto(), Base64.DEFAULT);
+                if (arr != null && arr.length > 0)
+                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
             }
         }
     }
@@ -87,19 +97,19 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<LendingInProgress> materials){
+    public void setItems(List<LendingInProgress> materials) {
         this.showcaseList = materials;
     }
 
-    public void removeAt(int position){
+    public void removeAt(int position) {
         showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
     }
 
-    public void add(@NotNull LendingInProgress m){
+    public void add(@NotNull LendingInProgress m) {
         showcaseList.add(m);
         notifyItemInserted(showcaseList.size() - 1);
-        notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
+        //notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
     }
 }

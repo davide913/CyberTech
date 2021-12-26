@@ -42,7 +42,7 @@ public class HomePage extends Fragment {
         TabLayout tabLayout = view.findViewById(R.id.showcase_tabs);
         ViewPager viewPager = view.findViewById(R.id.showcase_viewpager);
         tabLayout.setupWithViewPager(viewPager);
-        adapter = new Utils.FragmentAdapter(getParentFragmentManager());
+        adapter = new Utils.FragmentAdapter(getChildFragmentManager());
         adapter.addFragment(new ShowcaseFragment(), getString(R.string.showcase), ShowcaseFragment.ID);
         adapter.addFragment(new MyRentedMaterialsFragment(), getString(R.string.rented_materials), MyRentedMaterialsFragment.ID);
         adapter.addFragment(new MyRentMaterialsFragment(), getString(R.string.rent_materials), MyRentMaterialsFragment.ID);

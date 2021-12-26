@@ -2,10 +2,8 @@ package it.unive.cybertech.noleggio;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,11 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -48,7 +45,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
     private void initList() {
         super.onStart();
         //TODO get posizione
-        Thread t = new Thread(() -> {
+        /*Thread t = new Thread(() -> {
             try {
                 items = user.getMaterializedLendingInProgress();
                 Log.d("noleggio.MyRentedMaterialsFragment", "Size: " + items.size());
@@ -63,7 +60,29 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
             e.printStackTrace();
         }
         adapter.setItems(items);
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();*/
+        Runnable r = () -> {
+            {
+                try {
+                    items = user.getMaterializedLendingInProgress();
+                    Log.d("noleggio.MyRentedMaterialsFragment", "Size: " + items.size());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Utils.runInBackground(r, new Utils.ThreadResult() {
+            @Override
+            public void onComplete() {
+                adapter.setItems(items);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     public void onItemClick(View view, int position) {
@@ -71,15 +90,21 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
     }
 
     public void addLendingById(String id){
+        AtomicReference<LendingInProgress> l = new AtomicReference<>();
         Thread t = new Thread(() -> {
             try {
-                LendingInProgress l = LendingInProgress.getLendingInProgressById(id);
-                adapter.add(l);
+                l.set(LendingInProgress.getLendingInProgressById(id));
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         });
         t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        adapter.add(l.get());
         //initList();
     }
 }

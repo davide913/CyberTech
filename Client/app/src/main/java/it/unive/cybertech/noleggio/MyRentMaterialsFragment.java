@@ -47,7 +47,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     private void initList() {
         super.onStart();
         //TODO get posizione
-        Thread t = new Thread(() -> {
+        /*Thread t = new Thread(() -> {
             try {
                 items = user.getMaterializedUserMaterials();
                 Log.d(ID, "Size: " + items.size());
@@ -62,7 +62,29 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
             e.printStackTrace();
         }
         adapter.setItems(items);
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged();*/
+        Runnable r = () -> {
+            {
+                try {
+                    items = user.getMaterializedUserMaterials();
+                    Log.d(ID, "Size: " + items.size());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Utils.runInBackground(r, new Utils.ThreadResult() {
+            @Override
+            public void onComplete() {
+                adapter.setItems(items);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     @Override

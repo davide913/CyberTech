@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
@@ -47,6 +49,12 @@ public class Utils {
 
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public interface ThreadResult {
+        void onComplete();
+
+        void onError();
     }
 
     /**
@@ -138,11 +146,11 @@ public class Utils {
 
     public static class FragmentAdapter extends FragmentPagerAdapter {
 
-        class FragmentListAdapter{
+        class FragmentListAdapter {
             private String title, id;
             private Fragment fragment;
 
-            public FragmentListAdapter(String id,String title, Fragment fragment) {
+            public FragmentListAdapter(String id, String title, Fragment fragment) {
                 this.title = title;
                 this.id = id;
                 this.fragment = fragment;
@@ -214,5 +222,27 @@ public class Utils {
 
     public static String formatDateToString(@NotNull Date date, @NotNull String pattern) {
         return new SimpleDateFormat(pattern).format(date);
+    }
+
+    /*public static <T> void runInBackground(Executor executor, Runnable code, ThreadResult<T> callback) {
+        executor.execute(()->{
+            try{
+                code.run();
+                callback.onComplete(null);
+            }catch(Exception e){
+                callback.onError();
+            }
+        });
+    }*/
+
+    public static void runInBackground( Runnable code, ThreadResult callback) {
+        new Thread(()->{
+            try{
+                code.run();
+                callback.onComplete();
+            }catch(Exception e){
+                callback.onError();
+            }
+        }).start();
     }
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
@@ -66,6 +67,8 @@ public class ProductDetails extends AppCompatActivity {
         extensionLayout = findViewById(R.id.extension_layout_details);
         renter = findViewById(R.id.user_name_renter_details);
         requestDate = findViewById(R.id.expire_date_rent_details);
+        renterLayout.setVisibility(View.GONE);
+        extensionLayout.setVisibility(View.GONE);
 
         if (from.equals(MyRentMaterialsFragment.ID))
             confirm.setVisibility(View.GONE);
@@ -109,14 +112,19 @@ public class ProductDetails extends AppCompatActivity {
     private void manageType() throws ExecutionException, InterruptedException {
         switch (from) {
             case MyRentMaterialsFragment.ID:
-                User renterUser = null;
-                try {
-                    renterUser = material.getMaterializedRenter();
-                } catch (NoRentMaterialFoundException e) {
-                    e.printStackTrace();
-                }
-                if (renterUser == null) {
-                    renterLayout.setVisibility(View.GONE);
+                AtomicReference<User> renterUser = new AtomicReference<>();
+
+                Thread t = new Thread(() -> {
+                    try {
+                        renterUser.set(material.getMaterializedRenter());
+                    } catch (NoRentMaterialFoundException | ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+                t.start();
+                t.join();
+
+                if (renterUser.get() == null) {
                     delete.setVisibility(VISIBLE);
                     delete.setOnClickListener(v -> {
                         new Utils.Dialog(this)
@@ -138,17 +146,26 @@ public class ProductDetails extends AppCompatActivity {
                                 .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
                     });
                 } else {
-                    renter.setText(renterUser.getName());
+                    renter.setText(renterUser.get().getName() + " " + renterUser.get().getSurname());
                     renterLayout.setVisibility(VISIBLE);
                     try {
-                        LendingInProgress lending = material.getLending();
-                        if (lending != null && lending.getEndExpiryDate() != null) {
-                            requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                        AtomicReference<LendingInProgress> lending = new AtomicReference<>();
+                        t = new Thread(() -> {
+                            try {
+                                lending.set(material.getLending());
+                            } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        t.start();
+                        t.join();
+                        if (lending.get() != null && lending.get().getEndExpiryDate() != null) {
+                            requestDate.setText(Utils.formatDateToString(lending.get().getEndExpiryDate().toDate()));
                             extensionLayout.setVisibility(VISIBLE);
                             acceptExtension.setOnClickListener(v -> {
-                                material.updateExpiryDate(lending.getEndExpiryDate().toDate());
-                                lending.updateEndExpiryDate(null);
-                                date.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                                material.updateExpiryDate(lending.get().getEndExpiryDate().toDate());
+                                lending.get().updateEndExpiryDate(null);
+                                date.setText(Utils.formatDateToString(lending.get().getEndExpiryDate().toDate()));
                                 extensionLayout.setVisibility(View.GONE);
                             });
                             rejectExtension.setOnClickListener(v -> {
@@ -161,7 +178,7 @@ public class ProductDetails extends AppCompatActivity {
                                 }
                             });
                         }
-                    } catch (ExecutionException | InterruptedException e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
@@ -181,11 +198,12 @@ public class ProductDetails extends AppCompatActivity {
                                     @Override
                                     public void onSuccess() {
                                         AtomicBoolean done = new AtomicBoolean(false);
-                                        AtomicReference<LendingInProgress> l = null;
+                                        AtomicReference<LendingInProgress> l = new AtomicReference<>();
                                         Thread t = new Thread(() -> {
                                             try {
                                                 material.updateRenter(user);
                                                 l.set(LendingInProgress.createLendingInProgress(material, material.getExpiryDate().toDate()));
+                                                user.addLending(l.get());
                                                 done.set(true);
                                             } catch (ExecutionException | InterruptedException e) {
                                                 e.printStackTrace();

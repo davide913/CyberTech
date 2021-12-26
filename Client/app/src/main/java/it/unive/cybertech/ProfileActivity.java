@@ -38,6 +38,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import it.unive.cybertech.utils.Utils;
+
 /**
  * ProfileActivity is the main activity that allow user to view and edit some personal, account or
  * localization info:
@@ -76,9 +78,7 @@ public class ProfileActivity extends AppCompatActivity {
         dateOfBirth = findViewById(R.id.profile_dateOfBirth);
         Timestamp dateOfBirthDB = user.getBirthday();
         if(dateOfBirthDB != null) {
-            @NonNull String pattern = "dd/MM/yyyy";
-            @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-            @NonNull String dateOfBirthString = df.format(dateOfBirthDB);
+            @NonNull String dateOfBirthString = Utils.formatDateToString(user.getBirthDayToDate());
             dateOfBirth.setText(dateOfBirthString);
         }
 

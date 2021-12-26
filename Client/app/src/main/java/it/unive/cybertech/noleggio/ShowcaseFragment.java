@@ -58,7 +58,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     private void initList() {
         super.onStart();
         //TODO get posizione
-        Thread t = new Thread(() -> {
+        /*Thread t = new Thread(() -> {
             try {
                 items = Material.getRentableMaterials(45, 12, 10000, user.getId());
                 Log.d("noleggio.HomePage", "Size: " + items.size());
@@ -71,9 +71,29 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
             t.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        adapter.setItems(items);
-        adapter.notifyDataSetChanged();
+        }*/
+        Runnable r = () -> {
+            {
+                try {
+                    items = Material.getRentableMaterials(45, 12, 10000, user.getId());
+                    Log.d("noleggio.HomePage", "Size: " + items.size());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Utils.runInBackground(r, new Utils.ThreadResult() {
+            @Override
+            public void onComplete() {
+                adapter.setItems(items);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
     }
 
     @Override
@@ -84,11 +104,11 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
             if (pos >= 0) {
                 adapter.removeAt(pos);
                 String idLending = data.getStringExtra("LendingID");
-                if(idLending != null) {
+                if (idLending != null) {
                     HomePage h = (HomePage) getParentFragment();
                     if (h != null) {
                         MyRentedMaterialsFragment f = (MyRentedMaterialsFragment) h.getFragmentByID(MyRentedMaterialsFragment.ID);
-                        if(f != null)
+                        if (f != null)
                             f.addLendingById(idLending);
                     }
                 }
@@ -98,9 +118,10 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
 
     public void onItemClick(View view, int position) {
         Intent i = new Intent(getActivity(), ProductDetails.class);
-        i.putExtra("ID", items.get(position).getId());
+        Material m = items.get(position);
+        i.putExtra("ID", m.getId());
         i.putExtra("Position", position);
-        i.putExtra("Type", ID);
+        i.putExtra("Type", m.getOwner().getId().equals(user.getId()) ? MyRentMaterialsFragment.ID : ID);
         startActivityForResult(i, RENT_CODE);
     }
 }
