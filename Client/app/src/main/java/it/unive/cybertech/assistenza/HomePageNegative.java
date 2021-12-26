@@ -81,7 +81,7 @@ public class HomePageNegative extends Fragment {
 
         Thread t = new Thread(() -> {
             ArrayList<AssistanceType> tList = null;
-            ArrayList<QuarantineAssistance> myQuar = null;
+            List<QuarantineAssistance> myQuar = null;
             try {
                 tList = AssistanceType.getAssistanceTypes();
                 myQuar = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 10);

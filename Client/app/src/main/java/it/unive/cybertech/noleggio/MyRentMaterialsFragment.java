@@ -50,7 +50,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         Thread t = new Thread(() -> {
             try {
                 items = user.getMaterializedUserMaterials();
-                Log.d("noleggio.MyRentMaterialsFragment", "Size: " + items.size());
+                Log.d(ID, "Size: " + items.size());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }

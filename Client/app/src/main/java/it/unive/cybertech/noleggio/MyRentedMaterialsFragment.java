@@ -38,8 +38,6 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
         RecyclerView recyclerView = view.findViewById(R.id.my_rented_list);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
-        /*for (int i = 0; i < 20; i++)
-            items.add("prova" + i);*/
         adapter = new RentedMaterialsAdapter(items);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
@@ -73,15 +71,15 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
     }
 
     public void addLendingById(String id){
-        /*Thread t = new Thread(() -> {
+        Thread t = new Thread(() -> {
             try {
-                LendingInProgress l = LendingInProgress.getLendingById(id);
+                LendingInProgress l = LendingInProgress.getLendingInProgressById(id);
                 adapter.add(l);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         });
-        t.start();*/
-        initList();
+        t.start();
+        //initList();
     }
 }

@@ -49,6 +49,7 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
             if (item.getPhoto() != null) {
                 byte[] arr = Base64.decode(item.getPhoto(), Base64.DEFAULT);
+                if (arr != null && arr.length > 0)
                 image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
             }
         }

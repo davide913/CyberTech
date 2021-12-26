@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
+import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
 public class ProductDetails extends AppCompatActivity {
@@ -94,15 +96,27 @@ public class ProductDetails extends AppCompatActivity {
         date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
         if (material.getPhoto() != null) {
             byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
-            photo.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+            if (arr != null && arr.length > 0)
+                photo.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
         }
-        manageType();
+        try {
+            manageType();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void manageType() {
+    private void manageType() throws ExecutionException, InterruptedException {
         switch (from) {
             case MyRentMaterialsFragment.ID:
-                if (material.getRenter() == null) {
+                User renterUser = null;
+                try {
+                    renterUser = material.getMaterializedRenter();
+                } catch (NoRentMaterialFoundException e) {
+                    e.printStackTrace();
+                }
+                if (renterUser == null) {
+                    renterLayout.setVisibility(View.GONE);
                     delete.setVisibility(VISIBLE);
                     delete.setOnClickListener(v -> {
                         new Utils.Dialog(this)
@@ -123,23 +137,33 @@ public class ProductDetails extends AppCompatActivity {
                                 })
                                 .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
                     });
-                    /*renter.setText(material.getRenter().getName());
+                } else {
+                    renter.setText(renterUser.getName());
                     renterLayout.setVisibility(VISIBLE);
-                    if (material.getLandig().getEndExpiryDate() != null) {
-                        requestDate.setText(Utils.formatDateToString(material.getLanding().getEndExpiryDate()));
-                        extensionLayout.setVisibility(VISIBLE);
-                        acceptExtension.setOnClickListener(v -> {
-                            LendingInProgress p = material.getLending();
-                            material.updateExpiryDate(p.getEndExpiryDate().toDate());
-                            p.updateEndExpiryDate(null);
-                            date.setText(Utils.formatDateToString(p.getEndExpiryDate().toDate()));
-                            extensionLayout.setVisibility(View.GONE);
-                        });
-                        rejectExtension.setOnClickListener(v -> {
-                            LendingInProgress p = material.getLending();
-                            p.updateEndExpiryDate(null);
-                        });
-                    }*/
+                    try {
+                        LendingInProgress lending = material.getLending();
+                        if (lending != null && lending.getEndExpiryDate() != null) {
+                            requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                            extensionLayout.setVisibility(VISIBLE);
+                            acceptExtension.setOnClickListener(v -> {
+                                material.updateExpiryDate(lending.getEndExpiryDate().toDate());
+                                lending.updateEndExpiryDate(null);
+                                date.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                                extensionLayout.setVisibility(View.GONE);
+                            });
+                            rejectExtension.setOnClickListener(v -> {
+                                LendingInProgress p;
+                                try {
+                                    p = material.getLending();
+                                    p.updateEndExpiryDate(null);
+                                } catch (ExecutionException | InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case MyRentedMaterialsFragment.ID:

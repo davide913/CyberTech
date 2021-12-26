@@ -710,7 +710,7 @@ public class User extends Geoquerable implements Comparable<User> {
         return user.getMaterializedDevices();
     }
 
-    public Collection<User> getActivitiesUsers() throws ExecutionException, InterruptedException {
+    public Collection<User> activitiesUsers() throws ExecutionException, InterruptedException {
         TreeSet<User> result = new TreeSet<>();
         DocumentReference userDoc = getReference(table, this.id);
 

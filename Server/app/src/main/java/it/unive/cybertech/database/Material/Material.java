@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
@@ -47,11 +48,12 @@ public class Material extends Geoquerable {
     private Timestamp expiryDate;
     private DocumentReference type;
 
-    public Material() {}
+    public Material() {
+    }
 
     private Material(String id, DocumentReference owner, String title,
-                    String description, String photo, DocumentReference renter, boolean isRent,
-                    GeoPoint location, String geohash, DocumentReference type, Timestamp expiryDate) {
+                     String description, String photo, DocumentReference renter, boolean isRent,
+                     GeoPoint location, String geohash, DocumentReference type, Timestamp expiryDate) {
         this.id = id;
         this.owner = owner;
         this.title = title;
@@ -121,8 +123,10 @@ public class Material extends Geoquerable {
         return renter;
     }
 
-    public User getMaterializedRenter() throws ExecutionException, InterruptedException {
-        return User.getUserById(renter.getId());
+    public User getMaterializedRenter() throws ExecutionException, InterruptedException, NoRentMaterialFoundException {
+        if (renter != null)
+            return User.getUserById(renter.getId());
+        else throw new NoRentMaterialFoundException("The material has no renter");
     }
 
     private void setRenter(DocumentReference renter) {
@@ -185,7 +189,7 @@ public class Material extends Geoquerable {
         DocumentReference addedDocRef = addToCollection(table, myMaterial);
 
         return new Material(addedDocRef.getId(), docPro, title, description,
-                photo, null, false,  location, geohash, docType, timestamp);
+                photo, null, false, location, geohash, docType, timestamp);
     }
 
     public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
@@ -194,7 +198,7 @@ public class Material extends Geoquerable {
 
         Material material = null;
 
-        if (document.exists()){
+        if (document.exists()) {
             material = document.toObject(Material.class);
             material.id = document.getId();
 
@@ -304,20 +308,18 @@ public class Material extends Geoquerable {
             else
                 docRef.update("isRent", true);
             return docRef.update("renter", user);
-        }
-        else
+        } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
     public boolean updateRenter(User user) {
         try {
             Task<Void> t;
-            if (user == null){
+            if (user == null) {
                 t = updateRenterAsync(null);
                 setRenter(null);
                 this.isRent = false;
-            }
-            else {
+            } else {
                 DocumentReference docUser = getReference(User.table, user.getId());
                 t = updateRenterAsync(docUser);
                 setRenter(docUser);
@@ -337,7 +339,7 @@ public class Material extends Geoquerable {
 
         if (document.exists()) {
             return docRef.update("expiryDate", date);
-        }else
+        } else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
@@ -358,10 +360,9 @@ public class Material extends Geoquerable {
 
         Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
                 .whereEqualTo("idMaterial", getReference(table, id)).get();
-
         Tasks.await(task);
         List<DocumentSnapshot> list = task.getResult().getDocuments();
-        if(!list.isEmpty())
+        if (!list.isEmpty())
             return LendingInProgress.getLendingInProgressById(list.get(0).getId());
 
         throw new NoLendingInProgressFoundException("no lending found connect to this material: " + id);
@@ -381,8 +382,8 @@ public class Material extends Geoquerable {
         Timestamp timestamp = new Timestamp(new Date());
         DocumentReference userRef = getReference(User.table, userId);
         for (DocumentSnapshot doc : documents) {
-            Timestamp t =  doc.getTimestamp("expiryDate");
-            if(t!= null && t.compareTo(timestamp) > 0 && doc.getDocumentReference("owner") != userRef) {
+            Timestamp t = doc.getTimestamp("expiryDate");
+            if (t != null && t.compareTo(timestamp) > 0 && doc.getDocumentReference("owner") != userRef) {
                 arr.add(Material.getMaterialById(doc.getId()));
             }
         }

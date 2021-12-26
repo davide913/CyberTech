@@ -26,7 +26,7 @@ public class CustomSignReceivedAdapter extends ArrayAdapter {
     private Group group;
 
 
-    public CustomSignReceivedAdapter(@NonNull Context context, int resource, ArrayList<Group> groups)/*TODO qua prenderà in ingresso un array di USER userList*/ {
+    public CustomSignReceivedAdapter(@NonNull Context context, int resource, List<Group> groups)/*TODO qua prenderà in ingresso un array di USER userList*/ {
         super(context, resource, groups);
         this.context = context;
         this.groups = groups;

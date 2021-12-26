@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -28,7 +29,7 @@ import it.unive.cybertech.utils.Utils;
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
-    private ArrayList<Material> items;
+    private List<Material> items;
     private ShowcaseAdapter adapter;
 
     @Override

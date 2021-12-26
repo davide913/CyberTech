@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -153,6 +154,7 @@ public class SignUpActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         new Thread(() -> {
                             try {
+                                FirebaseUser us = task.getResult().getUser();
                                 User u = User.createUser(Objects.requireNonNull(task.getResult().getUser()).getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), dateOfBirth, finalAddress, finalCity, finalCountry, (long) location.getLatitude(), (long) location.getLongitude(), false);
                                 if (u != null) {
                                     @NonNull Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
@@ -161,6 +163,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                mAuth.signOut();
                             }
                         }).start();
                     } else {

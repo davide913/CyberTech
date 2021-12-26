@@ -55,6 +55,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
                 itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
                 if (material.getPhoto() != null) {
                     byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
+                    if (arr != null && arr.length > 0)
                     image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
                 }
             } catch (ExecutionException | InterruptedException e) {

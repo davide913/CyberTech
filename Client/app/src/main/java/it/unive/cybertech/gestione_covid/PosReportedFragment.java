@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
@@ -47,7 +48,7 @@ public class PosReportedFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    ArrayList<Group> groupList = Group.getPositiveGroups(user);
+                    List<Group> groupList = Group.getPositiveGroups(user);
                     Boolean var = false;
                     ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                     TextView textView = v.findViewById(R.id.TextView_PosReported);
