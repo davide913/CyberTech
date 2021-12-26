@@ -105,11 +105,11 @@ public class Activity {
         this.date = date;
     }
 
-    public ArrayList<DocumentReference> getParticipants() {
+    public List<DocumentReference> getParticipants() {
         return participants;
     }
 
-    public ArrayList<User> getMaterializedParticipants() throws ExecutionException, InterruptedException {
+    public List<User> getMaterializedParticipants() throws ExecutionException, InterruptedException {
         if(participantsMaterialized == null) {
             participantsMaterialized = new ArrayList<>();
 

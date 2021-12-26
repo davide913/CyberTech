@@ -39,7 +39,7 @@ import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 //TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
 
-public class User extends Geoquerable {
+public class User extends Geoquerable implements Comparable<User> {
     public final static String table = "users";
     private String id;
     private String name;
@@ -565,6 +565,19 @@ public class User extends Geoquerable {
         }
     }
 
+    public List<LendingInProgress> getExpiredLending() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> result = new ArrayList<>();
+        Timestamp timestamp = new Timestamp(new Date());
+
+        for (LendingInProgress lending : getMaterializedLendingInProgress()) {
+            if (timestamp.compareTo(lending.getExpiryDate()) < 0)
+                result.add(lending);
+
+        }
+
+        return result;
+    }
+
     //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
     private Task<Void> addMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
@@ -613,6 +626,19 @@ public class User extends Geoquerable {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<Material> getExpiredMaterial() throws ExecutionException, InterruptedException {
+        ArrayList<Material> result = new ArrayList<>();
+        Timestamp timestamp = new Timestamp(new Date());
+
+        for (Material material : getMaterializedUserMaterials()) {
+            if (timestamp.compareTo(material.getExpiryDate()) < 0)
+                result.add(material);
+
+        }
+
+        return result;
     }
 
     //aggiunta 17/12/2021
@@ -726,9 +752,6 @@ public class User extends Geoquerable {
         return result;
     }
 
-
-
-
     //metodo equal per confronti
     @Override
     public boolean equals(Object o) {
@@ -738,5 +761,12 @@ public class User extends Geoquerable {
             return user.getId().equals(this.getId());
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(User o) {
+        if(o.getId().equals(this.getId()))
+            return 0;
+        return 1;
     }
 }

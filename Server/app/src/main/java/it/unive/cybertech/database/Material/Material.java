@@ -1,6 +1,7 @@
 package it.unive.cybertech.database.Material;
 
 import static it.unive.cybertech.database.Database.addToCollection;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
@@ -16,6 +17,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
+import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 
 public class Material extends Geoquerable {
@@ -73,6 +77,10 @@ public class Material extends Geoquerable {
         return owner;
     }
 
+    public User getMaterializedOwner() throws ExecutionException, InterruptedException {
+        return User.getUserById(owner.getId());
+    }
+
     private void setOwner(DocumentReference owner) {
         this.owner = owner;
     }
@@ -111,6 +119,10 @@ public class Material extends Geoquerable {
 
     public DocumentReference getRenter() {
         return renter;
+    }
+
+    public User getMaterializedRenter() throws ExecutionException, InterruptedException {
+        return User.getUserById(renter.getId());
     }
 
     private void setRenter(DocumentReference renter) {
@@ -190,6 +202,28 @@ public class Material extends Geoquerable {
         }
 
         throw new NoMaterialFoundException("No material found with this id: " + id);
+    }
+
+    private Task<Void> deleteMaterialAsync() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return deleteFromCollectionAsync(table, id);
+        else
+            throw new NoMaterialFoundException("No material found with this id: " + id);
+    }
+
+    public boolean deleteMaterial() {
+        try {
+            Task<Void> t = deleteMaterialAsync();
+            Tasks.await(t);
+            this.id = null;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
@@ -320,8 +354,21 @@ public class Material extends Geoquerable {
         }
     }
 
+    public LendingInProgress getLending() throws ExecutionException, InterruptedException {
+
+        Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
+                .whereEqualTo("idMaterial", getReference(table, id)).get();
+
+        Tasks.await(task);
+        List<DocumentSnapshot> list = task.getResult().getDocuments();
+        if(!list.isEmpty())
+            return LendingInProgress.getLendingInProgressById(list.get(0).getId());
+
+        throw new NoLendingInProgressFoundException("no lending found connect to this material: " + id);
+    }
+
     //funzione per mattia!
-    public static ArrayList<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
+    public static List<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
             throws ExecutionException, InterruptedException {
         ArrayList<Material> arr = new ArrayList<>();
 
