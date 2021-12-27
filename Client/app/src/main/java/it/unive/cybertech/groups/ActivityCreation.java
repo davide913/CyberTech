@@ -90,9 +90,9 @@ public class ActivityCreation extends AppCompatActivity {
             showShortToast(getString(R.string.activityCreated));
             @NonNull Handler handler = new Handler();
             handler.postDelayed(()-> {
-                @NonNull Intent i = new Intent(context, GroupDetails.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
+                // @NonNull Intent i = new Intent(context, ActivityDetails.class);
+                // i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                // startActivity(i);
             }, 800);
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();

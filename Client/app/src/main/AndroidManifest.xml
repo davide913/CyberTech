@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".groups.GroupHomePage"
+            android:exported="true" />
+        <activity
             android:name=".groups.ActivityCreation"
             android:exported="true" />
         <activity
@@ -32,9 +35,6 @@
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
 
-        <activity
-            android:name=".groups.GroupDetails"
-            android:exported="false" />
         <activity
             android:name=".groups.GroupCreation"
             android:exported="false" />
