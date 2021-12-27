@@ -61,23 +61,22 @@ public class HomePagePositive extends Fragment {
 
     private void initView(View view) throws ExecutionException, InterruptedException {
         ArrayAdapter<QuarantineAssistance> adapter;
-        ArrayList<QuarantineAssistance> myRequestsList = new ArrayList<>();
+        final List<QuarantineAssistance>[] myRequestsList = new List[]{new ArrayList<>()};
         final QuarantineAssistance[] myreq = new QuarantineAssistance[1];
         listAlreadyMade = view.findViewById(R.id.lst_myRequests);
 
         //myRequestsList = user.getMaterializedQuarantineAssistance();
         Thread t = new Thread(() -> {
             try {
-                myreq[0] = user.getMaterializedQuarantineAssistance();
+                myRequestsList[0] = user.getMaterializedQuarantineAssistance();
             }
             catch (InterruptedException | ExecutionException |NoQuarantineAssistanceFoundException ignored) {}
         });
         t.start();
         t.join();
 
-        if(myreq[0] != null)
-            myRequestsList.add(myreq[0]);
-        else{
+        if(myRequestsList[0] == null) {
+
             Utils.Dialog dialog = new Utils.Dialog(getContext());
             dialog.show("Informazione", "Se vuoi chiedere aiuto ad un volontario, clicca il tast 'Richiedi Assistenza' per ricevere aiuto");
             dialog.setCallback(new Utils.DialogResult() {
@@ -91,13 +90,12 @@ public class HomePagePositive extends Fragment {
                                });
         }
 
-        adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
+        adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList[0]);
         listAlreadyMade.setAdapter(adapter);
         listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
-
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-            Date date = myRequestsList.get(position).getDateDeliveryToDate();
+            Date date = myRequestsList[0].get(position).getDeliveryDateToDate();
             String strDate = dateFormat.format(date);
 
 

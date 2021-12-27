@@ -32,7 +32,7 @@ import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 public class CastomRequestsAdapter extends ArrayAdapter {
-    private ArrayList<QuarantineAssistance> myList;
+    private List<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
     private int index = 0;
@@ -46,7 +46,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
     }
 
     //TODO: se la chiamo dalla Request.Viz non ho bisogno del tipo, chiamo tutte le mie
-    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList) {
+    public CastomRequestsAdapter(@NonNull Context context, int resource, List<QuarantineAssistance> myList) {
         super(context, resource, myList);
         this.myList = myList;
         this.context = context;
@@ -64,7 +64,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         title.setText(request.getTitle());
 
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-        Date date = request.getDateDeliveryToDate();
+        Date date = request.getDeliveryDateToDate();
         String strDate = dateFormat.format(date);
         TextView dateView =  view.findViewById(R.id.date_request);
         dateView.setText(strDate);

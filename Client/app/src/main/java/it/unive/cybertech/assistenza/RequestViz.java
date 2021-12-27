@@ -103,7 +103,7 @@ public class RequestViz extends AppCompatActivity {
 
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
             if (request[0] != null) {
-                Date date = request[0].getDateDeliveryToDate();
+                Date date = request[0].getDeliveryDateToDate();
                 String strDate = dateFormat.format(date);
                 textDate.setText(strDate);
             } else
@@ -206,12 +206,8 @@ public class RequestViz extends AppCompatActivity {
                         @Override
                         public void onSuccess() {
                             Thread t = new Thread(() -> {
-                                try {
-                                    finalRequest2.removeQuarantineAssistance();
-                                    setResult(Activity.RESULT_OK);
-                                } catch (ExecutionException | InterruptedException e) {
-                                    e.printStackTrace();
-                                }
+                                user.removeQuarantineAssistance(finalRequest2);
+                                setResult(Activity.RESULT_OK);
                             });
                             t.start();
                             try {
