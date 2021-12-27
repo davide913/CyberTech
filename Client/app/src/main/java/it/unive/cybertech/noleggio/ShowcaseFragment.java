@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -36,19 +37,20 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     public static final String ID = "ShowcaseFragment";
     private List<Material> items;
     private ShowcaseAdapter adapter;
+    private ProgressBar loader;
+    private RecyclerView list;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_showcase, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.showcase_list);
+        list = view.findViewById(R.id.showcase_list);
         FloatingActionButton add = view.findViewById(R.id.showcase_add);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        list.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
-        /*for (int i = 0; i < 20; i++)
-            items.add("prova" + i);*/
         adapter = new ShowcaseAdapter(items);
         adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        loader = view.findViewById(R.id.showcase_loader);
+        list.setAdapter(adapter);
         add.setOnClickListener(v -> {
             startActivity(new Intent(getActivity(), AddProductForRent.class));
         });
@@ -70,6 +72,8 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                 items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
+                loader.setVisibility(View.GONE);
+                list.setVisibility(View.VISIBLE);
             }
 
             @Override

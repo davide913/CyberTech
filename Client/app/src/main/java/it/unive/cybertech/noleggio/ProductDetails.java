@@ -7,6 +7,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,36 +16,40 @@ import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
-public class ProductDetails extends AppCompatActivity {
+public class ProductDetails extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     private Material material;
+    private LendingInProgress lending;
     private String id, from;
     private ImageView photo;
-    private TextView title, description, date, renter, requestDate;
-    private FloatingActionButton delete, confirm;
+    private TextView title, description, date, renter, requestDate, extensionDateRequest;
+    private FloatingActionButton delete, confirm, extend;
     private ConstraintLayout renterLayout, extensionLayout;
     private Button acceptExtension, rejectExtension;
     static final int RENT_DELETE = -1;
     static final int RENT_SUCCESS = 1;
     static final int RENT_FAIL = 0;
     private int pos;
+    private ActionBar actionBar;
+    private Context context;
+    private LinearLayout extensionRenterLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +59,17 @@ public class ProductDetails extends AppCompatActivity {
         id = i.getStringExtra("ID");
         pos = i.getIntExtra("Position", -1);
         from = i.getStringExtra("Type");
+        context = this;
         if (id == null || id.isEmpty())
             finish();
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        extensionRenterLayout = findViewById(R.id.extension_renter_details_layout);
         confirm = findViewById(R.id.confirm_rent_showcase);
         acceptExtension = findViewById(R.id.accept_extension_details);
         rejectExtension = findViewById(R.id.reject_extension_details);
+        extensionDateRequest = findViewById(R.id.extension_date_details_showcase);
+        extend = findViewById(R.id.extend_lending_fab);
         delete = findViewById(R.id.delete_rent_showcase);
         photo = findViewById(R.id.product_image_details_showcase);
         title = findViewById(R.id.title_details_showcase);
@@ -78,159 +90,232 @@ public class ProductDetails extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Thread t = new Thread(() -> {
-            try {
-                material = Material.getMaterialById(id);
-            } catch (ExecutionException | InterruptedException e) {
-                finish();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Dettaglio: " + material.getTitle());
-        title.setText(material.getTitle());
-        description.setText(material.getDescription());
-        date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
-        if (material.getPhoto() != null) {
-            byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
-            if (arr != null && arr.length > 0)
-                photo.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
-        }
         try {
             manageType();
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
+            finish();
         }
     }
 
-    private void manageType() throws ExecutionException, InterruptedException {
+    private void manageType() throws InterruptedException {
         switch (from) {
             case MyRentMaterialsFragment.ID:
-                AtomicReference<User> renterUser = new AtomicReference<>();
+                getMaterial(id, new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
+                            @Override
+                            public void onComplete(User renterUser) {
+                                if (renterUser == null) {
+                                    delete.setVisibility(VISIBLE);
+                                    delete.setOnClickListener(v -> {
+                                        new Utils.Dialog(getApplicationContext())
+                                                .setCallback(new Utils.DialogResult() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        //material.delete();
+                                                        Intent res = new Intent();
+                                                        res.putExtra("Position", pos);
+                                                        setResult(RENT_DELETE, res);
+                                                        finish();
+                                                    }
 
-                Thread t = new Thread(() -> {
-                    try {
-                        renterUser.set(material.getMaterializedRenter());
-                    } catch (NoRentMaterialFoundException | ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-                t.start();
-                t.join();
+                                                    @Override
+                                                    public void onCancel() {
 
-                if (renterUser.get() == null) {
-                    delete.setVisibility(VISIBLE);
-                    delete.setOnClickListener(v -> {
-                        new Utils.Dialog(this)
-                                .setCallback(new Utils.DialogResult() {
-                                    @Override
-                                    public void onSuccess() {
-                                        //material.delete();
-                                        Intent res = new Intent();
-                                        res.putExtra("Position", pos);
-                                        setResult(RENT_DELETE, res);
-                                        finish();
-                                    }
+                                                    }
+                                                })
+                                                .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
+                                    });
+                                } else {
+                                    renter.setText(renterUser.getName() + " " + renterUser.getSurname());
+                                    renterLayout.setVisibility(VISIBLE);
+                                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                                        @Override
+                                        public void onComplete(LendingInProgress lending) {
+                                            if (lending != null && lending.getEndExpiryDate() != null) {
+                                                requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                                                extensionLayout.setVisibility(VISIBLE);
+                                                acceptExtension.setOnClickListener(v -> {
+                                                    material.updateExpiryDate(lending.getEndExpiryDate().toDate());
+                                                    lending.updateEndExpiryDate(null);
+                                                    date.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                                                    extensionLayout.setVisibility(View.GONE);
+                                                    Snackbar.make(findViewById(android.R.id.content), context.getString(R.string.request_accepted), Snackbar.LENGTH_LONG).show();
+                                                });
+                                                rejectExtension.setOnClickListener(v -> {
+                                                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                                                        @Override
+                                                        public void onComplete(LendingInProgress result) {
+                                                            Utils.executeAsync(() -> result.updateEndExpiryDate(null), new Utils.TaskResult<Boolean>() {
+                                                                @Override
+                                                                public void onComplete(Boolean result) {
+                                                                    extensionLayout.setVisibility(View.GONE);
+                                                                    Snackbar.make(findViewById(android.R.id.content), context.getString(R.string.request_rejected), Snackbar.LENGTH_LONG).show();
+                                                                }
 
-                                    @Override
-                                    public void onCancel() {
+                                                                @Override
+                                                                public void onError(Exception e) {
+                                                                    e.printStackTrace();
+                                                                }
+                                                            });
+                                                        }
 
-                                    }
-                                })
-                                .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
-                    });
-                } else {
-                    renter.setText(renterUser.get().getName() + " " + renterUser.get().getSurname());
-                    renterLayout.setVisibility(VISIBLE);
-                    try {
-                        AtomicReference<LendingInProgress> lending = new AtomicReference<>();
-                        t = new Thread(() -> {
-                            try {
-                                lending.set(material.getLending());
-                            } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
-                                e.printStackTrace();
+                                                        @Override
+                                                        public void onError(Exception e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e) {
+
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+
                             }
                         });
-                        t.start();
-                        t.join();
-                        if (lending.get() != null && lending.get().getEndExpiryDate() != null) {
-                            requestDate.setText(Utils.formatDateToString(lending.get().getEndExpiryDate().toDate()));
-                            extensionLayout.setVisibility(VISIBLE);
-                            acceptExtension.setOnClickListener(v -> {
-                                material.updateExpiryDate(lending.get().getEndExpiryDate().toDate());
-                                lending.get().updateEndExpiryDate(null);
-                                date.setText(Utils.formatDateToString(lending.get().getEndExpiryDate().toDate()));
-                                extensionLayout.setVisibility(View.GONE);
-                            });
-                            rejectExtension.setOnClickListener(v -> {
-                                LendingInProgress p;
-                                try {
-                                    p = material.getLending();
-                                    p.updateEndExpiryDate(null);
-                                } catch (ExecutionException | InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
-                }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
                 break;
             case MyRentedMaterialsFragment.ID:
+                confirm.setVisibility(View.GONE);
+                getLending();
+                extend.setVisibility(VISIBLE);
+                extend.setOnClickListener(v -> {
+                    new Utils.Dialog(this)
+                            .setCallback(new Utils.DialogResult() {
+                                @Override
+                                public void onSuccess() {
+                                    Calendar now = Calendar.getInstance();
+                                    DatePickerDialog datePickerDialog = new DatePickerDialog(
+                                            context, ProductDetails.this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
+                                    datePickerDialog.getDatePicker().setMaxDate(material.getExpiryDate().toDate().getTime());
+                                    datePickerDialog.getDatePicker().setMinDate(now.getTimeInMillis());
+                                    datePickerDialog.show();
+                                }
 
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            })
+                            .show("Estensione prestito", "Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell'utente accettare o rifiutare la proposta");
+                });
                 break;
             case ShowcaseFragment.ID:
-                confirm.setOnClickListener(view -> {
-                    if (user.getLendingPoint() < 0)
-                        new Utils.Dialog(this)
-                                .hideCancelButton()
-                                .show(getString(R.string.unreliable), getString(R.string.unreliable_description));
-                    else
-                        new Utils.Dialog(this)
-                                .setCallback(new Utils.DialogResult() {
-                                    @Override
-                                    public void onSuccess() {
-                                        AtomicBoolean done = new AtomicBoolean(false);
-                                        AtomicReference<LendingInProgress> l = new AtomicReference<>();
-                                        Thread t = new Thread(() -> {
-                                            try {
-                                                material.updateRenter(user);
-                                                l.set(LendingInProgress.createLendingInProgress(material, material.getExpiryDate().toDate()));
-                                                user.addLending(l.get());
-                                                done.set(true);
-                                            } catch (ExecutionException | InterruptedException e) {
-                                                e.printStackTrace();
+                getMaterial(id, new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        confirm.setOnClickListener(view -> {
+                            if (user.getLendingPoint() < 0)
+                                new Utils.Dialog(context)
+                                        .hideCancelButton()
+                                        .show(getString(R.string.unreliable), getString(R.string.unreliable_description));
+                            else
+                                new Utils.Dialog(context)
+                                        .setCallback(new Utils.DialogResult() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Utils.executeAsync(() -> {
+                                                    material.updateRenter(user);
+                                                    LendingInProgress l = LendingInProgress.createLendingInProgress(material, material.getExpiryDate().toDate());
+                                                    user.addLending(l);
+                                                    return l;
+                                                }, new Utils.TaskResult<LendingInProgress>() {
+                                                    @Override
+                                                    public void onComplete(LendingInProgress result) {
+                                                        Intent res = new Intent();
+                                                        res.putExtra("Position", pos);
+                                                        res.putExtra("LendingID", result.getId());
+                                                        setResult(result != null ? RENT_SUCCESS : RENT_FAIL, res);
+                                                        finish();
+                                                    }
+
+                                                    @Override
+                                                    public void onError(Exception e) {
+                                                        Intent res = new Intent();
+                                                        setResult(RENT_FAIL, res);
+                                                        finish();
+                                                    }
+                                                });
                                             }
-                                        });
-                                        t.start();
-                                        try {
-                                            t.join();
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        Intent res = new Intent();
-                                        res.putExtra("Position", pos);
-                                        res.putExtra("LendingID", l.get().getId());
-                                        setResult(done.get() ? RENT_SUCCESS : RENT_FAIL, res);
-                                        finish();
-                                    }
 
-                                    @Override
-                                    public void onCancel() {
+                                            @Override
+                                            public void onCancel() {
 
-                                    }
-                                })
-                                .show(getString(R.string.rent_disclosure), getString(R.string.rent_disclosure_description));
+                                            }
+                                        })
+                                        .show(getString(R.string.rent_disclosure), getString(R.string.rent_disclosure_description));
+                        });
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
                 });
                 break;
         }
+    }
+
+    private void getMaterial(String id, Utils.TaskResult<Material> callback) {
+        Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+            @Override
+            public void onComplete(Material result) {
+                material = result;
+                actionBar.setTitle("Dettaglio: " + material.getTitle());
+                title.setText(material.getTitle());
+                description.setText(material.getDescription());
+                date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
+                if (material.getPhoto() != null) {
+                    byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
+                    if (arr != null && arr.length > 0)
+                        photo.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                }
+                if (callback != null)
+                    callback.onComplete(material);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                finish();
+            }
+        });
+    }
+
+    private void getLending() {
+        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+            @Override
+            public void onComplete(LendingInProgress result) {
+                lending = result;
+                if (lending.getEndExpiryDate() != null) {
+                    extensionRenterLayout.setVisibility(VISIBLE);
+                    extensionDateRequest.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                }
+                getMaterial(lending.getIdMaterial().getId(), null);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+                finish();
+            }
+        });
     }
 
     @Override
@@ -240,5 +325,38 @@ public class ProductDetails extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+        Calendar pickedDate = Calendar.getInstance();
+        pickedDate.set(year, month, dayOfMonth);
+        new Utils.Dialog(this)
+                .setCallback(new Utils.DialogResult() {
+                    @Override
+                    public void onSuccess() {
+                        Utils.executeAsync(() -> lending.updateEndExpiryDate(pickedDate.getTime()), new Utils.TaskResult<Boolean>() {
+                            @Override
+                            public void onComplete(Boolean result) {
+                                if (result) {
+                                    extensionRenterLayout.setVisibility(VISIBLE);
+                                    extensionDateRequest.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                                    Snackbar.make(findViewById(android.R.id.content), "Richiesta inviata con successo", Snackbar.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Snackbar.make(findViewById(android.R.id.content), "Errore nell'invio della richiesta", Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                })
+                .show("Estensione prestito", "Confermi la nuova data di restituzione: " + Utils.formatDateToString(pickedDate.getTime()));
     }
 }

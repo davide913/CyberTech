@@ -120,6 +120,17 @@ public class Utils {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
                     .setMessage(message);
+            buildAndShow(builder);
+        }
+
+        public void show(String title, View content) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(c)
+                    .setTitle(title)
+                    .setView(content);
+            buildAndShow(builder);
+        }
+
+        private void buildAndShow(AlertDialog.Builder builder){
             if (showOkButton)
                 builder.setPositiveButton(okButtonText, (dialog, which) -> {
                     dialog.dismiss();

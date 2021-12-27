@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -33,16 +34,19 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public static final String ID = "MyRentMaterialsFragment";
     private List<Material> items;
     private RentMaterialAdapter adapter;
+    private ProgressBar loader;
+    private RecyclerView list;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_rent_materials, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.my_rent_list);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        list = view.findViewById(R.id.my_rent_list);
+        loader = view.findViewById(R.id.my_rent_loader);
+        list.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
         adapter = new RentMaterialAdapter(items);
         adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        list.setAdapter(adapter);
         initList();
         return view;
     }
@@ -57,6 +61,8 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
                 items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
+                loader.setVisibility(View.GONE);
+                list.setVisibility(View.VISIBLE);
             }
 
             @Override

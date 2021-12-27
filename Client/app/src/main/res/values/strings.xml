@@ -148,6 +148,8 @@
     <string name="place">Luogo</string>
     <string name="activityCreated">Attività creata con successo!</string>
     <string name="expired">Scadute</string>
+    <string name="request_accepted">Richiesta accettata</string>
+    <string name="request_rejected">Richiesta respinta</string>
 
     <array name="sex">
         <item>Maschio</item>
