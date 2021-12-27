@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Pair;
 import android.view.View;
 
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,10 +54,10 @@ public class Utils {
         void onItemClick(View view, int position);
     }
 
-    public interface ThreadResult {
-        void onComplete();
+    public interface TaskResult<T> {
+        void onComplete(T result);
 
-        void onError();
+        void onError(Exception e);
     }
 
     /**
@@ -224,24 +227,14 @@ public class Utils {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-    /*public static <T> void runInBackground(Executor executor, Runnable code, ThreadResult<T> callback) {
-        executor.execute(()->{
-            try{
-                code.run();
-                callback.onComplete(null);
-            }catch(Exception e){
-                callback.onError();
-            }
-        });
-    }*/
-
-    public static void runInBackground( Runnable code, ThreadResult callback) {
-        new Thread(()->{
-            try{
-                code.run();
-                callback.onComplete();
-            }catch(Exception e){
-                callback.onError();
+    public static <R> void executeAsync(Callable<R> callable, TaskResult<R> callback) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        new Thread(() -> {
+            try {
+                R result = callable.call();
+                handler.post(() -> callback.onComplete(result));
+            } catch (Exception e) {
+                callback.onError(e);
             }
         }).start();
     }

@@ -4,13 +4,16 @@ import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,10 +23,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
@@ -58,40 +63,18 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     private void initList() {
         super.onStart();
         //TODO get posizione
-        /*Thread t = new Thread(() -> {
-            try {
-                items = Material.getRentableMaterials(45, 12, 10000, user.getId());
-                Log.d("noleggio.HomePage", "Size: " + items.size());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-        Runnable r = () -> {
-            {
-                try {
-                    items = Material.getRentableMaterials(45, 12, 10000, user.getId());
-                    Log.d("noleggio.HomePage", "Size: " + items.size());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Utils.runInBackground(r, new Utils.ThreadResult() {
+        Utils.executeAsync(() -> Material.getRentableMaterials(45, 12, 10000, user.getId()), new Utils.TaskResult<List<Material>>() {
             @Override
-            public void onComplete() {
+            public void onComplete(List<Material> result) {
+                Log.d(ID, "Size: " + result.size());
+                items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onError() {
-
+            public void onError(Exception e) {
+                e.printStackTrace();
             }
         });
     }

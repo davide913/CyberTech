@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,42 +46,18 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
     private void initList() {
         super.onStart();
         //TODO get posizione
-        /*Thread t = new Thread(() -> {
-            try {
-                items = user.getMaterializedLendingInProgress();
-                Log.d("noleggio.MyRentedMaterialsFragment", "Size: " + items.size());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        adapter.setItems(items);
-        adapter.notifyDataSetChanged();*/
-        Runnable r = () -> {
-            {
-                try {
-                    items = user.getMaterializedLendingInProgress();
-                    Log.d("noleggio.MyRentedMaterialsFragment", "Size: " + items.size());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Utils.runInBackground(r, new Utils.ThreadResult() {
+        Utils.executeAsync(() -> user.getMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
-            public void onComplete() {
+            public void onComplete(List<LendingInProgress> result) {
+                Log.d(ID, "Size: " + result.size());
+                items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onError() {
-
+            public void onError(Exception e) {
+                e.printStackTrace();
             }
         });
     }
