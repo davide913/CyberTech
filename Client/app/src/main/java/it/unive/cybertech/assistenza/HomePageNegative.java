@@ -8,9 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -22,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.firestore.GeoPoint;
@@ -32,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
@@ -67,36 +63,45 @@ public class HomePageNegative extends Fragment {
     }
 
     private void initViews(View view) throws ExecutionException, InterruptedException {
-        ArrayAdapter<QuarantineAssistance> adapter;
-        ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<>();
+        final ArrayAdapter<QuarantineAssistance>[] adapter = new ArrayAdapter[1];
+
+        final ArrayList<QuarantineAssistance>[] myQuarantineList = new ArrayList[]{new ArrayList<>()};
         listView = view.findViewById(R.id.listRequests);
 
         final ArrayList<AssistanceType> adapterList = new ArrayList<>();
-        final QuarantineAssistance[] inCharge = {null}; //da cambiare con [1]
+        final QuarantineAssistance[] inCharge = {null};
         final String[] homeType = new String[1];
+        final List<QuarantineAssistance>[] myQuar = new List[]{null};
+        final ArrayList<AssistanceType>[] tList = new ArrayList[]{null};
+        final AssistanceType[] aux = {null};
+        GeoPoint myGeoPosition = user.getLocation();
+        Log.d("Paese", user.getCountry());
+        Log.d("CIttà", user.getCity());
 
 
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
 
         Thread t = new Thread(() -> {
-            ArrayList<AssistanceType> tList = null;
-            List<QuarantineAssistance> myQuar = null;
+
             try {
-                tList = AssistanceType.getAssistanceTypes();
-                myQuar = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 10);
+                tList[0] = AssistanceType.getAssistanceTypes();
+                //TODO: da cambiare poi con un elemento dello spinner in posizione 0 generico che indica tutte le richieste
+                myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 10);
+
                 inCharge[0] = getQuarantineAssistanceByInCharge(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
 
-            for (AssistanceType a: tList) {
+            for (AssistanceType a: tList[0]) {
                 names.add(a.getType());
                 adapterList.add(a);
             }
-            for (QuarantineAssistance a: myQuar) {
-                myQuarantineList.add(a);
+            for (QuarantineAssistance a: myQuar[0]) {
+                myQuarantineList[0].add(a);
             }
+            Log.d("Dimensione primo Thread", String.valueOf(myQuar[0].size()));
         });
         t.start();
         t.join();
@@ -113,16 +118,49 @@ public class HomePageNegative extends Fragment {
                 if(position >= 0){
                     showShortToast("Selected : " + selectedItemText);
                 }
+
+                for (AssistanceType a: tList[0]) {
+                    if(a.getType().equals(selectedItemText))
+                        aux[0] = a;
+                }
+
+                Thread m = new Thread(() -> {
+                    myQuarantineList[0] = new ArrayList<>();
+                    Log.d("Dimensione dopo reset nel secondo Thread", String.valueOf(myQuarantineList[0].size()));
+                    try {
+                        myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(aux[0], myGeoPosition, 10);
+                        Log.d("Tipo", aux[0].getType());
+                        Log.d("Dimensione", String.valueOf(myQuar[0].size()));
+
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    for (QuarantineAssistance a: myQuar[0]) {
+                        myQuarantineList[0].add(a);
+                    }
+
+                    if(myQuarantineList[0] != null)
+                        Log.d("Dimensione finale", String.valueOf(myQuarantineList[0].size()));
+                });
+                m.start();
+                try {
+                    m.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+
             public void onNothingSelected(AdapterView<?> parent){}
         });
 
-        adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList);
-        listView.setAdapter(adapter);
+        adapter[0] = new CastomRequestsAdapter(getContext(), 0, myQuarantineList[0]);
+        listView.setAdapter(adapter[0]);
+
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
 
-            geoDecoder(adapter.getItem(position), newIntent);
+            geoDecoder(adapter[0].getItem(position), newIntent);
             String taken = null;
             try {
                 taken = inCharge[0].getId();
@@ -130,7 +168,7 @@ public class HomePageNegative extends Fragment {
             catch(NullPointerException ignored) {}
 
             newIntent.putExtra("alreadyTaken", taken);
-            newIntent.putExtra("id", adapter.getItem(position).getId());
+            newIntent.putExtra("id", adapter[0].getItem(position).getId());
             newIntent.putExtra("class", "Homenegative");
 
             startActivityForResult(newIntent, 1);
@@ -169,6 +207,8 @@ public class HomePageNegative extends Fragment {
         @NonNull List<Address> addresses;
         try {
             addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+            Log.d("Latitudine", String.valueOf(point.getLatitude()));
+            Log.d("Longitudine", String.valueOf(point.getLongitude()));
             if(addresses.size() != 0) {
                 newIntent.putExtra("country",addresses.get(0).getCountryName());
                 newIntent.putExtra("city", addresses.get(0).getLocality());

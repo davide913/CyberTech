@@ -65,7 +65,6 @@ public class HomePagePositive extends Fragment {
         final QuarantineAssistance[] myreq = new QuarantineAssistance[1];
         listAlreadyMade = view.findViewById(R.id.lst_myRequests);
 
-        //myRequestsList = user.getMaterializedQuarantineAssistance();
         Thread t = new Thread(() -> {
             try {
                 myRequestsList[0] = user.getMaterializedQuarantineAssistance();
