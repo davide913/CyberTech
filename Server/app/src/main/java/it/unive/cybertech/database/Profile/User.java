@@ -25,7 +25,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 
@@ -280,22 +282,34 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     //modificata il 13/12/2021 -> aggiunta la data di compleanno
-    public static User createUser(String id, String name, String surname, Sex sex, Date birthDay,
-                                  String address, String city, String country, long latitude, long longitude,
+    public static User createUser(@NonNull String id,@NonNull String name,@NonNull String surname,@NonNull Sex sex,@NonNull Date birthDay,
+                                  @NonNull String address,@NonNull String city,@NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
         if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
-        User user = new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country, new GeoPoint(latitude, longitude),
-                greenpass, null, 0, new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(), null);
+        Map<String, Object> myUser = new HashMap<>();
+        myUser.put("id", id);
+        myUser.put("name", name);
+        myUser.put("surname", surname);
+        myUser.put("sex", sex);
+        myUser.put("birthday", birthDay);
+        myUser.put("address", address);
+        myUser.put("city", city);
+        myUser.put("country", country);
+        myUser.put("location", new GeoPoint(latitude, longitude));
+        myUser.put("geohash", GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude)));
+        myUser.put("greenPass", greenpass);
+        myUser.put("positiveSince", null);
+        myUser.put("lendingPoint", 0);
 
-        Task<Void> future = getInstance().collection(table).document(id).set(user);
+        Task<Void> future = getInstance().collection(table).document(id).set(myUser);
         Tasks.await(future);
 
-        return user;
+        return new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country,
+                new GeoPoint(latitude, longitude), greenpass, null, 0,
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
 
