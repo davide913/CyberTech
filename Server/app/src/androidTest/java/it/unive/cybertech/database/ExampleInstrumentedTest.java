@@ -36,6 +36,9 @@ public class ExampleInstrumentedTest{
         User.createUser("shish", "davi","lll", Sex.female, new Date(1999-1900,1,10), "via delle banane", "abano",
                 "italy", 10,10,true);
 
+        User u = User.getUserById("shish");
+
+        u.deleteUser();
 
     }
 }

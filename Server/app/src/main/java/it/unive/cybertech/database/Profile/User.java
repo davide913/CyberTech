@@ -289,8 +289,9 @@ public class User extends Geoquerable implements Comparable<User> {
         if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
+        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
+
         Map<String, Object> myUser = new HashMap<>();
-        myUser.put("id", id);
         myUser.put("name", name);
         myUser.put("surname", surname);
         myUser.put("sex", sex);
@@ -298,7 +299,7 @@ public class User extends Geoquerable implements Comparable<User> {
         myUser.put("address", address);
         myUser.put("city", city);
         myUser.put("country", country);
-        myUser.put("location", new GeoPoint(latitude, longitude));
+        myUser.put("location", geoPoint);
         myUser.put("geohash", GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude)));
         myUser.put("greenPass", greenpass);
         myUser.put("positiveSince", null);
@@ -308,7 +309,7 @@ public class User extends Geoquerable implements Comparable<User> {
         Tasks.await(future);
 
         return new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country,
-                new GeoPoint(latitude, longitude), greenpass, null, 0,
+                geoPoint, greenpass, null, 0,
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
@@ -484,7 +485,8 @@ public class User extends Geoquerable implements Comparable<User> {
             if (notContainDevice(device.getId())) {
                 Tasks.await(addDeviceAsync(devDoc));
                 this.devices.add(devDoc);
-                this.getMaterializedDevices().add(device);
+                if(this.devicesMaterialized != null)
+                    this.getMaterializedDevices().add(device);
             }
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
@@ -509,7 +511,8 @@ public class User extends Geoquerable implements Comparable<User> {
             DocumentReference devDoc = getReference(Device.table, device.getId());
             Tasks.await(removeDeviceAsync(devDoc));
             this.devices.remove(devDoc);
-            this.getMaterializedDevices().remove(device);
+            if(this.devicesMaterialized != null)
+                this.getMaterializedDevices().remove(device);
             device.deleteDevice();
             return true;
         } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
@@ -544,7 +547,8 @@ public class User extends Geoquerable implements Comparable<User> {
             Task<Void> t = addLendingAsync(lenDoc);
             Tasks.await(t);
             this.lendingInProgress.add(lenDoc);
-            this.getMaterializedLendingInProgress().add(lending);
+            if(this.lendingInProgressMaterialized != null)
+                this.getMaterializedLendingInProgress().add(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -569,7 +573,8 @@ public class User extends Geoquerable implements Comparable<User> {
             Task<Void> t = removeLendingAsync(lenDoc);
             Tasks.await(t);
             this.lendingInProgress.remove(lenDoc);
-            this.getMaterializedLendingInProgress().remove(lending);
+            if(this.lendingInProgressMaterialized != null)
+                this.getMaterializedLendingInProgress().remove(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -607,7 +612,8 @@ public class User extends Geoquerable implements Comparable<User> {
             Task<Void> t = addMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.add(rentDoc);
-            this.getMaterializedUserMaterials().add(material);
+            if(this.materialsMaterialized != null)
+                this.getMaterializedUserMaterials().add(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -632,7 +638,8 @@ public class User extends Geoquerable implements Comparable<User> {
             Task<Void> t = removeMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.remove(rentDoc);
-            this.getMaterializedUserMaterials().remove(material);
+            if(this.materialsMaterialized != null)
+                this.getMaterializedUserMaterials().remove(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -672,7 +679,8 @@ public class User extends Geoquerable implements Comparable<User> {
             DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
             Tasks.await(addQuarantineAssistanceAsync(quarDoc));
             this.quarantineAssistance.add(quarDoc);
-            this.getMaterializedQuarantineAssistance().add(assistance);
+            if (this.quarantineAssistanceMaterialized != null)
+                this.getMaterializedQuarantineAssistance().add(assistance);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -697,7 +705,8 @@ public class User extends Geoquerable implements Comparable<User> {
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
-                this.getMaterializedQuarantineAssistance().remove(assistance);
+                if (this.quarantineAssistanceMaterialized != null)
+                    this.getMaterializedQuarantineAssistance().remove(assistance);
                 quarDoc.delete();
                 return true;
             }

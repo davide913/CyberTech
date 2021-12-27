@@ -264,7 +264,8 @@ public class Activity {
             Task<Void> t = addPartecipantAsync(userDoc);
             Tasks.await(t);
             this.participants.add(userDoc);
-            this.getMaterializedParticipants().add(user);
+            if(this.participantsMaterialized != null)
+                this.getMaterializedParticipants().add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();
@@ -288,7 +289,8 @@ public class Activity {
             Task<Void> t = removePartecipantAsync(userDoc);
             Tasks.await(t);
             this.participants.remove(userDoc);
-            this.getMaterializedParticipants().remove(user);
+            if(this.participantsMaterialized != null)
+                this.getMaterializedParticipants().remove(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();

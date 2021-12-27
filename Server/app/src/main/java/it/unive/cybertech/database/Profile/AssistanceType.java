@@ -4,7 +4,6 @@ import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 
-import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -15,12 +14,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 
-//TODO testata e funzionante
 public class AssistanceType {
     public final static String table = "assistanceType";
     private String Type;
