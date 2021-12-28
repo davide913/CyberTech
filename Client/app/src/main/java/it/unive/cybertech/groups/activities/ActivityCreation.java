@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 
 import static it.unive.cybertech.database.Groups.Activity.createActivity;
@@ -38,6 +40,7 @@ public class ActivityCreation extends AppCompatActivity {
     private EditText activityDate;
     private Date date;
     private EditText activityPlace;
+    private Activity newGroupActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,22 +82,32 @@ public class ActivityCreation extends AppCompatActivity {
     }
 
     private void createFSactivity() {
+        @NonNull Thread t = new Thread(() -> {
+            try {
+                newGroupActivity = createActivity(activityName.getText().toString(),
+                        activityDescription.getText().toString(),
+                        activityPlace.getText().toString(),
+                        date,
+                        user);
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
         try {
-            createActivity(activityName.getText().toString(),
-                    activityDescription.getText().toString(),
-                    activityPlace.getText().toString(),
-                    date,
-                    user);
-            showShortToast(getString(R.string.activityCreated));
-            @NonNull Handler handler = new Handler();
-            handler.postDelayed(()-> {
-                // @NonNull Intent i = new Intent(context, ActivityDetails.class);
-                // i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                // startActivity(i);
-            }, 800);
-        } catch (ExecutionException | InterruptedException e) {
+            t.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        showShortToast(getString(R.string.activityCreated));
+        @NonNull Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            @NonNull Intent i = new Intent(context, ActivityDetails.class);
+            i.putExtra("ID_Group", idGroup);
+            i.putExtra("ID_GroupActivity", newGroupActivity.getId());
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }, 800);
     }
 
 
@@ -122,7 +135,8 @@ public class ActivityCreation extends AppCompatActivity {
     private void bindThisGroup() {
         Thread t = new Thread(() -> {
             try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
+                String id = getIntent().getStringExtra("ID");
+                thisGroup = Group.getGroupById(id);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -131,6 +145,11 @@ public class ActivityCreation extends AppCompatActivity {
                 finish();
         });
         t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initActionBar() {
@@ -141,6 +160,7 @@ public class ActivityCreation extends AppCompatActivity {
 
     /**
      * Useful function that create and show a short-length toast (@see "{@link Toast}".
+     *
      * @since 1.0
      */
     private void showShortToast(@NonNull String message) {

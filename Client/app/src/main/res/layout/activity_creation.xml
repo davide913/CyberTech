@@ -50,7 +50,10 @@
         android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/Date"
-        android:inputType="datetime"
+        android:clickable="false"
+        android:cursorVisible="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activityCreation_description" />

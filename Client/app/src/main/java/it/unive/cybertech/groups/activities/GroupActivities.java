@@ -12,21 +12,22 @@ import androidx.fragment.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.Objects;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 
 public class GroupActivities extends Fragment {
-    private Group thisGroup;
     private String idGroup;
     private @Nullable List<Activity> activities;
     private @Nullable FragmentActivity fragmentActivity;
-    private FloatingActionButton newActivity;
+    private FloatingActionButton newActivityButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,19 +38,16 @@ public class GroupActivities extends Fragment {
         // todo manca lista delle activity del gruppo
 
         // ATTIVITA'
-        newActivity = view.findViewById(R.id.group_add_activity);
-        newActivity.setOnClickListener(v -> {
+
+        idGroup = Objects.requireNonNull(fragmentActivity).getIntent().getStringExtra("ID");
+        newActivityButton = view.findViewById(R.id.group_add_activity);
+        newActivityButton.setOnClickListener(v -> {
             @NonNull Intent i = new Intent(context, ActivityCreation.class);
             i.putExtra("ID", idGroup);
             startActivity(i);
         });
 
 
-
-
-
-        return inflater.inflate(R.layout.fragment_group_activities, container, false);
+        return view;
     }
-
-
 }
