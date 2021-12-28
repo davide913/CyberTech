@@ -174,13 +174,13 @@ public class Group {
             group.setId(document.getId());
 
             if(group.members == null)
-                group.members = new ArrayList<DocumentReference>();
+                group.members = new ArrayList<>();
 
             if(group.activities == null)
-                group.activities = new ArrayList<DocumentReference>();
+                group.activities = new ArrayList<>();
 
             if(group.messages == null)
-                group.messages = new ArrayList<DocumentReference>();
+                group.messages = new ArrayList<>();
 
             return group;
         } else
@@ -269,7 +269,8 @@ public class Group {
             Task<Void> t = addMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.add(messDoc);
-            this.getMaterializedMessages().add(message);
+            if(this.messagesMaterialized != null)
+                this.getMaterializedMessages().add(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -293,7 +294,8 @@ public class Group {
             Task<Void> t = removeMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.remove(message);
-            this.getMaterializedMessages().remove(message);
+            if(this.messagesMaterialized != null)
+                this.getMaterializedMessages().remove(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -317,7 +319,8 @@ public class Group {
             Task<Void> t = addMemberAsync(userDoc);
             Tasks.await(t);
             this.members.add(userDoc);
-            this.getMaterializedMembers().add(user);
+            if(this.membersMaterialized != null)
+                this.getMaterializedMembers().add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -342,7 +345,8 @@ public class Group {
                 Task<Void> t = removeMemberAsync(userDoc);
                 Tasks.await(t);
                 this.members.remove(userDoc);
-                this.getMaterializedMembers().remove(user);
+                if(this.membersMaterialized != null)
+                    this.getMaterializedMembers().remove(user);
                 return true;
             }
             return false;
@@ -368,7 +372,8 @@ public class Group {
             Task<Void> t = addActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.add(actDoc);
-            this.getMaterializedActivities().add(activity);
+            if(this.activitiesMaterialized != null)
+                this.getMaterializedActivities().add(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -392,7 +397,8 @@ public class Group {
             Task<Void> t = removeActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.remove(actDoc);
-            this.getMaterializedActivities().remove(activity);
+            if(this.activitiesMaterialized != null)
+                this.getMaterializedActivities().remove(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();

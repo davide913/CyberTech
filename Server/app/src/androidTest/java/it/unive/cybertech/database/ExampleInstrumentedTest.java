@@ -8,13 +8,19 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.firebase.firestore.GeoPoint;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -32,16 +38,17 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        Group group = Group.getGroupById("GomAtcIw32fv13spLHE3");
+        /*User.createUser("shish", "davi","lll", Sex.female, new Date(1999-1900,1,10), "via delle banane", "abano",
+                "italy", 10,10,true);
 
-        Log.d("id", group.getId());
+        User u = User.getUserById("shish");
 
-        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+        u.deleteUser();*/
 
-        Collection<User> us= u.activitiesUsers();
+        List<QuarantineAssistance> arr = QuarantineAssistance.getJoinableQuarantineAssistance(null,
+                new GeoPoint( 37,-122), 50);
 
 
 
-        Log.d("date", new Date().toString());
     }
 }
