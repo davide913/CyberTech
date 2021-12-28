@@ -104,11 +104,17 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     }
 
     public void onItemClick(View view, int position) {
-        Intent i = new Intent(getActivity(), ProductDetails.class);
-        Material m = items.get(position);
-        i.putExtra("ID", m.getId());
-        i.putExtra("Position", position);
-        i.putExtra("Type", m.getOwner().getId().equals(user.getId()) ? MyRentMaterialsFragment.ID : ID);
-        startActivityForResult(i, RENT_CODE);
+        if (user.getLendingPoint() < 0) {
+            HomePage h = (HomePage) getParentFragment();
+            if (h != null)
+                h.notifyNegativeLendingPoint();
+        } else {
+            Intent i = new Intent(getActivity(), ProductDetails.class);
+            Material m = items.get(position);
+            i.putExtra("ID", m.getId());
+            i.putExtra("Position", position);
+            i.putExtra("Type", m.getOwner().getId().equals(user.getId()) ? MyRentMaterialsFragment.ID : ID);
+            startActivityForResult(i, RENT_CODE);
+        }
     }
 }

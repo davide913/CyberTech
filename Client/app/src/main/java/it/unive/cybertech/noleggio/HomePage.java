@@ -52,4 +52,10 @@ public class HomePage extends Fragment {
     public Fragment getFragmentByID(String id){
         return adapter.getFragmentById(id);
     }
+
+    public void notifyNegativeLendingPoint(){
+        new Utils.Dialog(getContext())
+                .hideCancelButton()
+                .show(getString(R.string.unreliable), getString(R.string.unreliable_description));
+    }
 }

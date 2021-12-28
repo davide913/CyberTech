@@ -3,6 +3,7 @@ package it.unive.cybertech.noleggio;
 import static android.view.View.VISIBLE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -40,12 +41,14 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     private String id, from;
     private ImageView photo;
     private TextView title, description, date, renter, requestDate, extensionDateRequest;
-    private FloatingActionButton delete, confirm, extend;
+    private FloatingActionButton delete, confirm, extend, complete;
     private ConstraintLayout renterLayout, extensionLayout;
     private Button acceptExtension, rejectExtension;
     static final int RENT_DELETE = -1;
     static final int RENT_SUCCESS = 1;
     static final int RENT_FAIL = 0;
+    static final int RENT_TERMINATED = 0;
+    static final int FEEDBACK = 0;
     private int pos;
     private ActionBar actionBar;
     private Context context;
@@ -69,6 +72,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         acceptExtension = findViewById(R.id.accept_extension_details);
         rejectExtension = findViewById(R.id.reject_extension_details);
         extensionDateRequest = findViewById(R.id.extension_date_details_showcase);
+        complete = findViewById(R.id.complete_lending);
         extend = findViewById(R.id.extend_lending_fab);
         delete = findViewById(R.id.delete_rent_showcase);
         photo = findViewById(R.id.product_image_details_showcase);
@@ -138,11 +142,31 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                 requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
                                                 extensionLayout.setVisibility(VISIBLE);
                                                 acceptExtension.setOnClickListener(v -> {
-                                                    material.updateExpiryDate(lending.getEndExpiryDate().toDate());
-                                                    lending.updateEndExpiryDate(null);
-                                                    date.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
-                                                    extensionLayout.setVisibility(View.GONE);
-                                                    Snackbar.make(findViewById(android.R.id.content), context.getString(R.string.request_accepted), Snackbar.LENGTH_LONG).show();
+                                                    Utils.executeAsync(() -> lending.updateExpiryDate(lending.getEndExpiryDate().toDate()), new Utils.TaskResult<Boolean>() {
+                                                        @Override
+                                                        public void onComplete(Boolean result) {
+                                                            if (result)
+                                                                Utils.executeAsync(() -> lending.updateEndExpiryDate(null), new Utils.TaskResult<Boolean>() {
+                                                                    @Override
+                                                                    public void onComplete(Boolean result) {
+                                                                        if (result) {
+                                                                            date.setText(Utils.formatDateToString(lending.getExpiryDate().toDate()));
+                                                                            extensionLayout.setVisibility(View.GONE);
+                                                                            Snackbar.make(findViewById(android.R.id.content), context.getString(R.string.request_accepted), Snackbar.LENGTH_LONG).show();
+                                                                        }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onError(Exception e) {
+
+                                                                    }
+                                                                });
+                                                        }
+
+                                                        @Override
+                                                        public void onError(Exception e) {
+                                                        }
+                                                    });
                                                 });
                                                 rejectExtension.setOnClickListener(v -> {
                                                     Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
@@ -194,34 +218,50 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 break;
             case MyRentedMaterialsFragment.ID:
                 confirm.setVisibility(View.GONE);
-                getLending();
-                extend.setVisibility(VISIBLE);
-                extend.setOnClickListener(v -> {
-                    new Utils.Dialog(this)
-                            .setCallback(new Utils.DialogResult() {
-                                @Override
-                                public void onSuccess() {
-                                    Calendar now = Calendar.getInstance();
-                                    DatePickerDialog datePickerDialog = new DatePickerDialog(
-                                            context, ProductDetails.this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
-                                    datePickerDialog.getDatePicker().setMaxDate(material.getExpiryDate().toDate().getTime());
-                                    datePickerDialog.getDatePicker().setMinDate(now.getTimeInMillis());
-                                    datePickerDialog.show();
-                                }
+                getLending(new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        if (lending.getEndExpiryDate() != null) {
+                            extensionRenterLayout.setVisibility(VISIBLE);
+                            extensionDateRequest.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
+                        }
+                        extend.setVisibility(VISIBLE);
+                        extend.setOnClickListener(v -> {
+                            new Utils.Dialog(getApplicationContext())
+                                    .setCallback(new Utils.DialogResult() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Calendar now = Calendar.getInstance();
+                                            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                                                    context, ProductDetails.this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
+                                            datePickerDialog.getDatePicker().setMaxDate(material.getExpiryDate().toDate().getTime());
+                                            datePickerDialog.getDatePicker().setMinDate(now.getTimeInMillis());
+                                            datePickerDialog.show();
+                                        }
 
-                                @Override
-                                public void onCancel() {
+                                        @Override
+                                        public void onCancel() {
 
-                                }
-                            })
-                            .show("Estensione prestito", "Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell'utente accettare o rifiutare la proposta");
+                                        }
+                                    })
+                                    .show("Estensione prestito", "Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell'utente accettare o rifiutare la proposta");
+                        });
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
                 });
+
                 break;
             case ShowcaseFragment.ID:
                 getMaterial(id, new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
+                        confirm.setVisibility(VISIBLE);
                         confirm.setOnClickListener(view -> {
+                            //todo cancella dialog ma aggiungi comunque controllo
                             if (user.getLendingPoint() < 0)
                                 new Utils.Dialog(context)
                                         .hideCancelButton()
@@ -270,6 +310,64 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                     }
                 });
                 break;
+            case RentMaterialAdapter.ID:
+                getLending(new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        complete.setVisibility(VISIBLE);
+                        complete.setOnClickListener(v -> {
+                            new Utils.Dialog(context)
+                                    .setCallback(new Utils.DialogResult() {
+                                        @Override
+                                        public void onSuccess() {
+                                            startActivityForResult(new Intent(context, RentFeedback.class), FEEDBACK);
+                                        }
+
+                                        @Override
+                                        public void onCancel() {
+
+                                        }
+                                    }).show("Prestito terminato", "Prima di concludere ci serve il tuo feedback");
+                        });
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+                break;
+            case RentedMaterialsAdapter.ID:
+                getLending(new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        complete.setVisibility(VISIBLE);
+                        complete.setOnClickListener(v -> {
+                            new Utils.Dialog(context)
+                                    .setCallback(new Utils.DialogResult() {
+                                        @Override
+                                        public void onSuccess() {
+                                            //TODO update flag rent
+                                            Intent res = new Intent();
+                                            res.putExtra("Position", pos);
+                                            setResult(RENT_TERMINATED, res);
+                                            finish();
+                                        }
+
+                                        @Override
+                                        public void onCancel() {
+
+                                        }
+                                    }).show("Prestito terminato", "Vuoi concludere il prestito?");
+                        });
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+                break;
         }
     }
 
@@ -298,16 +396,12 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         });
     }
 
-    private void getLending() {
+    private void getLending(Utils.TaskResult<Material> callback) {
         Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 lending = result;
-                if (lending.getEndExpiryDate() != null) {
-                    extensionRenterLayout.setVisibility(VISIBLE);
-                    extensionDateRequest.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
-                }
-                getMaterial(lending.getIdMaterial().getId(), null);
+                getMaterial(lending.getMaterial().getId(), callback);
             }
 
             @Override
@@ -358,5 +452,33 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                     }
                 })
                 .show("Estensione prestito", "Confermi la nuova data di restituzione: " + Utils.formatDateToString(pickedDate.getTime()));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FEEDBACK) {
+            if (resultCode == RentFeedback.SUCCESS) {
+                int score = data.getIntExtra("Points", 0);
+                Utils.executeAsync(() -> user.updateLendingPoint(user.getLendingPoint() + score), new Utils.TaskResult<Boolean>() {
+                    @Override
+                    public void onComplete(Boolean result) {
+                        if (result) {
+                            Intent res = new Intent();
+                            res.putExtra("Position", pos);
+                            setResult(RENT_TERMINATED, res);
+                            finish();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+            } else {
+
+            }
+        }
     }
 }

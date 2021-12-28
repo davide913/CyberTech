@@ -20,6 +20,7 @@ import it.unive.cybertech.database.Material.Material;
 
 public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapter.ViewHolder>{
 
+    public static final String ID = "RentMaterialAdapter";
     private List<Material> showcaseList;
     private ItemClickListener clickListener;
 
@@ -61,6 +62,7 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
     public RentMaterialAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
+        view.setTag(ID);
         return new ViewHolder(view);
     }
 

@@ -25,6 +25,7 @@ import it.unive.cybertech.database.Profile.LendingInProgress;
 
 public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder> {
 
+    public static final String ID = "RentedMaterialsAdapter";
     private List<LendingInProgress> showcaseList;
     private ItemClickListener clickListener;
 
@@ -80,6 +81,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public RentedMaterialsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
+        view.setTag(ID);
         return new ViewHolder(view);
     }
 

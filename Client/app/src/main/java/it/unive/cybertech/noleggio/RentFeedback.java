@@ -20,6 +20,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class RentFeedback extends AppCompatActivity {
     private static final int BAD_SCORE_BOUND = 3;
+    static final int SUCCESS = 1, FAIL = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

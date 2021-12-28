@@ -54,7 +54,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     private void initList() {
         super.onStart();
         //TODO get posizione
-        Utils.executeAsync( () -> user.getMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
+        Utils.executeAsync(() -> user.getMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
             @Override
             public void onComplete(List<Material> result) {
                 Log.d(ID, "Size: " + result.size());

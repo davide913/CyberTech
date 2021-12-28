@@ -15,6 +15,7 @@
         android:text="Prestiti" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/expired_rented_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="5" />
@@ -27,6 +28,7 @@
         android:text="In prestito" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/expired_rent_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="5" />
