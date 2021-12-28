@@ -27,18 +27,18 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 //TODO fare test delle funzioni scritte, NESSUNA É TESTATA
 public class LendingInProgress {
     public final static String table = "lendingInProgress";
-    private DocumentReference idMaterial;
+    private DocumentReference material;
     private Timestamp expiryDate;
     private Timestamp endExpiryDate;
     private String id;
 
-    private Material material;
+    private Material materializeMaterial;
 
     public LendingInProgress() {}
 
-    private LendingInProgress(String id, DocumentReference IdMaterial, Timestamp expiryDate) {
+    private LendingInProgress(String id, DocumentReference material, Timestamp expiryDate) {
         this.id = id;
-        this.idMaterial = IdMaterial;
+        this.material = material;
         this.expiryDate = expiryDate;
     }
 
@@ -50,12 +50,12 @@ public class LendingInProgress {
         this.id = id;
     }
 
-    public DocumentReference getIdMaterial() {
-        return idMaterial;
+    public DocumentReference getMaterial() {
+        return material;
     }
 
-    private void setIdMaterial(DocumentReference idMaterial) {
-        this.idMaterial = idMaterial;
+    private void setMaterial(DocumentReference material) {
+        this.material = material;
     }
 
     public Timestamp getExpiryDate() {
@@ -79,9 +79,9 @@ public class LendingInProgress {
     }
 
     public Material getMaterializedMaterial() throws ExecutionException, InterruptedException {
-        if(material == null)
-            material = Material.getMaterialById(idMaterial.getId());
-        return material;
+        if(materializeMaterial == null)
+            materializeMaterial = Material.getMaterialById(material.getId());
+        return materializeMaterial;
     }
 
     public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException {
@@ -91,7 +91,7 @@ public class LendingInProgress {
 
         Map<String, Object> mylending = new HashMap<>();          //create "table"
         mylending.put("expiryDate", t);
-        mylending.put("idMaterial", docRefMaterial);
+        mylending.put("material", docRefMaterial);
 
         DocumentReference addedDocRef = addToCollection(table, mylending);
 
@@ -157,7 +157,10 @@ public class LendingInProgress {
         try {
             Task<Void> t = this.updateEndExpiryDateAsync(date);
             Tasks.await(t);
-            setEndExpiryDate(new Timestamp(date));
+            if(date == null)
+                setEndExpiryDate(null);
+            else
+                setEndExpiryDate(new Timestamp(date));
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();
@@ -175,7 +178,7 @@ public class LendingInProgress {
                 return docRef.update(Material.table, FieldValue.delete());
 
             DocumentReference docRefMaterial = getReference(Material.table, material.getId());
-            return docRef.update("idMaterial", docRefMaterial);
+            return docRef.update("material", docRefMaterial);
         }
         else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
@@ -187,12 +190,12 @@ public class LendingInProgress {
             Task<Void> t = this.updateMaterialAsync(material);
             Tasks.await(t);
             if(material == null){
-                this.idMaterial = null;
                 this.material = null;
+                this.materializeMaterial = null;
             }
             else {
-                this.idMaterial = getReference(Material.table, material.getId());
-                this.material = material;
+                this.material = getReference(Material.table, material.getId());
+                this.materializeMaterial = material;
             }
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
