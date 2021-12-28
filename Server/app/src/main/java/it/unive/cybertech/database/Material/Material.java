@@ -30,7 +30,6 @@ import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 

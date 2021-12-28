@@ -1,4 +1,5 @@
 package it.unive.cybertech.database.Material;
+
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
@@ -19,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Material.Exception.NoTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
-
 
 //TODO testata e funzionante
 public class Type {
