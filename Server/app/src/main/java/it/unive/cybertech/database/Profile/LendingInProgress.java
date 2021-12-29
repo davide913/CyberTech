@@ -30,6 +30,7 @@ public class LendingInProgress {
     private DocumentReference material;
     private Timestamp expiryDate;
     private Timestamp endExpiryDate;
+    private boolean waitingForFeedback;
     private String id;
 
     private Material materializeMaterial;
@@ -40,6 +41,7 @@ public class LendingInProgress {
         this.id = id;
         this.material = material;
         this.expiryDate = expiryDate;
+        this.waitingForFeedback = false;
     }
 
     public String getId() {
@@ -78,6 +80,14 @@ public class LendingInProgress {
         this.endExpiryDate = endExpiryDate;
     }
 
+    public boolean getWaitingForFeedback() {
+        return waitingForFeedback;
+    }
+
+    private void setWaitingForFeedback(boolean waitingForFeedback) {
+        this.waitingForFeedback = waitingForFeedback;
+    }
+
     public Material getMaterializedMaterial() throws ExecutionException, InterruptedException {
         if(materializeMaterial == null)
             materializeMaterial = Material.getMaterialById(material.getId());
@@ -91,6 +101,7 @@ public class LendingInProgress {
 
         Map<String, Object> mylending = new HashMap<>();          //create "table"
         mylending.put("expiryDate", t);
+        mylending.put("waitingForFeedback", false);
         mylending.put("material", docRefMaterial);
 
         DocumentReference addedDocRef = addToCollection(table, mylending);
@@ -133,6 +144,28 @@ public class LendingInProgress {
             Task<Void> t = this.updateExpiryDateAsync(timestamp);
             Tasks.await(t);
             setExpiryDate(timestamp);
+            return true;
+        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Task<Void> updateWaitingForFeedbackAsync(boolean val) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, this.id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            return docRef.update("waitingForFeedback", val);
+        }else
+            throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
+    }
+
+    public boolean updateWaitingForFeedback(boolean val) {
+        try {
+            Task<Void> t = this.updateWaitingForFeedbackAsync(val);
+            Tasks.await(t);
+            setWaitingForFeedback(val);
             return true;
         } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
             e.printStackTrace();

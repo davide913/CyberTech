@@ -26,8 +26,6 @@ import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
 import it.unive.cybertech.database.Profile.User;
 
-//TESTATED
-//TODO modificare tutti gli array con documentreference e fare un metodo che "materializza" gli oggetti
 public class Activity {
     public final static String table = "activity";
     private String id;
@@ -170,9 +168,37 @@ public class Activity {
 
     public boolean deleteActivity() {
         try {
-            Task<Void> t = deleteActivityAsync();
+            if(this.getParticipants().isEmpty()) {
+                Task<Void> t = deleteActivityAsync();
+                Tasks.await(t);
+                this.id = null;
+                return true;
+            }
+            else
+                throw new NoActivityFoundException("Not able to remove an activity with some participants. activity id: "
+                + this.id);
+        } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, this.id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            return docRef.update("owner", user);
+        } else
+            throw new NoActivityFoundException("No activity found with this id: " + id);
+    }
+
+    protected boolean updateOwner(User user) {
+        try {
+            DocumentReference docRef = getReference(User.table, user.getId());
+            Task<Void> t = updateOwnerAsync(docRef);
             Tasks.await(t);
-            this.id = null;
+            this.setOwner(docRef);
             return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();
@@ -247,7 +273,7 @@ public class Activity {
         }
     }
 
-    private Task<Void> addPartecipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> addParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -257,10 +283,10 @@ public class Activity {
             throw new NoActivityFoundException("No activity found with this id: " + id);
     }
 
-    public boolean addPartecipant(@NonNull User user) {
+    public boolean addParticipant(@NonNull User user) {
         try {
             DocumentReference userDoc = getReference(User.table, user.getId());
-            Task<Void> t = addPartecipantAsync(userDoc);
+            Task<Void> t = addParticipantAsync(userDoc);
             Tasks.await(t);
             this.participants.add(userDoc);
             if(this.participantsMaterialized != null)
@@ -272,7 +298,7 @@ public class Activity {
         }
     }
 
-    private Task<Void> removePartecipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> removeParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -282,10 +308,10 @@ public class Activity {
             throw new NoActivityFoundException("No activity found with this id: " + id);
     }
 
-    public boolean removePartecipant(@NonNull User user) {
+    public boolean removeParticipant(@NonNull User user) {
         try {
             DocumentReference userDoc = getReference(User.table, user.getId());
-            Task<Void> t = removePartecipantAsync(userDoc);
+            Task<Void> t = removeParticipantAsync(userDoc);
             Tasks.await(t);
             this.participants.remove(userDoc);
             if(this.participantsMaterialized != null)

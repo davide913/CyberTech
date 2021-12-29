@@ -347,6 +347,23 @@ public class Group {
                 this.members.remove(userDoc);
                 if(this.membersMaterialized != null)
                     this.getMaterializedMembers().remove(user);
+
+                for (Activity activity : getMaterializedActivities() ) {
+                    if(activity.getOwner().getId().equals(user.getId())) {
+
+                        if(activity.getMaterializedParticipants().isEmpty())
+                            activity.deleteActivity();
+
+                        else {
+                            User substitute = activity.getMaterializedParticipants().get(0);
+                            activity.removeParticipant(substitute);
+                            activity.updateOwner(substitute);
+                        }
+                    }
+                    else
+                        activity.removeParticipant(user);
+                }
+
                 return true;
             }
             return false;
