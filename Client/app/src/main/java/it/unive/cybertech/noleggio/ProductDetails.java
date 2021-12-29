@@ -44,10 +44,11 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     private FloatingActionButton delete, confirm, extend, complete;
     private ConstraintLayout renterLayout, extensionLayout;
     private Button acceptExtension, rejectExtension;
+    static final int EXCEPTION = -2;
     static final int RENT_DELETE = -1;
     static final int RENT_SUCCESS = 1;
     static final int RENT_FAIL = 0;
-    static final int RENT_TERMINATED = 0;
+    static final int RENT_TERMINATED = 2;
     static final int FEEDBACK = 0;
     private int pos;
     private ActionBar actionBar;
@@ -261,7 +262,6 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                     public void onComplete(Material result) {
                         confirm.setVisibility(VISIBLE);
                         confirm.setOnClickListener(view -> {
-                            //todo cancella dialog ma aggiungi comunque controllo
                             if (user.getLendingPoint() < 0)
                                 new Utils.Dialog(context)
                                         .hideCancelButton()
@@ -288,6 +288,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                                                     @Override
                                                     public void onError(Exception e) {
+                                                        e.printStackTrace();
                                                         Intent res = new Intent();
                                                         setResult(RENT_FAIL, res);
                                                         finish();
@@ -311,7 +312,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 });
                 break;
             case RentMaterialAdapter.ID:
-                getLending(new Utils.TaskResult<Material>() {
+                getMaterial(id, new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
                         complete.setVisibility(VISIBLE);
@@ -348,10 +349,23 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                         @Override
                                         public void onSuccess() {
                                             //TODO update flag rent
-                                            Intent res = new Intent();
-                                            res.putExtra("Position", pos);
-                                            setResult(RENT_TERMINATED, res);
-                                            finish();
+                                            Utils.executeAsync(() -> lending.updateWaitingForFeedback(true), new Utils.TaskResult<Boolean>() {
+                                                @Override
+                                                public void onComplete(Boolean result) {
+                                                    if(result)
+                                                    {
+                                                        Intent res = new Intent();
+                                                        res.putExtra("Position", pos);
+                                                        setResult(RENT_TERMINATED, res);
+                                                        finish();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onError(Exception e) {
+
+                                                }
+                                            });
                                         }
 
                                         @Override
@@ -391,7 +405,8 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
             @Override
             public void onError(Exception e) {
-                finish();
+                e.printStackTrace();
+                finishWithError();
             }
         });
     }
@@ -407,7 +422,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             @Override
             public void onError(Exception e) {
                 e.printStackTrace();
-                finish();
+                finishWithError();
             }
         });
     }
@@ -480,5 +495,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
             }
         }
+    }
+    private void finishWithError(){
+        setResult(EXCEPTION, null);
+        finish();
     }
 }

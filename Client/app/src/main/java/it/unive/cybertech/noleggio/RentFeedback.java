@@ -1,11 +1,13 @@
 package it.unive.cybertech.noleggio;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +28,9 @@ public class RentFeedback extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rent_feedback);
+        ActionBar actionBar = getSupportActionBar();
+        //actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(R.string.feedback);
         RatingBar rating = findViewById(R.id.rating_rent_feedback);
         LinearLayout feedbackLayout = findViewById(R.id.feedback_rent_feedback);
         FloatingActionButton done = findViewById(R.id.done_rent_feedback);
@@ -53,32 +58,24 @@ public class RentFeedback extends AppCompatActivity {
                 if (lost.getCheckedRadioButtonId() == R.id.lost_rent_yes_feedback_group)
                     score -= 1;
             }
-            new ConfirmFeedbackDialog(score).show(getSupportFragmentManager(), "ConfirmFeedbackDialog");
-        });
-    }
+            double finalScore = score;
+            new Utils.Dialog(this)
+                    .hideCancelButton()
+                    .setCallback(new Utils.DialogResult() {
+                        @Override
+                        public void onSuccess() {
+                            Intent data = new Intent();
+                            data.putExtra("Points", finalScore);
+                            setResult(SUCCESS, data);
+                            finish();
+                        }
 
-    public static class ConfirmFeedbackDialog extends DialogFragment {
+                        @Override
+                        public void onCancel() {
 
-        private final double score;
-
-        ConfirmFeedbackDialog(double score) {
-            this.score = score;
-        }
-
-        @NonNull
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the Builder class for convenient dialog construction
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setMessage(score >= 0 ? R.string.rent_feedback_positive_message : R.string.rent_feedback_negative_message)
-                    .setTitle(score >= 0 ? R.string.rent_feedback_positive : R.string.rent_feedback_negative)
-                    .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-                        // FIRE ZE MISSILES!
+                        }
                     })
-                    .setNegativeButton(android.R.string.cancel, (dialog, id) -> {
-                        // User cancelled the dialog
-                    });
-            return builder.create();
-        }
+                    .show(getString(score >= 0 ? R.string.rent_feedback_positive : R.string.rent_feedback_negative), getString(score >= 0 ? R.string.rent_feedback_positive_message : R.string.rent_feedback_negative_message));
+        });
     }
 }

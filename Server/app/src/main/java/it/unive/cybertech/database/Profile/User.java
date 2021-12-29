@@ -448,7 +448,7 @@ public class User extends Geoquerable implements Comparable<User> {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists() && val >= 0)
+        if (document.exists())
             return docRef.update("lendingPoint", val);
         else
             throw new NoUserFoundException("User not found, id: " + id);
