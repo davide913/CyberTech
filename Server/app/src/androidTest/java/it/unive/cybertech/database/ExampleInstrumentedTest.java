@@ -38,15 +38,19 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        /*User.createUser("shish", "davi","lll", Sex.female, new Date(1999-1900,1,10), "via delle banane", "abano",
-                "italy", 10,10,true);
+        User u = User.getUserById("davide.finesso@hotmail.it");
 
-        User u = User.getUserById("shish");
+        Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
 
-        u.deleteUser();*/
+        g.addMember(u);
 
-        List<QuarantineAssistance> arr = QuarantineAssistance.getJoinableQuarantineAssistance(null,
-                new GeoPoint( 37,-122), 50);
+        List<User> arr = g.getMaterializedMembers();
+
+        g.removeMember(u);
+
+        arr = g.getMaterializedMembers();
+
+
 
 
 
