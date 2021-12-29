@@ -587,7 +587,7 @@ public class User extends Geoquerable implements Comparable<User> {
         Timestamp timestamp = new Timestamp(new Date());
 
         for (LendingInProgress lending : getMaterializedLendingInProgress()) {
-            if (timestamp.compareTo(lending.getExpiryDate()) < 0 && !lending.getWaitingForFeedback())
+            if (timestamp.compareTo(lending.getExpiryDate()) >= 0 && !lending.getWaitingForFeedback())
                 result.add(lending);
 
         }
@@ -652,7 +652,7 @@ public class User extends Geoquerable implements Comparable<User> {
         Timestamp timestamp = new Timestamp(new Date());
 
         for (Material material : getMaterializedUserMaterials()) {
-            if (timestamp.compareTo(material.getExpiryDate()) < 0)
+            if (timestamp.compareTo(material.getExpiryDate()) >= 0)
                 result.add(material);
 
         }
