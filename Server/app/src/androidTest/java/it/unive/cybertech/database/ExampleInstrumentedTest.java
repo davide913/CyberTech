@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.Sex;
@@ -38,7 +39,11 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        User u = User.getUserById("davide.finesso@hotmail.it");
+        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+
+        Collection<User> collection =  u.obtainActivitiesUsers();
+
+
 
         Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
 
