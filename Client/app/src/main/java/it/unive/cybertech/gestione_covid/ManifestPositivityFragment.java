@@ -30,11 +30,13 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.messages.MessageService;
 
 
 public class ManifestPositivityFragment extends Fragment {
@@ -114,7 +116,7 @@ public class ManifestPositivityFragment extends Fragment {
 
 
 
-
+        //INVIA SEGNALAZIONE NULL
 
           bManifestNegativity.setOnClickListener(v1 -> {
               AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -149,7 +151,7 @@ public class ManifestPositivityFragment extends Fragment {
           });
 
 
-
+        //INVIA SEGNALAZIONE CON DATA DEL TAMPONE
 
 
         signPosButton.setOnClickListener(new View.OnClickListener() {
@@ -169,7 +171,17 @@ public class ManifestPositivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     user.updatePositiveSince(d); //TODO vedere se funziona
-                                    //Collection<User> users = user.getActivitiesUsers();
+                                    try {
+                                        Collection<User> users = user.getActivitiesUsers();
+                                        sendNotifications(users);
+                                    }catch (ExecutionException e) {
+
+                                        e.printStackTrace();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+
+
                                 }
                             });
                             t.start();
@@ -211,7 +223,12 @@ public class ManifestPositivityFragment extends Fragment {
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
-    private void sendNotifications(ArrayList<User> users){
+    private void sendNotifications(Collection<User> users){
+        for (User u: users) {
+            MessageService.sendMessageToUserDevices(u, MessageService.NotificationType.coronavirus,
+                    "ATTENZIONE: Utente positivo", "Un utente presente nelle tue attività è risultato positivo",
+                    getContext());
+        }
 
     }
 
