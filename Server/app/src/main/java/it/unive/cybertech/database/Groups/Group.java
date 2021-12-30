@@ -199,6 +199,8 @@ public class Group {
 
     public boolean deleteGroup() {
         try {
+            for (Activity activity: getMaterializedActivities())
+                activity.deleteActivity();
             Task<Void> t = deleteGroupAsync();
             Tasks.await(t);
             this.id = null;
@@ -230,6 +232,29 @@ public class Group {
             return false;
         }
     }
+
+    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, this.id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            return docRef.update("owner", user);
+        } else
+            throw new NoGroupFoundException("No group found with this id: " + id);
+    }
+
+    private boolean updateOwner(DocumentReference user) {
+        try {
+            Task<Void> t = updateOwnerAsync(user);
+            Tasks.await(t);
+            this.owner = user;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     private Task<Void> updateNameAsync(String name) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
@@ -340,33 +365,46 @@ public class Group {
 
     public boolean removeMember(@NonNull User user) throws Exception {
         try {
-            if(!user.getId().equals(owner.getId())) {
-                DocumentReference userDoc = getReference(User.table, user.getId());
-                Task<Void> t = removeMemberAsync(userDoc);
-                Tasks.await(t);
-                this.members.remove(userDoc);
-                if(this.membersMaterialized != null)
-                    this.getMaterializedMembers().remove(user);
+            if(user.getId().equals(owner.getId())){
+                Tasks.await(removeMemberAsync(owner));
+                this.members.remove(owner);
 
-                for (Activity activity : getMaterializedActivities() ) {
-                    if(activity.getOwner().getId().equals(user.getId())) {
-
-                        if(activity.getMaterializedParticipants().isEmpty())
-                            activity.deleteActivity();
-
-                        else {
-                            User substitute = activity.getMaterializedParticipants().get(0);
-                            activity.removeParticipant(substitute);
-                            activity.updateOwner(substitute);
-                        }
-                    }
-                    else
-                        activity.removeParticipant(user);
+                if(this.members.isEmpty()) {
+                    this.deleteGroup();
+                    return true;
                 }
+                else
+                    this.updateOwner(this.members.get(0));
 
-                return true;
             }
-            return false;
+            else{
+                DocumentReference userDoc = getReference(User.table, user.getId());
+
+                Tasks.await(removeActivityAsync(userDoc));
+                this.members.remove(userDoc);
+            }
+
+            if(this.membersMaterialized != null)
+                this.getMaterializedMembers().remove(user);
+
+            for (Activity activity : getMaterializedActivities() ) {
+                if(activity.getOwner().getId().equals(user.getId())) {
+
+                    if(activity.getMaterializedParticipants().isEmpty())
+                        activity.deleteActivity();
+
+                    else {
+                        User substitute = User.getUserById(activity.getParticipants().get(0).getId());
+                        activity.removeParticipant(substitute);
+                        activity.updateOwner(substitute);
+                    }
+                }
+                else
+                    activity.removeParticipant(user);
+            }
+
+            return true;
+
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
             return false;

@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
 import org.junit.Test;
@@ -46,6 +47,14 @@ public class ExampleInstrumentedTest{
 
 
         Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
+
+        DocumentReference doc = g.getOwner();
+
+        doc.getId().equals(u.getId());
+
+        User u1 = User.getUserById(doc.getId());
+
+        u1.equals(u);
 
         g.addMember(u);
 
