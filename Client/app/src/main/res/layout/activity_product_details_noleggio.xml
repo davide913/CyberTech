@@ -43,7 +43,7 @@
         app:layout_constraintTop_toBottomOf="@+id/title_details_showcase" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/date_description_product_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintStart_toEndOf="@+id/textView5"
+        app:layout_constraintStart_toEndOf="@+id/date_description_product_details"
         app:layout_constraintTop_toBottomOf="@+id/description_details_showcase" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -95,7 +95,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@+id/date_description_product_details"
         tools:visibility="gone">
 
         <TextView
@@ -201,7 +201,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5">
+        app:layout_constraintTop_toBottomOf="@+id/date_description_product_details">
 
         <TextView
             android:id="@+id/textView13"

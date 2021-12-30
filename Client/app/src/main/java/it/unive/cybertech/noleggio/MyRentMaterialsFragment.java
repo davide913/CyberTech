@@ -19,10 +19,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.firebase.Timestamp;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -47,8 +50,13 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         adapter = new RentMaterialAdapter(items);
         adapter.setClickListener(this);
         list.setAdapter(adapter);
-        initList();
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initList();
     }
 
     private void initList() {
@@ -80,6 +88,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
                     adapter.removeAt(pos);
+                    items.remove(pos);
                 }
             }
     }

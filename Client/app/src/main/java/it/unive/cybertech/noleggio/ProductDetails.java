@@ -32,6 +32,9 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
@@ -42,7 +45,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     private LendingInProgress lending;
     private String id, from;
     private ImageView photo;
-    private TextView title, description, date, renter, requestDate, extensionDateRequest;
+    private TextView title, description, date, renter, requestDate, extensionDateRequest, dateDescription;
     private FloatingActionButton delete, confirm, extend, complete;
     private ConstraintLayout renterLayout, extensionLayout;
     private Button acceptExtension, rejectExtension;
@@ -83,6 +86,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         title = findViewById(R.id.title_details_showcase);
         description = findViewById(R.id.description_details_showcase);
         date = findViewById(R.id.expiring_date_details_showcase);
+        dateDescription = findViewById(R.id.date_description_product_details);
         renterLayout = findViewById(R.id.renter_layout_details);
         extensionLayout = findViewById(R.id.extension_layout_details);
         renter = findViewById(R.id.user_name_renter_details);
@@ -101,10 +105,10 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         getDataFromDB(new Utils.TaskResult<Void>() {
             @Override
             public void onComplete(Void result) {
-                if (lending != null)
+                /*if (lending != null)
                     date.setText(Utils.formatDateToString(lending.getDateExpiryDate()));
                 else
-                    date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
+                    date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));*/
                 try {
                     manageType();
                 } catch (InterruptedException e) {
@@ -126,31 +130,11 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User renterUser) {
-                        if (renterUser == null) {
-                            delete.setVisibility(VISIBLE);
-                            delete.setOnClickListener(v -> {
-                                new Utils.Dialog(getApplicationContext())
-                                        .setCallback(new Utils.DialogResult() {
-                                            @Override
-                                            public void onSuccess() {
-                                                //material.delete();
-                                                Intent res = new Intent();
-                                                res.putExtra("Position", pos);
-                                                setResult(RENT_DELETE, res);
-                                                finish();
-                                            }
-
-                                            @Override
-                                            public void onCancel() {
-
-                                            }
-                                        })
-                                        .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
-                            });
-                        } else {
+                        if (renterUser != null) {
                             renter.setText(renterUser.getName() + " " + renterUser.getSurname());
                             renterLayout.setVisibility(VISIBLE);
                             if (lending != null) {
+                                date.setText(Utils.formatDateToString(lending.getDateExpiryDate()));
                                 if (lending.getEndExpiryDate() != null) {
                                     requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
                                     extensionLayout.setVisibility(VISIBLE);
@@ -203,6 +187,39 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                     @Override
                     public void onError(Exception e) {
+                        if (e instanceof NoRentMaterialFoundException) {
+                            dateDescription.setText(R.string.showcase_until_dotted);
+                            date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
+                            delete.setVisibility(VISIBLE);
+                            delete.setOnClickListener(v -> {
+                                new Utils.Dialog(context)
+                                        .setCallback(new Utils.DialogResult() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Utils.executeAsync(() -> material.deleteMaterial(), new Utils.TaskResult<Boolean>() {
+                                                    @Override
+                                                    public void onComplete(Boolean result) {
+                                                        Intent res = new Intent();
+                                                        res.putExtra("Position", pos);
+                                                        setResult(RENT_DELETE, res);
+                                                        finish();
+                                                    }
+
+                                                    @Override
+                                                    public void onError(Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onCancel() {
+
+                                            }
+                                        })
+                                        .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
+                            });
+                        }
                         e.printStackTrace();
                     }
                 });
@@ -237,6 +254,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 break;
             case ShowcaseFragment.ID:
                 confirm.setVisibility(VISIBLE);
+                date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
                 confirm.setOnClickListener(view -> {
                     if (user.getLendingPoint() < 0)
                         new Utils.Dialog(context)
@@ -410,7 +428,10 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                         @Override
                         public void onError(Exception e) {
-                            callback.onError(e);
+                            if (e instanceof NoLendingInProgressFoundException)
+                                callback.onComplete(null);
+                            else
+                                callback.onError(e);
                         }
                     });
                     //getLending(material.getLending(),callback);

@@ -245,7 +245,7 @@ public class Utils {
                 R result = callable.call();
                 handler.post(() -> callback.onComplete(result));
             } catch (Exception e) {
-                callback.onError(e);
+                handler.post(() -> callback.onError(e));
             }
         }).start();
     }

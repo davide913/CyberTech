@@ -28,6 +28,12 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public static final String ID = "RentedMaterialsAdapter";
     private List<LendingInProgress> showcaseList;
     private ItemClickListener clickListener;
+    private String tag = ID;
+
+    public RentedMaterialsAdapter(List<LendingInProgress> showcaseList, String tag) {
+        this.tag = tag;
+        this.showcaseList = showcaseList;
+    }
 
     public RentedMaterialsAdapter(List<LendingInProgress> showcaseList) {
         this.showcaseList = showcaseList;
@@ -81,7 +87,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public RentedMaterialsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
-        view.setTag(ID);
+        view.setTag(tag);
         return new ViewHolder(view);
     }
 

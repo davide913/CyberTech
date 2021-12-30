@@ -151,6 +151,7 @@
     <string name="request_accepted">Richiesta accettata</string>
     <string name="request_rejected">Richiesta respinta</string>
     <string name="feedback">Feedback</string>
+    <string name="showcase_until_dotted">In vetrina fino al:</string>
 
     <array name="sex">
         <item>Maschio</item>

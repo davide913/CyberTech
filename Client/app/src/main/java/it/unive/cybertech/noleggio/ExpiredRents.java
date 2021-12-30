@@ -13,8 +13,11 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.firebase.Timestamp;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -26,10 +29,8 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
     public static final String ID = "ExpiredRents";
     static final int CONFIRM_END_RENT = 0;
     static final int CONFIRM_END_LENDING = 1;
-    private RentMaterialAdapter rentMaterialsAdapter;
-    private RentedMaterialsAdapter rentedMaterialsAdapter;
-    private List<Material> rentMaterials;
-    private List<LendingInProgress> rentedMaterials;
+    private RentedMaterialsAdapter rentMaterialsAdapter, rentedMaterialsAdapter;
+    private List<LendingInProgress> rentMaterials, rentedMaterials;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +43,8 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
                 rented = findViewById(R.id.expired_rented_list);
         rentMaterials = new ArrayList<>();
         rentedMaterials = new ArrayList<>();
-        rentMaterialsAdapter = new RentMaterialAdapter(rentMaterials);
-        rentedMaterialsAdapter = new RentedMaterialsAdapter(rentedMaterials);
+        rentMaterialsAdapter = new RentedMaterialsAdapter(rentMaterials, "rentMaterialsAdapter");
+        rentedMaterialsAdapter = new RentedMaterialsAdapter(rentedMaterials, "rentedMaterialsAdapter");
         rentedMaterialsAdapter.setClickListener(this);
         rentMaterialsAdapter.setClickListener(this);
         rent.setLayoutManager(new GridLayoutManager(this, 2));
@@ -55,6 +56,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
     @Override
     protected void onStart() {
         super.onStart();
+        //TODO non va
         Utils.executeAsync(() -> user.getExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
@@ -68,9 +70,9 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
 
             }
         });
-        Utils.executeAsync(() -> user.getExpiredMaterial(), new Utils.TaskResult<List<Material>>() {
+        Utils.executeAsync(() -> user.getMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
-            public void onComplete(List<Material> result) {
+            public void onComplete(List<LendingInProgress> result) {
                 rentMaterials = result;
                 rentMaterialsAdapter.setItems(rentMaterials);
                 rentMaterialsAdapter.notifyDataSetChanged();
@@ -89,7 +91,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
         Intent i = new Intent(this, ProductDetails.class);
         i.putExtra("Type", tag);
         i.putExtra("Position", position);
-        if (tag.equals(RentedMaterialsAdapter.ID)) {
+        if (tag.equals("rentedMaterialsAdapter")) {
             i.putExtra("ID", rentedMaterials.get(position).getId());
             startActivityForResult(i, CONFIRM_END_LENDING);
         }else {

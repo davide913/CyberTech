@@ -48,6 +48,7 @@ public class AddProductForRent extends AppCompatActivity {
     private ImageView image;
     private Uri output;
     private Spinner type;
+    //TODO gestire immagine e datepicker
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

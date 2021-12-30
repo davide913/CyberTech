@@ -21,11 +21,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.common.collect.Collections2;
+import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -86,6 +89,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //TODO gestire aggiunta materiale
         if (requestCode == RENT_CODE && resultCode == ProductDetails.RENT_SUCCESS) {
             int pos = data.getIntExtra("Position", -1);
             if (pos >= 0) {
