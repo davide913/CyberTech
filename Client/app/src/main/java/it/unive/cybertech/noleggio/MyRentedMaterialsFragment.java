@@ -82,11 +82,14 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
     public void addLendingById(String id) {
         AtomicReference<LendingInProgress> l = new AtomicReference<>();
         Thread t = new Thread(() -> {
+
             try {
                 l.set(LendingInProgress.getLendingInProgressById(id));
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+
+
         });
         t.start();
         try {

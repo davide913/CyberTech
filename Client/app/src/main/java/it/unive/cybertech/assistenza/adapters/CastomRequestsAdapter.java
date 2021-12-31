@@ -67,7 +67,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         Date date = request.getDeliveryDateToDate();//.getDateDeliveryToDate();
         String strDate = dateFormat.format(date);
         TextView dateView =  view.findViewById(R.id.date_request);
-        dateView.setText(strDate);
+        //dateView.setText(strDate);
 
         GeoPoint point = request.getLocation();
         showAddress(point, view);

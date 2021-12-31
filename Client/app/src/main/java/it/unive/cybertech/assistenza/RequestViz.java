@@ -194,7 +194,7 @@ public class RequestViz extends AppCompatActivity {
             if(callerClass != null && callerClass.equals("positive")) { //se sono stato chiamato dalla HomePos
                 //Pulsanti visibili solo dall'utente positivo che richiede soccorso
                 QuarantineAssistance finalRequest2 = request[0];
-
+/*
                 menu.setOnClickListener(v -> {
                     animatedMenu(callerClass);
                 });
@@ -206,12 +206,12 @@ public class RequestViz extends AppCompatActivity {
                         @Override
                         public void onSuccess() {
                             Thread t = new Thread(() -> {
-                                /*try {
+                                try {
                                     finalRequest2.removeQuarantineAssistance();
                                     setResult(Activity.RESULT_OK);
                                 } catch (ExecutionException | InterruptedException e) {
                                     e.printStackTrace();
-                                }*/
+                                }
                             });
                             t.start();
                             try {
@@ -228,6 +228,8 @@ public class RequestViz extends AppCompatActivity {
                         }
                     });
                 });
+
+ */
 
                 chat.setOnClickListener(v -> {
                     finish();
