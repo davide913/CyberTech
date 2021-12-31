@@ -56,7 +56,7 @@ public class PosReportedFragment extends Fragment {
                     TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
                     ListView listView = v.findViewById(R.id.ListView_signReported);
 
-                    if(activityList != null)
+                    if(!activityList.isEmpty())
                         var = true;
 
                     if(var){

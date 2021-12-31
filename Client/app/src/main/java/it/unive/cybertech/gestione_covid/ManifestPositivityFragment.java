@@ -37,6 +37,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
+import it.unive.cybertech.utils.CachedUser;
 
 
 public class ManifestPositivityFragment extends Fragment {
@@ -171,15 +172,15 @@ public class ManifestPositivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     user.updatePositiveSince(d); //TODO vedere se funziona
-                                    /*try {
-                                        Collection<User> users = user.getActivitiesUsers();
+                                    try {
+                                        Collection<User> users = user.obtainActivitiesUsers();
                                         sendNotifications(users);
                                     }catch (ExecutionException e) {
 
                                         e.printStackTrace();
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
-                                    }*/
+                                    }
 
 
                                 }
