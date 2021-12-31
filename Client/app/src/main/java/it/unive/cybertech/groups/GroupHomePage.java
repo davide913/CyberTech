@@ -1,5 +1,7 @@
 package it.unive.cybertech.groups;
 
+import static it.unive.cybertech.utils.Utils.executeAsync;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -18,6 +20,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * The main activity called by fragment "{@link it.unive.cybertech.groups.HomePage}".
@@ -66,19 +69,22 @@ public class GroupHomePage extends AppCompatActivity {
      * @since 1.1
      */
     private void bindThisGroup() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> Group.getGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group> () {
+
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

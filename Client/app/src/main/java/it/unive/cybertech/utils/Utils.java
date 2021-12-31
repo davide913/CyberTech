@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -240,14 +241,14 @@ public class Utils {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-    public static <R> void executeAsync(Callable<R> callable, TaskResult<R> callback) {
-        Handler handler = new Handler(Looper.getMainLooper());
+    public static <R> void executeAsync(@NonNull Callable<R> callable, @Nullable TaskResult<R> callback) {
+        @NonNull Handler handler = new Handler(Looper.getMainLooper());
         new Thread(() -> {
             try {
                 R result = callable.call();
-                handler.post(() -> callback.onComplete(result));
+                handler.post(() -> Objects.requireNonNull(callback).onComplete(result));
             } catch (Exception e) {
-                handler.post(() -> callback.onError(e));
+                handler.post(() -> Objects.requireNonNull(callback).onError(e));
             }
         }).start();
     }

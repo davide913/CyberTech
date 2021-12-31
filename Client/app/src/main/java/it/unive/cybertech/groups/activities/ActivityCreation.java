@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
@@ -31,6 +30,9 @@ import static it.unive.cybertech.database.Groups.Activity.createActivity;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
 import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
+import static it.unive.cybertech.utils.Utils.executeAsync;
+
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * Activity that allow the group activity creation by users.
@@ -39,17 +41,26 @@ import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
  * @since 1.1
  */
 public class ActivityCreation extends AppCompatActivity {
-    private final @NonNull Context context = this;
+    private final @NonNull
+    Context context = this;
     private @Nullable
     Group thisGroup;
-    private @Nullable String idGroup;
-    private @Nullable Activity newGroupActivity;
-    private @Nullable EditText activityName;
-    private @Nullable EditText activityDescription;
-    private @Nullable EditText activityDate;
-    private @Nullable Date date;
-    private @Nullable EditText activityPlace;
-    private @Nullable FloatingActionButton confirmButton;
+    private @Nullable
+    String idGroup;
+    private @Nullable
+    Activity newGroupActivity;
+    private @Nullable
+    EditText activityName;
+    private @Nullable
+    EditText activityDescription;
+    private @Nullable
+    EditText activityDate;
+    private @Nullable
+    Date date;
+    private @Nullable
+    EditText activityPlace;
+    private @Nullable
+    FloatingActionButton confirmButton;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -83,6 +94,7 @@ public class ActivityCreation extends AppCompatActivity {
 
     /**
      * Bind all object contained in this layout.
+     *
      * @author Daniele Dotto
      * @since 1.1
      */
@@ -102,24 +114,26 @@ public class ActivityCreation extends AppCompatActivity {
      * @since 1.1
      */
     private void createFSactivity() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                newGroupActivity = createActivity(getActivityName().getText().toString(),
-                        getActivityDescription().getText().toString(),
-                        getActivityPlace().getText().toString(),
-                        getDate(),
-                        user);
-                getThisGroup().addActivity(newGroupActivity);
-            } catch (Exception e) {
-                e.printStackTrace();
+        executeAsync(() -> createActivity(getActivityName().getText().toString(),
+                getActivityDescription().getText().toString(),
+                getActivityPlace().getText().toString(),
+                getDate(),
+                user), new TaskResult<Activity>() {
+            @Override
+            public void onComplete(@NonNull Activity result) {
+                newGroupActivity = result;
+                executeAsync(() -> getThisGroup().addActivity(newGroupActivity), null);
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         showShortToast(getString(R.string.activityCreated), context);
         @NonNull Handler handler = new Handler();
         handler.postDelayed(() -> {
@@ -132,6 +146,7 @@ public class ActivityCreation extends AppCompatActivity {
 
     /**
      * Check if all fields are filled.
+     *
      * @return true if all fields are filled
      * @author Daniele Dotto
      * @since 1.1
@@ -159,27 +174,30 @@ public class ActivityCreation extends AppCompatActivity {
 
     /**
      * Bind the current group in field "{@link #thisGroup}" using ID passed by previous fragment.
+     *
      * @author Daniele Dotto
      * @since 1.1
      */
     private void bindThisGroup() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                String id = getIntent().getStringExtra("ID");
-                thisGroup = Group.getGroupById(id);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        @NonNull String id = getIntent().getStringExtra("ID");
+        executeAsync(() -> Group.getGroupById(id), new TaskResult<Group>() {
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
+                idGroup = getThisGroup().getId();
+                if (idGroup == null || idGroup.length() == 0)
+                    finish();
             }
-            idGroup = getThisGroup().getId();
-            if (idGroup == null || idGroup.length() == 0)
-                finish();
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -196,71 +214,85 @@ public class ActivityCreation extends AppCompatActivity {
 
     /**
      * Return the name EditText (only if that is not null).
+     *
      * @return "{@link #activityName}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getActivityName() {
+    private @NonNull
+    EditText getActivityName() {
         return Objects.requireNonNull(activityName);
     }
 
     /**
      * Return the description EditText (only if that is not null).
+     *
      * @return "{@link #activityDescription}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getActivityDescription() {
+    private @NonNull
+    EditText getActivityDescription() {
         return Objects.requireNonNull(activityDescription);
     }
 
     /**
      * Return the date EditText (only if that is not null).
+     *
      * @return "{@link #activityDate}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getActivityDate() {
+    private @NonNull
+    EditText getActivityDate() {
         return Objects.requireNonNull(activityDate);
     }
 
     /**
      * Return the place EditText (only if that is not null).
+     *
      * @return "{@link #activityPlace}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getActivityPlace() {
+    private @NonNull
+    EditText getActivityPlace() {
         return Objects.requireNonNull(activityPlace);
     }
 
     /**
      * Return the Date added by user (only if that is not null).
+     *
      * @return "{@link #date}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull Date getDate() {
+    private @NonNull
+    Date getDate() {
         return Objects.requireNonNull(date);
     }
 
     /**
      * Return the entire selected group where user is creating the group activity (only if that is not null).
+     *
      * @return "{@link #thisGroup}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull Group getThisGroup() {
+    private @NonNull
+    Group getThisGroup() {
         return Objects.requireNonNull(thisGroup);
     }
 
     /**
      * Return the new group activity (only if that is not null).
+     *
      * @return "{@link #newGroupActivity}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull Activity getNewGroupActivity() {
+    private @NonNull
+    Activity getNewGroupActivity() {
         return Objects.requireNonNull(newGroupActivity);
     }
 }

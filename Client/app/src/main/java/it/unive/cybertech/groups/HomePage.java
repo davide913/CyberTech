@@ -1,6 +1,6 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.getAllGroups;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,11 +23,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * HomePage is a main fragment that allow user to view all Families Share (plugin) groups.
@@ -49,9 +49,9 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private @Nullable
     RecyclerView groupsContainer;
     private @Nullable
-    GroupListAdapter adapter;
-    private @Nullable
     FloatingActionButton newGroupButton;
+    private @Nullable
+    GroupListAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -110,22 +110,23 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
      */
     @SuppressLint("NotifyDataSetChanged")
     private void findFSGroups() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                groups = getAllGroups();
-                // Log.d("Size", " " + groups.size());
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(Group::getAllGroups, new TaskResult<List<Group>>() {
+            @Override
+            public void onComplete(List<Group> result) {
+                groups = result;
+            }
+
+            @Override
+            public void onError(Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-            Objects.requireNonNull(adapter).setItems(groups);
-            adapter.notifyDataSetChanged();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        getAdapter().setItems(groups);
+        getAdapter().notifyDataSetChanged();
     }
 
     /**
@@ -174,6 +175,18 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private @NonNull
     List<Group> getGroups() {
         return Objects.requireNonNull(groups);
+    }
+
+    /**
+     * Return the group list adapter only if that is not null.
+     *
+     * @return "{@link #adapter}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    GroupListAdapter getAdapter() {
+        return Objects.requireNonNull(adapter);
     }
 
 

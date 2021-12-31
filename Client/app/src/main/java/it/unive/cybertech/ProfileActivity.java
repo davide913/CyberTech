@@ -2,6 +2,7 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import androidx.annotation.NonNull;
@@ -205,8 +206,7 @@ public class ProfileActivity extends AppCompatActivity {
             getCity().setText(newCity);
             @NonNull String newAddress = addresses.get(0).getThoroughfare();
             getAddress().setText(newAddress);
-            @NonNull Thread t = new Thread(() -> user.updateLocation(newCountry, newCity, newAddress, latitude, longitude));
-            t.start();
+            executeAsync(() -> user.updateLocation(newCountry, newCity, newAddress, latitude, longitude), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
