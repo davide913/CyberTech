@@ -168,15 +168,10 @@ public class Activity {
 
     public boolean deleteActivity() {
         try {
-            if(this.getParticipants().isEmpty()) {
-                Task<Void> t = deleteActivityAsync();
-                Tasks.await(t);
-                this.id = null;
-                return true;
-            }
-            else
-                throw new NoActivityFoundException("Not able to remove an activity with some participants. activity id: "
-                + this.id);
+            Task<Void> t = deleteActivityAsync();
+            Tasks.await(t);
+            this.id = null;
+            return true;
         } catch (ExecutionException | InterruptedException | NoActivityFoundException e) {
             e.printStackTrace();
             return false;

@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
 
 import org.junit.Test;
@@ -18,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.Sex;
@@ -38,9 +40,21 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        User u = User.getUserById("davide.finesso@hotmail.it");
+        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+
+        Collection<User> collection =  u.obtainActivitiesUsers();
+
+
 
         Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
+
+        DocumentReference doc = g.getOwner();
+
+        doc.getId().equals(u.getId());
+
+        User u1 = User.getUserById(doc.getId());
+
+        u1.equals(u);
 
         g.addMember(u);
 
