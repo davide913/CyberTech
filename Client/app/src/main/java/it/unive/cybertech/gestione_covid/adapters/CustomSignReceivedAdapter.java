@@ -21,21 +21,21 @@ import it.unive.cybertech.database.Groups.Group;
 public class CustomSignReceivedAdapter extends ArrayAdapter {
     private static final String TAG = "CustomOrderArrayAdapterTrader";
     private Context context;
-    private List<Group> groups;
+    private List<it.unive.cybertech.database.Groups.Activity> activities;
 
-    private Group group;
+    private it.unive.cybertech.database.Groups.Activity activity;
 
 
-    public CustomSignReceivedAdapter(@NonNull Context context, int resource, List<Group> groups)/*TODO qua prenderà in ingresso un array di USER userList*/ {
-        super(context, resource, groups);
+    public CustomSignReceivedAdapter(@NonNull Context context, int resource, List<it.unive.cybertech.database.Groups.Activity> activities)/*TODO TESTARE*/ {
+        super(context, resource, activities);
         this.context = context;
-        this.groups = groups;
+        this.activities = activities;
     }
 
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, ViewGroup parent){
         Log.d(TAG, "call getView");
-        group = groups.get(position);
+        activity = activities.get(position);
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         @SuppressLint({"ViewHolder", "InflateParams"}) View view = inflater.inflate(R.layout.raw_list_sign_reported, null);
 
@@ -45,7 +45,7 @@ public class CustomSignReceivedAdapter extends ArrayAdapter {
         TextView StatusTamp = view.findViewById(R.id.textView_changeStatus);
 
 
-        nameGroup.setText(group.getName());
+        nameGroup.setText(activity.getName());
         StatusTamp.setText("Positivo");
 
         return view;
