@@ -171,7 +171,7 @@ public class ManifestPositivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     user.updatePositiveSince(d); //TODO vedere se funziona
-                                    try {
+                                    /*try {
                                         Collection<User> users = user.getActivitiesUsers();
                                         sendNotifications(users);
                                     }catch (ExecutionException e) {
@@ -179,7 +179,7 @@ public class ManifestPositivityFragment extends Fragment {
                                         e.printStackTrace();
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
-                                    }
+                                    }*/
 
 
                                 }
