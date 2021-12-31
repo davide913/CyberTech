@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,7 @@ import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
+    public static final int HANDLER_DELAY = 500;
     public interface DialogResult {
         void onSuccess();
 
@@ -248,5 +250,23 @@ public class Utils {
                 handler.post(() -> callback.onError(e));
             }
         }).start();
+    }
+    /*
+    * How to use executeAsync
+    * new Utils.TaskResult<YourReturnType>
+
+    * Vedi la funzione "initList" in ShowcaseFragment
+    * */
+    private void test(){
+        Utils.executeAsync(() -> { /*Your db function here*/return null; }, new Utils.TaskResult<Boolean>() {
+            @Override
+            public void onComplete(Boolean result) {
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

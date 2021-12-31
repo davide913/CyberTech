@@ -144,7 +144,7 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void removeGroupActivityParticipant() {
         if (checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> getThisGroupActivity().removePartecipant(user));
+            @NonNull Thread t = new Thread(() -> {}/*getThisGroupActivity().removePartecipant(user)*/);
             t.start();
             try {
                 t.join();
@@ -165,7 +165,7 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void addGroupActivityParticipant() {
         if (checkGroupMember() && !checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> getThisGroupActivity().addPartecipant(user));
+            @NonNull Thread t = new Thread(() -> {}/*getThisGroupActivity().addPartecipant(user)*/);
             t.start();
             try {
                 t.join();

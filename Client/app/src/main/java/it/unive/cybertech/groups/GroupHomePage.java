@@ -53,8 +53,8 @@ public class GroupHomePage extends AppCompatActivity {
         @NonNull ViewPager viewPager = findViewById(R.id.group_infoViewPager);
         tabLayout.setupWithViewPager(viewPager);
         @NonNull Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getSupportFragmentManager());
-        adapter.addFragment(new GroupInfo(), getString(R.string.information));
-        adapter.addFragment(new GroupActivities(), getString(R.string.activity));
+        adapter.addFragment(new GroupInfo(), getString(R.string.information), "GroupInfo");
+        adapter.addFragment(new GroupActivities(), getString(R.string.activity), "GroupActivities");
         viewPager.setAdapter(adapter);
     }
 
