@@ -1,5 +1,6 @@
 package it.unive.cybertech.utils;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -39,6 +40,8 @@ import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
+    public static final int HANDLER_DELAY = 500;
+
     public interface DialogResult {
         void onSuccess();
 
@@ -162,25 +165,29 @@ public class Utils {
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            return  mFragmentList.get(position).first;
+            return mFragmentList.get(position).first;
         }
     }
 
     /**
      * Logout from application and disconnect user from database access
+     *
+     * @author Daniele Dotto
      * @since 1.0
      */
-    public static void logout(Context context){
+    public static void logout(Context context) {
         FirebaseAuth.getInstance().signOut();
         @NonNull Intent intent = new Intent(context, SplashScreen.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
-    public static String formatDateToString(@NotNull Date date){
+    public static String formatDateToString(@NotNull Date date) {
         return formatDateToString(date, "dd/MM/yyyy");
     }
-    public static String formatDateToString(@NotNull Date date, @NotNull String pattern){
+
+    @SuppressLint("SimpleDateFormat")
+    public static String formatDateToString(@NotNull Date date, @NotNull String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }
 }

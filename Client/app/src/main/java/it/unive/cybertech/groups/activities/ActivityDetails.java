@@ -1,15 +1,15 @@
 package it.unive.cybertech.groups.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
@@ -24,109 +24,173 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 
+import static it.unive.cybertech.groups.activities.GroupActivities.RELOAD_ACTIVITY;
 import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
 
+/**
+ * Activity that allow to see all group activity details.
+ *
+ * @author Daniele Dotto
+ * @since 1.1
+ */
 public class ActivityDetails extends AppCompatActivity {
     private final @NonNull
     Context context = this;
-    private Group thisGroup;
-    private Activity thisGroupActivity;
-    private FloatingActionButton joinLeftButton;
+    private @Nullable
+    Group thisGroup;
+    private @Nullable
+    Activity thisGroupActivity;
+    private @Nullable
+    TextView activityGroupName;
+    private @Nullable
+    TextView activityGroupDescription;
+    private @Nullable
+    TextView activityGroupDate;
+    private @Nullable
+    TextView activityGroupLocation;
+    private @Nullable
+    FloatingActionButton joinLeftButton;
     private boolean status = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-
-        @NonNull Thread t = new Thread(this::bindThisGroupActivity);
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        bindThisGroupActivity();
         initActionBar();
+        bindLayoutObjects();
+        setTextViews();
 
-        @NonNull TextView activityGroupName = findViewById(R.id.activityDetails_ActivityName);
-        activityGroupName.setText(thisGroupActivity.getName());
-
-        @NonNull TextView activityGroupDescription = findViewById(R.id.activityDetails_ActivityDescription);
-        activityGroupDescription.setText(thisGroupActivity.getDescription());
-
-        @NonNull TextView activityGroupDate = findViewById(R.id.activityDetails_ActivityDate);
-        @NonNull String pattern = "dd/MM/yyyy";
-        @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-        @NonNull Timestamp timestamp = thisGroupActivity.getDate();
-        @NonNull String date = df.format(timestamp.toDate());
-        activityGroupDate.setText(date);
-
-        @NonNull TextView activityGroupLocation = findViewById(R.id.activityDetails_ActivityLocation);
-        activityGroupLocation.setText(thisGroupActivity.getPlace());
-
-        joinLeftButton = findViewById(R.id.activityDetails_JoinLeftActivity);
         status = checkGroupActivityMember();
-        if(!status) {
-            setButtonInfoAsNoPartecipant();
+        if (!status) {
+            setButtonInfoAsNoParticipant();
         } else {
-            setButtonInfoAsPartecipant();
+            setButtonInfoAsParticipant();
         }
-        joinLeftButton.setOnClickListener(v -> {
+        getJoinLeftButton().setOnClickListener(v -> {
             if (!status) {
-                addGroupActivityPartecipant();
+                addGroupActivityParticipant();
             } else {
-                removeGroupActivityPartecipant();
+                removeGroupActivityParticipant();
             }
+            setResult(RELOAD_ACTIVITY);
+            finish();
         });
 
     }
 
-    private void setButtonInfoAsPartecipant() {
-        joinLeftButton.setImageResource(R.drawable.ic_baseline_person_remove_24);
-        joinLeftButton.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.red_fs)));
+    /**
+     * Set TextViews text contained in this layout.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void setTextViews() {
+        getActivityGroupName().setText(getThisGroupActivity().getName());
+        getActivityGroupDescription().setText(getThisGroupActivity().getDescription());
+        @NonNull String pattern = "dd/MM/yyyy";
+        @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
+        @NonNull Timestamp timestamp = getThisGroupActivity().getDate();
+        @NonNull String date = df.format(timestamp.toDate());
+        getActivityGroupDate().setText(date);
+        getActivityGroupLocation().setText(getThisGroupActivity().getPlace());
     }
 
-    private void setButtonInfoAsNoPartecipant() {
-        joinLeftButton.setImageResource(R.drawable.ic_baseline_person_add_24);
-        joinLeftButton.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.light_green_fs)));
+    /**
+     * Bind all object contained in this layout.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void bindLayoutObjects() {
+        activityGroupName = findViewById(R.id.activityDetails_ActivityName);
+        activityGroupDescription = findViewById(R.id.activityDetails_ActivityDescription);
+        activityGroupDate = findViewById(R.id.activityDetails_ActivityDate);
+        activityGroupLocation = findViewById(R.id.activityDetails_ActivityLocation);
+
+        joinLeftButton = findViewById(R.id.activityDetails_JoinLeftActivity);
     }
 
-    private void removeGroupActivityPartecipant() {
+    /**
+     * Set source image and color (red) for left the group activity.
+     *
+     * @author Daniele Dotto
+     * @see "{@link #joinLeftButton}"
+     * @since 1.1
+     */
+    private void setButtonInfoAsParticipant() {
+        getJoinLeftButton().setImageResource(R.drawable.ic_baseline_person_remove_24);
+        getJoinLeftButton().setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.red_fs)));
+    }
+
+    /**
+     * Set source image and color (green) for join the group activity.
+     *
+     * @author Daniele Dotto
+     * @see "{@link #joinLeftButton}"
+     * @since 1.1
+     */
+    private void setButtonInfoAsNoParticipant() {
+        getJoinLeftButton().setImageResource(R.drawable.ic_baseline_person_add_24);
+        getJoinLeftButton().setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.light_green_fs)));
+    }
+
+    /**
+     * Remove current user from the current selected group activity "{@link #thisGroupActivity}".
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void removeGroupActivityParticipant() {
         if (checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> thisGroupActivity.removePartecipant(user));
+            @NonNull Thread t = new Thread(() -> getThisGroupActivity().removePartecipant(user));
             t.start();
             try {
                 t.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            showShortToast(getString(R.string.GroupActivityRemoved));
-            setButtonInfoAsNoPartecipant();
+            showShortToast(getString(R.string.GroupActivityRemoved), context);
+            setButtonInfoAsNoParticipant();
             status = false;
         }
     }
 
-    private void addGroupActivityPartecipant() {
+    /**
+     * Add current user in the current selected group activity "{@link #thisGroupActivity}".
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void addGroupActivityParticipant() {
         if (checkGroupMember() && !checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> thisGroupActivity.addPartecipant(user));
+            @NonNull Thread t = new Thread(() -> getThisGroupActivity().addPartecipant(user));
             t.start();
             try {
                 t.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            showShortToast(getString(R.string.GroupActivitySubscribed));
-            setButtonInfoAsPartecipant();
+            showShortToast(getString(R.string.GroupActivitySubscribed), context);
+            setButtonInfoAsParticipant();
             status = true;
         } else
-            showShortToast(getString(R.string.OnlyGroupMembersForActivityJoin));
+            showShortToast(getString(R.string.OnlyGroupMembersForActivityJoin), context);
     }
 
+    /**
+     * Check if current user is a group member of "{@link #thisGroup}".
+     *
+     * @return true: current user is already member ||| false: current user is not member yet
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private boolean checkGroupMember() {
         final boolean[] stato = {false};
         @NonNull Thread t = new Thread(() -> {
             try {
-                if (thisGroup.getMaterializedMembers().contains(user))
+                if (getThisGroup().getMaterializedMembers().contains(user))
                     stato[0] = true;
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -141,42 +205,168 @@ public class ActivityDetails extends AppCompatActivity {
         return stato[0];
     }
 
+    /**
+     * Check if current user is a already a participant of the current activity"{@link #thisGroupActivity}".
+     *
+     * @return true: current user is already participant ||| false: current user is not participant yet
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private boolean checkGroupActivityMember() {
+        @NonNull Thread t = new Thread(() -> {
+            try {
+                if (getThisGroupActivity().getMaterializedParticipants().contains(user))
+                    status = true;
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
         try {
-            if (thisGroupActivity.getMaterializedParticipants().contains(user))
-                status = true;
-        } catch (ExecutionException | InterruptedException e) {
+            t.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return status;
     }
 
+    /**
+     * Find the group and group activity in DB based on current selected group.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private void bindThisGroupActivity() {
+        @NonNull Thread t = new Thread(() -> {
+            try {
+                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
+                thisGroupActivity = Activity.getActivityById(getIntent().getStringExtra("ID_GroupActivity"));
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            @NonNull String idGroup = getThisGroup().getId();
+            @NonNull String idGroupActivity = getThisGroupActivity().getId();
+            if (idGroup == null || idGroup.length() == 0 || idGroupActivity == null || idGroupActivity.length() == 0)
+                finish();
+        });
+        t.start();
         try {
-            thisGroup = Group.getGroupById(getIntent().getStringExtra("ID_Group"));
-            thisGroupActivity = Activity.getActivityById(getIntent().getStringExtra("ID_GroupActivity"));
-        } catch (ExecutionException | InterruptedException e) {
+            t.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        @NonNull String idGroup = thisGroup.getId();
-        @NonNull String idGroupActivity = thisGroupActivity.getId();
-        if (idGroup == null || idGroup.length() == 0 || idGroupActivity == null || idGroupActivity.length() == 0)
-            finish();
-    }
-
-    private void initActionBar() {
-        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(thisGroupActivity.getName());
     }
 
     /**
-     * Useful function that create and show a short-length toast (@see "{@link Toast}".
+     * Initialize action bar.
      *
-     * @since 1.0
+     * @author Daniele Dotto
+     * @since 1.1
      */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
+    private void initActionBar() {
+        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(getThisGroupActivity().getName());
+    }
+
+    /**
+     * Manage the 'back button' item
+     *
+     * @param item The 'back button' item
+     * @return true if the current activity "{@link it.unive.cybertech.groups.activities.ActivityDetails}" is finished.
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Return the entire selected group (only if that is not null).
+     *
+     * @return "{@link #thisGroup}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
+    }
+
+    /**
+     * Return the entire selected group activity (only if that is not null).
+     *
+     * @return "{@link #thisGroupActivity}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    Activity getThisGroupActivity() {
+        return Objects.requireNonNull(thisGroupActivity);
+    }
+
+    /**
+     * Return group activity name EditText only if that is not null.
+     *
+     * @return "{@link #activityGroupName}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    TextView getActivityGroupName() {
+        return Objects.requireNonNull(activityGroupName);
+    }
+
+    /**
+     * Return group activity description EditText only if that is not null.
+     *
+     * @return "{@link #activityGroupDescription}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    TextView getActivityGroupDescription() {
+        return Objects.requireNonNull(activityGroupDescription);
+    }
+
+    /**
+     * Return group activity date EditText only if that is not null.
+     *
+     * @return "{@link #activityGroupDate}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    TextView getActivityGroupDate() {
+        return Objects.requireNonNull(activityGroupDate);
+    }
+
+    /**
+     * Return group activity location EditText only if that is not null.
+     *
+     * @return "{@link #activityGroupLocation}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    TextView getActivityGroupLocation() {
+        return Objects.requireNonNull(activityGroupLocation);
+    }
+
+    /**
+     * Return left/join group activity button only if that is not null.
+     *
+     * @return "{@link #joinLeftButton}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    FloatingActionButton getJoinLeftButton() {
+        return Objects.requireNonNull(joinLeftButton);
     }
 }

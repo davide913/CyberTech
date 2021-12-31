@@ -159,6 +159,7 @@
     <string name="GroupActivityRemoved">Hai annullato la tua iscrizione!</string>
     <string name="LeftGroup">Hai lasciato il gruppo!</string>
     <string name="NowMember">Ora sei un membro del gruppo!</string>
+    <string name="groupActivityImgDescription">Image of current activity</string>
 
     <array name="sex">
         <item>Maschio</item>

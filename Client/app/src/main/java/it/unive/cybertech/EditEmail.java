@@ -1,5 +1,7 @@
 package it.unive.cybertech;
 
+import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import androidx.annotation.NonNull;
@@ -9,14 +11,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.AuthCredential;
@@ -31,71 +31,92 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Objects;
 
 /**
- * EditEmail is the activity that allow user to edit own email address to login on "Families Share".
+ * EditEmail is the activity that allow user to edit own email address to login on "Families Share (Plugin)".
+ *
  * @author Daniele Dotto
  * @since 1.0
  */
 public class EditEmail extends AppCompatActivity {
-    private final @NonNull Context context = EditEmail.this;
-    private final @NonNull FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
-    private @Nullable EditText oldMail, newEmail, confirmNewEmail;
-    private FloatingActionButton editEmail;
+    private final @NonNull
+    Context context = EditEmail.this;
+    private final @NonNull
+    FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
+    private @Nullable
+    EditText oldMail, newEmail, confirmNewEmail;
+    private @Nullable
+    FloatingActionButton editEmail;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_email);
+        initActionBar();
+        bindLayoutObjects();
 
-        // Header
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(R.string.EditEmail);
-        }
+        getOldMail().setText(currentUser.getEmail());
 
-
-        // UI fields
-        oldMail = findViewById(R.id.EditEmail_currentEmail);
-        oldMail.setText(currentUser.getEmail());
-        newEmail = findViewById(R.id.EditEmail_newEmail);
-        confirmNewEmail = findViewById(R.id.EditEmail_confirmNewEmail);
-        editEmail = findViewById(R.id.EditEmail_confirmButton);
-
-        editEmail.setOnClickListener(v -> {
-            boolean stato = true;
-            int newMailLength = Objects.requireNonNull(newEmail).length();
-            int confirmNewMail = Objects.requireNonNull(confirmNewEmail).length();
-
-            if (newMailLength <= 0) {
-                newEmail.setError(getString(R.string.requiredField));
-                stato = false;
-            }
-            if (confirmNewMail <= 0) {
-                confirmNewEmail.setError(getString(R.string.requiredField));
-                stato = false;
-            }
-            if (!newEmail.getText().toString().equals(confirmNewEmail.getText().toString())) {
-                showShortToast(getString(R.string.email_mismatch));
-                stato = false;
-            }
-            if (stato) {
-                changeEmailAndLogout(newEmail.getText().toString());
-            }
+        getEditEmail().setOnClickListener(v -> {
+            if (checkFields())
+                changeEmailAndLogout(getNewEmail().getText().toString());
         });
     }
 
     /**
-     * Useful function that create and show a short-length toast (@see "{@link Toast}".
-     * @since 1.0
+     * Check if the required fields (name and description) are filled.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
      */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
+    private boolean checkFields() {
+        boolean stato = true;
+        int newMailLength = getNewEmail().length();
+        int confirmNewMail = getConfirmNewEmail().length();
+
+        if (newMailLength <= 0) {
+            getNewEmail().setError(getString(R.string.requiredField));
+            stato = false;
+        }
+        if (confirmNewMail <= 0) {
+            getConfirmNewEmail().setError(getString(R.string.requiredField));
+            stato = false;
+        }
+        if (!getNewEmail().getText().toString().equals(getConfirmNewEmail().getText().toString())) {
+            showShortToast(getString(R.string.email_mismatch), context);
+            stato = false;
+        }
+        return stato;
     }
 
     /**
-     * Method that allow user to reauthenticate if too much time is passed from the last session
-     * login.
+     * Bind all layout objects contained in this Activity.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void bindLayoutObjects() {
+        oldMail = findViewById(R.id.EditEmail_currentEmail);
+        newEmail = findViewById(R.id.EditEmail_newEmail);
+        confirmNewEmail = findViewById(R.id.EditEmail_confirmNewEmail);
+
+        editEmail = findViewById(R.id.EditEmail_confirmButton);
+    }
+
+    /**
+     * Initialize the action bar of this Activity.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void initActionBar() {
+        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle(R.string.EditEmail);
+    }
+
+    /**
+     * Allow current user to reauthenticate if too much time is passed from the last login.
+     *
+     * @author Daniele Dotto
      * @since 1.0
      */
     public void showDialog(@NonNull String currentEmail, @NonNull String newEmail) {
@@ -116,42 +137,98 @@ public class EditEmail extends AppCompatActivity {
     }
 
     /**
-     * Method that allow user to change email;
+     * Allow user to change email;
      * The user will have to login again.
+     *
+     * @author Daniele Dotto
      * @since 1.0
      */
     private void changeEmailAndLogout(@NonNull String newEmail) {
         currentUser.updateEmail(newEmail).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                showShortToast(getString(R.string.email_updated));
+                showShortToast(getString(R.string.email_updated), context);
                 @NonNull Handler handler = new Handler();
-                handler.postDelayed(()->logout(context), 800);
+                handler.postDelayed(() -> logout(context), HANDLER_DELAY);
             } else {
                 try {
                     throw Objects.requireNonNull(task.getException());
                 } catch (FirebaseAuthInvalidCredentialsException e) {
-                    showShortToast(getString(R.string.WrongFormatEmail));
+                    showShortToast(getString(R.string.WrongFormatEmail), context);
                 } catch (FirebaseAuthUserCollisionException e) {
-                    showShortToast(getString(R.string.existingUser));
+                    showShortToast(getString(R.string.existingUser), context);
                 } catch (FirebaseAuthInvalidUserException e) {
-                    showShortToast(getString(R.string.InvalidUser));
+                    showShortToast(getString(R.string.InvalidUser), context);
                 } catch (FirebaseAuthRecentLoginRequiredException e) {
                     if (currentUser.getEmail() != null)
                         showDialog(currentUser.getEmail(), newEmail);
                 } catch (Exception e) {
-                    showShortToast(getString(R.string.genericError));
+                    showShortToast(getString(R.string.genericError), context);
                     e.printStackTrace();
                 }
             }
         });
     }
 
+    /**
+     * Allow user to finish the current activity as 'go back' button.
+     *
+     * @author Daniele Dotto
+     * @since 1.0
+     */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Return current email EditText only if that is not null.
+     *
+     * @return "{@link #oldMail}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    EditText getOldMail() {
+        return Objects.requireNonNull(oldMail);
+    }
+
+    /**
+     * Return new email EditText only if that is not null.
+     *
+     * @return "{@link #newEmail}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    EditText getNewEmail() {
+        return Objects.requireNonNull(newEmail);
+    }
+
+    /**
+     * Return confirm of new email EditText only if that is not null.
+     *
+     * @return "{@link #confirmNewEmail}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    EditText getConfirmNewEmail() {
+        return Objects.requireNonNull(confirmNewEmail);
+    }
+
+    /**
+     * Return confirm edit email button only if that is not null.
+     *
+     * @return "{@link #editEmail}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    FloatingActionButton getEditEmail() {
+        return Objects.requireNonNull(editEmail);
     }
 }

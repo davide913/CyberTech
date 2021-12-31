@@ -1,95 +1,145 @@
 package it.unive.cybertech.groups;
 
+import static it.unive.cybertech.groups.HomePage.RELOAD_GROUP;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Utils.logout;
+import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
-import it.unive.cybertech.utils.Utils;
 
+/**
+ * Fragment that belongs to "{@link it.unive.cybertech.groups.GroupHomePage}".
+ * It needs to show all group info.
+ *
+ * @author Daniele Dotto
+ * @since 1.1
+ */
 public class GroupInfo extends Fragment {
 
-
-    private TextView nameGroup;
-    private TextView descriptionGroup;
-    private TextView nUsers;
+    private @Nullable
+    TextView nameGroup;
+    private @Nullable
+    TextView descriptionGroup;
+    private @Nullable
+    TextView nUsers;
     private @Nullable
     GroupHomePage activity;
-    private Group thisGroup;
-    private FloatingActionButton joinLeftButton;
+    private @Nullable
+    Group thisGroup;
+    private @Nullable
+    FloatingActionButton joinLeftButton;
     private boolean status = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        @NonNull View view = inflater.inflate(R.layout.fragment_group_information, container, false);
-
-        // INFORMAZIONI
-        nameGroup = view.findViewById(R.id.group_information_tab_name);
-        descriptionGroup = view.findViewById(R.id.group_information_tab_description);
-        nUsers = view.findViewById(R.id.group_information_tab_nUsers);
-
-        activity = (GroupHomePage) getActivity();
-        if (activity != null) {
-            thisGroup = activity.getThisGroup();
-            nameGroup.setText(thisGroup.getName());
-            descriptionGroup.setText(thisGroup.getDescription());
-            nUsers.setText(String.valueOf(thisGroup.getMembers().size()));
-        }
-
-
-        joinLeftButton = view.findViewById(R.id.group_information_joinLeftGroup);
+    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
+        @NonNull final View view = inflater.inflate(R.layout.fragment_group_information, container, false);
+        initFragment();
+        bindLayoutObjects(view);
         status = checkGroupMember();
-        if (!status) {
-            setButtonInfoAsNoPartecipant();
-        } else {
-            setButtonInfoAsPartecipant();
-        }
+        setTextViews();
 
-        joinLeftButton.setOnClickListener(v -> {
+        getJoinLeftButton().setOnClickListener(v -> {
             if (!status) {
-                addGroupPartecipant();
+                addGroupParticipant();
             } else {
-                removeGroupPartecipant();
+                removeGroupParticipant();
             }
+            updateParticipants();
             @NonNull Handler handler = new Handler();
-            handler.postDelayed(()-> {
-                @NonNull Intent intent = new Intent(getContext(), GroupHomePage.class);
-                intent.putExtra("ID", thisGroup.getId());
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }, 800);
+            handler.postDelayed(() -> {
+                if (activity != null) {
+                    activity.setResult(RELOAD_GROUP);
+                    activity.finish();
+                }
+            }, HANDLER_DELAY);
         });
 
         return view;
     }
 
-    private void removeGroupPartecipant() {
+    /**
+     * Refresh the # of participants of "{@link #thisGroup}" in layout TextView
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void updateParticipants() {
+        Objects.requireNonNull(nUsers).setText(String.valueOf(Objects.requireNonNull(thisGroup).getMembers().size()));
+    }
+
+    /**
+     * Set TextViews text contained in this layout.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void setTextViews() {
+        Objects.requireNonNull(nameGroup).setText(Objects.requireNonNull(thisGroup).getName());
+        Objects.requireNonNull(descriptionGroup).setText(thisGroup.getDescription());
+        updateParticipants();
+
+        if (!status) {
+            setButtonInfoAsNoParticipant();
+        } else {
+            setButtonInfoAsParticipant();
+        }
+    }
+
+    /**
+     * Bind all object contained in this layout.
+     *
+     * @param view The fragment view.
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void bindLayoutObjects(@NonNull final View view) {
+        nameGroup = view.findViewById(R.id.group_information_tab_name);
+        descriptionGroup = view.findViewById(R.id.group_information_tab_description);
+        nUsers = view.findViewById(R.id.group_information_tab_nUsers);
+
+        joinLeftButton = view.findViewById(R.id.group_information_joinLeftGroup);
+    }
+
+    /**
+     * Find the fragment activity and group in DB based on current selected group.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void initFragment() {
+        activity = (GroupHomePage) requireActivity();
+        thisGroup = activity.getThisGroup();
+    }
+
+    /**
+     * Remove current user from the current selected group "{@link #thisGroup}".
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void removeGroupParticipant() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup.removeMember(user);
+                getThisGroup().removeMember(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -100,15 +150,21 @@ public class GroupInfo extends Fragment {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        showShortToast(getString(R.string.LeftGroup));
-        setButtonInfoAsNoPartecipant();
+        showShortToast(getString(R.string.LeftGroup), requireContext());
+        setButtonInfoAsNoParticipant();
         status = false;
     }
 
-    private void addGroupPartecipant() {
+    /**
+     * Add current user in the current selected group "{@link #thisGroup}".
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void addGroupParticipant() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup.addMember(user);
+                getThisGroup().addMember(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -119,29 +175,50 @@ public class GroupInfo extends Fragment {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        showShortToast(getString(R.string.NowMember));
-        setButtonInfoAsNoPartecipant();
+        showShortToast(getString(R.string.NowMember), requireContext());
+        setButtonInfoAsNoParticipant();
         status = true;
     }
 
-    private void setButtonInfoAsPartecipant() {
-        joinLeftButton.setImageResource(R.drawable.ic_baseline_person_remove_24);
+    /**
+     * Set source image and color (red) for left the group.
+     *
+     * @author Daniele Dotto
+     * @see "{@link #joinLeftButton}"
+     * @since 1.1
+     */
+    private void setButtonInfoAsParticipant() {
+        getJoinLeftButton().setImageResource(R.drawable.ic_baseline_person_remove_24);
         if (activity != null) {
-            joinLeftButton.setBackgroundTintList(ColorStateList.valueOf(activity.getColor(R.color.red_fs)));
+            getJoinLeftButton().setBackgroundTintList(ColorStateList.valueOf(activity.getColor(R.color.red_fs)));
         }
     }
 
-    private void setButtonInfoAsNoPartecipant() {
-        joinLeftButton.setImageResource(R.drawable.ic_baseline_person_add_24);
+    /**
+     * Set source image and color (green) for join the group.
+     *
+     * @author Daniele Dotto
+     * @see "{@link #joinLeftButton}"
+     * @since 1.1
+     */
+    private void setButtonInfoAsNoParticipant() {
+        getJoinLeftButton().setImageResource(R.drawable.ic_baseline_person_add_24);
         if (activity != null) {
-            joinLeftButton.setBackgroundTintList(ColorStateList.valueOf(activity.getColor(R.color.light_green_fs)));
+            getJoinLeftButton().setBackgroundTintList(ColorStateList.valueOf(activity.getColor(R.color.light_green_fs)));
         }
     }
 
+    /**
+     * Check if current user is already member of "{@link #thisGroup}".
+     *
+     * @return true: current user is already member ||| false: current user is not member yet
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private boolean checkGroupMember() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                status = thisGroup.getMaterializedMembers().contains(user);
+                status = getThisGroup().getMaterializedMembers().contains(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -156,12 +233,24 @@ public class GroupInfo extends Fragment {
     }
 
     /**
-     * Useful function that create and show a short-length toast (@see "{@link Toast}".
-     *
-     * @since 1.0
+     * Return the entire group only if that is not null.
+     * @return "{@link #thisGroup}"
+     * @author Daniele Dotto
+     * @since 1.1
      */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-        toast.show();
+    private @NonNull
+    Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
+    }
+
+    /**
+     * Return the button that allow to left or join the group (only if that is not null).
+     * @return "{@link #joinLeftButton}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    FloatingActionButton getJoinLeftButton() {
+        return Objects.requireNonNull(joinLeftButton);
     }
 }

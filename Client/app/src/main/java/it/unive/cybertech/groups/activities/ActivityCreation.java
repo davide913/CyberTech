@@ -1,6 +1,7 @@
 package it.unive.cybertech.groups.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -29,36 +29,40 @@ import it.unive.cybertech.database.Groups.Group;
 
 import static it.unive.cybertech.database.Groups.Activity.createActivity;
 import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 
+/**
+ * Activity that allow the group activity creation by users.
+ *
+ * @author Daniele Dotto
+ * @since 1.1
+ */
 public class ActivityCreation extends AppCompatActivity {
     private final @NonNull Context context = this;
-    private Group thisGroup;
-    private String idGroup;
-
-    private EditText activityName;
-    private EditText activityDescription;
-    private EditText activityDate;
-    private Date date;
-    private EditText activityPlace;
-    private Activity newGroupActivity;
+    private @Nullable
+    Group thisGroup;
+    private @Nullable String idGroup;
+    private @Nullable Activity newGroupActivity;
+    private @Nullable EditText activityName;
+    private @Nullable EditText activityDescription;
+    private @Nullable EditText activityDate;
+    private @Nullable Date date;
+    private @Nullable EditText activityPlace;
+    private @Nullable FloatingActionButton confirmButton;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_creation);
         initActionBar();
         bindThisGroup();
-
-        activityName = findViewById(R.id.activityCreation_name);
-        activityDescription = findViewById(R.id.activityCreation_description);
-        activityDate = findViewById(R.id.activityCreation_date);
-        activityPlace = findViewById(R.id.activityCreation_place);
-
+        bindLayoutObjects();
 
         @NonNull GregorianCalendar calendar = new GregorianCalendar();
         @NonNull String pattern = "dd/MM/yyyy";
         @NonNull DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
-        activityDate.setOnClickListener(v -> {      // todo: non c'è l'orario ma solo la data
+        getActivityDate().setOnClickListener(v -> {      // todo: non c'è l'orario ma solo la data
             int y = calendar.get(Calendar.YEAR);
             int m = calendar.get(Calendar.MONTH);
             int d = calendar.get(Calendar.DAY_OF_MONTH);
@@ -66,30 +70,47 @@ public class ActivityCreation extends AppCompatActivity {
                 calendar.set(year, month, dayOfMonth);
                 date = calendar.getTime();
                 @NonNull String dateStr = dateFormat.format(date);
-                activityDate.setText(dateStr);
+                getActivityDate().setText(dateStr);
             }, y, m, d);
             dialog.show();
         });
 
-
-        @NonNull FloatingActionButton confirmButton = findViewById(R.id.activityCreation_confirmButton);
-        confirmButton.setOnClickListener(v -> {
+        Objects.requireNonNull(confirmButton).setOnClickListener(v -> {
             if (checkFields())
                 createFSactivity();
         });
-
-
     }
 
+    /**
+     * Bind all object contained in this layout.
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void bindLayoutObjects() {
+        activityName = findViewById(R.id.activityCreation_name);
+        activityDescription = findViewById(R.id.activityCreation_description);
+        activityDate = findViewById(R.id.activityCreation_date);
+        activityPlace = findViewById(R.id.activityCreation_place);
+
+        confirmButton = findViewById(R.id.activityCreation_confirmButton);
+    }
+
+    /**
+     * Create a new group activity in Families Share (Plugin) with given fields.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private void createFSactivity() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                newGroupActivity = createActivity(activityName.getText().toString(),
-                        activityDescription.getText().toString(),
-                        activityPlace.getText().toString(),
-                        date,
+                newGroupActivity = createActivity(getActivityName().getText().toString(),
+                        getActivityDescription().getText().toString(),
+                        getActivityPlace().getText().toString(),
+                        getDate(),
                         user);
-            } catch (ExecutionException | InterruptedException e) {
+                getThisGroup().addActivity(newGroupActivity);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
@@ -99,48 +120,57 @@ public class ActivityCreation extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        showShortToast(getString(R.string.activityCreated));
+        showShortToast(getString(R.string.activityCreated), context);
         @NonNull Handler handler = new Handler();
         handler.postDelayed(() -> {
             @NonNull Intent i = new Intent(context, ActivityDetails.class);
-            i.putExtra("ID_Group", idGroup);
-            i.putExtra("ID_GroupActivity", newGroupActivity.getId());
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra("ID", idGroup);
+            i.putExtra("ID_GroupActivity", getNewGroupActivity().getId());
             startActivity(i);
-        }, 800);
+        }, HANDLER_DELAY);
     }
 
-
+    /**
+     * Check if all fields are filled.
+     * @return true if all fields are filled
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private boolean checkFields() {
         boolean ok = true;
-        if (activityName.getText().length() <= 0) {
+        if (getActivityName().getText().length() <= 0) {
             ok = false;
-            activityName.setError(getString(R.string.field_required));
+            getActivityName().setError(getString(R.string.field_required));
         }
-        if (activityDescription.getText().length() <= 0) {
+        if (getActivityDescription().getText().length() <= 0) {
             ok = false;
-            activityDescription.setError(getString(R.string.field_required));
+            getActivityDescription().setError(getString(R.string.field_required));
         }
-        if (activityDate.getText().length() <= 0) {
+        if (getActivityDate().getText().length() <= 0) {
             ok = false;
-            activityDate.setError(getString(R.string.field_required));
+            getActivityDate().setError(getString(R.string.field_required));
         }
-        if (activityPlace.getText().length() <= 0) {
+        if (getActivityPlace().getText().length() <= 0) {
             ok = false;
-            activityPlace.setError(getString(R.string.field_required));
+            getActivityPlace().setError(getString(R.string.field_required));
         }
         return ok;
     }
 
+    /**
+     * Bind the current group in field "{@link #thisGroup}" using ID passed by previous fragment.
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private void bindThisGroup() {
-        Thread t = new Thread(() -> {
+        @NonNull Thread t = new Thread(() -> {
             try {
                 String id = getIntent().getStringExtra("ID");
                 thisGroup = Group.getGroupById(id);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
-            idGroup = thisGroup.getId();
+            idGroup = getThisGroup().getId();
             if (idGroup == null || idGroup.length() == 0)
                 finish();
         });
@@ -152,6 +182,12 @@ public class ActivityCreation extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize action bar.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
     private void initActionBar() {
         @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
@@ -159,12 +195,72 @@ public class ActivityCreation extends AppCompatActivity {
     }
 
     /**
-     * Useful function that create and show a short-length toast (@see "{@link Toast}".
-     *
-     * @since 1.0
+     * Return the name EditText (only if that is not null).
+     * @return "{@link #activityName}"
+     * @author Daniele Dotto
+     * @since 1.1
      */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
+    private @NonNull EditText getActivityName() {
+        return Objects.requireNonNull(activityName);
+    }
+
+    /**
+     * Return the description EditText (only if that is not null).
+     * @return "{@link #activityDescription}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull EditText getActivityDescription() {
+        return Objects.requireNonNull(activityDescription);
+    }
+
+    /**
+     * Return the date EditText (only if that is not null).
+     * @return "{@link #activityDate}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull EditText getActivityDate() {
+        return Objects.requireNonNull(activityDate);
+    }
+
+    /**
+     * Return the place EditText (only if that is not null).
+     * @return "{@link #activityPlace}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull EditText getActivityPlace() {
+        return Objects.requireNonNull(activityPlace);
+    }
+
+    /**
+     * Return the Date added by user (only if that is not null).
+     * @return "{@link #date}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull Date getDate() {
+        return Objects.requireNonNull(date);
+    }
+
+    /**
+     * Return the entire selected group where user is creating the group activity (only if that is not null).
+     * @return "{@link #thisGroup}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
+    }
+
+    /**
+     * Return the new group activity (only if that is not null).
+     * @return "{@link #newGroupActivity}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull Activity getNewGroupActivity() {
+        return Objects.requireNonNull(newGroupActivity);
     }
 }
