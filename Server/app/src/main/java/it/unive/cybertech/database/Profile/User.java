@@ -770,7 +770,7 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-    public List<Activity> GetPositiveActivities() throws ExecutionException, InterruptedException {
+    public List<Activity> obtainPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
         DocumentReference userDoc = getReference(table, this.id);
 
@@ -783,7 +783,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Activity activity = getActivityById(doc.getId());
 
             for (User u : activity.getMaterializedParticipants()) {
-                if (u.getPositiveSince() != null) {
+                if (u.getPositiveSince() != null && !u.equals(this)) {
                     result.add(activity);
                     break;
                 }

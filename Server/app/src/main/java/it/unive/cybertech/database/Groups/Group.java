@@ -441,7 +441,7 @@ public class Group {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update("activities", FieldValue.arrayRemove(activity));
+            return docRef.update("members", FieldValue.arrayRemove(activity));
         else
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
