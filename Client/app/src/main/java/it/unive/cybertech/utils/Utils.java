@@ -81,7 +81,7 @@ public class Utils {
      * [.hideOkButton()]
      * .showDialog("", "");
      */
-    public static class Dialog {
+    public static class  Dialog {
         private DialogResult result;
         private boolean showOkButton, showCancelButton;
         private final String okButtonText, cancelButtonText;

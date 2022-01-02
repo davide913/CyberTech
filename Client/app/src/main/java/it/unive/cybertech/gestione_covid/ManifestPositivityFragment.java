@@ -38,6 +38,7 @@ import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 
 public class ManifestPositivityFragment extends Fragment {
@@ -126,6 +127,7 @@ public class ManifestPositivityFragment extends Fragment {
               builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                   @Override
                   public void onClick(DialogInterface dialog, int which) {
+                      //Utils.executeAsync(()->user.updatePositiveSince(null), null);
                       Thread t = new Thread(new Runnable() {
                           @Override
                           public void run() {
@@ -138,6 +140,8 @@ public class ManifestPositivityFragment extends Fragment {
                       } catch (InterruptedException e) {
                           e.printStackTrace();
                       }
+
+
                       updateFr();
                       dialog.cancel();
                   }
