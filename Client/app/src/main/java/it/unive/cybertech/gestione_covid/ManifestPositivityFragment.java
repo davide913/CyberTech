@@ -23,6 +23,8 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.Timestamp;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -127,7 +129,19 @@ public class ManifestPositivityFragment extends Fragment {
               builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
                   @Override
                   public void onClick(DialogInterface dialog, int which) {
-                      //Utils.executeAsync(()->user.updatePositiveSince(null), null);
+                      Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
+                          @Override
+                          public void onComplete(Boolean result) {
+                              updateFr();
+                              dialog.cancel();
+                          }
+
+                          @Override
+                          public void onError(Exception e) {
+
+                          }
+                      });
+                      /*
                       Thread t = new Thread(new Runnable() {
                           @Override
                           public void run() {
@@ -140,11 +154,13 @@ public class ManifestPositivityFragment extends Fragment {
                       } catch (InterruptedException e) {
                           e.printStackTrace();
                       }
-
-
                       updateFr();
                       dialog.cancel();
+
+                       */
                   }
+
+
               });
               builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
                   @Override
@@ -169,9 +185,42 @@ public class ManifestPositivityFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String data = mDateSign.getText().toString();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
+                        Date d = null;
+                        try {
+                            d = sdf.parse(data);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        Date finalD = d;
+                        Utils.executeAsync(() -> user.updatePositiveSince(finalD), new Utils.TaskResult<Boolean>() {
+                            @Override
+                            public void onComplete(Boolean result) {
+                                Utils.executeAsync(() -> user.obtainActivitiesUsers(), new Utils.TaskResult<Collection<User>>() {
+                                    @Override
+                                    public void onComplete(Collection<User> result) {
+                                        sendNotifications(result);
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+
+                                    }
+                                });
+                                updateFr();
+                                dialog.cancel();
+
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+
+                            }
+                        });
+                        /*
                         try{
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
-                            Date d = sdf.parse(data);
+
+
                             Thread t = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -196,6 +245,8 @@ public class ManifestPositivityFragment extends Fragment {
                         }
                         updateFr();
                         dialog.cancel();
+
+                             */
                     }
                 });
                 builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
@@ -232,7 +283,7 @@ public class ManifestPositivityFragment extends Fragment {
         for (User u: users) {
             MessageService.sendMessageToUserDevices(u, MessageService.NotificationType.coronavirus,
                     "ATTENZIONE: Utente positivo", "Un utente presente nelle tue attività è risultato positivo",
-                    getContext());
+                    getActivity());
         }
 
     }
