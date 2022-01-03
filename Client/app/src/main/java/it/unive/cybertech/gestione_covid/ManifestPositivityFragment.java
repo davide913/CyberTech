@@ -1,6 +1,7 @@
 package it.unive.cybertech.gestione_covid;
 
 import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.Timestamp;
 
@@ -175,45 +177,47 @@ public class ManifestPositivityFragment extends Fragment {
         signPosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setTitle("Inviare Segnalazione?");
-                builder.setMessage("Sei sicuro di voler inviare la segnalazione?\n");
-                builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String data = mDateSign.getText().toString();
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
-                        Date d = null;
-                        try {
-                            d = sdf.parse(data);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        Date finalD = d;
-                        Utils.executeAsync(() -> user.updatePositiveSince(finalD), new Utils.TaskResult<Boolean>() {
-                            @Override
-                            public void onComplete(Boolean result) {
-                                Utils.executeAsync(() -> user.obtainActivitiesUsers(), new Utils.TaskResult<Collection<User>>() {
-                                    @Override
-                                    public void onComplete(Collection<User> result) {
-                                        sendNotifications(result);
-                                    }
-
-                                    @Override
-                                    public void onError(Exception e) {
-
-                                    }
-                                });
-                                updateFr();
-                                dialog.cancel();
-
+                String data = mDateSign.getHint().toString();
+                if (!data.equals("Nessuna segnalazione inviata")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                    builder.setTitle("Inviare Segnalazione?");
+                    builder.setMessage("Sei sicuro di voler inviare la segnalazione?\n");
+                    builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String data = mDateSign.getHint().toString();
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy"); // here set the pattern as you date in string was containing like date/month/year
+                            Date d = null;
+                            try {
+                                d = sdf.parse(data);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
+                            Date finalD = d;
+                            Utils.executeAsync(() -> user.updatePositiveSince(finalD), new Utils.TaskResult<Boolean>() {
+                                @Override
+                                public void onComplete(Boolean result) {
+                                    Utils.executeAsync(() -> user.obtainActivitiesUsers(), new Utils.TaskResult<Collection<User>>() {
+                                        @Override
+                                        public void onComplete(Collection<User> result) {
+                                            sendNotifications(result);
+                                        }
 
-                            @Override
-                            public void onError(Exception e) {
+                                        @Override
+                                        public void onError(Exception e) {
 
-                            }
-                        });
+                                        }
+                                    });
+                                    updateFr();
+                                    dialog.cancel();
+
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+
+                                }
+                            });
                         /*
                         try{
 
@@ -244,16 +248,23 @@ public class ManifestPositivityFragment extends Fragment {
                         dialog.cancel();
 
                              */
-                    }
-                });
-                builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.create().show();
+                        }
 
+                    });
+
+                    builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.create().show();
+
+                }
+                else{
+                    Toast errorToast = Toast.makeText(getActivity(), "Devi inserire una data!", Toast.LENGTH_SHORT);
+                    errorToast.show();
+                }
             }
         });
 
@@ -266,7 +277,7 @@ public class ManifestPositivityFragment extends Fragment {
 
         EditText selectDate = v.findViewById(R.id.textView_dateAlert2);
 
-        selectDate.setText(sdf.format(myCalendar.getTime()));
+        selectDate.setHint(sdf.format(myCalendar.getTime()));
     }
 
 

@@ -89,6 +89,4 @@ public class PosReportedFragment extends Fragment {
         t.join();
 
     }
-
-
 }
