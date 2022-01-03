@@ -66,7 +66,15 @@ public class SplashScreen extends AppCompatActivity {
                                     sh.edit().putBoolean("FirstTime", false).apply();
                                     MessageService.getCurrentToken(task -> {
                                         if (task.isSuccessful()) {
-                                            result.addDevice(task.getResult(), deviceID);
+                                            Thread t2 = new Thread(()->{
+                                                result.addDevice(task.getResult(), deviceID);
+                                            });
+                                            t2.start();
+                                            try {
+                                                t2.join();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     });
                                 }
@@ -74,6 +82,7 @@ public class SplashScreen extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         });
+                        t.start();
                         try {
                             t.join();
                         } catch (InterruptedException e) {
