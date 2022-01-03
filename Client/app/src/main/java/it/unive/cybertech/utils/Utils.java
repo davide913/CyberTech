@@ -46,6 +46,7 @@ import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
     public static final int HANDLER_DELAY = 500;
+
     public interface DialogResult {
         void onSuccess();
 
@@ -81,7 +82,7 @@ public class Utils {
      * [.hideOkButton()]
      * .showDialog("", "");
      */
-    public static class  Dialog {
+    public static class Dialog {
         private DialogResult result;
         private boolean showOkButton, showCancelButton;
         private final String okButtonText, cancelButtonText;
@@ -132,7 +133,7 @@ public class Utils {
             buildAndShow(builder);
         }
 
-        private void buildAndShow(AlertDialog.Builder builder){
+        private void buildAndShow(AlertDialog.Builder builder) {
             if (showOkButton)
                 builder.setPositiveButton(okButtonText, (dialog, which) -> {
                     dialog.dismiss();
@@ -240,25 +241,30 @@ public class Utils {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-    public static <R> void executeAsync(Callable<R> callable, TaskResult<R> callback) {
+    public static <R> void executeAsync(@NonNull Callable<R> callable, TaskResult<R> callback) {
         Handler handler = new Handler(Looper.getMainLooper());
         new Thread(() -> {
             try {
                 R result = callable.call();
-                handler.post(() -> callback.onComplete(result));
+                if (callback != null)
+                    handler.post(() -> callback.onComplete(result));
             } catch (Exception e) {
-                handler.post(() -> callback.onError(e));
+                if (callback != null)
+                    handler.post(() -> callback.onError(e));
             }
         }).start();
     }
-    /*
-    * How to use executeAsync
-    * new Utils.TaskResult<YourReturnType>
 
-    * Vedi la funzione "initList" in ShowcaseFragment
-    * */
-    private void test(){
-        Utils.executeAsync(() -> { /*Your db function here*/return null; }, new Utils.TaskResult<Boolean>() {
+    /*
+     * How to use executeAsync
+     * new Utils.TaskResult<YourReturnType>
+
+     * Vedi la funzione "initList" in ShowcaseFragment
+     * */
+    private void test() {
+        Utils.executeAsync(() -> { /*Your db function here*/
+            return null;
+        }, new Utils.TaskResult<Boolean>() {
             @Override
             public void onComplete(Boolean result) {
             }

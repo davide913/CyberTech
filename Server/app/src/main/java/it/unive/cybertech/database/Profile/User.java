@@ -481,7 +481,7 @@ public class User extends Geoquerable implements Comparable<User> {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update(Device.table, FieldValue.arrayUnion(device));
+            return docRef.update("devices", FieldValue.arrayUnion(device));
         else
             throw new NoUserFoundException("User not found with this id: " + id);
     }

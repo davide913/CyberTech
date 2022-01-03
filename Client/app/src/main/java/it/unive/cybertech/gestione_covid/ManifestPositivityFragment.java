@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.Tag;
@@ -45,8 +46,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class ManifestPositivityFragment extends Fragment {
     final Calendar myCalendar = Calendar.getInstance();
-
-
+    private Context context;
 
 
     @Override
@@ -55,13 +55,13 @@ public class ManifestPositivityFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_manifest_positivity, container, false);
-
+        context = getContext();
         initViews(v);
 
         return v;
     }
 
-    private void initViews(View v){
+    private void initViews(View v) {
 
         TextView mNome = v.findViewById(R.id.textView_nome2);
         TextView mCognome = v.findViewById(R.id.textView_cognome2);
@@ -70,25 +70,23 @@ public class ManifestPositivityFragment extends Fragment {
         Button signPosButton = v.findViewById(R.id.button_alertPos);
         Button bManifestNegativity = v.findViewById(R.id.button_signGua);
 
-        
 
         mNome.setText(user.getName());
         mCognome.setText(user.getSurname());
 
-          if(user.getPositiveSince() != null){
-                String myFormat = "dd/MM/yyyy";
-                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-                mDateSign.setHint(sdf.format(user.getPositiveSince().toDate()));
-                mStateSign.setText("Positivo");
-                signPosButton.setVisibility(View.INVISIBLE);
-                bManifestNegativity.setVisibility(View.VISIBLE);
-          }
-          else{
-                mDateSign.setHint("Nessuna segnalazione inviata");
-                mStateSign.setText("Negativo");
-              signPosButton.setVisibility(View.VISIBLE);
-              bManifestNegativity.setVisibility(View.INVISIBLE);
-          }
+        if (user.getPositiveSince() != null) {
+            String myFormat = "dd/MM/yyyy";
+            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+            mDateSign.setHint(sdf.format(user.getPositiveSince().toDate()));
+            mStateSign.setText("Positivo");
+            signPosButton.setVisibility(View.INVISIBLE);
+            bManifestNegativity.setVisibility(View.VISIBLE);
+        } else {
+            mDateSign.setHint("Nessuna segnalazione inviata");
+            mStateSign.setText("Negativo");
+            signPosButton.setVisibility(View.VISIBLE);
+            bManifestNegativity.setVisibility(View.INVISIBLE);
+        }
 
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
@@ -105,7 +103,7 @@ public class ManifestPositivityFragment extends Fragment {
         };
 
 
-        if(mDateSign.getHint().equals("Nessuna segnalazione inviata")) {
+        if (mDateSign.getHint().equals("Nessuna segnalazione inviata")) {
 
             mDateSign.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -119,28 +117,27 @@ public class ManifestPositivityFragment extends Fragment {
         }
 
 
-
         //INVIA SEGNALAZIONE NULL
 
-          bManifestNegativity.setOnClickListener(v1 -> {
-              AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-              builder.setTitle("Invia Guarigione");
-              builder.setMessage("Confermi di voler inviare la segnalazione di guarigione?\n");
-              builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                      Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
-                          @Override
-                          public void onComplete(Boolean result) {
-                              updateFr();
-                              dialog.cancel();
-                          }
+        bManifestNegativity.setOnClickListener(v1 -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Invia Guarigione");
+            builder.setMessage("Confermi di voler inviare la segnalazione di guarigione?\n");
+            builder.setPositiveButton("Invia", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
+                        @Override
+                        public void onComplete(Boolean result) {
+                            updateFr();
+                            dialog.cancel();
+                        }
 
-                          @Override
-                          public void onError(Exception e) {
+                        @Override
+                        public void onError(Exception e) {
 
-                          }
-                      });
+                        }
+                    });
                       /*
                       Thread t = new Thread(new Runnable() {
                           @Override
@@ -158,18 +155,18 @@ public class ManifestPositivityFragment extends Fragment {
                       dialog.cancel();
 
                        */
-                  }
+                }
 
 
-              });
-              builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                      dialog.cancel();
-                  }
-              });
-              builder.create().show();
-          });
+            });
+            builder.setNegativeButton("Annulla", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            builder.create().show();
+        });
 
 
         //INVIA SEGNALAZIONE CON DATA DEL TAMPONE
@@ -273,17 +270,17 @@ public class ManifestPositivityFragment extends Fragment {
     }
 
 
-    private void updateFr(){  //Permette di aggiornare i fragments
+    private void updateFr() {  //Permette di aggiornare i fragments
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
-    private void sendNotifications(Collection<User> users){
-        for (User u: users) {
+    private void sendNotifications(Collection<User> users) {
+        for (User u : users) {
             MessageService.sendMessageToUserDevices(u, MessageService.NotificationType.coronavirus,
                     "ATTENZIONE: Utente positivo", "Un utente presente nelle tue attività è risultato positivo",
-                    getActivity());
+                    context);
         }
 
     }

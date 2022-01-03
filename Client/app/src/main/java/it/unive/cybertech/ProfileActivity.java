@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import it.unive.cybertech.utils.Utils;
+
 /**
  * ProfileActivity is the main activity that allow user to view and edit some personal, account or
  * localization info:
@@ -54,8 +56,10 @@ public class ProfileActivity extends AppCompatActivity {
     FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
     private @Nullable
     FloatingActionButton editInfo, logoutButton;
-    private @Nullable EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
-    private @Nullable FusedLocationProviderClient fusedLocationProviderClient;
+    private @Nullable
+    EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
+    private @Nullable
+    FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,11 +112,10 @@ public class ProfileActivity extends AppCompatActivity {
         getName().setText(user.getName());
         getSurname().setText(user.getSurname());
         getSex().setText(user.getSex().toString().toUpperCase().substring(0, 1));
-        @NonNull Timestamp dateOfBirthDB = user.getBirthday();
-        @NonNull String pattern = "dd/MM/yyyy";
-        @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-        @NonNull String dateOfBirthString = df.format(dateOfBirthDB);
-        getDateOfBirth().setText(dateOfBirthString);
+        if(user.getBirthDayToDate() != null) {
+            @NonNull String dateOfBirthString = Utils.formatDateToString(user.getBirthDayToDate());
+            getDateOfBirth().setText(dateOfBirthString);
+        }
 
         getCountry().setText(user.getCountry());
         getCity().setText(user.getCity());
@@ -246,7 +249,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull FloatingActionButton getEditInfo() {
+    private @NonNull
+    FloatingActionButton getEditInfo() {
         return Objects.requireNonNull(editInfo);
     }
 
@@ -257,7 +261,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull FloatingActionButton getLogoutButton() {
+    private @NonNull
+    FloatingActionButton getLogoutButton() {
         return Objects.requireNonNull(logoutButton);
     }
 
@@ -268,7 +273,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getName() {
+    private @NonNull
+    EditText getName() {
         return Objects.requireNonNull(name);
     }
 
@@ -279,7 +285,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getSurname() {
+    private @NonNull
+    EditText getSurname() {
         return Objects.requireNonNull(surname);
     }
 
@@ -290,7 +297,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getDateOfBirth() {
+    private @NonNull
+    EditText getDateOfBirth() {
         return Objects.requireNonNull(dateOfBirth);
     }
 
@@ -301,7 +309,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getSex() {
+    private @NonNull
+    EditText getSex() {
         return Objects.requireNonNull(sex);
     }
 
@@ -312,7 +321,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getCountry() {
+    private @NonNull
+    EditText getCountry() {
         return Objects.requireNonNull(country);
     }
 
@@ -323,7 +333,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getCity() {
+    private @NonNull
+    EditText getCity() {
         return Objects.requireNonNull(city);
     }
 
@@ -334,7 +345,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getAddress() {
+    private @NonNull
+    EditText getAddress() {
         return Objects.requireNonNull(address);
     }
 
@@ -345,7 +357,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getEmail() {
+    private @NonNull
+    EditText getEmail() {
         return Objects.requireNonNull(email);
     }
 
@@ -356,7 +369,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getPwd() {
+    private @NonNull
+    EditText getPwd() {
         return Objects.requireNonNull(pwd);
     }
 
@@ -367,7 +381,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull FusedLocationProviderClient getFusedLocationProviderClient() {
+    private @NonNull
+    FusedLocationProviderClient getFusedLocationProviderClient() {
         return Objects.requireNonNull(fusedLocationProviderClient);
     }
 
