@@ -40,7 +40,10 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+        User u = User.getUserById("s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
+        u.getMyMaterialsExpiredLending();
+
+        /*User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
 
         Collection<User> collection =  u.obtainActivitiesUsers();
 
@@ -62,7 +65,7 @@ public class ExampleInstrumentedTest{
 
         g.removeMember(u);
 
-        arr = g.getMaterializedMembers();
+        arr = g.getMaterializedMembers();*/
 
 
 

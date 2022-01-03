@@ -227,7 +227,10 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     public Date getBirthDayToDate() {
-        return birthday.toDate();
+        if (birthday != null)
+            return birthday.toDate();
+        else
+            return null;
     }
 
     private void setBirthday(Timestamp birthday) {
@@ -248,12 +251,18 @@ public class User extends Geoquerable implements Comparable<User> {
         return devicesMaterialized;
     }
 
-    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+    //aggiunta 03/01/2022 in quant la getMaterializedLendingInProgress eliminava le scadute dai lending e quindi non comparivano mai nelle altre funzioni
+    private ArrayList<LendingInProgress> getAllMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
         if (lendingInProgressMaterialized == null) {
             lendingInProgressMaterialized = new ArrayList<>();
             for (DocumentReference doc : lendingInProgress)
                 lendingInProgressMaterialized.add(LendingInProgress.getLendingInProgressById(doc.getId()));
         }
+        return lendingInProgressMaterialized;
+    }
+
+    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+        getAllMaterializedLendingInProgress();
         Timestamp timestamp = Timestamp.now();
         List<LendingInProgress> result = new ArrayList<>();
         for (LendingInProgress lending : lendingInProgressMaterialized) {
@@ -557,7 +566,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.lendingInProgress.add(lenDoc);
             if (this.lendingInProgressMaterialized != null)
-                this.getMaterializedLendingInProgress().add(lending);
+                this.getAllMaterializedLendingInProgress().add(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -583,7 +592,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.lendingInProgress.remove(lenDoc);
             if (this.lendingInProgressMaterialized != null)
-                this.getMaterializedLendingInProgress().remove(lending);
+                this.getAllMaterializedLendingInProgress().remove(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -595,8 +604,8 @@ public class User extends Geoquerable implements Comparable<User> {
         ArrayList<LendingInProgress> result = new ArrayList<>();
         Timestamp timestamp = Timestamp.now();
 
-        for (LendingInProgress lending : getMaterializedLendingInProgress()) {
-            if (timestamp.compareTo(lending.getExpiryDate()) > 0) //&& !lending.getWaitingForFeedback()
+        for (LendingInProgress lending : getAllMaterializedLendingInProgress()) {
+            if (timestamp.compareTo(lending.getExpiryDate()) > 0 && !lending.getWaitingForFeedback())
                 result.add(lending);
         }
 
@@ -607,7 +616,7 @@ public class User extends Geoquerable implements Comparable<User> {
     public List<LendingInProgress> getMyMaterialsExpiredLending() throws ExecutionException, InterruptedException {
         ArrayList<LendingInProgress> result = new ArrayList<>();
         if (!materials.isEmpty()) {
-            Task<QuerySnapshot> future = getInstance().collection(LendingInProgress.table).whereIn("material", materials).get();
+            Task<QuerySnapshot> future = getInstance().collection(LendingInProgress.table).whereIn("material", materials).whereLessThan("expiryDate", Timestamp.now()).get();
             Tasks.await(future);
             for (DocumentSnapshot ref : future.getResult().getDocuments())
                 result.add(LendingInProgress.getLendingInProgressById(ref.getReference().getId()));
@@ -740,7 +749,6 @@ public class User extends Geoquerable implements Comparable<User> {
     //aggiunta il 7/12/2021
     public static List<LendingInProgress> getUserLandingsInProgress(String id) throws ExecutionException, InterruptedException {
         User user = getUserById(id);
-
         return user.getMaterializedLendingInProgress();
     }
 

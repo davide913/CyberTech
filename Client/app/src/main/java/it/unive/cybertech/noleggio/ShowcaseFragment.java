@@ -1,19 +1,17 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.noleggio.HomePage.NEW_MATERIAL;
 import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,18 +19,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.common.collect.Collections2;
-import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
@@ -55,11 +47,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         loader = view.findViewById(R.id.showcase_loader);
         list.setAdapter(adapter);
         add.setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), AddProductForRent.class));
-        });
-
-        view.findViewById(R.id.test_showcase).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RentFeedback.class));
+            startActivityForResult(new Intent(getActivity(), AddProductForRent.class), NEW_MATERIAL);
         });
         initList();
         return view;
@@ -90,7 +78,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //TODO gestire aggiunta materiale
-        if (requestCode == RENT_CODE && resultCode == ProductDetails.RENT_SUCCESS) {
+        if (requestCode == RENT_CODE && resultCode == ProductDetails.SUCCESS) {
             int pos = data.getIntExtra("Position", -1);
             if (pos >= 0) {
                 adapter.removeAt(pos);
@@ -103,6 +91,27 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                             f.addLendingById(idLending);
                     }
                 }
+            }
+        } else if (requestCode == NEW_MATERIAL && resultCode == ProductDetails.SUCCESS) {
+            String id = data.getStringExtra("ID");
+            if (id != null) {
+                Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        adapter.add(result);
+                        HomePage h = (HomePage) getParentFragment();
+                        if (h != null) {
+                            MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
+                            if (f != null)
+                                f.addMaterialToList(result);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
             }
         }
     }

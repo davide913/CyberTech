@@ -5,6 +5,7 @@ import static it.unive.cybertech.utils.CachedUser.user;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -34,6 +36,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -43,12 +46,14 @@ import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Material.Type;
 import it.unive.cybertech.utils.Utils;
 
-public class AddProductForRent extends AppCompatActivity {
+public class AddProductForRent extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     private ImageView image;
+    private EditText date;
     private Uri output;
     private Spinner type;
-    //TODO gestire immagine e datepicker
+    public static final int SUCCESS = 1;
+    private boolean hasImage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +64,19 @@ public class AddProductForRent extends AppCompatActivity {
         actionBar.setTitle(R.string.add_to_showcase);
         FloatingActionButton done = findViewById(R.id.showcase_details_done);
         EditText title = findViewById(R.id.showcase_details_title),
-                description = findViewById(R.id.showcase_details_description),
-                date = findViewById(R.id.showcase_details_date);
+                description = findViewById(R.id.showcase_details_description);
+        date = findViewById(R.id.showcase_details_date);
         type = findViewById(R.id.showcase_details_type);
         image = findViewById(R.id.showcase_details_image);
         Button loadImage = findViewById(R.id.showcase_details_load_image);
         loadImage.setOnClickListener(v -> pickImage());
+        date.setOnClickListener(v -> {
+            Calendar now = Calendar.getInstance();
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this, this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
+            datePickerDialog.getDatePicker().setMinDate(now.getTimeInMillis());
+            datePickerDialog.show();
+        });
         done.setOnClickListener(v -> {
             boolean formOk = true;
             if (title.length() == 0) {
@@ -83,12 +95,11 @@ public class AddProductForRent extends AppCompatActivity {
                 formOk = false;
 
             if (formOk) {
-                Toast.makeText(this, "FORM OK", Toast.LENGTH_LONG).show();
                 AtomicReference<Material> m = new AtomicReference<>();
                 Thread t = new Thread(() -> {
                     try {
                         String baseString = null;
-                        if (image.getDrawable() != null) {
+                        if (hasImage && image.getDrawable() != null) {
                             Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
                             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteStream);
@@ -122,6 +133,9 @@ public class AddProductForRent extends AppCompatActivity {
                             .setCallback(new Utils.DialogResult() {
                                 @Override
                                 public void onSuccess() {
+                                    Intent i = new Intent();
+                                    i.putExtra("ID", m.get().getId());
+                                    setResult(SUCCESS, i);
                                     finish();
                                 }
 
@@ -199,11 +213,20 @@ public class AddProductForRent extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d("AddProductForRent", resultCode + "");
         if (requestCode == 0) {
-            if (resultCode == -1)
+            if (resultCode == -1) {
                 if (data.getData() != null)
                     image.setImageURI(data.getData());
                 else
                     image.setImageURI(output);
+                hasImage = true;
+            }
         }
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+        Calendar pickedDate = Calendar.getInstance();
+        pickedDate.set(year, month, dayOfMonth);
+        date.setText(Utils.formatDateToString(pickedDate.getTime()));
     }
 }

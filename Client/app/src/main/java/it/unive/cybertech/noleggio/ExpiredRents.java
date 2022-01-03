@@ -17,6 +17,7 @@ import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
@@ -43,8 +44,8 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
                 rented = findViewById(R.id.expired_rented_list);
         rentMaterials = new ArrayList<>();
         rentedMaterials = new ArrayList<>();
-        rentMaterialsAdapter = new RentedMaterialsAdapter(rentMaterials, "rentMaterialsAdapter");
-        rentedMaterialsAdapter = new RentedMaterialsAdapter(rentedMaterials, "rentedMaterialsAdapter");
+        rentMaterialsAdapter = new RentedMaterialsAdapter(rentMaterials, RentMaterialAdapter.ID);
+        rentedMaterialsAdapter = new RentedMaterialsAdapter(rentedMaterials, RentedMaterialsAdapter.ID);
         rentedMaterialsAdapter.setClickListener(this);
         rentMaterialsAdapter.setClickListener(this);
         rent.setLayoutManager(new GridLayoutManager(this, 2));
@@ -91,7 +92,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
         Intent i = new Intent(this, ProductDetails.class);
         i.putExtra("Type", tag);
         i.putExtra("Position", position);
-        if (tag.equals("rentedMaterialsAdapter")) {
+        if (tag.equals(RentedMaterialsAdapter.ID)) {
             i.putExtra("ID", rentedMaterials.get(position).getId());
             startActivityForResult(i, CONFIRM_END_LENDING);
         }else {

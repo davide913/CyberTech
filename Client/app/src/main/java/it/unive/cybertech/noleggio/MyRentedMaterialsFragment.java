@@ -1,6 +1,5 @@
 package it.unive.cybertech.noleggio;
 
-import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;

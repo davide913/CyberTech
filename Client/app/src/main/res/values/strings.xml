@@ -164,6 +164,7 @@
     <string name="LeftGroup">Hai lasciato il gruppo!</string>
     <string name="NowMember">Ora sei un membro del gruppo!</string>
     <string name="groupActivityImgDescription">Image of current activity</string>
+    <string name="something_wrong">Qualcosa è andato storto</string>
 
     <array name="sex">
         <item>Maschio</item>

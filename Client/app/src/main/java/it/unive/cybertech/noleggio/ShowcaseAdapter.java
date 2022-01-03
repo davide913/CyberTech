@@ -96,4 +96,9 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         notifyItemRangeChanged(position, showcaseList.size());
         return removed;
     }
+
+    public void add(Material m) {
+        showcaseList.add(m);
+        notifyItemInserted(showcaseList.size() - 1);
+    }
 }

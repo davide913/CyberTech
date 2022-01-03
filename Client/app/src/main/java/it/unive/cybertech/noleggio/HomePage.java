@@ -26,7 +26,7 @@ import it.unive.cybertech.utils.Utils;
 
 public class HomePage extends Fragment {
 
-    public static final int RENT_CODE = 0;
+    public static final int RENT_CODE = 0, NEW_MATERIAL = 1;
     private Utils.FragmentAdapter adapter;
 
     @Nullable

@@ -11,25 +11,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-
-import com.google.firebase.Timestamp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
@@ -84,11 +76,11 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RENT_CODE)
-            if (resultCode == ProductDetails.RENT_SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
+            if (resultCode == ProductDetails.SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
                     adapter.removeAt(pos);
-                    items.remove(pos);
+                    //items.remove(pos);
                 }
             }
     }
@@ -99,5 +91,10 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         i.putExtra("Position", position);
         i.putExtra("Type", ID);
         startActivityForResult(i, RENT_CODE);
+    }
+
+    public void addMaterialToList(Material m) {
+        if (adapter != null)
+            adapter.add(m);
     }
 }
