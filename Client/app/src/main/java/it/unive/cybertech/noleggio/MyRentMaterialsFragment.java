@@ -57,6 +57,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
             @Override
             public void onComplete(List<Material> result) {
                 Log.d(ID, "Size: " + result.size());
+                ///Bind data to local list and update the adapter view
                 items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
@@ -79,7 +80,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
                     adapter.removeAt(pos);
-                    //items.remove(pos);
+                    items.remove(pos);
                 }
             }
     }
@@ -95,5 +96,6 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void addMaterialToList(Material m) {
         if (adapter != null)
             adapter.add(m);
+        items.add(m);
     }
 }

@@ -50,6 +50,8 @@ import it.unive.cybertech.utils.Utils;
 
 /**
  * This activity is used for add new product in the showcase
+ *
+ * @author Mattia Musone
  */
 public class AddProductForRent extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -114,6 +116,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
 
             if (formOk) {
                 String baseString = null;
+                ///If an image has beet picked, then get it an upload it as Base64 on db
                 if (hasImage && image.getDrawable() != null) {
                     Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -155,9 +158,9 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
 
                                                     }
                                                 })
-                                                .show("Fatto!", "Il tuo annuncio è stato pubblicato");
+                                                .show(getString(R.string.done_exclamation), getString(R.string.material_published_to_showcase));
                                     } else
-                                        new Utils.Dialog(getApplicationContext()).show("Errore", "Non è stato possibile aggiungere il tuo materiale in prestito. Riprova tra qualche istante");
+                                        new Utils.Dialog(getApplicationContext()).show(getString(R.string.error), getString(R.string.material_error));
                                 }
 
                                 @Override
@@ -184,23 +187,27 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
     protected void onStart() {
         super.onStart();
         try {
-            AtomicReference<ArrayAdapter<Type>> userAdapter = new AtomicReference<>();
-            Thread t = new Thread(() -> {
-                try {
-                    ArrayList<Type> types = Type.getMaterialTypes();
-                    userAdapter.set(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, types));
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+            ///Building the adapter of material types
+            Utils.executeAsync(Type::getMaterialTypes, new Utils.TaskResult<ArrayList<Type>>() {
+                @Override
+                public void onComplete(ArrayList<Type> result) {
+                    ArrayAdapter<Type> userAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, result);
+                    type.setAdapter(userAdapter);
+                }
+
+                @Override
+                public void onError(Exception e) {
+
                 }
             });
-            t.start();
-            t.join();
-            type.setAdapter(userAdapter.get());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Functions that find all the activities of installed app that support the image capture in order to pick an image from the device
+     * */
     private void pickImage() {
         Intent i = new Intent();
         i.setType("image/*");
@@ -243,6 +250,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
         Log.d("AddProductForRent", resultCode + "");
         if (requestCode == 0) {
             if (resultCode == -1) {
+                ///If image has been picked, then update the ui
                 if (data.getData() != null)
                     image.setImageURI(data.getData());
                 else

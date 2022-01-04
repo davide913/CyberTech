@@ -36,8 +36,10 @@ import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
+import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 //TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
@@ -278,7 +280,11 @@ public class User extends Geoquerable implements Comparable<User> {
         if (materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
             for (DocumentReference doc : quarantineAssistance)
-                materialsMaterialized.add(Material.getMaterialById(doc.getId()));
+                try {
+                    materialsMaterialized.add(Material.getMaterialById(doc.getId()));
+                } catch (NoMaterialFoundException e) {
+                    e.printStackTrace();
+                }
         }
         Timestamp timestamp = Timestamp.now();
         List<Material> result = new ArrayList<>();
