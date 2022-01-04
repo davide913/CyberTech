@@ -30,7 +30,6 @@ import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 
@@ -359,7 +358,7 @@ public class Material extends Geoquerable {
     public LendingInProgress getLending() throws ExecutionException, InterruptedException {
 
         Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
-                .whereEqualTo("idMaterial", getReference(table, id)).get();
+                .whereEqualTo("material", getReference(table, id)).get();
         Tasks.await(task);
         List<DocumentSnapshot> list = task.getResult().getDocuments();
         if (!list.isEmpty())

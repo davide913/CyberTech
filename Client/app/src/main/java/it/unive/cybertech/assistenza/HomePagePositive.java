@@ -121,7 +121,7 @@ public class HomePagePositive extends Fragment {
             }
 
             newIntent.putExtra("title", adapter.getItem(position).getTitle());
-            newIntent.putExtra("date", strDate);
+            //newIntent.putExtra("date", strDate);
             newIntent.putExtra("id", adapter.getItem(position).getId());
 
             newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative

@@ -16,13 +16,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".groups.activities.ActivityDetails"
+            android:exported="true" />
+        <activity
             android:name=".noleggio.ExpiredRents"
             android:exported="false" />
         <activity
             android:name=".groups.GroupHomePage"
             android:exported="true" />
         <activity
-            android:name=".groups.ActivityCreation"
+            android:name=".groups.activities.ActivityCreation"
             android:exported="true" />
         <activity
             android:name=".ProfileActivity"

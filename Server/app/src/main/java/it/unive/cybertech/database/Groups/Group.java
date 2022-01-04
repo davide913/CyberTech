@@ -174,13 +174,13 @@ public class Group {
             group.setId(document.getId());
 
             if(group.members == null)
-                group.members = new ArrayList<DocumentReference>();
+                group.members = new ArrayList<>();
 
             if(group.activities == null)
-                group.activities = new ArrayList<DocumentReference>();
+                group.activities = new ArrayList<>();
 
             if(group.messages == null)
-                group.messages = new ArrayList<DocumentReference>();
+                group.messages = new ArrayList<>();
 
             return group;
         } else
@@ -199,6 +199,8 @@ public class Group {
 
     public boolean deleteGroup() {
         try {
+            for (Activity activity: getMaterializedActivities())
+                activity.deleteActivity();
             Task<Void> t = deleteGroupAsync();
             Tasks.await(t);
             this.id = null;
@@ -230,6 +232,29 @@ public class Group {
             return false;
         }
     }
+
+    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, this.id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            return docRef.update("owner", user);
+        } else
+            throw new NoGroupFoundException("No group found with this id: " + id);
+    }
+
+    private boolean updateOwner(DocumentReference user) {
+        try {
+            Task<Void> t = updateOwnerAsync(user);
+            Tasks.await(t);
+            this.owner = user;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     private Task<Void> updateNameAsync(String name) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
@@ -269,7 +294,8 @@ public class Group {
             Task<Void> t = addMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.add(messDoc);
-            this.getMaterializedMessages().add(message);
+            if(this.messagesMaterialized != null)
+                this.getMaterializedMessages().add(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -293,7 +319,8 @@ public class Group {
             Task<Void> t = removeMessageAsync(messDoc);
             Tasks.await(t);
             this.messages.remove(message);
-            this.getMaterializedMessages().remove(message);
+            if(this.messagesMaterialized != null)
+                this.getMaterializedMessages().remove(message);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -317,7 +344,8 @@ public class Group {
             Task<Void> t = addMemberAsync(userDoc);
             Tasks.await(t);
             this.members.add(userDoc);
-            this.getMaterializedMembers().add(user);
+            if(this.membersMaterialized != null)
+                this.getMaterializedMembers().add(user);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -337,15 +365,46 @@ public class Group {
 
     public boolean removeMember(@NonNull User user) throws Exception {
         try {
-            if(!user.getId().equals(owner.getId())) {
-                DocumentReference userDoc = getReference(User.table, user.getId());
-                Task<Void> t = removeMemberAsync(userDoc);
-                Tasks.await(t);
-                this.members.remove(userDoc);
-                this.getMaterializedMembers().remove(user);
-                return true;
+            if(user.getId().equals(owner.getId())){
+                Tasks.await(removeMemberAsync(owner));
+                this.members.remove(owner);
+
+                if(this.members.isEmpty()) {
+                    this.deleteGroup();
+                    return true;
+                }
+                else
+                    this.updateOwner(this.members.get(0));
+
             }
-            return false;
+            else{
+                DocumentReference userDoc = getReference(User.table, user.getId());
+
+                Tasks.await(removeActivityAsync(userDoc));
+                this.members.remove(userDoc);
+            }
+
+            if(this.membersMaterialized != null)
+                this.getMaterializedMembers().remove(user);
+
+            for (Activity activity : getMaterializedActivities() ) {
+                if(activity.getOwner().getId().equals(user.getId())) {
+
+                    if(activity.getMaterializedParticipants().isEmpty())
+                        activity.deleteActivity();
+
+                    else {
+                        User substitute = User.getUserById(activity.getParticipants().get(0).getId());
+                        activity.removeParticipant(substitute);
+                        activity.updateOwner(substitute);
+                    }
+                }
+                else
+                    activity.removeParticipant(user);
+            }
+
+            return true;
+
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
             return false;
@@ -368,7 +427,8 @@ public class Group {
             Task<Void> t = addActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.add(actDoc);
-            this.getMaterializedActivities().add(activity);
+            if(this.activitiesMaterialized != null)
+                this.getMaterializedActivities().add(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -392,7 +452,8 @@ public class Group {
             Task<Void> t = removeActivityAsync(actDoc);
             Tasks.await(t);
             this.activities.remove(actDoc);
-            this.getMaterializedActivities().remove(activity);
+            if(this.activitiesMaterialized != null)
+                this.getMaterializedActivities().remove(activity);
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();

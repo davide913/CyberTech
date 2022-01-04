@@ -43,7 +43,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_group_change_image" />
+        app:layout_constraintTop_toBottomOf="@+id/create_group_image" />
 
     <EditText
         android:id="@+id/create_group_description"
@@ -59,18 +59,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/create_group_name" />
-
-    <TextView
-        android:id="@+id/create_group_position"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_group_description" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/create_group_done"
@@ -92,15 +80,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView9"
         app:srcCompat="@drawable/generic_group" />
-
-    <Button
-        android:id="@+id/create_group_change_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/load_image"
-        app:layout_constraintEnd_toEndOf="@+id/create_group_image"
-        app:layout_constraintStart_toStartOf="@+id/create_group_image"
-        app:layout_constraintTop_toBottomOf="@+id/create_group_image" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

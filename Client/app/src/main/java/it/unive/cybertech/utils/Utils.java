@@ -1,11 +1,21 @@
 package it.unive.cybertech.utils;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
+
+import android.Manifest;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Pair;
 import android.view.View;
 
@@ -13,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
@@ -21,10 +32,12 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -32,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,6 +55,8 @@ import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
 public class Utils {
+    public static final int HANDLER_DELAY = 500;
+
     public interface DialogResult {
         void onSuccess();
 
@@ -51,10 +67,10 @@ public class Utils {
         void onItemClick(View view, int position);
     }
 
-    public interface ThreadResult {
-        void onComplete();
+    public interface TaskResult<T> {
+        void onComplete(T result);
 
-        void onError();
+        void onError(Exception e);
     }
 
     /**
@@ -117,6 +133,17 @@ public class Utils {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
                     .setMessage(message);
+            buildAndShow(builder);
+        }
+
+        public void show(String title, View content) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(c)
+                    .setTitle(title)
+                    .setView(content);
+            buildAndShow(builder);
+        }
+
+        private void buildAndShow(AlertDialog.Builder builder) {
             if (showOkButton)
                 builder.setPositiveButton(okButtonText, (dialog, which) -> {
                     dialog.dismiss();
@@ -224,25 +251,74 @@ public class Utils {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-    /*public static <T> void runInBackground(Executor executor, Runnable code, ThreadResult<T> callback) {
-        executor.execute(()->{
-            try{
-                code.run();
-                callback.onComplete(null);
-            }catch(Exception e){
-                callback.onError();
-            }
-        });
-    }*/
-
-    public static void runInBackground( Runnable code, ThreadResult callback) {
-        new Thread(()->{
-            try{
-                code.run();
-                callback.onComplete();
-            }catch(Exception e){
-                callback.onError();
+    public static <R> void executeAsync(@NonNull Callable<R> callable, TaskResult<R> callback) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        new Thread(() -> {
+            try {
+                R result = callable.call();
+                if (callback != null)
+                    handler.post(() -> callback.onComplete(result));
+            } catch (Exception e) {
+                if (callback != null)
+                    handler.post(() -> callback.onError(e));
             }
         }).start();
+    }
+
+    /*
+     * How to use executeAsync
+     * new Utils.TaskResult<YourReturnType>
+
+     * Vedi la funzione "initList" in ShowcaseFragment
+     * */
+    private void test() {
+        Utils.executeAsync(() -> { /*Your db function here*/
+            return null;
+        }, new Utils.TaskResult<Boolean>() {
+            @Override
+            public void onComplete(Boolean result) {
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public static class Location {
+        public String city;
+        public String country;
+        public String address;
+        public double latitude, longitude;
+    }
+
+    public static class PermissionDeniedException extends Exception {
+        public PermissionDeniedException(String message) {
+            super(message);
+        }
+    }
+
+    public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException {
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(activity);
+            client.getLastLocation().addOnSuccessListener(activity, location -> {
+                try {
+                    Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
+                    List<Address> addresses;
+                    Location result = new Location();
+                    result.latitude = location.getLatitude();
+                    result.longitude = location.getLongitude();
+                    addresses = geocoder.getFromLocation(result.latitude, result.longitude, 1);
+                    result.country = addresses.get(0).getCountryName();
+                    result.city = addresses.get(0).getLocality();
+                    result.address = addresses.get(0).getThoroughfare();
+                    callback.onComplete(result);
+                } catch (IOException e) {
+                    callback.onError(e);
+                }
+            }).addOnFailureListener(callback::onError);
+        } else
+            throw new PermissionDeniedException("GPS permission not granted");
     }
 }

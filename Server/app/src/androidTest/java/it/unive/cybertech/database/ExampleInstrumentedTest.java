@@ -8,13 +8,21 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.GeoPoint;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -32,16 +40,36 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        Group group = Group.getGroupById("GomAtcIw32fv13spLHE3");
+        User u = User.getUserById("s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
+        u.getMyMaterialsExpiredLending();
 
-        Log.d("id", group.getId());
+        /*User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
 
-        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
-
-        Collection<User> us= u.activitiesUsers();
-
+        Collection<User> collection =  u.obtainActivitiesUsers();
 
 
-        Log.d("date", new Date().toString());
+
+        Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
+
+        DocumentReference doc = g.getOwner();
+
+        doc.getId().equals(u.getId());
+
+        User u1 = User.getUserById(doc.getId());
+
+        u1.equals(u);
+
+        g.addMember(u);
+
+        List<User> arr = g.getMaterializedMembers();
+
+        g.removeMember(u);
+
+        arr = g.getMaterializedMembers();*/
+
+
+
+
+
     }
 }

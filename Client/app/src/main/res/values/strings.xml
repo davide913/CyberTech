@@ -23,7 +23,7 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="groupName">Nome gruppo:</string>
+    <string name="groupName">Nome gruppo</string>
     <string name="button">Button</string>
     <string name="textview">TextView</string>
     <string name="name_dotted">Nome:</string>
@@ -148,6 +148,23 @@
     <string name="place">Luogo</string>
     <string name="activityCreated">Attività creata con successo!</string>
     <string name="expired">Scadute</string>
+    <string name="request_accepted">Richiesta accettata</string>
+    <string name="request_rejected">Richiesta respinta</string>
+    <string name="feedback">Feedback</string>
+    <string name="showcase_until_dotted">In vetrina fino al:</string>
+    <string name="groupDescription">Descrizione</string>
+    <string name="nMembers">Partecipanti: </string>
+    <string name="addnewgroupactivity">Aggiunge una nuova attività al gruppo</string>
+    <string name="groupActivityName">Nome attività</string>
+    <string name="groupActivityDescription">Descrizione</string>
+    <string name="Location">Luogo</string>
+    <string name="OnlyGroupMembersForActivityJoin">Solo i membri del gruppo possono partecipare alle attività!</string>
+    <string name="GroupActivitySubscribed">Ti sei iscritto all\'attività!</string>
+    <string name="GroupActivityRemoved">Hai annullato la tua iscrizione!</string>
+    <string name="LeftGroup">Hai lasciato il gruppo!</string>
+    <string name="NowMember">Ora sei un membro del gruppo!</string>
+    <string name="groupActivityImgDescription">Image of current activity</string>
+    <string name="something_wrong">Qualcosa è andato storto</string>
 
     <array name="sex">
         <item>Maschio</item>

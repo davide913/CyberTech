@@ -15,14 +15,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
@@ -30,59 +29,44 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public static final String ID = "MyRentMaterialsFragment";
     private List<Material> items;
     private RentMaterialAdapter adapter;
+    private ProgressBar loader;
+    private RecyclerView list;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_rent_materials, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.my_rent_list);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        list = view.findViewById(R.id.my_rent_list);
+        loader = view.findViewById(R.id.my_rent_loader);
+        list.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
         adapter = new RentMaterialAdapter(items);
         adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
-        initList();
+        list.setAdapter(adapter);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initList();
     }
 
     private void initList() {
         super.onStart();
-        //TODO get posizione
-        /*Thread t = new Thread(() -> {
-            try {
-                items = user.getMaterializedUserMaterials();
-                Log.d(ID, "Size: " + items.size());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        adapter.setItems(items);
-        adapter.notifyDataSetChanged();*/
-        Runnable r = () -> {
-            {
-                try {
-                    items = user.getMaterializedUserMaterials();
-                    Log.d(ID, "Size: " + items.size());
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Utils.runInBackground(r, new Utils.ThreadResult() {
+        Utils.executeAsync(() -> user.getMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
             @Override
-            public void onComplete() {
+            public void onComplete(List<Material> result) {
+                Log.d(ID, "Size: " + result.size());
+                items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
+                loader.setVisibility(View.GONE);
+                list.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onError() {
-
+            public void onError(Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -91,10 +75,11 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RENT_CODE)
-            if (resultCode == ProductDetails.RENT_SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
+            if (resultCode == ProductDetails.SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
                     adapter.removeAt(pos);
+                    //items.remove(pos);
                 }
             }
     }
@@ -105,5 +90,10 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         i.putExtra("Position", position);
         i.putExtra("Type", ID);
         startActivityForResult(i, RENT_CODE);
+    }
+
+    public void addMaterialToList(Material m) {
+        if (adapter != null)
+            adapter.add(m);
     }
 }

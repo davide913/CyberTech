@@ -29,12 +29,14 @@ import org.json.JSONObject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Device;
 import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.Utils;
 
 public class MessageService extends FirebaseMessagingService {
 
@@ -52,13 +54,19 @@ public class MessageService extends FirebaseMessagingService {
     }
 
     public static void sendMessageToUserDevices(@NonNull User user, @NonNull NotificationType type, String title, String message, Context ctx) {
-        try {
-            RequestQueue queue = Volley.newRequestQueue(ctx);
-            for (Device device : user.getMaterializedDevices())
-                sendMessage(device, type, title, message, queue);
-        } catch (InterruptedException | ExecutionException e) {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        Utils.executeAsync(user::getMaterializedDevices, new Utils.TaskResult<List<Device>>() {
+            @Override
+            public void onComplete(List<Device> result) {
+                for (Device device : result)
+                    sendMessage(device, type, title, message, queue);
+            }
 
-        }
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
     }
 
     public static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, Context ctx) {
@@ -67,7 +75,7 @@ public class MessageService extends FirebaseMessagingService {
     }
 
     private static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, RequestQueue queue) {
-        device.updateLastUsed();
+        Utils.executeAsync(device::updateLastUsed, null);
         String url = "https://fcm.googleapis.com/fcm/send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {

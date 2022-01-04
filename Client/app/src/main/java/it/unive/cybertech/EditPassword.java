@@ -1,5 +1,6 @@
 package it.unive.cybertech;
 
+import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import androidx.annotation.NonNull;
@@ -9,7 +10,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -35,43 +35,73 @@ import java.util.Objects;
  * @since 1.0
  */
 public class EditPassword extends AppCompatActivity {
-    @NonNull
+    private final @NonNull
     Context context = EditPassword.this;
-    @NonNull
+    private final @NonNull
     FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
+    private @Nullable
+    EditText newPwd, confirmNewPwd;
+    private @Nullable
     FloatingActionButton editPwd;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_password);
+        initActionBar();
+        bindLayoutObjects();
+
+        getEditPwd().setOnClickListener(v -> {
+            if (checkFields())
+                changePwdAndLogout(getNewPwd().getText().toString());
+        });
+    }
+
+    /**
+     * Bind all objects contained in layout.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void bindLayoutObjects() {
+        newPwd = findViewById(R.id.EditPassword_newPwd);
+        confirmNewPwd = findViewById(R.id.EditPassword_confirmNewPwd);
+        editPwd = findViewById(R.id.EditPassword_confirmButton);
+    }
+
+    /**
+     * Initialize the action bar of this Activity.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void initActionBar() {
         @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.EditPassword);
+    }
 
-        @NonNull EditText newPwd = findViewById(R.id.EditPassword_newPwd);
-        @NonNull EditText confirmNewPwd = findViewById(R.id.EditPassword_confirmNewPwd);
-        editPwd = findViewById(R.id.EditPassword_confirmButton);
-
-
-        editPwd.setOnClickListener(v -> {
-            boolean stato = true;
-            if (newPwd.length() <= 0) {
-                newPwd.setError(getString(R.string.requiredField));
-                stato = false;
-            }
-            if (confirmNewPwd.length() <= 0) {
-                confirmNewPwd.setError(getString(R.string.requiredField));
-                stato = false;
-            }
-            if (!newPwd.getText().toString().equals(confirmNewPwd.getText().toString())) {
-                showShortToast(getString(R.string.password_mismatch));
-                stato = false;
-            }
-            if (stato) {
-                changePwdAndLogout(newPwd.getText().toString());
-            }
-        });
+    /**
+     * Check if the required fields (name and description) are filled.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private boolean checkFields() {
+        boolean stato = true;
+        if (getNewPwd().length() <= 0) {
+            getNewPwd().setError(getString(R.string.requiredField));
+            stato = false;
+        }
+        if (getConfirmNewPwd().length() <= 0) {
+            getConfirmNewPwd().setError(getString(R.string.requiredField));
+            stato = false;
+        }
+        if (!getNewPwd().getText().toString().equals(getConfirmNewPwd().getText().toString())) {
+            showShortToast(getString(R.string.password_mismatch));
+            stato = false;
+        }
+        return stato;
     }
 
     /**
@@ -120,7 +150,7 @@ public class EditPassword extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         showShortToast(getString(R.string.pwdUpdated));
                         @NonNull Handler handler = new Handler();
-                        handler.postDelayed(() -> logout(context), 800);
+                        handler.postDelayed(() -> logout(context), HANDLER_DELAY);
                     } else {
                         try {
                             throw Objects.requireNonNull(task.getException());
@@ -136,6 +166,12 @@ public class EditPassword extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Allow user to finish the current activity as 'go back' button.
+     *
+     * @author Daniele Dotto
+     * @since 1.0
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -143,5 +179,41 @@ public class EditPassword extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Return new password EditText only if that is not null.
+     *
+     * @return "{@link #newPwd}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    EditText getNewPwd() {
+        return Objects.requireNonNull(newPwd);
+    }
+
+    /**
+     * Return confirm of new password EditText only if that is not null.
+     *
+     * @return "{@link #confirmNewPwd}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    EditText getConfirmNewPwd() {
+        return Objects.requireNonNull(confirmNewPwd);
+    }
+
+    /**
+     * Return confirm edit password button only if that is not null.
+     *
+     * @return "{@link #editPwd}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    FloatingActionButton getEditPwd() {
+        return Objects.requireNonNull(editPwd);
     }
 }
