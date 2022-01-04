@@ -81,7 +81,7 @@ public class HomePageNegative extends Fragment {
 
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
-
+        
         Thread t = new Thread(() -> {
             try {
                 tList[0] = AssistanceType.getAssistanceTypes();

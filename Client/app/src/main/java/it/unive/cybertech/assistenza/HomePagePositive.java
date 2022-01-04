@@ -62,7 +62,6 @@ public class HomePagePositive extends Fragment {
     private void initView(View view) throws ExecutionException, InterruptedException {
         ArrayAdapter<QuarantineAssistance> adapter;
         final List<QuarantineAssistance>[] myRequestsList = new List[]{new ArrayList<>()};
-        final QuarantineAssistance[] myreq = new QuarantineAssistance[1];
         listAlreadyMade = view.findViewById(R.id.lst_myRequests);
 
         Thread t = new Thread(() -> {
@@ -73,11 +72,11 @@ public class HomePagePositive extends Fragment {
         });
         t.start();
         t.join();
+        Log.d("Dimensione Home Pos", String.valueOf(myRequestsList[0].size()));
 
-        if(myRequestsList[0] == null) {
-
+        if(myRequestsList[0].size() == 0) {
             Utils.Dialog dialog = new Utils.Dialog(getContext());
-            dialog.show("Informazione", "Se vuoi chiedere aiuto ad un volontario, clicca il tast 'Richiedi Assistenza' per ricevere aiuto");
+            dialog.show("Informazione", "Se vuoi chiedere aiuto ad un volontario, clicca il tast 'Aggiungi una richiesta' per ricevere aiuto");
             dialog.setCallback(new Utils.DialogResult() {
                                    @Override
                                    public void onSuccess() {
@@ -91,6 +90,7 @@ public class HomePagePositive extends Fragment {
 
         adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList[0]);
         listAlreadyMade.setAdapter(adapter);
+
         listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);
             @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");

@@ -78,10 +78,6 @@
             android:exported="false"
             android:theme="@style/Theme.Cybertech.NoActionBar" />
         <activity
-            android:name=".assistenza.MyRequests"
-            android:exported="false"
-            android:theme="@style/Theme.Cybertech.NoActionBar" />
-        <activity
             android:name=".assistenza.RequestDetails"
             android:exported="false"
             android:parentActivityName=".MainActivity"

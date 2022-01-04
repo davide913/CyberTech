@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
@@ -70,7 +71,7 @@ public class RequestViz extends AppCompatActivity {
                 Thread t = new Thread(() -> {
                     try {
                         request[0] = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
-                    } catch (ExecutionException | InterruptedException e) {
+                    } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
                         e.printStackTrace();
                     }
                 });
@@ -160,8 +161,6 @@ public class RequestViz extends AppCompatActivity {
                     });
 
                     accept_request.setOnClickListener(v -> {
-                        //TODO: manca da fare il controllo sul poter accettare solo una richiesta alla volta
-
                         Utils.Dialog dialog = new Utils.Dialog(this);
                         dialog.show("Operazione confermata!", "Hai preso in carico una richiesta");
                         dialog.setCallback(new Utils.DialogResult() {
