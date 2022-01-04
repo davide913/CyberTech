@@ -83,7 +83,6 @@ public class HomePageNegative extends Fragment {
         ArrayList<String> names = new ArrayList<>();
 
         Thread t = new Thread(() -> {
-
             try {
                 tList[0] = AssistanceType.getAssistanceTypes();
                 //TODO: da cambiare poi con un elemento dello spinner in posizione 0 generico che indica tutte le richieste
@@ -150,7 +149,6 @@ public class HomePageNegative extends Fragment {
                     e.printStackTrace();
                 }
             }
-
             public void onNothingSelected(AdapterView<?> parent){}
         });
 
