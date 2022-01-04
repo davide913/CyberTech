@@ -14,6 +14,7 @@ import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.common.collect.Collections2;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
@@ -275,7 +277,7 @@ public class User extends Geoquerable implements Comparable<User> {
     public List<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
         if (materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
-            for (DocumentReference doc : materials)
+            for (DocumentReference doc : quarantineAssistance)
                 materialsMaterialized.add(Material.getMaterialById(doc.getId()));
         }
         Timestamp timestamp = Timestamp.now();
@@ -292,7 +294,7 @@ public class User extends Geoquerable implements Comparable<User> {
         if (quarantineAssistanceMaterialized == null) {
             quarantineAssistanceMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : materials)
+            for (DocumentReference doc : quarantineAssistance)
                 quarantineAssistanceMaterialized.add(QuarantineAssistance.getQuarantineAssistanceById(doc.getId()));
         }
 
@@ -730,17 +732,19 @@ public class User extends Geoquerable implements Comparable<User> {
 
     public boolean removeQuarantineAssistance(@NonNull QuarantineAssistance assistance) {
         try {
-            if (getMaterializedDevices().contains(assistance)) {
+            List<QuarantineAssistance> tmp = getMaterializedQuarantineAssistance().stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
+            if (tmp.size() > 0) {
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
                 if (this.quarantineAssistanceMaterialized != null)
-                    this.getMaterializedQuarantineAssistance().remove(assistance);
-                quarDoc.delete();
+                    this.getMaterializedQuarantineAssistance().remove(tmp.get(0));
+                Task<Void> t = quarDoc.delete();
+                Tasks.await(t);
                 return true;
             }
             return false;
-        } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }

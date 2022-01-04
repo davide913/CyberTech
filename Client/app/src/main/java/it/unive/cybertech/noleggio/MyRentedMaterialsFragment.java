@@ -50,7 +50,6 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
 
     private void initList() {
         super.onStart();
-        //TODO get posizione
         Utils.executeAsync(() -> user.getMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
