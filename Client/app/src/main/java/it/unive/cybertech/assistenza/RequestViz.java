@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -34,85 +35,31 @@ import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
 public class RequestViz extends AppCompatActivity {
-    User user = CachedUser.user;
-    FloatingActionButton menu, chat, deleteRequest, accept_request, stop_helping;
-    Animation menuOpen, menuClose;
+    private final User user = CachedUser.user;
+    private FloatingActionButton menu, chat, deleteRequest, accept_request, stop_helping;
+    private TextView textTitle, text, textCountry, textCity, textDate;
+    Toolbar toolbar;
+    private Animation menuOpen, menuClose;
     boolean isOpen = false;
+    private String id, idInCharge, callerClass;
+    private String title, country, city, strDate;
+    private QuarantineAssistance request;
 
     @SuppressLint("SetTextI18n")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_visualisation);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        setTitle("Dettagli richiesta");
-
-        final QuarantineAssistance[] request = {null};
-        String id = getIntent().getStringExtra("id");
-        String idInCharge = getIntent().getStringExtra("user");
-        String callerClass = getIntent().getStringExtra("class");
-
-        menu = (FloatingActionButton) findViewById(R.id.menu_open);
-        chat = (FloatingActionButton) findViewById(R.id.chat_from_request);
-        accept_request = (FloatingActionButton) findViewById(R.id.acceptRequest);
-        stop_helping = (FloatingActionButton) findViewById(R.id.stopHelping);
-        deleteRequest = (FloatingActionButton) findViewById(R.id.deleteRequest);
-
-        //Animations
-        menuOpen = AnimationUtils.loadAnimation(this, R.anim.from_botton_animation);
-        menuClose = AnimationUtils.loadAnimation(this, R.anim.to_bottom_animation);
+        toolbar();
+        findingLayoutElements();
+        animations();
+        getStringExtra();
 
         if (id != null || idInCharge != null || callerClass != null) {//se è uno dei 3 chiamanti HomeNeg, HomePos e taken
-            if(id != null || idInCharge != null) {
-                Thread t = new Thread(() -> {
-                    try {
-                        request[0] = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
-                    } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-                t.start();
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            TextView textTitle = findViewById(R.id.textTitle);
-            TextView text = findViewById(R.id.textFull);
-            TextView textCountry = findViewById(R.id.textCountry);
-            TextView textCity = findViewById(R.id.textCity);
-            TextView textDate = findViewById(R.id.textDate);
-
-            String title = getIntent().getStringExtra("title");
-            textTitle.setText(title);
-
-            String country = getIntent().getStringExtra("country");
-            textCountry.setText(country);
-
-            String city = getIntent().getStringExtra("city");
-            textCity.setText(city);
-
-            if (request[0] != null)
-                text.setText(request[0].getDescription());
-            else
-                text.setText("Nessun testo è stato inserito");
-
-            @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-            if (request[0] != null) {
-                Date date = request[0].getDeliveryDateToDate();
-                String strDate = dateFormat.format(date);
-                textDate.setText(strDate);
-            } else
-                textDate.setText("NAN");
-
+            initializeRequest(id, idInCharge); //Inizializzo il campo request dipendentemente dal fatto che ne abbia una già accettata da svolgere o meno
+            setFields();
 
             if(idInCharge != null) { //se sono stato chiamato dalla taken
-                QuarantineAssistance thisRequest = request[0];
                 String taken = "taken";
 
                 menu.setOnClickListener(v -> {
@@ -124,66 +71,20 @@ public class RequestViz extends AppCompatActivity {
                 });
 
                 stop_helping.setOnClickListener(v -> {
-                    Utils.Dialog dialog = new Utils.Dialog(this);
-                    dialog.show("Attenzione!", "Stai per abbandonare la richiesta");
-                    dialog.setCallback(new Utils.DialogResult() {
-                        @Override
-                        public void onSuccess() {
-                            Thread t = new Thread(() -> {
-                                thisRequest.updateInCharge_QuarantineAssistance(null);
-                                setResult(Activity.RESULT_OK);
-                            });
-                            t.start();
-                            try {
-                                t.join();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            finish();
-                        }
-
-                        @Override
-                        public void onCancel() {
-                            finish();
-                        }
-                    });
+                    stop_helping();
                 });
             }
 
             if (callerClass != null && callerClass.equals("Homenegative")) { //se sono stato chiamato dalla HomeNeg
                 String idTaken = getIntent().getStringExtra("alreadyTaken");
-
                 if(idTaken == null) {
-                    QuarantineAssistance finalRequest1 = request[0];
 
                     menu.setOnClickListener(v -> {
                         animatedMenu(callerClass);
                     });
 
                     accept_request.setOnClickListener(v -> {
-                        Utils.Dialog dialog = new Utils.Dialog(this);
-                        dialog.show("Operazione confermata!", "Hai preso in carico una richiesta");
-                        dialog.setCallback(new Utils.DialogResult() {
-                            @Override
-                            public void onSuccess() {
-                                Thread t = new Thread(() -> {
-                                    finalRequest1.updateInCharge_QuarantineAssistance(user);
-                                    setResult(Activity.RESULT_OK);
-                                });
-                                t.start();
-                                try {
-                                    t.join();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                finish();
-                            }
-
-                            @Override
-                            public void onCancel() {
-                                finish();
-                            }
-                        });
+                        accept_request();
                     });
                 }
                 else
@@ -192,39 +93,16 @@ public class RequestViz extends AppCompatActivity {
 
             if(callerClass != null && callerClass.equals("positive")) { //se sono stato chiamato dalla HomePos
                 //Pulsanti visibili solo dall'utente positivo che richiede soccorso
-                QuarantineAssistance finalRequest2 = request[0];
 
                 menu.setOnClickListener(v -> {
                     animatedMenu(callerClass);
                 });
 
                 deleteRequest.setOnClickListener(v -> {
-                    Utils.Dialog dialog = new Utils.Dialog(this);
-                    dialog.show("Attenzione!", "Vuoi davvero eliminare la richiesta?");
-                    dialog.setCallback(new Utils.DialogResult() {
-                        @Override
-                        public void onSuccess() {
-                            Thread t = new Thread(() -> {
-                                user.removeQuarantineAssistance(finalRequest2);
-                                setResult(Activity.RESULT_OK);
-                            });
-                            t.start();
-                            try {
-                                t.join();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            finish();
-                        }
-
-                        @Override
-                        public void onCancel() {
-                            finish();
-                        }
-                    });
+                    delete_request();
                 });
 
-                chat.setOnClickListener(v -> {
+                chat.setOnClickListener(v -> {//TODO: forse da togliere
                     finish();
                 });
             }
@@ -237,7 +115,168 @@ public class RequestViz extends AppCompatActivity {
         }
     }
 
-    private void animatedMenu(String caller) {
+    private void delete_request() {
+        Utils.Dialog dialog = new Utils.Dialog(this);
+        dialog.show(getString(R.string.attention), getString(R.string.delete_request_warning));
+        dialog.setCallback(new Utils.DialogResult() {
+            @Override
+            public void onSuccess() {
+                Thread t = new Thread(() -> {
+                    user.removeQuarantineAssistance(request);
+                });
+                t.start();
+                try {
+                    t.join();
+                } catch (InterruptedException ignored) {
+                }
+                /*Utils.executeAsync(() -> user.removeQuarantineAssistance(request), new Utils.TaskResult<Boolean>() { TODO: da vedere come farlo Async
+                    @Override
+                    public void onComplete(Boolean result) {
+
+                        setResult(10);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+
+                 */
+                finish();
+            }
+
+            @Override
+            public void onCancel() {
+                finish();
+            }
+        });
+    }
+
+    private void accept_request() {
+        Utils.Dialog dialog = new Utils.Dialog(this);
+        dialog.show(getString(R.string.information), getString(R.string.request_taken_in_charge));
+        dialog.setCallback(new Utils.DialogResult() {
+            @Override
+            public void onSuccess() {
+                Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(user), new Utils.TaskResult<Boolean>() {
+                    @Override
+                    public void onComplete(Boolean result) {
+                        setResult(Activity.RESULT_OK);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+                finish();
+            }
+
+            @Override
+            public void onCancel() {
+                finish();
+            }
+        });
+    }
+
+    private void stop_helping() {
+        Utils.Dialog dialog = new Utils.Dialog(this);
+        dialog.show(getString(R.string.attention), getString(R.string.stop_helping_request));
+        dialog.setCallback(new Utils.DialogResult() {
+            @Override
+            public void onSuccess() {
+                Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(null), new Utils.TaskResult<Boolean>() {
+                    @Override
+                    public void onComplete(Boolean result) {
+                        setResult(Activity.RESULT_OK);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+                finish();
+            }
+
+            @Override
+            public void onCancel() {
+                finish();
+            }
+        });
+    }
+
+    private void initializeRequest(String id, String idInCharge) {
+        if(id != null || idInCharge != null) {
+            Thread t = new Thread(() -> {
+                try {
+                    request = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
+                } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void setFields() {
+        title = getIntent().getStringExtra("title");
+        textTitle.setText(title);
+
+        country = getIntent().getStringExtra("country");
+        textCountry.setText(country);
+
+        city = getIntent().getStringExtra("city");
+        textCity.setText(city);
+
+        if (request != null) {
+            strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+            textDate.setText(strDate);
+            text.setText(request.getDescription());
+        }
+    }
+
+    private void getStringExtra() {
+        id = getIntent().getStringExtra("id");
+        idInCharge = getIntent().getStringExtra("user");
+        callerClass = getIntent().getStringExtra("class");
+    }
+
+    private void animations() {
+        menuOpen = AnimationUtils.loadAnimation(this, R.anim.from_botton_animation);
+        menuClose = AnimationUtils.loadAnimation(this, R.anim.to_bottom_animation);
+    }
+
+    private void toolbar() {
+        toolbar = findViewById(R.id.toolbar_RequestViz);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        setTitle("Dettagli richiesta");
+    }
+
+    private void findingLayoutElements() {
+        textTitle = findViewById(R.id.textTitle);
+        text = findViewById(R.id.textFull);
+        textCountry = findViewById(R.id.textCountry);
+        textCity = findViewById(R.id.textCity);
+        textDate = findViewById(R.id.textDate);
+
+        menu = (FloatingActionButton) findViewById(R.id.menu_open);
+        chat = (FloatingActionButton) findViewById(R.id.chat_from_request);
+        accept_request = (FloatingActionButton) findViewById(R.id.acceptRequest);
+        stop_helping = (FloatingActionButton) findViewById(R.id.stopHelping);
+        deleteRequest = (FloatingActionButton) findViewById(R.id.deleteRequest);
+    }
+
+    private void animatedMenu(@NonNull String caller) {
         if(caller.equals("positive")) {
             if (isOpen) {
                 chat.startAnimation(menuClose);

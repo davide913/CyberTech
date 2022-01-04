@@ -165,6 +165,11 @@
     <string name="NowMember">Ora sei un membro del gruppo!</string>
     <string name="groupActivityImgDescription">Image of current activity</string>
     <string name="something_wrong">Qualcosa è andato storto</string>
+    <string name="attention">Attenzione!</string>
+    <string name="request_help_assistance">Se vuoi chiedere aiuto ad un volontario, clicca il tast \'Aggiungi una richiesta\' per ricevere aiuto</string>
+    <string name="delete_request_warning">Vuoi davvero eliminare la richiesta?</string>
+    <string name="request_taken_in_charge">Vuoi prendere in carico questa richiesta?</string>
+    <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
 
     <array name="sex">
         <item>Maschio</item>
