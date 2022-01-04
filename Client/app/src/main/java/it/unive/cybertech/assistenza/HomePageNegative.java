@@ -85,8 +85,8 @@ public class HomePageNegative extends Fragment {
         Thread t = new Thread(() -> {
             try {
                 tList[0] = AssistanceType.getAssistanceTypes();
-                //TODO: da cambiare poi con un elemento dello spinner in posizione 0 generico che indica tutte le richieste
-                myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 10);
+                //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
+                myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(tList[0].get(0), myGeoPosition, 10);
 
                 inCharge[0] = getQuarantineAssistanceByInCharge(user);
             } catch (ExecutionException | InterruptedException e) {
@@ -104,6 +104,9 @@ public class HomePageNegative extends Fragment {
         });
         t.start();
         t.join();
+
+        adapter[0] = new CastomRequestsAdapter(getContext(), 0, myQuarantineList[0]);
+        listView.setAdapter(adapter[0]);
 
         ArrayAdapter<String> arr = new ArrayAdapter<>(getContext(), R.layout.spinner_item, names);
         sp.setAdapter(arr);
@@ -148,13 +151,16 @@ public class HomePageNegative extends Fragment {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                //per aggiornare la listView in base al filtro
+                adapter[0].clear();
+                adapter[0].addAll(myQuarantineList[0]);
+                adapter[0].notifyDataSetChanged();
             }
+
             public void onNothingSelected(AdapterView<?> parent){}
         });
 
-
-        adapter[0] = new CastomRequestsAdapter(getContext(), 0, myQuarantineList[0]);
-        listView.setAdapter(adapter[0]);
 
         listView.setOnItemClickListener(((parent, view1, position, id) -> {
             Intent newIntent = new Intent(getContext(), RequestViz.class);

@@ -35,7 +35,6 @@ public class CastomRequestsAdapter extends ArrayAdapter {
     private List<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
-    private int index = 0;
     ArrayList<AssistanceType> type;
 
     public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList, ArrayList<AssistanceType> type) {
@@ -90,12 +89,12 @@ public class CastomRequestsAdapter extends ArrayAdapter {
                 TextView city = view.findViewById(R.id.city_location);
                 city.setText(newCity);
             }
-            else{//TODO: da togliere e verificare
+            else{
                 TextView country = view.findViewById(R.id.country_request);
-                country.setText("newCountry");
+                country.setText("Out of Bounds");
 
                 TextView city = view.findViewById(R.id.city_location);
-                city.setText("newCity");
+                city.setText("Out of Bounds");
             }
 
         } catch (IOException e) {
