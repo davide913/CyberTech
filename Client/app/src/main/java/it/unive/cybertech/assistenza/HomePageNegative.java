@@ -152,6 +152,7 @@ public class HomePageNegative extends Fragment {
             public void onNothingSelected(AdapterView<?> parent){}
         });
 
+
         adapter[0] = new CastomRequestsAdapter(getContext(), 0, myQuarantineList[0]);
         listView.setAdapter(adapter[0]);
 
