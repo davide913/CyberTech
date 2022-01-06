@@ -20,6 +20,7 @@ import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.signup.LogInActivity;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -52,36 +53,58 @@ public class SplashScreen extends AppCompatActivity {
         }
         if (currentUser != null) {
             MessageService.NotificationType finalType = type;
-            new Thread(() -> {
-                try {
-                    User u = User.getUserById(currentUser.getUid());
-                    if (u != null) {
-                        CachedUser.user = u;
+            Utils.executeAsync(() -> User.getUserById(currentUser.getUid()), new Utils.TaskResult<User>() {
+                @Override
+                public void onComplete(User result) {
+                    if (result != null) {
+                        CachedUser.user = result;
                         SharedPreferences sh = getPreferences(Context.MODE_PRIVATE);
                         String deviceID = Settings.Secure.ANDROID_ID;
-                        /*if (sh.getBoolean("FirstTime", true) || Collections2.filter(u.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
-                            sh.edit().putBoolean("FirstTime", false).apply();
-                            MessageService.getCurrentToken(task -> {
-                                if (task.isSuccessful()) {
-
-                                    new Thread(() -> {
-                                            u.addDevice(task.getResult(), deviceID);
-                                    }).start();
+                        Thread t = new Thread(() -> {
+                            try {
+                                if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
+                                    sh.edit().putBoolean("FirstTime", false).apply();
+                                    MessageService.getCurrentToken(task -> {
+                                        if (task.isSuccessful()) {
+                                            Thread t2 = new Thread(()->{
+                                                result.addDevice(task.getResult(), deviceID);
+                                            });
+                                            t2.start();
+                                            try {
+                                                t2.join();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
                                 }
-                            });
-                        }*/
-                        Intent i = new Intent(this, MainActivity.class);
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        t.start();
+                        try {
+                            t.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
                         if (finalType != null) {
                             i.putExtra("open", finalType.toString());
                             Log.d("SPLASH SCREEN", "Main activity should open: " + finalType);
                         }
                         startActivity(i);
-                    } else
-                        startActivity(new Intent(this, LogInActivity.class));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } else {
+                        Utils.logout(getApplicationContext());
+                        startActivity(new Intent(getApplicationContext(), LogInActivity.class));
+                    }
                 }
-            }).start();
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
         } else
             startActivity(new Intent(this, LogInActivity.class));
     }

@@ -3,9 +3,11 @@ package it.unive.cybertech.signup;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
@@ -45,10 +47,10 @@ import it.unive.cybertech.utils.Utils;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private final @NonNull Context context = this;
+    private static final int PERMISSIONS_FINE_LOCATION = 5;
+    private final @NonNull
+    Context context = this;
     private FirebaseAuth mAuth;
-    private FusedLocationProviderClient fusedLocationClient;
-    private Location location;
     private EditText name, surname, dateOfBirth, email, pwd, confirmPwd;
     private Date inputDateOfBirth;
 
@@ -57,8 +59,6 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         mAuth = FirebaseAuth.getInstance();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        initGPS();
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         @NonNull FloatingActionButton done = findViewById(R.id.signup_done);
 
@@ -127,64 +127,52 @@ public class SignUpActivity extends AppCompatActivity {
         return ok;
     }
 
-    private void initGPS() {
-        try {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, location -> {
-                        if (location != null) {
-                            this.location = location;
-                        }
-                    });
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void signInWithEmailAndPassword(@NonNull String email, @NonNull String password, @NonNull String name, @NonNull String surname, @NonNull Date dateOfBirth, @NonNull String sex) {
         try {
-            @NonNull Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
-            @NonNull List<Address> addresses = gcd.getFromLocation(location.getLatitude(),
-                    location.getLongitude(), 1);
-            if (addresses.size() > 0) {
-                @NonNull Address adr = addresses.get(0);
-                @NonNull String finalCity = adr.getLocality();
-                @NonNull String finalCountry = adr.getCountryName();
-                @NonNull String finalAddress = adr.getThoroughfare();
-                mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        new Thread(() -> {
-                            try {
-                                FirebaseUser us = task.getResult().getUser();
-                                User u = User.createUser(Objects.requireNonNull(task.getResult().getUser()).getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), dateOfBirth, finalAddress, finalCity, finalCountry, (long) location.getLatitude(), (long) location.getLongitude(), false);
-                                if (u != null) {
-                                    @NonNull Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
+            Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
+                @Override
+                public void onComplete(Utils.Location location) {
+                    mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            new Thread(() -> {
+                                try {
+                                    FirebaseUser us = task.getResult().getUser();
+                                    User u = User.createUser(Objects.requireNonNull(task.getResult().getUser()).getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), dateOfBirth, location.address, location.city, location.country, (long) location.latitude, (long) location.longitude, false);
+                                    if (u != null) {
+                                        @NonNull Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    mAuth.signOut();
                                 }
-                            } catch (Exception e) {
+                            }).start();
+                        } else {
+                            try {
+                                throw Objects.requireNonNull(task.getException());
+                            } catch (FirebaseAuthWeakPasswordException e) {
+                                new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.SaferPwd));
                                 e.printStackTrace();
-                                mAuth.signOut();
+                            } catch (FirebaseAuthInvalidCredentialsException e) {
+                                new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.wrongEmailFormat));
+                            } catch (FirebaseAuthUserCollisionException e) {
+                                new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.ExistingUser));
+                            } catch (Exception e) {
+                                new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.genericError));
                             }
-                        }).start();
-                    } else {
-                        try {
-                            throw Objects.requireNonNull(task.getException());
-                        } catch (FirebaseAuthWeakPasswordException e) {
-                            new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.SaferPwd));
-                            e.printStackTrace();
-                        } catch (FirebaseAuthInvalidCredentialsException e) {
-                            new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.wrongEmailFormat));
-                        } catch (FirebaseAuthUserCollisionException e) {
-                            new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.ExistingUser));
-                        } catch (Exception e) {
-                            new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.genericError));
                         }
-                    }
-                });
-            } else
-                new Utils.Dialog(context).show(getString(R.string.FailedSignup), getString(R.string.LocalizationError));
-        } catch (IOException e) {
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
+        } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
     }
 
@@ -195,5 +183,25 @@ public class SignUpActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+            new Utils.Dialog(this)
+                    .setCallback(new Utils.DialogResult() {
+                        @Override
+                        public void onSuccess() {
+                            finish();
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    })
+                    .hideCancelButton()
+                    .show("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
     }
 }

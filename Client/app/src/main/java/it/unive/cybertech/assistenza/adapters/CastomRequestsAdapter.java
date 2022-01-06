@@ -32,10 +32,9 @@ import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 
 public class CastomRequestsAdapter extends ArrayAdapter {
-    private ArrayList<QuarantineAssistance> myList;
+    private List<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
-    private int index = 0;
     ArrayList<AssistanceType> type;
 
     public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList, ArrayList<AssistanceType> type) {
@@ -46,7 +45,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
     }
 
     //TODO: se la chiamo dalla Request.Viz non ho bisogno del tipo, chiamo tutte le mie
-    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList) {
+    public CastomRequestsAdapter(@NonNull Context context, int resource, List<QuarantineAssistance> myList) {
         super(context, resource, myList);
         this.myList = myList;
         this.context = context;
@@ -64,7 +63,7 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         title.setText(request.getTitle());
 
         @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-        Date date = request.getDeliveryDateToDate();//.getDateDeliveryToDate();
+        Date date = request.getDeliveryDateToDate();
         String strDate = dateFormat.format(date);
         TextView dateView =  view.findViewById(R.id.date_request);
         //dateView.setText(strDate);
@@ -90,12 +89,12 @@ public class CastomRequestsAdapter extends ArrayAdapter {
                 TextView city = view.findViewById(R.id.city_location);
                 city.setText(newCity);
             }
-            else{//TODO: da togliere e verificare
+            else{
                 TextView country = view.findViewById(R.id.country_request);
-                country.setText("newCountry");
+                country.setText("Out of Bounds");
 
                 TextView city = view.findViewById(R.id.city_location);
-                city.setText("newCity");
+                city.setText("Out of Bounds");
             }
 
         } catch (IOException e) {

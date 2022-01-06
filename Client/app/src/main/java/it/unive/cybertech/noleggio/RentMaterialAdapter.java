@@ -89,4 +89,9 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
     }
+
+    public void add(Material m) {
+        showcaseList.add(m);
+        notifyItemInserted(showcaseList.size() - 1);
+    }
 }

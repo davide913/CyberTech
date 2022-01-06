@@ -4,6 +4,7 @@ package it.unive.cybertech.database.Profile;
 import static it.unive.cybertech.database.Database.addToCollection;
 import static it.unive.cybertech.database.Database.deleteFromCollection;
 import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Material.Material;
+import it.unive.cybertech.database.Profile.Exception.LendingInProgressException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 
 
@@ -35,7 +38,8 @@ public class LendingInProgress {
 
     private Material materializeMaterial;
 
-    public LendingInProgress() {}
+    public LendingInProgress() {
+    }
 
     private LendingInProgress(String id, DocumentReference material, Timestamp expiryDate) {
         this.id = id;
@@ -89,24 +93,30 @@ public class LendingInProgress {
     }
 
     public Material getMaterializedMaterial() throws ExecutionException, InterruptedException {
-        if(materializeMaterial == null)
+        if (materializeMaterial == null)
             materializeMaterial = Material.getMaterialById(material.getId());
         return materializeMaterial;
     }
 
-    public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException {
+    //03/01/2022 Aggiunto controllo se esiste già un lending con quel materiale. Solo un prestito alla volta è concesso
+    public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException, LendingInProgressException {
         DocumentReference docRefMaterial = getReference(Material.table, material.getId());
 
-        Timestamp t = new Timestamp(expiryDate);
+        Task<QuerySnapshot> lending = getInstance().collection(LendingInProgress.table).whereEqualTo("material", docRefMaterial).get();
+        Tasks.await(lending);
+        if (lending.getResult().size() == 0) {
+            Timestamp t = new Timestamp(expiryDate);
 
-        Map<String, Object> mylending = new HashMap<>();          //create "table"
-        mylending.put("expiryDate", t);
-        mylending.put("waitingForFeedback", false);
-        mylending.put("material", docRefMaterial);
+            Map<String, Object> mylending = new HashMap<>();          //create "table"
+            mylending.put("expiryDate", t);
+            mylending.put("waitingForFeedback", false);
+            mylending.put("material", docRefMaterial);
 
-        DocumentReference addedDocRef = addToCollection(table, mylending);
+            DocumentReference addedDocRef = addToCollection(table, mylending);
 
-        return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
+            return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
+        } else
+            throw new LendingInProgressException("A lendign with this material is already in progress: " + material.getId());
     }
 
     public static LendingInProgress getLendingInProgressById(String id) throws ExecutionException, InterruptedException {
@@ -134,7 +144,7 @@ public class LendingInProgress {
 
         if (document.exists()) {
             return docRef.update("expiryDate", date);
-        }else
+        } else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
@@ -157,7 +167,7 @@ public class LendingInProgress {
 
         if (document.exists()) {
             return docRef.update("waitingForFeedback", val);
-        }else
+        } else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
@@ -178,11 +188,11 @@ public class LendingInProgress {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            if(date == null){
+            if (date == null) {
                 return docRef.update("endExpiryDate", FieldValue.delete());
             }
             return docRef.update("endExpiryDate", new Timestamp(date));
-        }else
+        } else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
@@ -190,7 +200,7 @@ public class LendingInProgress {
         try {
             Task<Void> t = this.updateEndExpiryDateAsync(date);
             Tasks.await(t);
-            if(date == null)
+            if (date == null)
                 setEndExpiryDate(null);
             else
                 setEndExpiryDate(new Timestamp(date));
@@ -212,8 +222,7 @@ public class LendingInProgress {
 
             DocumentReference docRefMaterial = getReference(Material.table, material.getId());
             return docRef.update("material", docRefMaterial);
-        }
-        else
+        } else
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
@@ -222,11 +231,10 @@ public class LendingInProgress {
         try {
             Task<Void> t = this.updateMaterialAsync(material);
             Tasks.await(t);
-            if(material == null){
+            if (material == null) {
                 this.material = null;
                 this.materializeMaterial = null;
-            }
-            else {
+            } else {
                 this.material = getReference(Material.table, material.getId());
                 this.materializeMaterial = material;
             }

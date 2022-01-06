@@ -112,7 +112,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public void removeAt(int position) {
         showcaseList.remove(position);
         notifyItemRemoved(position);
-        notifyItemRangeChanged(position, showcaseList.size());
+        notifyItemRangeChanged(position, 1);
     }
 
     public void add(@NotNull LendingInProgress m) {

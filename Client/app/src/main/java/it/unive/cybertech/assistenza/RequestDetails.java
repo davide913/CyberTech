@@ -39,6 +39,8 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.CachedUser;
 
 
 public class RequestDetails extends AppCompatActivity {
@@ -51,6 +53,7 @@ public class RequestDetails extends AppCompatActivity {
     private LocationRequest locationRequest;
     private double latitude, longitude;
     public static ArrayList<QuarantineAssistance> myRequests = new ArrayList<>();
+    private final User me = user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,9 +150,8 @@ public class RequestDetails extends AppCompatActivity {
                     }
                     String title = et_requestTitle.getText().toString();
                     String description = et_requestText.getText().toString();
-                    /*QuarantineAssistance sec = QuarantineAssistance.createQuarantineAssistance(choosen, title, description, date, latitude, longitude);
-                    myRequests.add(sec); //la aggiungo a quelle create da me
-                    user.updateQuarantine(sec); //todo: questa va sostituita con la funzione nuova*/
+                    me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude);
+                    //user.add(sec); //todo: questa va sostituita con la funzione nuova
                     setResult(Activity.RESULT_OK);
 
                 } catch (ExecutionException | InterruptedException e) {

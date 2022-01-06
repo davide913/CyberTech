@@ -40,13 +40,41 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
+<<<<<<< HEAD
         Group g = Group.getGroupById("CWhAhAjdsYAfkaRKDFxX");
+=======
+        User u = User.getUserById("s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
+        u.getMyMaterialsExpiredLending();
+
+        /*User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+>>>>>>> Mattia-nuovo
 
         User davide = User.getUserById("davide.finesso@hotmail.it");
 
         //g.addMember(davide);
 
+<<<<<<< HEAD
         g.removeMember(davide);
+=======
+
+        Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
+
+        DocumentReference doc = g.getOwner();
+
+        doc.getId().equals(u.getId());
+
+        User u1 = User.getUserById(doc.getId());
+
+        u1.equals(u);
+
+        g.addMember(u);
+
+        List<User> arr = g.getMaterializedMembers();
+
+        g.removeMember(u);
+
+        arr = g.getMaterializedMembers();*/
+>>>>>>> Mattia-nuovo
 
 
 
