@@ -170,6 +170,17 @@
     <string name="done_exclamation">Fatto!</string>
     <string name="material_published_to_showcase">Il tuo annuncio è stato pubblicato</string>
     <string name="deadlines">Scadenze</string>
+    <string name="request_sended">Richiesta inviata con successo</string>
+    <string name="error_sending_request">Errore nell\'invio della richiesta</string>
+    <string name="rent_extension">Estensione prestito</string>
+    <string name="confirm_rent_extension">\"Confermi la nuova data di restituzione: \"</string>
+    <string name="rent_extension_request_description">Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell\'utente accettare o rifiutare la proposta</string>
+    <string name="rent_terminated">Prestito terminato</string>
+    <string name="rent_terminated_feedback_required">Prima di concludere ci serve il tuo feedback</string>
+    <string name="waiting_for_feedback">in attesa di restituzione</string>
+    <string name="rent_terminated_feedback_required_renter">L\'utente ora valuterà la cura prestata e ti verrà assegnato un punteggio di merito o demerito</string>
+    <string name="irreversible_operation">Operazione irreversibile</string>
+    <string name="delete_material_confirm">Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?</string>
 
     <array name="sex">
         <item>Maschio</item>
