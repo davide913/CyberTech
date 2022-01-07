@@ -3,14 +3,21 @@ package it.unive.cybertech.database;
 import static it.unive.cybertech.database.Database.getDocument;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.firebase.geofire.GeoFireUtils;
+import com.firebase.geofire.GeoLocation;
+import com.google.firebase.firestore.GeoPoint;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import it.unive.cybertech.database.Groups.Group;
+import java.util.List;
+
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -28,45 +35,13 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-<<<<<<< HEAD
-        Group g = Group.getGroupById("CWhAhAjdsYAfkaRKDFxX");
-=======
-        User u = User.obtainUserById("s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
-        u.obtainMyMaterialsExpiredLending();
+        List<QuarantineAssistance> arr = QuarantineAssistance
+                .obtainJoinableQuarantineAssistance(null, new GeoPoint(37,-122),15);
 
-        /*User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
->>>>>>> Mattia-nuovo
+        double distanceInM = GeoFireUtils
+                .getDistanceBetween(new GeoLocation(37,-122), new GeoLocation(37.4219983,-122.084));
 
-        User davide = User.getUserById("davide.finesso@hotmail.it");
-
-        //g.addMember(davide);
-
-<<<<<<< HEAD
-        g.removeMember(davide);
-=======
-
-        Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
-
-        DocumentReference doc = g.getOwner();
-
-        doc.getId().equals(u.getId());
-
-        User u1 = User.getUserById(doc.getId());
-
-        u1.equals(u);
-
-        g.addMember(u);
-
-        List<User> arr = g.getMaterializedMembers();
-
-        g.removeMember(u);
-
-        arr = g.getMaterializedMembers();*/
->>>>>>> Mattia-nuovo
-
-
-
-
+        Log.d("size", ""+distanceInM/1000);
 
     }
 }

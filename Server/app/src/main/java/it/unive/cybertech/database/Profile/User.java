@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
+import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
@@ -283,7 +285,7 @@ public class User extends Geoquerable implements Comparable<User> {
         if (lendingInProgressMaterialized == null) {
             lendingInProgressMaterialized = new ArrayList<>();
             for (DocumentReference doc : lendingInProgress)
-                lendingInProgressMaterialized.add(LendingInProgress.getLendingInProgressById(doc.getId()));
+                lendingInProgressMaterialized.add(LendingInProgress.obtainLendingInProgressById(doc.getId()));
         }
         return lendingInProgressMaterialized;
     }
@@ -333,7 +335,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public List<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
+    public List<QuarantineAssistance> obtainMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
         if (quarantineAssistanceMaterialized == null) {
             quarantineAssistanceMaterialized = new ArrayList<>();
 
@@ -423,12 +425,49 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method is use to delete an user from the database. It return a boolean value that describe if the operation was done.
+     * The method is use to delete an user from the database and all the reference to him. It return a boolean value that describe if the operation was done.
      *
      * @author Davide Finesso
      */
     public boolean deleteUser() {
         try {
+            //delete all the quarantine assistance where i'm in charge
+            DocumentReference doc = getReference(table, this.id);
+
+            Task<QuerySnapshot> task = getInstance().collection(QuarantineAssistance.table)
+                    .whereEqualTo("inCharge", doc).get();
+
+            Tasks.await(task);
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
+
+            for (DocumentSnapshot documentSnapshot : documents )
+                QuarantineAssistance.obtainQuarantineAssistanceById(documentSnapshot.getId())
+                        .updateInCharge_QuarantineAssistance(null);
+
+            //delete him from the group and activity
+            task = getInstance().collection(Group.table)
+                    .whereArrayContains("members", doc).get();
+
+            Tasks.await(task);
+            documents = task.getResult().getDocuments();
+
+            for (DocumentSnapshot documentSnapshot : documents )
+                Group.getGroupById(documentSnapshot.getId()).removeMember(this);
+
+            //delete all the things of this user
+            for (Material material: obtainMaterializedUserMaterials() )
+                material.deleteMaterial();
+
+            for (LendingInProgress lending: obtainAllMaterializedLendingInProgress() )
+                lending.deleteLendingInProgress();
+
+            for (Device device: obtainMaterializedDevices() )
+                device.deleteDevice();
+
+            for (QuarantineAssistance assistance: obtainMaterializedQuarantineAssistance() )
+                assistance.deleteQuarantineAssistance();
+
+            //delete user from db
             Task<Void> t = deleteUserAsync();
             Tasks.await(t);
             this.id = null;
@@ -769,7 +808,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(future);
 
             for (DocumentSnapshot ref : future.getResult().getDocuments())
-                result.add(LendingInProgress.getLendingInProgressById(ref.getReference().getId()));
+                result.add(LendingInProgress.obtainLendingInProgressById(ref.getReference().getId()));
         }
 
         return result;
@@ -892,7 +931,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(addQuarantineAssistanceAsync(quarDoc));
             this.quarantineAssistance.add(quarDoc);
             if (this.quarantineAssistanceMaterialized != null)
-                this.getMaterializedQuarantineAssistance().add(assistance);
+                this.obtainMaterializedQuarantineAssistance().add(assistance);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -922,14 +961,14 @@ public class User extends Geoquerable implements Comparable<User> {
      */
     public boolean removeQuarantineAssistance(@NonNull QuarantineAssistance assistance) {
         try {
-            List<QuarantineAssistance> tmp = getMaterializedQuarantineAssistance()
+            List<QuarantineAssistance> tmp = obtainMaterializedQuarantineAssistance()
                     .stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
             if (tmp.size() > 0) {       //TODO aggiungere override equals su quarantineAssistance e cambiare la condizione dell'if con contains
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
                 if (this.quarantineAssistanceMaterialized != null)
-                    this.getMaterializedQuarantineAssistance().remove(tmp.get(0));
+                    this.obtainMaterializedQuarantineAssistance().remove(tmp.get(0));
                 Task<Void> t = quarDoc.delete();
                 Tasks.await(t);
                 return true;
@@ -1012,7 +1051,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * Compare they id because are unique.
+     * Compare their id because are unique.
      *
      * @author Davide Finesso
      */

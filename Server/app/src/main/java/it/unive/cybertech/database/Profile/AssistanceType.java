@@ -9,7 +9,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -31,11 +30,11 @@ public class AssistanceType {
         this.id = id;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 
-    private void setID(String ID) {
+    private void setId(String ID) {
         this.id = ID;
     }
 
@@ -55,33 +54,15 @@ public class AssistanceType {
 
         if (document.exists()) {
             assistanceType = document.toObject(AssistanceType.class);
-            assistanceType.setID(document.getId());
+            assistanceType.setId(document.getId());
 
             return assistanceType;
         } else
             throw new NoAssistanceTypeFoundException("No Assistance Type found with this id: " + id);
     }
 
-    /*public static AssistanceType getAssistanceTypeByName(@NonNull String name) throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table).whereEqualTo("type", name).get();
-        Tasks.await(future);
-        List<DocumentSnapshot> documents = future.getResult().getDocuments();
-
-        if (documents.isEmpty())
-            throw new NoAssistanceTypeFoundException("No assistance type found with this type: " + name);
-
-        AssistanceType assistance = documents.get(0).toObject(AssistanceType.class);
-        assistance.id = documents.get(0).getId();
-
-        return assistance;
-    }*/
-
     public static ArrayList<AssistanceType> getAssistanceTypes() throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table).get();
+        Task<QuerySnapshot> future = getInstance().collection(table).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 

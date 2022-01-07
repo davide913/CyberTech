@@ -27,8 +27,12 @@ import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.LendingInProgressException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 
-
-//TODO fare test delle funzioni scritte, NESSUNA É TESTATA
+/**
+ * Class use to describe a lending in progresses instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ *
+ * @author Davide Finesso
+ */
 public class LendingInProgress {
     public final static String table = "lendingInProgress";
     private DocumentReference material;
@@ -37,11 +41,26 @@ public class LendingInProgress {
     private boolean waitingForFeedback;
     private String id;
 
+    /**
+     * Materialize field for increase the performance.
+     *
+     * @author Davide Finesso
+     */
     private Material materializeMaterial;
 
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
     public LendingInProgress() {
     }
 
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private LendingInProgress(String id, DocumentReference material, Timestamp expiryDate) {
         this.id = id;
         this.material = material;
@@ -93,13 +112,22 @@ public class LendingInProgress {
         this.waitingForFeedback = waitingForFeedback;
     }
 
-    public Material getMaterializedMaterial() throws ExecutionException, InterruptedException {
+    /**
+     * The method return the field material materialize.
+     *
+     * @author Davide Finesso
+     */
+    public Material obtainMaterializedMaterial() throws ExecutionException, InterruptedException {
         if (materializeMaterial == null)
             materializeMaterial = Material.getMaterialById(material.getId());
         return materializeMaterial;
     }
 
-    //03/01/2022 Aggiunto controllo se esiste già un lending con quel materiale. Solo un prestito alla volta è concesso
+    /**
+     * The method add to the database a new lending in progress and return it.
+     *
+     * @author Davide Finesso
+     */
     public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException, LendingInProgressException {
         DocumentReference docRefMaterial = getReference(Material.table, material.getId());
 
@@ -117,10 +145,15 @@ public class LendingInProgress {
 
             return new LendingInProgress(addedDocRef.getId(), docRefMaterial, t);
         } else
-            throw new LendingInProgressException("A lendign with this material is already in progress: " + material.getId());
+            throw new LendingInProgressException("A lending with this material is already in progress: " + material.getId());
     }
 
-    public static LendingInProgress getLendingInProgressById(String id) throws ExecutionException, InterruptedException {
+    /**
+     * The method return the lending in progress with that id. If there isn't a quarantine assistance with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     */
+    public static LendingInProgress obtainLendingInProgressById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -135,6 +168,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No lending in progress found with this id: " + id);
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> deleteLendingInProgressAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -145,6 +183,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No lending in progress found with this id: " + id);
     }
 
+    /**
+     * The method is use to delete a lending in progress to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean deleteLendingInProgress() {
         try {
             Task<Void> t = deleteLendingInProgressAsync();
@@ -157,6 +200,11 @@ public class LendingInProgress {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -167,6 +215,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
+    /**
+     * The method is use to update a lending in progress field expiry date to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateExpiryDate(@NonNull Date date) {
         try {
             Timestamp timestamp = new Timestamp(date);
@@ -180,6 +233,11 @@ public class LendingInProgress {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateWaitingForFeedbackAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -190,6 +248,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
+    /**
+     * The method is use to update a lending in progress field waiting for feedback to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateWaitingForFeedback(boolean val) {
         try {
             Task<Void> t = this.updateWaitingForFeedbackAsync(val);
@@ -202,6 +265,11 @@ public class LendingInProgress {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateEndExpiryDateAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -215,6 +283,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
+    /**
+     * The method is use to update a lending in progress field end expiry date to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateEndExpiryDate(Date date) {
         try {
             Task<Void> t = this.updateEndExpiryDateAsync(date);
@@ -230,7 +303,11 @@ public class LendingInProgress {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateMaterialAsync(Material material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -245,7 +322,11 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
-
+    /**
+     * The method is use to update a lending in progress field material to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateMaterial(Material material) {
         try {
             Task<Void> t = this.updateMaterialAsync(material);
@@ -264,6 +345,11 @@ public class LendingInProgress {
         }
     }
 
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -272,6 +358,11 @@ public class LendingInProgress {
         return Objects.equals(id, lending.id);
     }
 
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

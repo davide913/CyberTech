@@ -353,7 +353,7 @@ public class Group {
         }
     }
 
-    private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws Exception {
+    private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -363,7 +363,7 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
-    public boolean removeMember(@NonNull User user) throws Exception {
+    public boolean removeMember(@NonNull User user){
         try {
             if(user.getId().equals(owner.getId())){
                 Tasks.await(removeMemberAsync(owner));
@@ -436,7 +436,7 @@ public class Group {
         }
     }
 
-    private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws Exception {
+    private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -446,7 +446,7 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
-    public boolean removeActivity(@NonNull Activity activity) throws Exception {
+    public boolean removeActivity(@NonNull Activity activity){
         try {
             DocumentReference actDoc = getReference(Activity.table, activity.getId());
             Task<Void> t = removeActivityAsync(actDoc);

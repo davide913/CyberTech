@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
+import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
@@ -48,8 +49,7 @@ public class Material extends Geoquerable {
     private Timestamp expiryDate;
     private DocumentReference type;
 
-    public Material() {
-    }
+    public Material() {}
 
     private Material(String id, DocumentReference owner, String title,
                      String description, String photo, DocumentReference renter, boolean isRent,
@@ -123,7 +123,7 @@ public class Material extends Geoquerable {
         return renter;
     }
 
-    public User getMaterializedRenter() throws ExecutionException, InterruptedException, NoRentMaterialFoundException {
+    public User obtainMaterializedRenter() throws ExecutionException, InterruptedException, NoRentMaterialFoundException {
         if (renter != null)
             return User.obtainUserById(renter.getId());
         else throw new NoRentMaterialFoundException("The material has no renter");
@@ -220,6 +220,19 @@ public class Material extends Geoquerable {
 
     public boolean deleteMaterial() {
         try {
+            //delete all lending associate to this material
+            DocumentReference doc = getReference(table, this.id);
+
+            Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
+                    .whereEqualTo("material", doc).get();
+
+            Tasks.await(task);
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
+
+            for (DocumentSnapshot documentSnapshot : documents )
+                LendingInProgress.obtainLendingInProgressById(documentSnapshot.getId()).deleteLendingInProgress();
+
+            //delete the material
             Task<Void> t = deleteMaterialAsync();
             Tasks.await(t);
             this.id = null;
@@ -363,7 +376,7 @@ public class Material extends Geoquerable {
         Tasks.await(task);
         List<DocumentSnapshot> list = task.getResult().getDocuments();
         if (!list.isEmpty())
-            return LendingInProgress.getLendingInProgressById(list.get(0).getId());
+            return LendingInProgress.obtainLendingInProgressById(list.get(0).getId());
 
         throw new NoLendingInProgressFoundException("no lending found connect to this material: " + id);
     }
