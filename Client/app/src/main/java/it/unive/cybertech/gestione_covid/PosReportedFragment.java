@@ -49,7 +49,7 @@ public class PosReportedFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    List<Activity> activityList = user.GetPositiveActivities();
+                    List<Activity> activityList = user.obtainPositiveActivities();
                     Boolean var = false;
                     ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                     TextView textView = v.findViewById(R.id.TextView_PosReported);

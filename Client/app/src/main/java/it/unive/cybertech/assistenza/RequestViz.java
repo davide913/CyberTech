@@ -1,6 +1,6 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceById;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.obtainQuarantineAssistanceById;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
@@ -31,6 +32,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
@@ -122,7 +124,15 @@ public class RequestViz extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 Thread t = new Thread(() -> {
+                    User target = null;
+                    try {
+                        target = request.obtainRequestOwner();
+                    } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    sendNotifications(target, "delete", CachedUser.user.getName());
                     user.removeQuarantineAssistance(request);
+                    setResult(Activity.RESULT_OK);
                 });
                 t.start();
                 try {
@@ -161,7 +171,9 @@ public class RequestViz extends AppCompatActivity {
             public void onSuccess() {
                 Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(user), new Utils.TaskResult<Boolean>() {
                     @Override
-                    public void onComplete(Boolean result) {
+                    public void onComplete(Boolean result) throws ExecutionException, InterruptedException {
+                        User target = request.obtainRequestOwner();
+                        sendNotifications(target, "accept", target.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
@@ -188,7 +200,9 @@ public class RequestViz extends AppCompatActivity {
             public void onSuccess() {
                 Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(null), new Utils.TaskResult<Boolean>() {
                     @Override
-                    public void onComplete(Boolean result) {
+                    public void onComplete(Boolean result) throws ExecutionException, InterruptedException {
+                        User target = request.obtainRequestOwner();
+                        sendNotifications(target, "stop", target.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
@@ -211,7 +225,7 @@ public class RequestViz extends AppCompatActivity {
         if(id != null || idInCharge != null) {
             Thread t = new Thread(() -> {
                 try {
-                    request = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
+                    request = obtainQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
                 } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -269,11 +283,11 @@ public class RequestViz extends AppCompatActivity {
         textCity = findViewById(R.id.textCity);
         textDate = findViewById(R.id.textDate);
 
-        menu = (FloatingActionButton) findViewById(R.id.menu_open);
-        chat = (FloatingActionButton) findViewById(R.id.chat_from_request);
-        accept_request = (FloatingActionButton) findViewById(R.id.acceptRequest);
-        stop_helping = (FloatingActionButton) findViewById(R.id.stopHelping);
-        deleteRequest = (FloatingActionButton) findViewById(R.id.deleteRequest);
+        menu = findViewById(R.id.menu_open);
+        chat = findViewById(R.id.chat_from_request);
+        accept_request = findViewById(R.id.acceptRequest);
+        stop_helping = findViewById(R.id.stopHelping);
+        deleteRequest = findViewById(R.id.deleteRequest);
     }
 
     private void animatedMenu(@NonNull String caller) {
@@ -342,5 +356,25 @@ public class RequestViz extends AppCompatActivity {
             findViewById(R.id.textDate).setVisibility(View.GONE);
             findViewById(R.id.menu_open).setVisibility(View.GONE);
         }
+    }
+
+    private void sendNotifications(User user, String event, String name) {
+        switch (event) {
+            case "accept":
+                MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_accepted,
+                        "Richiesta presa in carico", name +" "+"ha preso in carico la tua richiesta di aiuto",
+                        this);
+            case "stop":
+                MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_stop_helping,
+                        "Attenzione!", name + " "+"L'utente ha smesso di seguire la tua richiesta di aiuto",
+                        this);
+            case "delete":
+                MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_stop_helping,
+                        "Attenzione!", name + " "+"Ha eliminato la richiesta, ti ringraziamo per la collaborazione",
+                        this);
+        }
+
+
+
     }
 }

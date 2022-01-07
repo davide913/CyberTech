@@ -81,7 +81,7 @@ public class HomePageNegative extends Fragment {
                 Thread t = new Thread(() -> {
                     try {
                         //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
-                        myQuar = QuarantineAssistance.getJoinableQuarantineAssistance(tList.get(0), myGeoPosition, 10);
+                        myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(tList.get(0), myGeoPosition, 10);
                         inCharge = getQuarantineAssistanceByInCharge(user);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
@@ -123,7 +123,7 @@ public class HomePageNegative extends Fragment {
                             myQuarantineList = new ArrayList<>();
 
                             try {
-                                myQuar = QuarantineAssistance.getJoinableQuarantineAssistance(aux, myGeoPosition, 10);
+                                myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(aux, myGeoPosition, 10);
 
                             } catch (ExecutionException | InterruptedException e) {
                                 e.printStackTrace();

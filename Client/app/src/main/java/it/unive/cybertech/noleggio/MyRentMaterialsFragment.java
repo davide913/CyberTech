@@ -53,7 +53,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
 
     private void initList() {
         super.onStart();
-        Utils.executeAsync(() -> user.getMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
+        Utils.executeAsync(() -> user.obtainMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
             @Override
             public void onComplete(List<Material> result) {
                 Log.d(ID, "Size: " + result.size());

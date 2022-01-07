@@ -41,6 +41,7 @@ import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 
 public class RequestDetails extends AppCompatActivity {
@@ -52,56 +53,36 @@ public class RequestDetails extends AppCompatActivity {
     private FloatingActionButton editInfo;
     private LocationRequest locationRequest;
     private double latitude, longitude;
-    public static ArrayList<QuarantineAssistance> myRequests = new ArrayList<>();
     private final User me = user;
+    private String type;
+    private  ArrayList<AssistanceType> tList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_details);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_Request);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        setTitle("Dettagli Richiesta");
-
-        et_requestTitle = findViewById(R.id.requestTitle);
-        et_requestText = findViewById(R.id.requestText);
-        editInfo = findViewById(R.id.edit_location);
-        countryReq = findViewById(R.id.countryLoc);
-        //countryReq.setText(user.getCountry());
-
-        cityReq = findViewById(R.id.cityLoc);
-        //cityReq.setText(user.getCity());
-
-        final String[] type = new String[1];
+        setToolbar();
+        findFields();
 
        //lo spinner
         Spinner spinner = findViewById(R.id.spinner_type);
         ArrayList<String> options = new ArrayList<>();
         final ArrayList<AssistanceType> adapterList = new ArrayList<>();
 
-        Thread t = new Thread(() -> {
-            ArrayList<AssistanceType> tList = null;
-            try {
-                tList = AssistanceType.getAssistanceTypes();
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        Utils.executeAsync(AssistanceType::getAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+            @Override
+            public void onComplete(ArrayList<AssistanceType> result) {
+                tList = result;
+                for (AssistanceType a: tList) {
+                    options.add(a.getType());
+                    adapterList.add(a);
+                }
             }
 
-            for (AssistanceType a: tList) {
-                options.add(a.getType());
-                adapterList.add(a);
-            }
+            @Override
+            public void onError(Exception e) {}
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         //ArrayAdapter
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
@@ -110,7 +91,7 @@ public class RequestDetails extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
                 String selectedItemText = (String) parent.getItemAtPosition(position);
-                type[0] = selectedItemText;
+                type = selectedItemText;
 
                 if(position >= 0){
                     showShortToast("Selected : " + selectedItemText);
@@ -121,13 +102,7 @@ public class RequestDetails extends AppCompatActivity {
 
             }
         });
-
-        locationRequest = LocationRequest.create();
-        locationRequest.setInterval(30000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setMaxWaitTime(100);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        locationRequest();
 
         editInfo.setOnClickListener(v -> {
             updateGPS();
@@ -145,13 +120,12 @@ public class RequestDetails extends AppCompatActivity {
                     buffertType = AssistanceType.getAssistanceTypes();
 
                     for (AssistanceType a : buffertType) {
-                        if (a.getType().equals(type[0]))
+                        if (a.getType().equals(type))
                             choosen = a;
                     }
                     String title = et_requestTitle.getText().toString();
                     String description = et_requestText.getText().toString();
                     me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude);
-                    //user.add(sec); //todo: questa va sostituita con la funzione nuova
                     setResult(Activity.RESULT_OK);
 
                 } catch (ExecutionException | InterruptedException e) {
@@ -168,6 +142,31 @@ public class RequestDetails extends AppCompatActivity {
             finish();
 
         });
+    }
+
+    private void setToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar_Request);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        setTitle("Dettagli Richiesta");
+    }
+
+    private void findFields() {
+        et_requestTitle = findViewById(R.id.requestTitle);
+        et_requestText = findViewById(R.id.requestText);
+        editInfo = findViewById(R.id.edit_location);
+        countryReq = findViewById(R.id.countryLoc);
+        cityReq = findViewById(R.id.cityLoc);
+    }
+
+    private void locationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(30000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setMaxWaitTime(100);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
     private void updateGPS() {

@@ -50,7 +50,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
 
     private void initList() {
         super.onStart();
-        Utils.executeAsync(() -> user.getMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 Log.d(ID, "Size: " + result.size());
