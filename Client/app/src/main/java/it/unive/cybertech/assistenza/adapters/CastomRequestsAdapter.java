@@ -32,6 +32,11 @@ import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * A Custom Adapter the visualisation of requests with a balloon effect
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class CastomRequestsAdapter extends ArrayAdapter {
     private List<QuarantineAssistance> myList;
     private Context context;

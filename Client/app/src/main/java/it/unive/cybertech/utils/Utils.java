@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,7 +69,7 @@ public class Utils {
     }
 
     public interface TaskResult<T> {
-        void onComplete(T result);
+        void onComplete(T result) throws ExecutionException, InterruptedException;
 
         void onError(Exception e);
     }

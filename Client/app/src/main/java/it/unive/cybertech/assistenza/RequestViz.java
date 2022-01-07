@@ -36,6 +36,18 @@ import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * The request visualization shows an extended version of the one found previously in {@link it.unive.cybertech.assistenza.HomePageNegative}
+ * and {@link it.unive.cybertech.assistenza.HomePagePositive} listView, allowing users different interaction
+ * depending on the roles (positive or negative to COVID-19).
+ *
+ * .Sick users can delete the request they made or access to the chat with their volunteer
+ * .Volunteer users can accept the request if they want to help with the given task, stop helping an already
+ * taken request, or access the chat if they need additional information
+ *
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class RequestViz extends AppCompatActivity {
     private final User user = CachedUser.user;
     private FloatingActionButton menu, chat, deleteRequest, accept_request, stop_helping;
@@ -57,11 +69,11 @@ public class RequestViz extends AppCompatActivity {
         animations();
         getStringExtra();
 
-        if (id != null || idInCharge != null || callerClass != null) {//se è uno dei 3 chiamanti HomeNeg, HomePos e taken
-            initializeRequest(id, idInCharge); //Inizializzo il campo request dipendentemente dal fatto che ne abbia una già accettata da svolgere o meno
+        if (id != null || idInCharge != null || callerClass != null) {
+            initializeRequest(id, idInCharge);
             setFields();
 
-            if(idInCharge != null) { //se sono stato chiamato dalla taken
+            if(idInCharge != null) {
                 String taken = "taken";
 
                 menu.setOnClickListener(v -> {
@@ -77,10 +89,9 @@ public class RequestViz extends AppCompatActivity {
                 });
             }
 
-            if (callerClass != null && callerClass.equals("Homenegative")) { //se sono stato chiamato dalla HomeNeg
+            if (callerClass != null && callerClass.equals("Homenegative")) {
                 String idTaken = getIntent().getStringExtra("alreadyTaken");
                 if(idTaken == null) {
-
                     menu.setOnClickListener(v -> {
                         animatedMenu(callerClass);
                     });
@@ -93,9 +104,7 @@ public class RequestViz extends AppCompatActivity {
                     menu.setVisibility(View.GONE);
             }
 
-            if(callerClass != null && callerClass.equals("positive")) { //se sono stato chiamato dalla HomePos
-                //Pulsanti visibili solo dall'utente positivo che richiede soccorso
-
+            if(callerClass != null && callerClass.equals("positive")) {
                 menu.setOnClickListener(v -> {
                     animatedMenu(callerClass);
                 });
@@ -104,19 +113,25 @@ public class RequestViz extends AppCompatActivity {
                     delete_request();
                 });
 
-                chat.setOnClickListener(v -> {//TODO: forse da togliere
+                chat.setOnClickListener(v -> {
                     finish();
                 });
             }
 
         }
-        else { //altrimenti non c'è nulla da visualizzare
+        else {
             new Utils.Dialog(this).show("Nessuna Incarico preso", "Nessuna richiesta è stata presa in carico!");
             String allGone = "allGone";
             animatedMenu(allGone);
         }
     }
 
+    /**
+     * Users can delete their {@link #request}, a notification is sent to the user who took in charge
+     * the task eventually
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void delete_request() {
         Utils.Dialog dialog = new Utils.Dialog(this);
         dialog.show(getString(R.string.attention), getString(R.string.delete_request_warning));
@@ -139,20 +154,6 @@ public class RequestViz extends AppCompatActivity {
                     t.join();
                 } catch (InterruptedException ignored) {
                 }
-                /*Utils.executeAsync(() -> user.removeQuarantineAssistance(request), new Utils.TaskResult<Boolean>() { TODO: da vedere come farlo Async
-                    @Override
-                    public void onComplete(Boolean result) {
-
-                        setResult(10);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-
-                    }
-                });
-
-                 */
                 finish();
             }
 
@@ -163,6 +164,12 @@ public class RequestViz extends AppCompatActivity {
         });
     }
 
+    /**
+     * Volunteers can accept a helping request, only if there is not one already being followed,
+     * a notification is sent to the owner of the {@link #request}, warning him an user took in charge their task
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void accept_request() {
         Utils.Dialog dialog = new Utils.Dialog(this);
         dialog.show(getString(R.string.information), getString(R.string.request_taken_in_charge));
@@ -192,6 +199,13 @@ public class RequestViz extends AppCompatActivity {
         });
     }
 
+    /**
+     * Volunteers can stop following a request they accepted, so other people can take it in charge,
+     * a notification is send to the owner of the {@link #request}, warning him of the event
+     *
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void stop_helping() {
         Utils.Dialog dialog = new Utils.Dialog(this);
         dialog.show(getString(R.string.attention), getString(R.string.stop_helping_request));
@@ -221,6 +235,13 @@ public class RequestViz extends AppCompatActivity {
         });
     }
 
+    /**
+     * Check if the user is following already a help request, side effects the reference {@link #request} accordingly
+     * @param id for the request selected
+     * @param idInCharge for the request that user is already following, if exists
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void initializeRequest(String id, String idInCharge) {
         if(id != null || idInCharge != null) {
             Thread t = new Thread(() -> {
@@ -239,6 +260,11 @@ public class RequestViz extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize the TextView
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void setFields() {
         title = getIntent().getStringExtra("title");
         textTitle.setText(title);
@@ -249,24 +275,39 @@ public class RequestViz extends AppCompatActivity {
         city = getIntent().getStringExtra("city");
         textCity.setText(city);
 
-        if (request != null) {
-            strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
-            textDate.setText(strDate);
-            text.setText(request.getDescription());
-        }
+        strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+        textDate.setText(strDate);
+
+        text.setText(request.getDescription());
     }
 
+    /**
+     * Sets {@link #id}, {@link #idInCharge}, {@link #callerClass} to the id of the request selected,
+     * the request that user has already accepted and the caller class.
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void getStringExtra() {
         id = getIntent().getStringExtra("id");
         idInCharge = getIntent().getStringExtra("user");
         callerClass = getIntent().getStringExtra("class");
     }
 
+    /**
+     * Initialize the menu FloatingActionButton animation for its opening and closure
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void animations() {
         menuOpen = AnimationUtils.loadAnimation(this, R.anim.from_botton_animation);
         menuClose = AnimationUtils.loadAnimation(this, R.anim.to_bottom_animation);
     }
 
+    /**
+     * Finds and sets the toolbar
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void toolbar() {
         toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
@@ -276,6 +317,11 @@ public class RequestViz extends AppCompatActivity {
         setTitle("Dettagli richiesta");
     }
 
+    /**
+     * Finds all layout elements
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void findingLayoutElements() {
         textTitle = findViewById(R.id.textTitle);
         text = findViewById(R.id.textFull);
@@ -290,6 +336,12 @@ public class RequestViz extends AppCompatActivity {
         deleteRequest = findViewById(R.id.deleteRequest);
     }
 
+    /**
+     * Depending on the caller, sets the open and close animation and the visibility to the right FloatingActionButton
+     * @param caller identify the previous activity who called RequestViz
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void animatedMenu(@NonNull String caller) {
         if(caller.equals("positive")) {
             if (isOpen) {
@@ -358,6 +410,14 @@ public class RequestViz extends AppCompatActivity {
         }
     }
 
+    /**
+     * Create the right notification based on the event caller
+     * @param user identify the target of the notification
+     * @param event specify the notification to be send
+     * @param name indicates the Name of the persone that took in charge, or stopped helping or deleted the request
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void sendNotifications(User user, String event, String name) {
         switch (event) {
             case "accept":

@@ -38,6 +38,13 @@ import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * The Fragment that allows volunteer users of Family Share (Plugin) to interact with help requests made
+ * by users found positive to COVID-19.
+ *
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class HomePageNegative extends Fragment {
     private ListView listView;
     private final User user = CachedUser.user;
@@ -62,11 +69,6 @@ public class HomePageNegative extends Fragment {
         return view;
     }
 
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
     private void initViews(View view) throws ExecutionException, InterruptedException {
         listView = view.findViewById(R.id.listRequests);
         GeoPoint myGeoPosition = user.getLocation();
@@ -80,8 +82,7 @@ public class HomePageNegative extends Fragment {
 
                 Thread t = new Thread(() -> {
                     try {
-                        //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
-                        myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(tList.get(0), myGeoPosition, 10);
+                        myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(null, myGeoPosition, 50);
                         inCharge = getQuarantineAssistanceByInCharge(user);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
@@ -90,7 +91,7 @@ public class HomePageNegative extends Fragment {
                     for (AssistanceType a: tList) {
                         names.add(a.getType());
                     }
-
+                    names.add(0, "Tutte le richieste");
                     myQuarantineList.addAll(myQuar);
                 });
                 t.start();
@@ -123,8 +124,7 @@ public class HomePageNegative extends Fragment {
                             myQuarantineList = new ArrayList<>();
 
                             try {
-                                myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(aux, myGeoPosition, 10);
-
+                                myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(aux, myGeoPosition, 50);
                             } catch (ExecutionException | InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -138,7 +138,6 @@ public class HomePageNegative extends Fragment {
                             e.printStackTrace();
                         }
 
-                        //per aggiornare la listView in base al filtro
                         adapter.clear();
                         adapter.addAll(myQuarantineList);
                         adapter.notifyDataSetChanged();
@@ -164,7 +163,6 @@ public class HomePageNegative extends Fragment {
                     startActivityForResult(newIntent, 1);
                 }));
 
-                //La richiesta presa in carico dall'utente negativo
                 view.findViewById(R.id.alreadyTaken).setOnClickListener(v -> {
                     Intent newIntent = new Intent(getContext(), RequestViz.class);
 
@@ -185,7 +183,13 @@ public class HomePageNegative extends Fragment {
         });
     }
 
-    private void updateFr(){  //Permette di aggiornare i fragments
+    /**
+     * Allows to update Fragment
+     *
+     * @author Mihail Racaru
+     * @since 1.1
+     */
+    private void updateFr(){
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.assistenza.HomePageNegative()).commit();
@@ -196,6 +200,14 @@ public class HomePageNegative extends Fragment {
         updateFr();
     }
 
+    /**
+     * Finds the nearest location to the given coordinates from request, if find none, the putExtra
+     * method is set at a default value "Out of Bounds"
+     *
+     * @param request, the input request given
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void geoDecoder(QuarantineAssistance request, Intent newIntent){
         GeoPoint point = request.getLocation();
 
@@ -203,13 +215,11 @@ public class HomePageNegative extends Fragment {
         @NonNull List<Address> addresses;
         try {
             addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            Log.d("Latitudine", String.valueOf(point.getLatitude()));
-            Log.d("Longitudine", String.valueOf(point.getLongitude()));
             if(addresses.size() != 0) {
                 newIntent.putExtra("country",addresses.get(0).getCountryName());
                 newIntent.putExtra("city", addresses.get(0).getLocality());
             }
-            else {      //per richieste in posizioni estreme
+            else {
                 newIntent.putExtra("country", "Out of Bounds");
                 newIntent.putExtra("city", "Out of Bounds");
             }
@@ -217,6 +227,18 @@ public class HomePageNegative extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Used to show a Toast with the given message String
+     *
+     * @param message, the input String
+     * @author Mihail Racaru
+     * @since 1.1
+     */
+    private void showShortToast(@NonNull String message) {
+        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
 }

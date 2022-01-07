@@ -43,8 +43,12 @@ import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
-/***
- * QUesto commento per le classi
+/**
+ * The Fragment that allows positive to COVID-19 users of Family Share (Plugin) to make help requests,
+ * in order to get help from the volunteer users for their daily tasks.
+ *
+ * @author Mihail Racaru
+ * @since 1.1
  */
 public class HomePagePositive extends Fragment {
     ListView listAlreadyMade;
@@ -78,20 +82,16 @@ public class HomePagePositive extends Fragment {
                 listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
                     Intent newIntent = new Intent(getContext(), RequestViz.class);
 
-                    String strDate = Utils.formatDateToString(myRequestsList.get(position).getDeliveryDateToDate(), "kk:mm  dd-MM" ); //TODO: esempio di data con utils
+                    String strDate = Utils.formatDateToString(myRequestsList.get(position).getDeliveryDateToDate(), "kk:mm  dd-MM" );
                     geoPointer(newIntent, position);
                     putExtra(newIntent, position, strDate);
 
                     startActivityForResult(newIntent, 4);
-
-                    //adapter.notifyDataSetChanged(); TODO: se si fa Async
                 }));
             }
 
             @Override
-            public void onError(Exception e) {
-
-            }
+            public void onError(Exception e) {}
         });
 
         view.findViewById(R.id.add_new_request).setOnClickListener(v -> {
@@ -101,6 +101,15 @@ public class HomePagePositive extends Fragment {
         });
     }
 
+    /**
+     * For the visualization of the selected request at the given position
+     * Sets some key fields which will be used by {@link it.unive.cybertech.assistenza.RequestViz}
+     *
+     * @param position for the position in the list
+     * @param strDate for the date with right pattern
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void putExtra(Intent newIntent, int position, String strDate) {
         newIntent.putExtra("title", adapter.getItem(position).getTitle());
         newIntent.putExtra("date", strDate);
@@ -108,6 +117,14 @@ public class HomePagePositive extends Fragment {
         newIntent.putExtra("class", "positive"); //per indicare se il chiamante è la HomePositive o Negative
     }
 
+    /**
+     * Finds the nearest location to the given coordinates from request at the specified position in the list,
+     * if find none, the putExtra method is set at a default value "Out of Bounds"
+     *
+     * @param position, the input position given
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void geoPointer(Intent newIntent, int position) {
         GeoPoint point = adapter.getItem(position).getLocation();
 
@@ -132,6 +149,13 @@ public class HomePagePositive extends Fragment {
         }
     }
 
+    /**
+     * If the user is positive and there is no request made, a default message will pop up every time
+     * he opens his assistance Home Page.
+     *
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void message_if_empty() {
         if(myRequestsList.size() == 0) {
             Utils.Dialog dialog = new Utils.Dialog(getContext());
@@ -148,6 +172,12 @@ public class HomePagePositive extends Fragment {
         }
     }
 
+    /**
+     * Allows to update Fragment
+     *
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void updateFr(){  //Permette di aggiornare i fragments
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();

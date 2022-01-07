@@ -43,7 +43,11 @@ import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
-
+/**
+ * Allows the positive user to compile a form with his needs and upload the request
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class RequestDetails extends AppCompatActivity {
     EditText et_requestTitle, et_requestText, countryReq, cityReq;
     private final @NonNull
@@ -65,7 +69,6 @@ public class RequestDetails extends AppCompatActivity {
         setToolbar();
         findFields();
 
-       //lo spinner
         Spinner spinner = findViewById(R.id.spinner_type);
         ArrayList<String> options = new ArrayList<>();
         final ArrayList<AssistanceType> adapterList = new ArrayList<>();
@@ -84,7 +87,6 @@ public class RequestDetails extends AppCompatActivity {
             public void onError(Exception e) {}
         });
 
-        //ArrayAdapter
         final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
         spinner.setAdapter(spinnerArrayAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -97,10 +99,7 @@ public class RequestDetails extends AppCompatActivity {
                     showShortToast("Selected : " + selectedItemText);
                 }
             }
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
         locationRequest();
 
@@ -109,13 +108,11 @@ public class RequestDetails extends AppCompatActivity {
         });
 
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            //upload tutte le info nel db
             Date date = Calendar.getInstance().getTime();
 
-            //per l'upload
             Thread m = new Thread(() -> {
                 try {
-                    ArrayList<AssistanceType> buffertType = null;
+                    ArrayList<AssistanceType> buffertType;
                     AssistanceType choosen = null;
                     buffertType = AssistanceType.getAssistanceTypes();
 
@@ -131,7 +128,6 @@ public class RequestDetails extends AppCompatActivity {
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
-
             });
             m.start();
             try {
@@ -140,10 +136,14 @@ public class RequestDetails extends AppCompatActivity {
                 e.printStackTrace();
             }
             finish();
-
         });
     }
 
+    /**
+     * Finds and sets the toolbar
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_Request);
         setSupportActionBar(toolbar);
@@ -152,6 +152,11 @@ public class RequestDetails extends AppCompatActivity {
         setTitle("Dettagli Richiesta");
     }
 
+    /**
+     * Finds all layout elements
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void findFields() {
         et_requestTitle = findViewById(R.id.requestTitle);
         et_requestText = findViewById(R.id.requestText);
@@ -160,6 +165,11 @@ public class RequestDetails extends AppCompatActivity {
         cityReq = findViewById(R.id.cityLoc);
     }
 
+    /**
+     * Initialize locationRequest
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void locationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(30000);
@@ -169,6 +179,11 @@ public class RequestDetails extends AppCompatActivity {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
+    /**
+     * Sets {@link #longitude} , {@link #latitude} and calles {@link #updateValues}
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void updateGPS() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
@@ -185,6 +200,12 @@ public class RequestDetails extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets TextView {@link #countryReq} and {@link #cityReq} from the given location in input
+     * @param location from which is computed city and country
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void updateValues(@NonNull Location location) {
         @NonNull Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         @NonNull List<Address> addresses;
@@ -196,12 +217,18 @@ public class RequestDetails extends AppCompatActivity {
             countryReq.setText(newCountry);
             @NonNull String newCity = addresses.get(0).getLocality();
             cityReq.setText(newCity);
-            // user.updateLocation(newCountry, newCity, newAddress, latitude, longitude);   // salva l'ultima posizione nel DB todo updateLocationDB()
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Used to show a Toast with the given message String
+     *
+     * @param message, the input String
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void showShortToast(@NonNull String message) {
         @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
