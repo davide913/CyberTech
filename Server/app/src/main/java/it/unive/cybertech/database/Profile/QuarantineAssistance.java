@@ -23,12 +23,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Geoquerable;
+import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 
+/**
+ * Class use to describe a quarantine assistance's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * The class extend Geoquerable to query the quarantine assistance by their position.
+ *
+ * @author Davide Finesso
+ */
 public class QuarantineAssistance extends Geoquerable {
     public final static String table = "quarantineAssistance";
     private DocumentReference assistanceType;
@@ -40,10 +49,19 @@ public class QuarantineAssistance extends Geoquerable {
     private String geohash;
     private String title;
     private String id;
-    //private raccolta chatPrivata
 
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
     public QuarantineAssistance() {}
 
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private QuarantineAssistance(DocumentReference assistanceType, String description, Timestamp deliveryDate,
                                 GeoPoint location, String geohash, String title, String id) {
         this.assistanceType = assistanceType;
@@ -56,7 +74,12 @@ public class QuarantineAssistance extends Geoquerable {
         this.id = id;
     }
 
-    public AssistanceType getAssistanceTypeMaterialized() throws ExecutionException, InterruptedException {
+    /**
+     * The method return the field assistance type materialize.
+     *
+     * @author Davide Finesso
+     */
+    public AssistanceType obtainAssistanceTypeMaterialized() throws ExecutionException, InterruptedException {
         DocumentSnapshot document = getDocument(assistanceType);
 
         if(document.exists())
@@ -85,11 +108,16 @@ public class QuarantineAssistance extends Geoquerable {
         return inCharge;
     }
 
-    public User getInChargeMaterialized() throws InterruptedException, ExecutionException {
+    /**
+     * The method return the field in charge materialize.
+     *
+     * @author Davide Finesso
+     */
+    public User obtainInChargeMaterialized() throws InterruptedException, ExecutionException {
         DocumentSnapshot document = getDocument(inCharge);
 
         if(document.exists())
-            return User.getUserById(document.getId());
+            return User.obtainUserById(document.getId());
 
         return null;
     }
@@ -150,7 +178,11 @@ public class QuarantineAssistance extends Geoquerable {
         this.title = title;
     }
 
-    //tested, modificata tolto lo user inCharge
+    /**
+     * The protected method add to the database a new quarantine assistance and return it.
+     *
+     * @author Davide Finesso
+     */
     protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
                                                                   String description, Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
         DocumentReference AssTypeRef = getReference(AssistanceType.table, assistanceType.getID());
@@ -173,15 +205,44 @@ public class QuarantineAssistance extends Geoquerable {
         return new QuarantineAssistance(AssTypeRef, description, t, geoPoint, geohash, title, addedDocRef.getId());
     }
 
-    //tested
-    protected void removeQuarantineAssistance() throws ExecutionException, InterruptedException {
-        deleteFromCollection(table, this.id);
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
+    private Task<Void> deleteQuarantineAssistanceAsync() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
 
-        this.id = null;
+        if (document.exists())
+            return deleteFromCollectionAsync(table, id);
+        else
+            throw new NoQuarantineAssistanceFoundException("No quarantine assistance found with this id: " + id);
     }
 
-    //tested
-    public static QuarantineAssistance getQuarantineAssistanceById(String id) throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to delete a quarantine assistance from the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
+    public boolean deleteQuarantineAssistance() {
+        try {
+            Task<Void> t = deleteQuarantineAssistanceAsync();
+            Tasks.await(t);
+            this.id = null;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * The method return the quarantine assistance with that id. If there isn't a quarantine assistance with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     */
+    public static QuarantineAssistance obtainQuarantineAssistanceById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -194,7 +255,11 @@ public class QuarantineAssistance extends Geoquerable {
             throw new NoQuarantineAssistanceFoundException("No quarantine assistance found with this id: " + id);
     }
 
-    //tested
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -207,6 +272,11 @@ public class QuarantineAssistance extends Geoquerable {
             throw new NoQuarantineAssistanceFoundException("No quarantine assistance found with this id: " + id);
     }
 
+    /**
+     * The method is use to update a quarantine assistance field assistance type to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateAssistanceType_QuarantineAssistance(@NonNull AssistanceType assistanceType) {
         try {
             Task<Void> t = this.updateAssistanceType_QuarantineAssistanceAsync(assistanceType);
@@ -219,6 +289,11 @@ public class QuarantineAssistance extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -238,7 +313,11 @@ public class QuarantineAssistance extends Geoquerable {
             throw new NoQuarantineAssistanceFoundException("No quarantine assistance found with this id: " + id + " Or no user found with this id: " + user.getId());
     }
 
-    //tested, aggiornata 6/12/2021 con modifica del campo isInCharge
+    /**
+     * The method is use to update a quarantine assistance field in charge to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateInCharge_QuarantineAssistance(User user)  {
         try {
             Task<Void> t = this.updateInCharge_QuarantineAssistanceAsync(user);
@@ -258,20 +337,11 @@ public class QuarantineAssistance extends Geoquerable {
         }
     }
 
-
-    //tested
-    /*public boolean updateDeliveryDate(@NonNull Date date) throws ExecutionException, InterruptedException {
-        DocumentReference docRef = getReference(table, id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists()) {
-            docRef.update("date", date);
-            this.setDeliveryDate(new Timestamp(date));
-            return true;
-        } else
-            return false;
-    }*/
-
+    /**
+     * The method is use to update a quarantine assistance field description to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateDescription(@NonNull String description) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -284,6 +354,11 @@ public class QuarantineAssistance extends Geoquerable {
             return false;
     }
 
+    /**
+     * The method is use to update a quarantine assistance field title to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateTitle(@NonNull String title) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -296,11 +371,13 @@ public class QuarantineAssistance extends Geoquerable {
             return false;
     }
 
-    //query che mi ritorna la richiesta dove incharge = user passato, fatta 7/12/2021
+    /**
+     * This method return a quarantine assistance with field in charge equals to an user passed as a parameter. If there isn't quarantine assistance with that user as in charge, the method return null.
+     *
+     * @author Davide Finesso
+     */
     public static QuarantineAssistance getQuarantineAssistanceByInCharge(User user) throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();
-
-        Task<QuerySnapshot> future = db.collection(table)
+        Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("isInCharge", true)
                 .whereEqualTo("inCharge", getReference(User.table, user.getId())).get();
 
@@ -316,8 +393,13 @@ public class QuarantineAssistance extends Geoquerable {
         return null;
     }
 
-    //modificata 30/11/2021, testata completa e aggiunta modifica per la gestione dei 6/12/2021,
-    public static List<QuarantineAssistance> getJoinableQuarantineAssistance(AssistanceType type, GeoPoint position,
+    /**
+     * This method return all joinable quarantine assistance. It's possible to add some filter by the parameter of the method.
+     * The result is also sort by date.
+     *
+     * @author Davide Finesso
+     */
+    public static List<QuarantineAssistance> obtainJoinableQuarantineAssistance(AssistanceType type, GeoPoint position,
                                                                                   double radiusInKm) throws ExecutionException, InterruptedException {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
         FirebaseFirestore db = getInstance();
@@ -356,5 +438,28 @@ public class QuarantineAssistance extends Geoquerable {
         });
 
         return arr;
+    }
+
+    /**
+     * Compare they id because are unique.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QuarantineAssistance that = (QuarantineAssistance) o;
+        return Objects.equals(id, that.id);
+    }
+
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

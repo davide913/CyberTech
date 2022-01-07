@@ -14,7 +14,6 @@ import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.common.collect.Collections2;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -29,7 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -39,11 +38,15 @@ import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
-//TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
-
+/**
+ * Class use to describe a user's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set.
+ * The class extend Geoquerable to query the users by their position.
+ *
+ * @author Davide Finesso
+ */
 public class User extends Geoquerable implements Comparable<User> {
     public final static String table = "users";
     private String id;
@@ -64,15 +67,29 @@ public class User extends Geoquerable implements Comparable<User> {
     private ArrayList<DocumentReference> materials;
     private ArrayList<DocumentReference> quarantineAssistance;
 
-    //aggiunti 17/12/2021 come cache per le materialized
+    /**
+     * Materialize field for increase the performance.
+     *
+     * @author Davide Finesso
+     */
     private ArrayList<Device> devicesMaterialized;
     private ArrayList<LendingInProgress> lendingInProgressMaterialized;
     private ArrayList<Material> materialsMaterialized;
     private ArrayList<QuarantineAssistance> quarantineAssistanceMaterialized;
 
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
     public User() {
     }
 
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private User(String id, String name, String surname, Sex sex, Timestamp birthday,
                  String address, String city, String country, GeoPoint location, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
@@ -241,22 +258,28 @@ public class User extends Geoquerable implements Comparable<User> {
         this.birthday = birthday;
     }
 
-    public List<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
+    /**
+     * The method return the field device materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public List<Device> obtainMaterializedDevices() throws ExecutionException, InterruptedException {
         if (devicesMaterialized == null) {
             devicesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : devices)
-                //try {
                 devicesMaterialized.add(Device.getDeviceById(doc.getId()));
-            //}
-            //catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
         }
 
         return devicesMaterialized;
     }
 
-    //aggiunta 03/01/2022 in quant la getMaterializedLendingInProgress eliminava le scadute dai lending e quindi non comparivano mai nelle altre funzioni
-    private ArrayList<LendingInProgress> getAllMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+    /**
+     * The method return the field lending in progress materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    private ArrayList<LendingInProgress> obtainAllMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
         if (lendingInProgressMaterialized == null) {
             lendingInProgressMaterialized = new ArrayList<>();
             for (DocumentReference doc : lendingInProgress)
@@ -265,8 +288,13 @@ public class User extends Geoquerable implements Comparable<User> {
         return lendingInProgressMaterialized;
     }
 
-    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
-        getAllMaterializedLendingInProgress();
+    /**
+     * The method return the field lending in progress materialize, if is null it create the field and after populate it if and only if the expiry date is after now
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+        obtainAllMaterializedLendingInProgress();
         Timestamp timestamp = Timestamp.now();
         List<LendingInProgress> result = new ArrayList<>();
         for (LendingInProgress lending : lendingInProgressMaterialized) {
@@ -276,7 +304,12 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-    public List<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
+    /**
+     * The method return the field materials materialize, if is null it create the field and after populate it if and only if the expiry date is after now.
+     *
+     * @author Davide Finesso
+     */
+    public List<Material> obtainMaterializedUserMaterials() throws ExecutionException, InterruptedException {
         if (materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
             for (DocumentReference doc : quarantineAssistance)
@@ -295,19 +328,27 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-
+    /**
+     * The method return the field quarantine assistance materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
     public List<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
         if (quarantineAssistanceMaterialized == null) {
             quarantineAssistanceMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : quarantineAssistance)
-                quarantineAssistanceMaterialized.add(QuarantineAssistance.getQuarantineAssistanceById(doc.getId()));
+                quarantineAssistanceMaterialized.add(QuarantineAssistance.obtainQuarantineAssistanceById(doc.getId()));
         }
 
         return quarantineAssistanceMaterialized;
     }
 
-    //modificata il 13/12/2021 -> aggiunta la data di compleanno
+    /**
+     * The method add to the database a new user and return it.
+     *
+     * @author Davide Finesso
+     */
     public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, @NonNull Date birthDay,
                                   @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
@@ -339,15 +380,17 @@ public class User extends Geoquerable implements Comparable<User> {
                 new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-
-    public static User getUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
+    /**
+     * The method return the user with that id. If there isn't a user with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     */
+    public static User obtainUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        User user = null;
-
         if (document.exists()) {
-            user = document.toObject(User.class);
+            User user = document.toObject(User.class);
             user.setId(document.getId());
 
             if (user.devices == null)
@@ -364,6 +407,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("No user found with this id: " + id);
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -374,6 +422,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("No user found with this id: " + id);
     }
 
+    /**
+     * The method is use to delete an user from the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean deleteUser() {
         try {
             Task<Void> t = deleteUserAsync();
@@ -386,8 +439,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-
-    //modificata 30/11/2021, greenpass era maiuscolo
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -398,6 +454,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field greenpass to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateGreenPass(boolean val) {
         try {
             Task<Void> t = updateGreenPassAsync(val);
@@ -410,13 +471,18 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            if (date != null) {                    //if the date is null is possible to delete the field date from db
-                Timestamp timestamp = new Timestamp(date);            //conversion from date to timestamp
+            if (date != null) {
+                Timestamp timestamp = new Timestamp(date);
                 return docRef.update("positiveSince", timestamp);
             } else {
                 return docRef.update("positiveSince", FieldValue.delete());
@@ -425,6 +491,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field positive since to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updatePositiveSince(Date date) {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
@@ -437,6 +508,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateLocationAsync(String newCountry, String newCity, String newAddress, GeoPoint geoPoint)
             throws ExecutionException, InterruptedException {
 
@@ -453,6 +529,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field location to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude) {
         try {
             GeoPoint geoPoint = new GeoPoint(latitude, longitude);
@@ -469,7 +550,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -480,6 +565,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field lending point to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateLendingPoint(long val) {
         try {
             Task<Void> t = updateLendingPointAsync(val);
@@ -492,7 +582,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -503,6 +597,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to add an user device to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addDevice(@NonNull String token, @NonNull String deviceId) {
         try {
             Device device = createDevice(token, deviceId, this.id);
@@ -512,7 +611,7 @@ public class User extends Geoquerable implements Comparable<User> {
                 Tasks.await(addDeviceAsync(devDoc));
                 this.devices.add(devDoc);
                 if (this.devicesMaterialized != null)
-                    this.getMaterializedDevices().add(device);
+                    this.obtainMaterializedDevices().add(device);
             }
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
@@ -521,7 +620,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -532,13 +635,18 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove an user device to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeDevice(@NonNull Device device) {
         try {
             DocumentReference devDoc = getReference(Device.table, device.getId());
             Tasks.await(removeDeviceAsync(devDoc));
             this.devices.remove(devDoc);
             if (this.devicesMaterialized != null)
-                this.getMaterializedDevices().remove(device);
+                this.obtainMaterializedDevices().remove(device);
             device.deleteDevice();
             return true;
         } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
@@ -547,7 +655,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    //nuova, inserita il 13/12/2021
+    /**
+     * The private method is use find if the user already have a device. It return a boolean value that describe if it have or not.
+     *
+     * @author Davide Finesso
+     */
     private boolean notContainDevice(String deviceId) {
         for (DocumentReference document : this.devices) {
             if (deviceId.equals(document.getId()))
@@ -556,7 +668,11 @@ public class User extends Geoquerable implements Comparable<User> {
         return true;
     }
 
-    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -567,6 +683,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to add an user lending to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addLending(@NonNull LendingInProgress lending) {
         try {
             DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
@@ -574,7 +695,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.lendingInProgress.add(lenDoc);
             if (this.lendingInProgressMaterialized != null)
-                this.getAllMaterializedLendingInProgress().add(lending);
+                this.obtainAllMaterializedLendingInProgress().add(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -582,7 +703,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -593,6 +718,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to remove an user lending to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeLending(@NonNull LendingInProgress lending) {
         try {
             DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
@@ -600,7 +730,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.lendingInProgress.remove(lenDoc);
             if (this.lendingInProgressMaterialized != null)
-                this.getAllMaterializedLendingInProgress().remove(lending);
+                this.obtainAllMaterializedLendingInProgress().remove(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -608,11 +738,16 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    public List<LendingInProgress> getExpiredLending() throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to obtain all the expired user's lendings in progress from the database.
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMyExpiredLending() throws ExecutionException, InterruptedException {
         ArrayList<LendingInProgress> result = new ArrayList<>();
         Timestamp timestamp = Timestamp.now();
 
-        for (LendingInProgress lending : getAllMaterializedLendingInProgress()) {
+        for (LendingInProgress lending : obtainAllMaterializedLendingInProgress()) {
             if (timestamp.compareTo(lending.getExpiryDate()) > 0 && !lending.getWaitingForFeedback())
                 result.add(lending);
         }
@@ -620,19 +755,31 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-    //fatta io sorry <3
-    public List<LendingInProgress> getMyMaterialsExpiredLending() throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to obtain all the expired lending with the user's material from the database.
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMyMaterialsExpiredLending() throws ExecutionException, InterruptedException {
         ArrayList<LendingInProgress> result = new ArrayList<>();
+
         if (!materials.isEmpty()) {
-            Task<QuerySnapshot> future = getInstance().collection(LendingInProgress.table).whereIn("material", materials).whereLessThan("expiryDate", Timestamp.now()).get();
+            Task<QuerySnapshot> future = getInstance().collection(LendingInProgress.table)
+                    .whereIn("material", materials).whereLessThan("expiryDate", Timestamp.now()).get();
             Tasks.await(future);
+
             for (DocumentSnapshot ref : future.getResult().getDocuments())
                 result.add(LendingInProgress.getLendingInProgressById(ref.getReference().getId()));
         }
+
         return result;
     }
 
-    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -643,6 +790,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to add an user material to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addMaterial(@NonNull Material material) {
         try {
             DocumentReference rentDoc = getReference(Material.table, material.getId());
@@ -650,7 +802,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.materials.add(rentDoc);
             if (this.materialsMaterialized != null)
-                this.getMaterializedUserMaterials().add(material);
+                this.obtainMaterializedUserMaterials().add(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -658,7 +810,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -669,6 +825,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to remove an user material to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeMaterial(@NonNull Material material) {
         try {
             DocumentReference rentDoc = getReference(Material.table, material.getId());
@@ -676,7 +837,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(t);
             this.materials.remove(rentDoc);
             if (this.materialsMaterialized != null)
-                this.getMaterializedUserMaterials().remove(material);
+                this.obtainMaterializedUserMaterials().remove(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -684,11 +845,16 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
+    /**
+     * The method is use to obtain all the user's expired material from the database.
+     *
+     * @author Davide Finesso
+     */
     public List<Material> getExpiredMaterial() throws ExecutionException, InterruptedException {
         ArrayList<Material> result = new ArrayList<>();
-        Timestamp timestamp = new Timestamp(new Date());
+        Timestamp timestamp = Timestamp.now();
 
-        for (Material material : getMaterializedUserMaterials()) {
+        for (Material material : obtainMaterializedUserMaterials()) {
             if (timestamp.compareTo(material.getExpiryDate()) >= 0)
                 result.add(material);
 
@@ -697,7 +863,11 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-    //aggiunta 17/12/2021
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addQuarantineAssistanceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -708,6 +878,11 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to add an user quarantine assistance to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
                                            String description, Date date, double latitude, double longitude) {
         try {
@@ -725,7 +900,11 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeQuarantineAssistanceAsync(@NonNull DocumentReference assistance) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -736,10 +915,16 @@ public class User extends Geoquerable implements Comparable<User> {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove an user quarantine assistance to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeQuarantineAssistance(@NonNull QuarantineAssistance assistance) {
         try {
-            List<QuarantineAssistance> tmp = getMaterializedQuarantineAssistance().stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
-            if (tmp.size() > 0) {
+            List<QuarantineAssistance> tmp = getMaterializedQuarantineAssistance()
+                    .stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
+            if (tmp.size() > 0) {       //TODO aggiungere override equals su quarantineAssistance e cambiare la condizione dell'if con contains
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
@@ -756,19 +941,29 @@ public class User extends Geoquerable implements Comparable<User> {
         }
     }
 
-    //aggiunta il 7/12/2021
-    public static List<LendingInProgress> getUserLandingsInProgress(String id) throws ExecutionException, InterruptedException {
-        User user = getUserById(id);
-        return user.getMaterializedLendingInProgress();
+    /**
+     * The method is use to obtain all the lending in progress from a user describe by a passed id.
+     *
+     * @author Davide Finesso
+     */
+    public static List<LendingInProgress> obtainUserLendingInProgress(String id) throws ExecutionException, InterruptedException {
+        return obtainUserById(id).obtainMaterializedLendingInProgress();
     }
 
-    //aggiunta il 7/12/2021
-    public static List<Device> getUserDevices(String id) throws ExecutionException, InterruptedException {
-        User user = getUserById(id);
-
-        return user.getMaterializedDevices();
+    /**
+     * The method is use to obtain all the devices from a user describe by a a passed id.
+     *
+     * @author Davide Finesso
+     */
+    public static List<Device> obtainUserDevices(String id) throws ExecutionException, InterruptedException {
+        return obtainUserById(id).obtainMaterializedDevices();
     }
 
+    /**
+     * The method is use to obtain a collection with all users ( not repeated ) that are in the same activities of caller one.
+     *
+     * @author Davide Finesso
+     */
     public Collection<User> obtainActivitiesUsers() throws ExecutionException, InterruptedException {
         TreeSet<User> result = new TreeSet<>();
         DocumentReference userDoc = getReference(table, this.id);
@@ -788,6 +983,11 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
+    /**
+     * The method is use to obtain a list with all activities that have at least one positive as member.
+     *
+     * @author Davide Finesso
+     */
     public List<Activity> obtainPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
         DocumentReference userDoc = getReference(table, this.id);
@@ -811,17 +1011,34 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
-    //metodo equal per confronti
+    /**
+     * Compare they id because are unique.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public boolean equals(Object o) {
-        if (o instanceof User) {
-            User user = (User) o;
-
-            return user.getId().equals(this.getId());
-        }
-        return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    /**
+     * Used for don't have the same user in a set. it return 0 if the id are the same, 1 otherwise.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public int compareTo(User o) {
         if (o.getId().equals(this.getId()))

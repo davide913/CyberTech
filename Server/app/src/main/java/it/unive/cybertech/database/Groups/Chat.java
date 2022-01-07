@@ -60,7 +60,7 @@ public class Chat {
     }
 
     public User getSenderUser() throws ExecutionException, InterruptedException {
-        return User.getUserById(sender.getId());
+        return User.obtainUserById(sender.getId());
     }
 
     private void setSender(DocumentReference sender) {

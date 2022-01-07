@@ -111,7 +111,7 @@ public class Activity {
             participantsMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : participants) {
-                participantsMaterialized.add(User.getUserById(doc.getId()));
+                participantsMaterialized.add(User.obtainUserById(doc.getId()));
             }
         }
 

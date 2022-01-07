@@ -2,7 +2,7 @@ package it.unive.cybertech.database.Profile;
 
 
 import static it.unive.cybertech.database.Database.addToCollection;
-import static it.unive.cybertech.database.Database.deleteFromCollection;
+import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
@@ -20,6 +20,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Material.Material;
@@ -134,8 +135,26 @@ public class LendingInProgress {
             throw new NoLendingInProgressFoundException("No lending in progress found with this id: " + id);
     }
 
-    public boolean removeLendingInProgress() {
-        return deleteFromCollection(table, this.id);
+    private Task<Void> deleteLendingInProgressAsync() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists())
+            return deleteFromCollectionAsync(table, id);
+        else
+            throw new NoLendingInProgressFoundException("No lending in progress found with this id: " + id);
+    }
+
+    public boolean deleteLendingInProgress() {
+        try {
+            Task<Void> t = deleteLendingInProgressAsync();
+            Tasks.await(t);
+            this.id = null;
+            return true;
+        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
@@ -247,10 +266,14 @@ public class LendingInProgress {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof LendingInProgress) {
-            LendingInProgress lending = (LendingInProgress) o;
-            return lending.getId().equals(this.getId());
-        }
-        return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LendingInProgress lending = (LendingInProgress) o;
+        return Objects.equals(id, lending.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
@@ -79,7 +80,7 @@ public class Material extends Geoquerable {
     }
 
     public User getMaterializedOwner() throws ExecutionException, InterruptedException {
-        return User.getUserById(owner.getId());
+        return User.obtainUserById(owner.getId());
     }
 
     private void setOwner(DocumentReference owner) {
@@ -124,7 +125,7 @@ public class Material extends Geoquerable {
 
     public User getMaterializedRenter() throws ExecutionException, InterruptedException, NoRentMaterialFoundException {
         if (renter != null)
-            return User.getUserById(renter.getId());
+            return User.obtainUserById(renter.getId());
         else throw new NoRentMaterialFoundException("The material has no renter");
     }
 
@@ -388,5 +389,18 @@ public class Material extends Geoquerable {
         }
 
         return arr;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Material material = (Material) o;
+        return Objects.equals(id, material.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

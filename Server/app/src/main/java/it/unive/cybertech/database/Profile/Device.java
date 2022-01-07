@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
@@ -209,11 +210,15 @@ public class Device {
     }
 
     @Override
-    public boolean equals(Object o){
-        if(o instanceof Device) {
-            Device d = (Device) o;
-            return d.deviceId.equals(this.deviceId) && d.userId.equals(this.userId);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Device device = (Device) o;
+        return Objects.equals(id, device.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

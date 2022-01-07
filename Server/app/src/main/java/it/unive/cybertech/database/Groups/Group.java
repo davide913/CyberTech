@@ -114,7 +114,7 @@ public class Group {
             membersMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : members) {
-                membersMaterialized.add(User.getUserById(doc.getId()));
+                membersMaterialized.add(User.obtainUserById(doc.getId()));
             }
         }
 
@@ -394,7 +394,7 @@ public class Group {
                         activity.deleteActivity();
 
                     else {
-                        User substitute = User.getUserById(activity.getParticipants().get(0).getId());
+                        User substitute = User.obtainUserById(activity.getParticipants().get(0).getId());
                         activity.removeParticipant(substitute);
                         activity.updateOwner(substitute);
                     }
