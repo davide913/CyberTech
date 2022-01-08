@@ -327,6 +327,6 @@ public class Activity {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        return Group.getGroupById(documents.get(0).getId());
+        return Group.obtainGroupById(documents.get(0).getId());
     }
 }

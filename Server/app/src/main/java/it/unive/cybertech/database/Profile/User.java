@@ -448,7 +448,7 @@ public class User extends Geoquerable implements Comparable<User> {
 
             documents = task.getResult().getDocuments();
             for (DocumentSnapshot documentSnapshot : documents )
-                Group.getGroupById(documentSnapshot.getId()).removeMember(this);
+                Group.obtainGroupById(documentSnapshot.getId()).removeMember(this);
 
             for (Material material: obtainMaterializedUserMaterials() )
                 material.deleteMaterial();
