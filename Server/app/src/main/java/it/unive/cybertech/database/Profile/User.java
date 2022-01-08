@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
-import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
@@ -270,7 +269,7 @@ public class User extends Geoquerable implements Comparable<User> {
             devicesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : devices)
-                devicesMaterialized.add(Device.getDeviceById(doc.getId()));
+                devicesMaterialized.add(Device.obtainDeviceById(doc.getId()));
         }
 
         return devicesMaterialized;
@@ -316,7 +315,7 @@ public class User extends Geoquerable implements Comparable<User> {
             materialsMaterialized = new ArrayList<>();
             for (DocumentReference doc : quarantineAssistance)
                 try {
-                    materialsMaterialized.add(Material.getMaterialById(doc.getId()));
+                    materialsMaterialized.add(Material.obtainMaterialById(doc.getId()));
                 } catch (NoMaterialFoundException e) {
                     e.printStackTrace();
                 }
@@ -425,36 +424,32 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method is use to delete an user from the database and all the reference to him. It return a boolean value that describe if the operation was done.
+     * The method is use to delete an user from the database and all the reference to him.
+     * It start to delete all the quarantine assistance where the user are in charge, after teh method delete the user from all the group and activity where is present, later delete all the  things associate to him and finally the method delete the user
+     * It return a boolean value that describe if the operation was done.
      *
      * @author Davide Finesso
      */
     public boolean deleteUser() {
         try {
-            //delete all the quarantine assistance where i'm in charge
             DocumentReference doc = getReference(table, this.id);
-
             Task<QuerySnapshot> task = getInstance().collection(QuarantineAssistance.table)
                     .whereEqualTo("inCharge", doc).get();
-
             Tasks.await(task);
-            List<DocumentSnapshot> documents = task.getResult().getDocuments();
 
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
             for (DocumentSnapshot documentSnapshot : documents )
                 QuarantineAssistance.obtainQuarantineAssistanceById(documentSnapshot.getId())
                         .updateInCharge_QuarantineAssistance(null);
 
-            //delete him from the group and activity
             task = getInstance().collection(Group.table)
                     .whereArrayContains("members", doc).get();
-
             Tasks.await(task);
-            documents = task.getResult().getDocuments();
 
+            documents = task.getResult().getDocuments();
             for (DocumentSnapshot documentSnapshot : documents )
                 Group.getGroupById(documentSnapshot.getId()).removeMember(this);
 
-            //delete all the things of this user
             for (Material material: obtainMaterializedUserMaterials() )
                 material.deleteMaterial();
 
@@ -467,10 +462,9 @@ public class User extends Geoquerable implements Comparable<User> {
             for (QuarantineAssistance assistance: obtainMaterializedQuarantineAssistance() )
                 assistance.deleteQuarantineAssistance();
 
-            //delete user from db
             Task<Void> t = deleteUserAsync();
             Tasks.await(t);
-            this.id = null;
+            this.setId(null);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
