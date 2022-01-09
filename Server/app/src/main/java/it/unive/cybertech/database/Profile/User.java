@@ -4,7 +4,7 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
-import static it.unive.cybertech.database.Groups.Activity.getActivityById;
+import static it.unive.cybertech.database.Groups.Activity.obtainActivityById;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
@@ -249,10 +249,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     public Date getBirthDayToDate() {
-        if (birthday != null)
-            return birthday.toDate();
-        else
-            return null;
+        return birthday.toDate();
     }
 
     private void setBirthday(Timestamp birthday) {
@@ -260,7 +257,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method return the field device materialize, if is null it create the field and after populate it.
+     * The method return the field devices materialize, if is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
@@ -290,7 +287,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method return the field lending in progress materialize, if is null it create the field and after populate it if and only if the expiry date is after now
+     * The method return the field lending in progress materialize with the expiry after now. If is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
@@ -640,12 +637,11 @@ public class User extends Geoquerable implements Comparable<User> {
             Device device = createDevice(token, deviceId, this.id);
             DocumentReference devDoc = getReference(Device.table, device.getId());
 
-            if (notContainDevice(device.getId())) {
-                Tasks.await(addDeviceAsync(devDoc));
-                this.devices.add(devDoc);
-                if (this.devicesMaterialized != null)
+            Tasks.await(addDeviceAsync(devDoc));
+            this.devices.add(devDoc);
+            if (this.devicesMaterialized != null)
                     this.obtainMaterializedDevices().add(device);
-            }
+
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -686,19 +682,6 @@ public class User extends Geoquerable implements Comparable<User> {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * The private method is use find if the user already have a device. It return a boolean value that describe if it have or not.
-     *
-     * @author Davide Finesso
-     */
-    private boolean notContainDevice(String deviceId) {
-        for (DocumentReference document : this.devices) {
-            if (deviceId.equals(document.getId()))
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -1007,9 +990,9 @@ public class User extends Geoquerable implements Comparable<User> {
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         for (DocumentSnapshot doc : documents) {
-            Activity activity = getActivityById(doc.getId());
+            Activity activity = obtainActivityById(doc.getId());
 
-            result.addAll(activity.getMaterializedParticipants());
+            result.addAll(activity.obtainMaterializedParticipants());
         }
 
         result.remove(this);
@@ -1031,9 +1014,9 @@ public class User extends Geoquerable implements Comparable<User> {
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         for (DocumentSnapshot doc : documents) {
-            Activity activity = getActivityById(doc.getId());
+            Activity activity = obtainActivityById(doc.getId());
 
-            for (User u : activity.getMaterializedParticipants()) {
+            for (User u : activity.obtainMaterializedParticipants()) {
                 if (u.getPositiveSince() != null && !u.equals(this)) {
                     result.add(activity);
                     break;

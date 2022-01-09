@@ -12,13 +12,14 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
@@ -26,9 +27,8 @@ import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 /**
- * Class use to describe a user's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Class use to describe a group instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set.
- * The class extend Geoquerable to query the users by their position.
  *
  * @author Davide Finesso
  */
@@ -47,7 +47,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private User materializedOwner;
+    private User ownerMaterialized;
     private ArrayList<User> membersMaterialized;
     private ArrayList<Chat> messagesMaterialized;
     private ArrayList<Activity> activitiesMaterialized;
@@ -74,7 +74,7 @@ public class Group {
         this.members = members;
         this.messages = messages;
         this.activities = activities;
-        this.materializedOwner = owner;
+        this.ownerMaterialized = owner;
     }
 
     public String getId() {
@@ -139,9 +139,9 @@ public class Group {
      * @author Davide Finesso
      */
     public User obtainMaterializedOwner() throws ExecutionException, InterruptedException {
-        if(materializedOwner == null)
-            materializedOwner = User.obtainUserById(owner.getId());
-        return materializedOwner;
+        if(ownerMaterialized == null)
+            ownerMaterialized = User.obtainUserById(owner.getId());
+        return ownerMaterialized;
     }
 
     /**
@@ -162,7 +162,7 @@ public class Group {
     }
 
     /**
-     * The method return the field messages materialize, if is null it create the field and after populate it.
+     * The method return the field messages materialize order by date time. If the field is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
@@ -171,8 +171,15 @@ public class Group {
             messagesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : messages) {
-                messagesMaterialized.add(Chat.getChatById(doc.getId()));
+                messagesMaterialized.add(Chat.obtainChatById(doc.getId()));
             }
+
+            messagesMaterialized.sort(new Comparator<Chat>() {
+                @Override
+                public int compare(Chat o1, Chat o2) {
+                    return o1.getDateTime().compareTo(o2.getDateTime());
+                }
+            });
         }
 
         return messagesMaterialized;
@@ -188,7 +195,7 @@ public class Group {
             activitiesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : activities) {
-                activitiesMaterialized.add(Activity.getActivityById(doc.getId()));
+                activitiesMaterialized.add(Activity.obtainActivityById(doc.getId()));
             }
         }
 
@@ -219,7 +226,7 @@ public class Group {
     }
 
     /**
-     * The method return the group with that id. If there isn't a user with that id it throw an exception.
+     * The method return the group with that id. If there isn't a group with that id it throw an exception.
      *
      * @author Davide Finesso
      */
@@ -262,10 +269,18 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to delete a group, all his activities and message as well. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean deleteGroup() {
         try {
-            for (Activity activity: obtainMaterializedActivities())
+            for (Activity activity : obtainMaterializedActivities())
                 activity.deleteActivity();
+            for(Chat chat : obtainMaterializedMessages())
+                chat.deleteChat();
+
             Task<Void> t = deleteGroupAsync();
             Tasks.await(t);
             this.id = null;
@@ -291,6 +306,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to update a group field description to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateDescription(String description) {
         try {
             Task<Void> t = updateDescriptionAsync(description);
@@ -318,12 +338,17 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The private method is use to update a group field owner to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     private boolean updateOwner(@NonNull DocumentReference user) {
         try {
             Task<Void> t = updateOwnerAsync(user);
             Tasks.await(t);
             this.owner = user;
-            this.materializedOwner = User.obtainUserById(user.getId());
+            this.ownerMaterialized = User.obtainUserById(user.getId());
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -346,6 +371,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to update a group field name to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateName(String name) {
         try {
             Task<Void> t = updateNameAsync(name);
@@ -373,6 +403,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to add a group message to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addMessage(@NonNull Chat message) throws Exception {
         try {
             DocumentReference messDoc = getReference(Chat.table, message.getId());
@@ -403,6 +438,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove a group message to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeMessage(@NonNull Chat message) throws Exception {
         try {
             DocumentReference messDoc = getReference(Chat.table, message.getId());
@@ -433,6 +473,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to add a group member to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addMember(@NonNull User user) {
         try {
             DocumentReference userDoc = getReference(User.table, user.getId());
@@ -464,7 +509,9 @@ public class Group {
     }
 
     /**
-     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     * The method is use to remove a group member to the database. It check if the remove user is the owner of the group and in case it change the owner, if there isn't any more member in the group the method delete it.
+     * Later the method check if the deleted user was the owner of some activities and it change or delete the activity as described before.
+     * It return a boolean value that describe if the operation was done.
      *
      * @author Davide Finesso
      */
@@ -495,7 +542,7 @@ public class Group {
             for (Activity activity : obtainMaterializedActivities() ) {
                 if(activity.getOwner().getId().equals(user.getId())) {
 
-                    if(activity.getMaterializedParticipants().isEmpty())
+                    if(activity.obtainMaterializedParticipants().isEmpty())
                         activity.deleteActivity();
 
                     else {
@@ -531,6 +578,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to add a group activity to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addActivity(@NonNull Activity activity) throws Exception {
         try {
             DocumentReference actDoc = getReference(Activity.table, activity.getId());
@@ -561,6 +613,11 @@ public class Group {
             throw new NoGroupFoundException("No group found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove a group activity to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeActivity(@NonNull Activity activity){
         try {
             DocumentReference actDoc = getReference(Activity.table, activity.getId());
@@ -576,53 +633,8 @@ public class Group {
         }
     }
 
-    /*@Deprecated
-    public static List<Group> obtainPositiveGroups(User user) throws ExecutionException, InterruptedException {
-        ArrayList<Group> arr = new ArrayList<>();
-        FirebaseFirestore db = getInstance();
-        DocumentReference userDoc = getReference(User.table, user.getId());
-
-        Task<QuerySnapshot> future = db.collection(table).whereArrayContains("members", userDoc).get();
-        Tasks.await(future);
-        List<DocumentSnapshot> documents = future.getResult().getDocuments();
-
-        for (DocumentSnapshot doc : documents) {
-            Group g = obtainGroupById(doc.getId());
-            List<User> members = g.obtainMaterializedMembers();
-
-            for (User u : members) {
-                if (u.getPositiveSince() != null) {
-                    arr.add(g);
-                    break;
-                }
-            }
-        }
-
-        return arr;
-    }
-
-    //TODO vedere se si puo fare con una query
-    @Deprecated
-    public List<Activity> obtainPositiveActivities() throws ExecutionException, InterruptedException {
-        ArrayList<Activity> result = new ArrayList<>();
-        List<Activity> activities = obtainMaterializedActivities();
-
-        for (Activity activity: activities) {
-            List<User> participants = activity.getMaterializedParticipants();
-
-            for (User user : participants) {
-                if(user.getPositiveSince() != null){
-                    result.add(activity);
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }*/
-
     /**
-     * the method is use to get all groups from database. it returns a task and the caller function waits until it finishes.
+     * the method is use to get all groups from database.
      *
      * @author Davide Finesso
      */
@@ -633,10 +645,32 @@ public class Group {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        for (DocumentSnapshot doc: documents )
+        for (DocumentSnapshot doc : documents )
             result.add(obtainGroupById(doc.getId()));
 
         return result;
     }
 
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Group group = (Group) o;
+        return Objects.equals(id, group.id);
+    }
+
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

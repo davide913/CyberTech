@@ -192,7 +192,7 @@ public class Material extends Geoquerable {
 
             return materializeRenter;
         }
-        else throw new NoMaterialFoundException("The material has no renter");
+        else throw new NoMaterialFoundException("The material ("+ id +") has no renter");
     }
 
     /**
@@ -284,7 +284,10 @@ public class Material extends Geoquerable {
      */
     public boolean deleteMaterial() {
         try {
-            this.obtainLending().deleteLendingInProgress();
+            try {
+                this.obtainLending().deleteLendingInProgress();
+            }
+            catch ( NoLendingInProgressFoundException exception ){};
 
             Task<Void> t = deleteMaterialAsync();
             Tasks.await(t);
@@ -486,7 +489,7 @@ public class Material extends Geoquerable {
         if (!list.isEmpty())
             return LendingInProgress.obtainLendingInProgressById(list.get(0).getId());
 
-        throw new NoLendingInProgressFoundException("no lending found connect to this material: " + id);
+        throw new NoLendingInProgressFoundException("No lending found connect to this material: " + id);
     }
 
     /**
