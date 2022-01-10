@@ -81,7 +81,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
             }
         });
         ///Binding data to the rent list and refreshing the relative adapter
-        Utils.executeAsync(() -> user.getMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 rentMaterials = result;

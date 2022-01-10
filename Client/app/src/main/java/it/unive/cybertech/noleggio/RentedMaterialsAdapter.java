@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -81,7 +79,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
          * @param position The item position in the list
          */
         public void bind(@NonNull final LendingInProgress item, @NonNull int position) {
-            Utils.executeAsync(() -> item.getMaterializedMaterial(), new Utils.TaskResult<Material>() {
+            Utils.executeAsync(item::obtainMaterializedMaterial, new Utils.TaskResult<Material>() {
                 @Override
                 public void onComplete(Material result) {
                     title.setText(result.getTitle());

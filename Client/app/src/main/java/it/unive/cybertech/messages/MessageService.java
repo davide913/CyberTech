@@ -55,7 +55,7 @@ public class MessageService extends FirebaseMessagingService {
 
     public static void sendMessageToUserDevices(@NonNull User user, @NonNull NotificationType type, String title, String message, Context ctx) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        Utils.executeAsync(user::getMaterializedDevices, new Utils.TaskResult<List<Device>>() {
+        Utils.executeAsync(user::obtainMaterializedDevices, new Utils.TaskResult<List<Device>>() {
             @Override
             public void onComplete(List<Device> result) {
                 for (Device device : result)
@@ -139,7 +139,7 @@ public class MessageService extends FirebaseMessagingService {
         if (user != null) {
             String deviceID = Settings.Secure.ANDROID_ID;
             try {
-                Device[] devices = (Device[]) Collections2.filter(user.getMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
+                Device[] devices = (Device[]) Collections2.filter(user.obtainMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
                 if (devices.length > 0) {
                     Device device = devices[0];
                     if (device == null) {

@@ -181,6 +181,7 @@
     <string name="rent_terminated_feedback_required_renter">L\'utente ora valuterà la cura prestata e ti verrà assegnato un punteggio di merito o demerito</string>
     <string name="irreversible_operation">Operazione irreversibile</string>
     <string name="delete_material_confirm">Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?</string>
+    <string name="green_pass_covid_19">Green pass COVID-19</string>
 
     <array name="sex">
         <item>Maschio</item>

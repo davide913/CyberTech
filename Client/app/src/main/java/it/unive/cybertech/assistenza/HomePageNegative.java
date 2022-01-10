@@ -1,12 +1,5 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.location.Address;
@@ -21,6 +14,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.firestore.GeoPoint;
 
@@ -86,9 +85,9 @@ public class HomePageNegative extends Fragment {
             try {
                 tList[0] = AssistanceType.getAssistanceTypes();
                 //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
-                myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(tList[0].get(0), myGeoPosition, 10);
+                myQuar[0] = QuarantineAssistance.obtainJoinableQuarantineAssistance(tList[0].get(0), myGeoPosition, 10);
 
-                inCharge[0] = getQuarantineAssistanceByInCharge(user);
+                inCharge[0] = QuarantineAssistance.obtainQuarantineAssistanceByInCharge(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -130,7 +129,7 @@ public class HomePageNegative extends Fragment {
                     myQuarantineList[0] = new ArrayList<>();
                     Log.d("Dimensione dopo reset nel secondo Thread", String.valueOf(myQuarantineList[0].size()));
                     try {
-                        myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(aux[0], myGeoPosition, 10);
+                        myQuar[0] = QuarantineAssistance.obtainJoinableQuarantineAssistance(aux[0], myGeoPosition, 10);
                         Log.d("Tipo", aux[0].getType());
                         Log.d("Dimensione", String.valueOf(myQuar[0].size()));
 

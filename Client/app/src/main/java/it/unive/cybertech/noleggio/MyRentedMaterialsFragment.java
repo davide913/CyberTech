@@ -4,26 +4,21 @@ import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
@@ -64,7 +59,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
      * */
     private void initList() {
         super.onStart();
-        Utils.executeAsync(() -> user.getMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMaterializedLendingInProgress(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 Log.d(ID, "Size: " + result.size());
@@ -99,7 +94,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
      * This function is used to update the lending list adding a new lending by id and update the adapter
      * */
     public void addLendingById(@NonNull String id) {
-        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+        Utils.executeAsync(() -> LendingInProgress.obtainLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 adapter.add(result);

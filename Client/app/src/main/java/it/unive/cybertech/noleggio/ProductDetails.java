@@ -150,7 +150,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
      */
     private void manageType() throws InterruptedException {
         expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
-        Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
+        Utils.executeAsync(() -> material.obtainMaterializedRenter(), new Utils.TaskResult<User>() {
             @Override
             public void onComplete(User renterUser) {
                 //If the renter is not null, it means that someone has rented the material
@@ -444,7 +444,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
      * @param callback The callback to call when the data has been retrieved
      */
     private void getLending(@NonNull String id, @NonNull Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+        Utils.executeAsync(() -> LendingInProgress.obtainLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 lending = result;
@@ -564,7 +564,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 ///Get the calculated points
                 double score = data.getDoubleExtra("Points", 0);
                 //Update the user total lending point and remove the lending from the database
-                Utils.executeAsync(() -> User.getUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
+                Utils.executeAsync(() -> User.obtainUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User result) {
                         Thread t = new Thread(() -> {
@@ -577,7 +577,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                 e.printStackTrace();
                             }
                             result.removeLending(lending);
-                            lending.removeLendingInProgress();
+                            lending.deleteLendingInProgress();
                             material.updateRenter(null);
                         });
                         t.start();

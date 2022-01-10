@@ -2,9 +2,7 @@ package it.unive.cybertech.gestione_covid;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.fragment.app.Fragment;
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +11,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import androidx.fragment.app.Fragment;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
-import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
-import it.unive.cybertech.utils.CachedUser;
 
 public class PosReportedFragment extends Fragment {
 
@@ -49,7 +46,7 @@ public class PosReportedFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    List<Activity> activityList = user.GetPositiveActivities();
+                    List<Activity> activityList = user.obtainPositiveActivities();
                     Boolean var = false;
                     ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                     TextView textView = v.findViewById(R.id.TextView_PosReported);

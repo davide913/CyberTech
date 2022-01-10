@@ -56,6 +56,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/profile_green_pass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/green_pass_covid_19" />
+
         <EditText
             android:id="@+id/profile_name"
             android:layout_width="match_parent"

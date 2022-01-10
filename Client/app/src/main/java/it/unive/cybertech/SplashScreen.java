@@ -1,7 +1,5 @@
 package it.unive.cybertech;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,13 +7,14 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.common.collect.Collections2;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Profile.Device;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.signup.LogInActivity;
@@ -53,7 +52,7 @@ public class SplashScreen extends AppCompatActivity {
         }
         if (currentUser != null) {
             MessageService.NotificationType finalType = type;
-            Utils.executeAsync(() -> User.getUserById(currentUser.getUid()), new Utils.TaskResult<User>() {
+            Utils.executeAsync(() -> User.obtainUserById(currentUser.getUid()), new Utils.TaskResult<User>() {
                 @Override
                 public void onComplete(User result) {
                     if (result != null) {
@@ -62,7 +61,7 @@ public class SplashScreen extends AppCompatActivity {
                         String deviceID = Settings.Secure.ANDROID_ID;
                         Thread t = new Thread(() -> {
                             try {
-                                if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
+                                if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.obtainMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
                                     sh.edit().putBoolean("FirstTime", false).apply();
                                     MessageService.getCurrentToken(task -> {
                                         if (task.isSuccessful()) {

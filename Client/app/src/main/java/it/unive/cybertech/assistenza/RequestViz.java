@@ -1,28 +1,21 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceById;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
@@ -70,7 +63,7 @@ public class RequestViz extends AppCompatActivity {
             if(id != null || idInCharge != null) {
                 Thread t = new Thread(() -> {
                     try {
-                        request[0] = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
+                        request[0] = QuarantineAssistance.obtainQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
                     } catch (ExecutionException | NoQuarantineAssistanceFoundException | InterruptedException e) {
                         e.printStackTrace();
                     }
