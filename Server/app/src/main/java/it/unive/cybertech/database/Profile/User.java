@@ -747,6 +747,8 @@ public class User extends Geoquerable implements Comparable<User> {
             this.lendingInProgress.remove(lenDoc);
             if (this.lendingInProgressMaterialized != null)
                 this.obtainAllMaterializedLendingInProgress().remove(lending);
+
+            lending.deleteLendingInProgress();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -854,6 +856,8 @@ public class User extends Geoquerable implements Comparable<User> {
             this.materials.remove(rentDoc);
             if (this.materialsMaterialized != null)
                 this.obtainMaterializedUserMaterials().remove(material);
+
+            material.deleteMaterial();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -940,14 +944,14 @@ public class User extends Geoquerable implements Comparable<User> {
         try {
             List<QuarantineAssistance> tmp = obtainMaterializedQuarantineAssistance()
                     .stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
-            if (tmp.size() > 0) {       //TODO aggiungere override equals su quarantineAssistance e cambiare la condizione dell'if con contains
+            if (tmp.size() > 0) {
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
                 if (this.quarantineAssistanceMaterialized != null)
                     this.obtainMaterializedQuarantineAssistance().remove(tmp.get(0));
-                Task<Void> t = quarDoc.delete();
-                Tasks.await(t);
+
+                assistance.deleteQuarantineAssistance();
                 return true;
             }
             return false;
@@ -955,6 +959,16 @@ public class User extends Geoquerable implements Comparable<User> {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * The method is use to delete all the quarantine assistance from a user and database as well.
+     *
+     * @author Davide Finesso
+     */
+    public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
+        for(QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+            this.removeQuarantineAssistance(quarantineAssistance);
     }
 
     /**
