@@ -84,7 +84,7 @@ public class PosReportedFragment extends Fragment {
             public void onError(Exception e) {
 
             }
-        }); //TODO ENRICO VERIFICARE SE IL CODICE COMMENTATO SOTTO FUNZIONA ANCHE CON EXECUTEASYNC QUA SOPRA
+        });
         /*
         Thread t = new Thread(new Runnable() {
             @Override

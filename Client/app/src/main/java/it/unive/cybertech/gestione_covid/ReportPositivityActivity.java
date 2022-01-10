@@ -87,7 +87,7 @@ public class ReportPositivityActivity extends AppCompatActivity {
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    user.updatePositiveSince(d); //TODO vedere se funziona
+                    user.updatePositiveSince(d);
                 }
             });
             t.start();
