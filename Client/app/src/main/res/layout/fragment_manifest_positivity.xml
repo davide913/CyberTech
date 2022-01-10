@@ -26,13 +26,13 @@
             android:id="@+id/textView_nome"
             android:layout_width="205dp"
             android:layout_height="43dp"
-            android:layout_marginTop="308dp"
+            android:layout_marginTop="284dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/name"
-            android:textColor="#212121"
+            android:textColor="#455A64"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.135"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +48,7 @@
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/surname"
-            android:textColor="#455A64"
+            android:textColor="#616161"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.136"
             app:layout_constraintStart_toStartOf="parent"
@@ -90,11 +90,11 @@
             android:id="@+id/textView_nome2"
             android:layout_width="99dp"
             android:layout_height="35dp"
-            android:layout_marginStart="84dp"
-            android:layout_marginTop="308dp"
+            android:layout_marginStart="88dp"
+            android:layout_marginTop="284dp"
             android:paddingTop="10dp"
             android:text="@string/nulls"
-            android:textColor="#455A64"
+            android:textColor="#616161"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -105,7 +105,7 @@
             android:layout_marginTop="28dp"
             android:paddingTop="10dp"
             android:text="@string/nulls"
-            android:textColor="#455A64"
+            android:textColor="#616161"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.337"
             app:layout_constraintStart_toStartOf="parent"
@@ -139,7 +139,7 @@
             android:inputType="text"
             android:paddingTop="10dp"
             android:text="@string/no_sign"
-            android:textColor="#455A64"
+            android:textColor="#616161"
             android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="@+id/textView_stateAlert"
             app:layout_constraintEnd_toEndOf="@+id/textView_stateAlert"
@@ -160,7 +160,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
-            app:layout_constraintVertical_bias="0.547" />
+            app:layout_constraintVertical_bias="0.529" />
 
         <ImageView
             android:id="@+id/imageView2"
@@ -188,7 +188,7 @@
             app:layout_constraintHorizontal_bias="0.492"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
-            app:layout_constraintVertical_bias="0.545" />
+            app:layout_constraintVertical_bias="0.527" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

@@ -13,22 +13,49 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
+import it.unive.cybertech.utils.Utils;
 
-public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder>{
+/**
+ * This is an adapter that provide a view for the rented materials
+ */
+public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder> {
 
+    public static final String ID = "RentedMaterialsAdapter";
     private List<LendingInProgress> showcaseList;
+    //A callback to call when an item is clicked
     private ItemClickListener clickListener;
+    private String tag = ID;
 
+    /**
+     * A constructor that accepts and overrides the default tag/id of the class
+     *
+     * @param showcaseList the list of item to show
+     * @param tag          The custom tag to add to each view
+     */
+    public RentedMaterialsAdapter(List<LendingInProgress> showcaseList, String tag) {
+        this.tag = tag;
+        this.showcaseList = showcaseList;
+    }
+
+    /**
+     * The constructor
+     *
+     * @param showcaseList the list of item to show
+     */
     public RentedMaterialsAdapter(List<LendingInProgress> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
+    /**
+     * A viewholder that is used for caching the view
+     */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView title, description;
         private final ImageView image;
@@ -45,22 +72,31 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final LendingInProgress item, int position) {
-            /*
-            try {
-                Material material = item.getMaterializedMaterial();
-                title.setText(material.getTitle());
-                description.setText(material.getDescription());
-                itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
-                if (material.getPhoto() != null) {
-                    byte[] arr = Base64.decode(material.getPhoto(), Base64.DEFAULT);
-                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+        /**
+         * Bind a lending to it's field
+         *
+         * @param item     the lending that is about to be displayed
+         * @param position The item position in the list
+         */
+        public void bind(@NonNull final LendingInProgress item, @NonNull int position) {
+            Utils.executeAsync(item::obtainMaterializedMaterial, new Utils.TaskResult<Material>() {
+                @Override
+                public void onComplete(Material result) {
+                    title.setText(result.getTitle());
+                    description.setText(result.getDescription());
+                    itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
+                    if (result.getPhoto() != null) {
+                        byte[] arr = Base64.decode(result.getPhoto(), Base64.DEFAULT);
+                        if (arr != null && arr.length > 0)
+                            image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                    }
                 }
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
 
-             */
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
         }
     }
 
@@ -70,6 +106,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public RentedMaterialsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.showcase_list_item, parent, false);
+        view.setTag(tag);
         return new ViewHolder(view);
     }
 
@@ -83,17 +120,42 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
         return showcaseList.size();
     }
 
+    /**
+     * Sets the listener of the click item
+     */
     void setClickListener(ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<LendingInProgress> materials){
+    /**
+     * Upload the list item replacing with new ones
+     *
+     * @param materials the new list of lending
+     * */
+    public void setItems(@NonNull List<LendingInProgress> materials) {
         this.showcaseList = materials;
     }
 
-    public void removeAt(int position){
+    /**
+     * Remove an item at the provided position and notify the adapter.
+     * Note: no check is made about the index
+     *
+     * @param position The item position in the list
+     * */
+    public void removeAt(int position) {
         showcaseList.remove(position);
         notifyItemRemoved(position);
-        notifyItemRangeChanged(position, showcaseList.size());
+        notifyItemRangeChanged(position, 1);
+    }
+
+    /**
+     * Add a new lending at the end of the list
+     *
+     * @param lending The item to add
+     * */
+    public void add(@NotNull LendingInProgress lending) {
+        showcaseList.add(lending);
+        notifyItemInserted(showcaseList.size() - 1);
+        notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
     }
 }

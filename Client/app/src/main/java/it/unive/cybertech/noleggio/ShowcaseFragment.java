@@ -1,55 +1,56 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.noleggio.HomePage.NEW_MATERIAL;
 import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.utils.Utils;
 
-public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListener{
+public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
-    private ArrayList<Material> items;
+    private static final int PERMISSIONS_FINE_LOCATION = 5;
+    private List<Material> items;
     private ShowcaseAdapter adapter;
+    private ProgressBar loader;
+    private RecyclerView list;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_showcase, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.showcase_list);
+        list = view.findViewById(R.id.showcase_list);
         FloatingActionButton add = view.findViewById(R.id.showcase_add);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        list.setLayoutManager(new GridLayoutManager(getContext(), 2));
         items = new ArrayList<>();
-        /*for (int i = 0; i < 20; i++)
-            items.add("prova" + i);*/
         adapter = new ShowcaseAdapter(items);
         adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        loader = view.findViewById(R.id.showcase_loader);
+        list.setAdapter(adapter);
         add.setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), AddProductForRent.class));
-        });
-
-        view.findViewById(R.id.test_showcase).setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RentFeedback.class));
+            startActivityForResult(new Intent(getActivity(), AddProductForRent.class), NEW_MATERIAL);
         });
         initList();
         return view;
@@ -57,41 +58,108 @@ public class ShowcaseFragment extends Fragment  implements Utils.ItemClickListen
 
     private void initList() {
         super.onStart();
-        //TODO get posizione
-        Thread t = new Thread(() -> {
-            try {
-                items = Material.getRentableMaterials(45, 12, 10000, user.getId());
-                Log.d("noleggio.HomePage", "Size: " + items.size());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
         try {
-            t.join();
-        } catch (InterruptedException e) {
+            Utils.getLocation(getActivity(), new Utils.TaskResult<Utils.Location>() {
+                @Override
+                public void onComplete(Utils.Location result) {
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                        @Override
+                        public void onComplete(List<Material> result) {
+                            Log.d(ID, "Size: " + result.size());
+                            items = result;
+                            adapter.setItems(items);
+                            adapter.notifyDataSetChanged();
+                            loader.setVisibility(View.GONE);
+                            list.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            e.printStackTrace();
+                            loader.setVisibility(View.GONE);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    e.printStackTrace();
+                    loader.setVisibility(View.GONE);
+                }
+            });
+
+        } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
-        adapter.setItems(items);
-        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RENT_CODE && resultCode == ProductDetails.RENT_SUCCESS) {
+        //TODO gestire aggiunta materiale
+        if (requestCode == RENT_CODE && resultCode == ProductDetails.SUCCESS) {
             int pos = data.getIntExtra("Position", -1);
             if (pos >= 0) {
                 adapter.removeAt(pos);
+                String idLending = data.getStringExtra("LendingID");
+                if (idLending != null) {
+                    HomePage h = (HomePage) getParentFragment();
+                    if (h != null) {
+                        MyRentedMaterialsFragment f = (MyRentedMaterialsFragment) h.getFragmentByID(MyRentedMaterialsFragment.ID);
+                        if (f != null)
+                            f.addLendingById(idLending);
+                    }
+                }
+            }
+        } else if (requestCode == NEW_MATERIAL && resultCode == ProductDetails.SUCCESS) {
+            String id = data.getStringExtra("ID");
+            if (id != null) {
+                Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
+                    @Override
+                    public void onComplete(Material result) {
+                        adapter.add(result);
+                        HomePage h = (HomePage) getParentFragment();
+                        if (h != null) {
+                            MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
+                            if (f != null)
+                                f.addMaterialToList(result);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                    }
+                });
             }
         }
     }
 
     public void onItemClick(View view, int position) {
-        Intent i = new Intent(getActivity(), ProductDetails.class);
-        i.putExtra("ID", items.get(position).getId());
-        i.putExtra("Position", position);
-        i.putExtra("Type", ID);
-        startActivityForResult(i, RENT_CODE);
+        if (user.getLendingPoint() < 0) {
+            HomePage h = (HomePage) getParentFragment();
+            if (h != null)
+                h.notifyNegativeLendingPoint();
+        } else {
+            Intent i = new Intent(getActivity(), ProductDetails.class);
+            Material m = items.get(position);
+            i.putExtra("ID", m.getId());
+            i.putExtra("Position", position);
+            i.putExtra("Type", m.getOwner().getId().equals(user.getId()) ? MyRentMaterialsFragment.ID : ID);
+            startActivityForResult(i, RENT_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            new Utils.Dialog(getContext())
+                    .hideCancelButton()
+                    .show(getString(R.string.position_required), getString(R.string.position_required_description));
+            loader.setVisibility(View.GONE);
+        } else {
+            initList();
+        }
     }
 }

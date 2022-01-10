@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQueryBounds;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,11 +15,19 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
+/**
+ * Who extend this class can be query by a position field.
+ *
+ * @author Davide Finesso
+ */
 public class Geoquerable {
 
-    //Aggiunta il 5/12/2021 funzionante
-    protected static List<DocumentSnapshot> getGeoQueries(Query query, double radiusInM,
+    /**
+     * This protected method is used to filter a passed query by a circle. The circle is describe by a center and a radius.
+     *
+     * @author Davide Finesso
+     */
+    protected static List<DocumentSnapshot> getGeoQueries(@NonNull Query query, double radiusInM,
                                                           GeoLocation center)
             throws ExecutionException, InterruptedException {
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);

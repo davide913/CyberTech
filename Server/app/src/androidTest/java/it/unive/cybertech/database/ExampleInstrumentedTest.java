@@ -1,7 +1,6 @@
 package it.unive.cybertech.database;
 
 import static it.unive.cybertech.database.Database.getDocument;
-import static it.unive.cybertech.database.Database.getInstance;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,19 +8,12 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
+import java.util.List;
 
-import it.unive.cybertech.database.Groups.Group;
-import it.unive.cybertech.database.Material.Material;
-import it.unive.cybertech.database.Profile.Device;
-import it.unive.cybertech.database.Profile.LendingInProgress;
+import it.unive.cybertech.database.Material.Type;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
@@ -40,16 +32,13 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        Group group = Group.getGroupById("GomAtcIw32fv13spLHE3");
+        User u = User.obtainUserById("nWZXf0hT5qSVURKdS3UkT0Te63E3");
 
-        Log.d("id", group.getId());
+        List<QuarantineAssistance> arr = u.obtainMaterializedQuarantineAssistance();
 
-        User u = User.getUserById("davide.finesso@hotmail.com");
+        Log.d("size", ""+arr.size());
 
-        Collection<User> us= u.getActivitiesUsers();
+        u.removeQuarantineAssistance(arr.get(0));
 
-
-
-        //Log.d("date", new Date().toString());
     }
 }

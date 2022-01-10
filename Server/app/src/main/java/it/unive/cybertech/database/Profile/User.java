@@ -4,7 +4,7 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
-import static it.unive.cybertech.database.Groups.Activity.getActivityById;
+import static it.unive.cybertech.database.Groups.Activity.obtainActivityById;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
@@ -22,24 +22,33 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
 
-import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
+import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
-//TODO una volta rimossa un campo negli arraylist procedere con l'eliminazione di quest'ultimo
-
-public class User extends Geoquerable {
+/**
+ * Class use to describe a user's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set.
+ * The class extend Geoquerable to query the users by their position.
+ *
+ * @author Davide Finesso
+ */
+public class User extends Geoquerable implements Comparable<User> {
     public final static String table = "users";
     private String id;
     private String name;
@@ -55,23 +64,37 @@ public class User extends Geoquerable {
     private Timestamp positiveSince;
     private long lendingPoint;
     private ArrayList<DocumentReference> devices;
-    private ArrayList<DocumentReference> lendingInProgresses;
+    private ArrayList<DocumentReference> lendingInProgress;
     private ArrayList<DocumentReference> materials;
     private ArrayList<DocumentReference> quarantineAssistance;
 
-    //aggiunti 17/12/2021 come cache per le materialized
+    /**
+     * Materialize field for increase the performance.
+     *
+     * @author Davide Finesso
+     */
     private ArrayList<Device> devicesMaterialized;
-    private ArrayList<LendingInProgress> lendingInProgressesMaterialized;
+    private ArrayList<LendingInProgress> lendingInProgressMaterialized;
     private ArrayList<Material> materialsMaterialized;
     private ArrayList<QuarantineAssistance> quarantineAssistanceMaterialized;
 
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
     public User() {
     }
 
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private User(String id, String name, String surname, Sex sex, Timestamp birthday,
                  String address, String city, String country, GeoPoint location, boolean greenPass,
                  Timestamp positiveSince, long lendingPoint, ArrayList<DocumentReference> devices,
-                 ArrayList<DocumentReference> lendingInProgresses, ArrayList<DocumentReference> materials,
+                 ArrayList<DocumentReference> lendingInProgress, ArrayList<DocumentReference> materials,
                  ArrayList<DocumentReference> quarantineAssistance) {
 
         this.id = id;
@@ -88,7 +111,7 @@ public class User extends Geoquerable {
         this.positiveSince = positiveSince;
         this.lendingPoint = lendingPoint;
         this.devices = devices;
-        this.lendingInProgresses = lendingInProgresses;
+        this.lendingInProgress = lendingInProgress;
         this.materials = materials;
         this.quarantineAssistance = quarantineAssistance;
     }
@@ -197,12 +220,12 @@ public class User extends Geoquerable {
         this.devices = devices;
     }
 
-    public List<DocumentReference> getLendingInProgresses() {
-        return lendingInProgresses;
+    public List<DocumentReference> getLendingInProgress() {
+        return lendingInProgress;
     }
 
-    private void setLendingInProgresses(ArrayList<DocumentReference> lendingInProgresses) {
-        this.lendingInProgresses = lendingInProgresses;
+    private void setLendingInProgress(ArrayList<DocumentReference> lendingInProgress) {
+        this.lendingInProgress = lendingInProgress;
     }
 
     public List<DocumentReference> getMaterials() {
@@ -233,89 +256,146 @@ public class User extends Geoquerable {
         this.birthday = birthday;
     }
 
-    public List<Device> getMaterializedDevices() throws ExecutionException, InterruptedException {
-        if(devicesMaterialized == null) {
+    /**
+     * The method return the field devices materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public List<Device> obtainMaterializedDevices() throws ExecutionException, InterruptedException {
+        if (devicesMaterialized == null) {
             devicesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : devices)
-                //try {
-                devicesMaterialized.add(Device.getDeviceById(doc.getId()));
-                //}
-                //catch (ExecutionException | InterruptedException | NoDeviceFoundException ignored){}
+                devicesMaterialized.add(Device.obtainDeviceById(doc.getId()));
         }
 
         return devicesMaterialized;
     }
 
-    public List<LendingInProgress> getMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
-        if(lendingInProgressesMaterialized == null) {
-            lendingInProgressesMaterialized = new ArrayList<>();
-
-            for (DocumentReference doc : lendingInProgresses)
-                lendingInProgressesMaterialized.add(LendingInProgress.getLendingInProgressById(doc.getId()));
+    /**
+     * The method return the field lending in progress materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    private ArrayList<LendingInProgress> obtainAllMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+        if (lendingInProgressMaterialized == null) {
+            lendingInProgressMaterialized = new ArrayList<>();
+            for (DocumentReference doc : lendingInProgress)
+                lendingInProgressMaterialized.add(LendingInProgress.obtainLendingInProgressById(doc.getId()));
         }
-
-        return lendingInProgressesMaterialized;
+        return lendingInProgressMaterialized;
     }
 
-    public List<Material> getMaterializedUserMaterials() throws ExecutionException, InterruptedException {
-        if(materialsMaterialized == null) {
+    /**
+     * The method return the field lending in progress materialize with the expiry after now. If is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMaterializedLendingInProgress() throws ExecutionException, InterruptedException {
+        obtainAllMaterializedLendingInProgress();
+        Timestamp timestamp = Timestamp.now();
+        List<LendingInProgress> result = new ArrayList<>();
+        for (LendingInProgress lending : lendingInProgressMaterialized) {
+            if (timestamp.compareTo(lending.getExpiryDate()) <= 0)
+                result.add(lending);
+        }
+        return result;
+    }
+
+    /**
+     * The method return the field materials materialize, if is null it create the field and after populate it if and only if the expiry date is after now.
+     *
+     * @author Davide Finesso
+     */
+    public List<Material> obtainMaterializedUserMaterials() throws ExecutionException, InterruptedException {
+        if (materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
-
-            for (DocumentReference doc : materials)
-                materialsMaterialized.add(Material.getMaterialById(doc.getId()));
+            for (DocumentReference doc : quarantineAssistance)
+                try {
+                    materialsMaterialized.add(Material.obtainMaterialById(doc.getId()));
+                } catch (NoMaterialFoundException e) {
+                    e.printStackTrace();
+                }
         }
-
-        return materialsMaterialized;
+        Timestamp timestamp = Timestamp.now();
+        List<Material> result = new ArrayList<>();
+        for (Material material : materialsMaterialized) {
+            if (timestamp.compareTo(material.getExpiryDate()) <= 0)
+                result.add(material);
+        }
+        return result;
     }
 
-
-    public List<QuarantineAssistance> getMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
-        if(quarantineAssistanceMaterialized == null) {
+    /**
+     * The method return the field quarantine assistance materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public List<QuarantineAssistance> obtainMaterializedQuarantineAssistance() throws ExecutionException, InterruptedException {
+        if (quarantineAssistanceMaterialized == null) {
             quarantineAssistanceMaterialized = new ArrayList<>();
 
-            for (DocumentReference doc : materials)
-                quarantineAssistanceMaterialized.add(QuarantineAssistance.getQuarantineAssistanceById(doc.getId()));
+            for (DocumentReference doc : quarantineAssistance)
+                quarantineAssistanceMaterialized.add(QuarantineAssistance.obtainQuarantineAssistanceById(doc.getId()));
         }
 
         return quarantineAssistanceMaterialized;
     }
 
-    //modificata il 13/12/2021 -> aggiunta la data di compleanno
-    public static User createUser(String id, String name, String surname, Sex sex, Date birthDay,
-                                  String address, String city, String country, long latitude, long longitude,
+    /**
+     * The method add to the database a new user and return it.
+     *
+     * @author Davide Finesso
+     */
+    public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, @NonNull Date birthDay,
+                                  @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
         if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
             throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
 
-        User user = new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country, new GeoPoint(latitude, longitude),
-                greenpass, null, 0, new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(),
-                new ArrayList<DocumentReference>(), null);
+        GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 
-        Task<Void> future = getInstance().collection(table).document(id).set(user);
+        Map<String, Object> myUser = new HashMap<>();
+        myUser.put("name", name);
+        myUser.put("surname", surname);
+        myUser.put("sex", sex);
+        myUser.put("birthday", birthDay);
+        myUser.put("address", address);
+        myUser.put("city", city);
+        myUser.put("country", country);
+        myUser.put("location", geoPoint);
+        myUser.put("geohash", GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude)));
+        myUser.put("greenPass", greenpass);
+        myUser.put("positiveSince", null);
+        myUser.put("lendingPoint", 0);
+
+        Task<Void> future = getInstance().collection(table).document(id).set(myUser);
         Tasks.await(future);
 
-        return user;
+        return new User(id, name, surname, sex, new Timestamp(birthDay), address, city, country,
+                geoPoint, greenpass, null, 0,
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-
-    public static User getUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
+    /**
+     * The method return the user with that id. If there isn't a user with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     */
+    public static User obtainUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        User user = null;
-
         if (document.exists()) {
-            user = document.toObject(User.class);
+            User user = document.toObject(User.class);
             user.setId(document.getId());
 
             if (user.devices == null)
                 user.devices = new ArrayList<>();
 
-            if (user.lendingInProgresses == null)
-                user.lendingInProgresses = new ArrayList<>();
+            if (user.lendingInProgress == null)
+                user.lendingInProgress = new ArrayList<>();
 
             if (user.materials == null)
                 user.materials = new ArrayList<>();
@@ -325,6 +405,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("No user found with this id: " + id);
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -335,11 +420,48 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("No user found with this id: " + id);
     }
 
+    /**
+     * The method is use to delete an user from the database and all the reference to him.
+     * It start to delete all the quarantine assistance where the user are in charge, after teh method delete the user from all the group and activity where is present, later delete all the  things associate to him and finally the method delete the user
+     * It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean deleteUser() {
         try {
+            DocumentReference doc = getReference(table, this.id);
+            Task<QuerySnapshot> task = getInstance().collection(QuarantineAssistance.table)
+                    .whereEqualTo("inCharge", doc).get();
+            Tasks.await(task);
+
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
+            for (DocumentSnapshot documentSnapshot : documents )
+                QuarantineAssistance.obtainQuarantineAssistanceById(documentSnapshot.getId())
+                        .updateInCharge_QuarantineAssistance(null);
+
+            task = getInstance().collection(Group.table)
+                    .whereArrayContains("members", doc).get();
+            Tasks.await(task);
+
+            documents = task.getResult().getDocuments();
+            for (DocumentSnapshot documentSnapshot : documents )
+                Group.obtainGroupById(documentSnapshot.getId()).removeMember(this);
+
+            for (Material material: obtainMaterializedUserMaterials() )
+                material.deleteMaterial();
+
+            for (LendingInProgress lending: obtainAllMaterializedLendingInProgress() )
+                lending.deleteLendingInProgress();
+
+            for (Device device: obtainMaterializedDevices() )
+                device.deleteDevice();
+
+            for (QuarantineAssistance assistance: obtainMaterializedQuarantineAssistance() )
+                assistance.deleteQuarantineAssistance();
+
             Task<Void> t = deleteUserAsync();
             Tasks.await(t);
-            this.id = null;
+            this.setId(null);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -347,8 +469,11 @@ public class User extends Geoquerable {
         }
     }
 
-
-    //modificata 30/11/2021, greenpass era maiuscolo
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -359,6 +484,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field greenpass to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateGreenPass(boolean val) {
         try {
             Task<Void> t = updateGreenPassAsync(val);
@@ -371,13 +501,18 @@ public class User extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            if (date != null) {                    //if the date is null is possible to delete the field date from db
-                Timestamp timestamp = new Timestamp(date);            //conversion from date to timestamp
+            if (date != null) {
+                Timestamp timestamp = new Timestamp(date);
                 return docRef.update("positiveSince", timestamp);
             } else {
                 return docRef.update("positiveSince", FieldValue.delete());
@@ -386,6 +521,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field positive since to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updatePositiveSince(Date date) {
         try {
             Task<Void> t = updatePositiveSinceAsync(date);
@@ -398,6 +538,11 @@ public class User extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateLocationAsync(String newCountry, String newCity, String newAddress, GeoPoint geoPoint)
             throws ExecutionException, InterruptedException {
 
@@ -414,6 +559,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field location to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude) {
         try {
             GeoPoint geoPoint = new GeoPoint(latitude, longitude);
@@ -430,17 +580,26 @@ public class User extends Geoquerable {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if (document.exists() && val >= 0)
+        if (document.exists())
             return docRef.update("lendingPoint", val);
         else
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to update an user field lending point to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateLendingPoint(long val) {
         try {
             Task<Void> t = updateLendingPointAsync(val);
@@ -453,27 +612,36 @@ public class User extends Geoquerable {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists())
-            return docRef.update(Device.table, FieldValue.arrayUnion(device));
+            return docRef.update("devices", FieldValue.arrayUnion(device));
         else
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to add an user device to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addDevice(@NonNull String token, @NonNull String deviceId) {
         try {
             Device device = createDevice(token, deviceId, this.id);
             DocumentReference devDoc = getReference(Device.table, device.getId());
 
-            if (notContainDevice(device.getId())) {
-                Tasks.await(addDeviceAsync(devDoc));
-                this.devices.add(devDoc);
-                //this.getMaterializedDevices().add(device);
-            }
+            Tasks.await(addDeviceAsync(devDoc));
+            this.devices.add(devDoc);
+            if (this.devicesMaterialized != null)
+                    this.obtainMaterializedDevices().add(device);
+
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -481,7 +649,11 @@ public class User extends Geoquerable {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -492,12 +664,18 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove an user device to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeDevice(@NonNull Device device) {
         try {
             DocumentReference devDoc = getReference(Device.table, device.getId());
             Tasks.await(removeDeviceAsync(devDoc));
             this.devices.remove(devDoc);
-            this.getMaterializedDevices().remove(device);
+            if (this.devicesMaterialized != null)
+                this.obtainMaterializedDevices().remove(device);
             device.deleteDevice();
             return true;
         } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
@@ -506,16 +684,11 @@ public class User extends Geoquerable {
         }
     }
 
-    //nuova, inserita il 13/12/2021
-    private boolean notContainDevice(String deviceId) {
-        for (DocumentReference document : this.devices) {
-            if (deviceId.equals(document.getId()))
-                return false;
-        }
-        return true;
-    }
-
-    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -526,13 +699,19 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to add an user lending to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addLending(@NonNull LendingInProgress lending) {
         try {
             DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
             Task<Void> t = addLendingAsync(lenDoc);
             Tasks.await(t);
-            this.lendingInProgresses.add(lenDoc);
-            this.getMaterializedLendingInProgress().add(lending);
+            this.lendingInProgress.add(lenDoc);
+            if (this.lendingInProgressMaterialized != null)
+                this.obtainAllMaterializedLendingInProgress().add(lending);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -540,7 +719,11 @@ public class User extends Geoquerable {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera LendingInProgress ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -551,13 +734,21 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to remove an user lending to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeLending(@NonNull LendingInProgress lending) {
         try {
             DocumentReference lenDoc = getReference(LendingInProgress.table, lending.getId());
             Task<Void> t = removeLendingAsync(lenDoc);
             Tasks.await(t);
-            this.lendingInProgresses.remove(lenDoc);
-            this.getMaterializedLendingInProgress().remove(lending);
+            this.lendingInProgress.remove(lenDoc);
+            if (this.lendingInProgressMaterialized != null)
+                this.obtainAllMaterializedLendingInProgress().remove(lending);
+
+            lending.deleteLendingInProgress();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -565,7 +756,48 @@ public class User extends Geoquerable {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
+    /**
+     * The method is use to obtain all the expired user's lendings in progress from the database.
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMyExpiredLending() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> result = new ArrayList<>();
+        Timestamp timestamp = Timestamp.now();
+
+        for (LendingInProgress lending : obtainAllMaterializedLendingInProgress()) {
+            if (timestamp.compareTo(lending.getExpiryDate()) > 0 && !lending.getWaitingForFeedback())
+                result.add(lending);
+        }
+
+        return result;
+    }
+
+    /**
+     * The method is use to obtain all the expired lending with the user's material from the database.
+     *
+     * @author Davide Finesso
+     */
+    public List<LendingInProgress> obtainMyMaterialsExpiredLending() throws ExecutionException, InterruptedException {
+        ArrayList<LendingInProgress> result = new ArrayList<>();
+
+        if (!materials.isEmpty()) {
+            Task<QuerySnapshot> future = getInstance().collection(LendingInProgress.table)
+                    .whereIn("material", materials).whereLessThan("expiryDate", Timestamp.now()).get();
+            Tasks.await(future);
+
+            for (DocumentSnapshot ref : future.getResult().getDocuments())
+                result.add(LendingInProgress.obtainLendingInProgressById(ref.getReference().getId()));
+        }
+
+        return result;
+    }
+
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -576,13 +808,19 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to add an user material to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addMaterial(@NonNull Material material) {
         try {
             DocumentReference rentDoc = getReference(Material.table, material.getId());
             Task<Void> t = addMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.add(rentDoc);
-            this.getMaterializedUserMaterials().add(material);
+            if (this.materialsMaterialized != null)
+                this.obtainMaterializedUserMaterials().add(material);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -590,7 +828,11 @@ public class User extends Geoquerable {
         }
     }
 
-    //modificata 30/11/2021, non salvo la classe intera RentMaterial ma solo la sua reference sul db
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeMaterialAsync(@NonNull DocumentReference material) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -601,13 +843,21 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found, id: " + id);
     }
 
+    /**
+     * The method is use to remove an user material to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeMaterial(@NonNull Material material) {
         try {
             DocumentReference rentDoc = getReference(Material.table, material.getId());
             Task<Void> t = removeMaterialAsync(rentDoc);
             Tasks.await(t);
             this.materials.remove(rentDoc);
-            this.getMaterializedUserMaterials().remove(material);
+            if (this.materialsMaterialized != null)
+                this.obtainMaterializedUserMaterials().remove(material);
+
+            material.deleteMaterial();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -615,7 +865,29 @@ public class User extends Geoquerable {
         }
     }
 
-    //aggiunta 17/12/2021
+    /**
+     * The method is use to obtain all the user's expired material from the database.
+     *
+     * @author Davide Finesso
+     */
+    public List<Material> getExpiredMaterial() throws ExecutionException, InterruptedException {
+        ArrayList<Material> result = new ArrayList<>();
+        Timestamp timestamp = Timestamp.now();
+
+        for (Material material : obtainMaterializedUserMaterials()) {
+            if (timestamp.compareTo(material.getExpiryDate()) >= 0)
+                result.add(material);
+
+        }
+
+        return result;
+    }
+
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> addQuarantineAssistanceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -626,6 +898,11 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to add an user quarantine assistance to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
                                            String description, Date date, double latitude, double longitude) {
         try {
@@ -634,7 +911,8 @@ public class User extends Geoquerable {
             DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
             Tasks.await(addQuarantineAssistanceAsync(quarDoc));
             this.quarantineAssistance.add(quarDoc);
-            this.getMaterializedQuarantineAssistance().add(assistance);
+            if (this.quarantineAssistanceMaterialized != null)
+                this.obtainMaterializedQuarantineAssistance().add(assistance);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -642,7 +920,11 @@ public class User extends Geoquerable {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> removeQuarantineAssistanceAsync(@NonNull DocumentReference assistance) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -653,38 +935,66 @@ public class User extends Geoquerable {
             throw new NoUserFoundException("User not found with this id: " + id);
     }
 
+    /**
+     * The method is use to remove an user quarantine assistance to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean removeQuarantineAssistance(@NonNull QuarantineAssistance assistance) {
         try {
-            if(getMaterializedDevices().contains(assistance)){
+            List<QuarantineAssistance> tmp = obtainMaterializedQuarantineAssistance()
+                    .stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
+            if (tmp.size() > 0) {
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
-                this.getMaterializedQuarantineAssistance().remove(assistance);
-                quarDoc.delete();
+                if (this.quarantineAssistanceMaterialized != null)
+                    this.obtainMaterializedQuarantineAssistance().remove(tmp.get(0));
+
+                assistance.deleteQuarantineAssistance();
                 return true;
             }
             return false;
-        } catch ( NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    //aggiunta il 7/12/2021
-    public static List<LendingInProgress> getUserLandingsInProgress(String id) throws ExecutionException, InterruptedException {
-        User user = getUserById(id);
-
-        return user.getMaterializedLendingInProgress();
+    /**
+     * The method is use to delete all the quarantine assistance from a user and database as well.
+     *
+     * @author Davide Finesso
+     */
+    public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
+        for(QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+            this.removeQuarantineAssistance(quarantineAssistance);
     }
 
-    //aggiunta il 7/12/2021
-    public static List<Device> getUserDevices(String id) throws ExecutionException, InterruptedException {
-        User user = getUserById(id);
-
-        return user.getMaterializedDevices();
+    /**
+     * The method is use to obtain all the lending in progress from a user describe by a passed id.
+     *
+     * @author Davide Finesso
+     */
+    public static List<LendingInProgress> obtainUserLendingInProgress(String id) throws ExecutionException, InterruptedException {
+        return obtainUserById(id).obtainMaterializedLendingInProgress();
     }
 
-    public Collection<User> getActivitiesUsers() throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to obtain all the devices from a user describe by a a passed id.
+     *
+     * @author Davide Finesso
+     */
+    public static List<Device> obtainUserDevices(String id) throws ExecutionException, InterruptedException {
+        return obtainUserById(id).obtainMaterializedDevices();
+    }
+
+    /**
+     * The method is use to obtain a collection with all users ( not repeated ) that are in the same activities of caller one.
+     *
+     * @author Davide Finesso
+     */
+    public Collection<User> obtainActivitiesUsers() throws ExecutionException, InterruptedException {
         TreeSet<User> result = new TreeSet<>();
         DocumentReference userDoc = getReference(table, this.id);
 
@@ -693,17 +1003,22 @@ public class User extends Geoquerable {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        for (DocumentSnapshot doc : documents ) {
-            Activity activity = getActivityById(doc.getId());
+        for (DocumentSnapshot doc : documents) {
+            Activity activity = obtainActivityById(doc.getId());
 
-            result.addAll(activity.getMaterializedParticipants());
+            result.addAll(activity.obtainMaterializedParticipants());
         }
 
         result.remove(this);
         return result;
     }
 
-    public List<Activity> GetPositiveActivities() throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to obtain a list with all activities that have at least one positive as member.
+     *
+     * @author Davide Finesso
+     */
+    public List<Activity> obtainPositiveActivities() throws ExecutionException, InterruptedException {
         ArrayList<Activity> result = new ArrayList<>();
         DocumentReference userDoc = getReference(table, this.id);
 
@@ -712,11 +1027,11 @@ public class User extends Geoquerable {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        for (DocumentSnapshot doc : documents ) {
-            Activity activity = getActivityById(doc.getId());
+        for (DocumentSnapshot doc : documents) {
+            Activity activity = obtainActivityById(doc.getId());
 
-            for (User u: activity.getMaterializedParticipants() ) {
-                if(u.getPositiveSince() != null) {
+            for (User u : activity.obtainMaterializedParticipants()) {
+                if (u.getPositiveSince() != null && !u.equals(this)) {
                     result.add(activity);
                     break;
                 }
@@ -726,17 +1041,38 @@ public class User extends Geoquerable {
         return result;
     }
 
-
-
-
-    //metodo equal per confronti
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public boolean equals(Object o) {
-        if (o instanceof User) {
-            User user = (User) o;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
 
-            return user.getId().equals(this.getId());
-        }
-        return false;
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    /**
+     * Used for don't have the same user in a set. it return 0 if the id are the same, 1 otherwise.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int compareTo(User o) {
+        if (o.getId().equals(this.getId()))
+            return 0;
+        return 1;
     }
 }

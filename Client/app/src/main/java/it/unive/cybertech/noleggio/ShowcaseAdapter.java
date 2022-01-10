@@ -1,6 +1,7 @@
 package it.unive.cybertech.noleggio;
 
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +11,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 
-public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder>{
+public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder> {
 
     private List<Material> showcaseList;
     private ItemClickListener clickListener;
@@ -42,12 +47,18 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         }
 
         public void bind(final Material item, int position) {
-            title.setText(item.getTitle());
+            String titleStr = item.getTitle();
+            if (item.getOwner().getId().equals(user.getId())) {
+                titleStr += " (TUO)";
+                title.setTextColor(Color.BLUE);
+            }
+            title.setText(titleStr);
             description.setText(item.getDescription());
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
             if (item.getPhoto() != null) {
                 byte[] arr = Base64.decode(item.getPhoto(), Base64.DEFAULT);
-                image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                if (arr != null && arr.length > 0)
+                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
             }
         }
     }
@@ -75,13 +86,19 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<Material> materials){
+    public void setItems(List<Material> materials) {
         this.showcaseList = materials;
     }
 
-    public void removeAt(int position){
-        showcaseList.remove(position);
+    public Material removeAt(int position) {
+        Material removed = showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
+        return removed;
+    }
+
+    public void add(Material m) {
+        showcaseList.add(m);
+        notifyItemInserted(showcaseList.size() - 1);
     }
 }

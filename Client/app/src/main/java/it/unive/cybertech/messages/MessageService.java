@@ -29,19 +29,23 @@ import org.json.JSONObject;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Device;
 import it.unive.cybertech.database.Profile.User;
+import it.unive.cybertech.utils.Utils;
 
 public class MessageService extends FirebaseMessagingService {
 
     public enum NotificationType {
         base,
         coronavirus,
-        assistance_chat
+        assistance_chat,
+        request_accepted,
+        request_stop_helping
     }
 
     private final static String TAG = "FirebaseMessage";
@@ -52,13 +56,19 @@ public class MessageService extends FirebaseMessagingService {
     }
 
     public static void sendMessageToUserDevices(@NonNull User user, @NonNull NotificationType type, String title, String message, Context ctx) {
-        try {
-            RequestQueue queue = Volley.newRequestQueue(ctx);
-            for (Device device : user.getMaterializedDevices())
-                sendMessage(device, type, title, message, queue);
-        } catch (InterruptedException | ExecutionException e) {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        Utils.executeAsync(user::obtainMaterializedDevices, new Utils.TaskResult<List<Device>>() {
+            @Override
+            public void onComplete(List<Device> result) {
+                for (Device device : result)
+                    sendMessage(device, type, title, message, queue);
+            }
 
-        }
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
     }
 
     public static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, Context ctx) {
@@ -67,7 +77,7 @@ public class MessageService extends FirebaseMessagingService {
     }
 
     private static void sendMessage(@NonNull Device device, @NonNull NotificationType type, String title, String message, RequestQueue queue) {
-        device.updateLastUsed();
+        Utils.executeAsync(device::updateLastUsed, null);
         String url = "https://fcm.googleapis.com/fcm/send";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
@@ -95,6 +105,14 @@ public class MessageService extends FirebaseMessagingService {
                         case assistance_chat:
                             notification.put("android_channel_id", "assistance_chat");
                             notification.put("icon", "notification_assistance_chat_icon");
+                            break;
+                        case request_accepted:
+                            notification.put("android_channel_id", "request_accepted");
+                            notification.put("icon", "notification_icon");
+                            break;
+                        case request_stop_helping:
+                            notification.put("android_channel_id", "request_stop_helping");
+                            notification.put("icon", "notification_icon");
                             break;
                     }
                     notification.put("click_action", "OPEN_SPLASH_SCREEN");
@@ -131,7 +149,7 @@ public class MessageService extends FirebaseMessagingService {
         if (user != null) {
             String deviceID = Settings.Secure.ANDROID_ID;
             try {
-                Device[] devices = (Device[]) Collections2.filter(user.getMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
+                Device[] devices = (Device[]) Collections2.filter(user.obtainMaterializedDevices(), f -> f.getDeviceId().equals(deviceID)).toArray();
                 if (devices.length > 0) {
                     Device device = devices[0];
                     if (device == null) {
@@ -180,6 +198,15 @@ public class MessageService extends FirebaseMessagingService {
                 iconResource = R.drawable.notification_assistance_chat_icon;
                 argb = ctx.getColor(R.color.light_green_fs);
                 break;
+            case request_accepted:
+                iconResource = R.drawable.notification_icon;
+                argb = ctx.getColor(R.color.dark_green_fs);
+                break;
+            case request_stop_helping:
+                iconResource = R.drawable.notification_icon;
+                argb = ctx.getColor(R.color.orange_fs);
+                break;
+
         }
         createNotificationChannelIfNotExists(type, ctx);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, channelID)
@@ -213,6 +240,16 @@ public class MessageService extends FirebaseMessagingService {
                 description = "Canale utilizzato per avvisarti di una eventuale espoizione al nuovo coronavirus SARS-CoV-2 (COVID-19)";
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
+            case request_accepted:
+                name = "Avvisi";
+                description = "Canale utilizzato per avvisare l'utente positivo che una sua richiesta di aiuto è stata presa in carico";
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                break;
+            case request_stop_helping:
+                name = "Avvisi";
+                description = "Canale utilizzato per avvisare l'utente positivo che una sua richiesta di aiuto precedentemente presa in carico non verrà più portata avanti";
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                break;
         }
 
         NotificationChannel channel = new NotificationChannel(channelID, name, importance);
@@ -230,6 +267,10 @@ public class MessageService extends FirebaseMessagingService {
                 return "coronavirus";
             case assistance_chat:
                 return "assistance_chat";
+            case request_accepted:
+                return "request_accepted";
+            case request_stop_helping:
+                return "request_stop_helping";
         }
     }
 

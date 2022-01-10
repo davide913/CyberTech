@@ -41,11 +41,11 @@ public class HomePage extends Fragment {
         return view;
     }
 
-    //Setta i fragment della viewpager
+    //create the fragments of the ViewPager
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getChildFragmentManager());
-        adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività");
-        adapter.addFragment(new PosReportedFragment(), "Segnalazioni Ricevute");
+        adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività"); //Creation of the first fragments
+        adapter.addFragment(new PosReportedFragment(), "Segnalazioni Ricevute"); //Creation of the second fragments
         viewPager.setAdapter(adapter);
     }
 
@@ -58,11 +58,9 @@ public class HomePage extends Fragment {
 
         setupViewPager(viewPager);
 
-        /*setSupportActionBar(toolbar_covid_homepage);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);*/
-
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -74,6 +72,9 @@ public class HomePage extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    //Adapter for ViewPager
     static class Adapter extends FragmentPagerAdapter {
 
         private final List<Fragment> mFragmentList = new ArrayList<>();

@@ -14,12 +14,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
 public class PosReportedFragment extends Fragment {
 
@@ -43,16 +46,59 @@ public class PosReportedFragment extends Fragment {
 
     private void initViews(View v) throws ExecutionException, InterruptedException {
 
+        Utils.executeAsync(() -> user.obtainPositiveActivities(), new Utils.TaskResult<List<Activity>>() {
+            @Override
+            public void onComplete(List<Activity> result) {
+                List<Activity> activityList = result; //activity list with positives
+                Boolean var = false;
+                ImageView imageView = v.findViewById(R.id.imageView_PosReported);
+                TextView textView = v.findViewById(R.id.TextView_PosReported);
+                TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
+                ListView listView = v.findViewById(R.id.ListView_signReported);
+
+                if(!activityList.isEmpty())
+                    var = true;
+
+                if(var){
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                    listView.setVisibility(View.VISIBLE);
+                    textView1.setVisibility(View.VISIBLE);
+
+                    ArrayAdapter<Activity> adapter;
+
+                    adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList); //creation of the ListView
+
+                    listView.setAdapter(adapter);
+                }
+                else{
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                    listView.setVisibility(View.INVISIBLE);
+                    textView1.setVisibility(View.INVISIBLE);
+                }
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        }); //TODO ENRICO VERIFICARE SE IL CODICE COMMENTATO SOTTO FUNZIONA ANCHE CON EXECUTEASYNC QUA SOPRA
+        /*
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    ArrayList<Group> groupList = Group.getPositiveGroups(user);
+                    List<Activity> activityList = user.obtainPositiveActivities();
                     Boolean var = false;
                     ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                     TextView textView = v.findViewById(R.id.TextView_PosReported);
                     TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
                     ListView listView = v.findViewById(R.id.ListView_signReported);
+
+                    if(!activityList.isEmpty())
+                        var = true;
 
                     if(var){
                         imageView.setVisibility(View.INVISIBLE);
@@ -60,9 +106,9 @@ public class PosReportedFragment extends Fragment {
                         listView.setVisibility(View.VISIBLE);
                         textView1.setVisibility(View.VISIBLE);
 
-                        ArrayAdapter<Group> adapter;
+                        ArrayAdapter<Activity> adapter;
 
-                        adapter = new CustomSignReceivedAdapter(getContext(), 0, groupList); //TODO qua prenderà in ingresso userList
+                        adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList);
 
                         listView.setAdapter(adapter);
                     }
@@ -82,6 +128,8 @@ public class PosReportedFragment extends Fragment {
         });
         t.start();
         t.join();
+
+         */
 
     }
 

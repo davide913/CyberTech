@@ -161,8 +161,9 @@
     <color name="light_green_fs">#90c024</color>
     <color name="red_fs">#e5042e</color>
     <color name="orange_fs">#f29200</color>
-
+    <color name="colorIcon">@color/black</color>
     <color name="viola_mask">#8A3264</color>
     <color name="grigio_mask">#C8D2EB</color>
     <color name="ciuc">#00788B</color>
+    <color name="light_grey">#ededed</color>
 </resources>

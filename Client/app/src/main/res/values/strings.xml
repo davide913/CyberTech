@@ -23,7 +23,7 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="groupName">Nome gruppo:</string>
+    <string name="groupName">Nome gruppo</string>
     <string name="button">Button</string>
     <string name="textview">TextView</string>
     <string name="name_dotted">Nome:</string>
@@ -148,6 +148,47 @@
     <string name="place">Luogo</string>
     <string name="activityCreated">Attività creata con successo!</string>
     <string name="expired">Scadute</string>
+    <string name="request_accepted">Richiesta accettata</string>
+    <string name="request_rejected">Richiesta respinta</string>
+    <string name="feedback">Feedback</string>
+    <string name="showcase_until_dotted">In vetrina fino al:</string>
+    <string name="groupDescription">Descrizione</string>
+    <string name="nMembers">Partecipanti: </string>
+    <string name="addnewgroupactivity">Aggiunge una nuova attività al gruppo</string>
+    <string name="groupActivityName">Nome attività</string>
+    <string name="groupActivityDescription">Descrizione</string>
+    <string name="Location">Luogo</string>
+    <string name="OnlyGroupMembersForActivityJoin">Solo i membri del gruppo possono partecipare alle attività!</string>
+    <string name="GroupActivitySubscribed">Ti sei iscritto all\'attività!</string>
+    <string name="GroupActivityRemoved">Hai annullato la tua iscrizione!</string>
+    <string name="LeftGroup">Hai lasciato il gruppo!</string>
+    <string name="NowMember">Ora sei un membro del gruppo!</string>
+    <string name="groupActivityImgDescription">Image of current activity</string>
+    <string name="something_wrong">Qualcosa è andato storto</string>
+    <string name="error">Errore</string>
+    <string name="material_error">Non è stato possibile aggiungere il tuo materiale in prestito. Riprova tra qualche istante</string>
+    <string name="done_exclamation">Fatto!</string>
+    <string name="material_published_to_showcase">Il tuo annuncio è stato pubblicato</string>
+    <string name="deadlines">Scadenze</string>
+    <string name="request_sended">Richiesta inviata con successo</string>
+    <string name="error_sending_request">Errore nell\'invio della richiesta</string>
+    <string name="rent_extension">Estensione prestito</string>
+    <string name="confirm_rent_extension">\"Confermi la nuova data di restituzione: \"</string>
+    <string name="rent_extension_request_description">Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell\'utente accettare o rifiutare la proposta</string>
+    <string name="rent_terminated">Prestito terminato</string>
+    <string name="rent_terminated_feedback_required">Prima di concludere ci serve il tuo feedback</string>
+    <string name="waiting_for_feedback">in attesa di restituzione</string>
+    <string name="rent_terminated_feedback_required_renter">L\'utente ora valuterà la cura prestata e ti verrà assegnato un punteggio di merito o demerito</string>
+    <string name="irreversible_operation">Operazione irreversibile</string>
+    <string name="delete_material_confirm">Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?</string>
+    <string name="green_pass_covid_19">Green pass COVID-19</string>
+    <string name="attention">Attenzione!</string>
+    <string name="request_help_assistance">Se vuoi chiedere aiuto ad un volontario, clicca il tast \'Aggiungi una richiesta\' per ricevere aiuto</string>
+    <string name="delete_request_warning">Vuoi davvero eliminare la richiesta?</string>
+    <string name="request_taken_in_charge">Vuoi prendere in carico questa richiesta?</string>
+    <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
+    <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
+    <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
 
     <array name="sex">
         <item>Maschio</item>

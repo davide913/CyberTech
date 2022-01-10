@@ -1,69 +1,106 @@
 package it.unive.cybertech.groups;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
+/**
+ * The main activity called by fragment "{@link it.unive.cybertech.groups.HomePage}".
+ * It supplies the selected group.
+ * It is splitted by two fragments:
+ *
+ * @author Daniele Dotto
+ * @see "{@link it.unive.cybertech.groups.GroupInfo}"
+ * @see "{@link it.unive.cybertech.groups.activities.GroupActivities}"
+ * @since 1.1
+ */
 public class GroupHomePage extends AppCompatActivity {
-    private Group thisGroup;
-    private String idGroup;
+    private @Nullable
+    Group thisGroup;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_home_page);
-        @NonNull Thread t = new Thread(this::bindThisGroup);
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        bindThisGroup();
         initTabs();
-        initActionBar();
     }
 
-    private void initTabs(){
+    /**
+     * Find and bind the layout tab (and viewholder) and add the activity fragments.
+     *
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private void initTabs() {
         @NonNull TabLayout tabLayout = findViewById(R.id.groups_tabs);
         @NonNull ViewPager viewPager = findViewById(R.id.group_infoViewPager);
         tabLayout.setupWithViewPager(viewPager);
         @NonNull Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getSupportFragmentManager());
-        adapter.addFragment(new GroupInfo(), getString(R.string.information));
-        adapter.addFragment(new GroupActivities(), getString(R.string.activity));
+        adapter.addFragment(new GroupInfo(), getString(R.string.information), "GroupInfo");
+        adapter.addFragment(new GroupActivities(), getString(R.string.activity), "GroupActivities");
         viewPager.setAdapter(adapter);
     }
 
+    /**
+     * Bind the selected group with group present in DB using the ID.
+     *
+     * @author Daniele Dotto
+     * @see "{@link #thisGroup}"
+     * @since 1.1
+     */
     private void bindThisGroup() {
-            try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> Group.obtainGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group> () {
+
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
+                initActionBar();
             }
-            idGroup = thisGroup.getId();
-            if(idGroup == null || idGroup.length() == 0)
-                finish();
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
     }
 
+    /**
+     * Initialize the action bar values.
+     */
     private void initActionBar() {
         @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
         Objects.requireNonNull(actionBar).setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(thisGroup.getName());
+        actionBar.setTitle(getThisGroup().getName());
     }
 
+    /**
+     * Manage the 'back button'.
+     *
+     * @param item The 'back button'
+     * @return true when the current activity is finished
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -73,7 +110,13 @@ public class GroupHomePage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public Group getThisGroup() {
-        return thisGroup;
+    /**
+     * Check if "{@link #thisGroup}" is not null and return it
+     *
+     * @return the selected group
+     */
+    public @NonNull
+    Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
     }
 }
