@@ -113,6 +113,8 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
             @Override
             public void onComplete(List<Group> result) {
                 groups = result;
+                getAdapter().setItems(groups);
+                getAdapter().notifyDataSetChanged();
             }
 
             @Override
@@ -124,8 +126,6 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
                 }
             }
         });
-        getAdapter().setItems(groups);
-        getAdapter().notifyDataSetChanged();
     }
 
     /**

@@ -1,8 +1,9 @@
 package it.unive.cybertech.groups;
 
+import static it.unive.cybertech.utils.Utils.executeAsync;
+
 import android.os.Bundle;
 import android.view.MenuItem;
-import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +14,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
@@ -41,7 +41,6 @@ public class GroupHomePage extends AppCompatActivity {
         setContentView(R.layout.activity_group_home_page);
         bindThisGroup();
         initTabs();
-        initActionBar();
     }
 
     /**
@@ -73,6 +72,7 @@ public class GroupHomePage extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Group result) {
                 thisGroup = result;
+                initActionBar();
             }
 
             @Override

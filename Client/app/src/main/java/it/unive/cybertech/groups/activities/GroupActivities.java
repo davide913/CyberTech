@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
@@ -163,7 +161,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
                 }
             }
         });
-        executeAsync(() -> getThisGroup().getMaterializedActivities(), new TaskResult<List<Activity>>() {
+        executeAsync(() -> getThisGroup().obtainMaterializedActivities(), new TaskResult<List<Activity>>() {
             @Override
             public void onComplete(@NonNull List<Activity> result) {
                 activities = result;

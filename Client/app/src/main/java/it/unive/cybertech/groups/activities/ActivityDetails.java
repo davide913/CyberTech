@@ -3,6 +3,7 @@ package it.unive.cybertech.groups.activities;
 import static it.unive.cybertech.groups.activities.GroupActivities.RELOAD_ACTIVITY;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -26,12 +27,6 @@ import java.util.Objects;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
-
-import static it.unive.cybertech.groups.activities.GroupActivities.RELOAD_ACTIVITY;
-import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
-import static it.unive.cybertech.utils.Utils.executeAsync;
-
 import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
@@ -183,7 +178,7 @@ public class ActivityDetails extends AppCompatActivity {
     private boolean checkGroupMember() {
 
         final boolean[] stato = {false};
-        executeAsync(() -> getThisGroup().getMaterializedMembers().contains(user), new TaskResult<Boolean>() {
+        executeAsync(() -> getThisGroup().obtainMaterializedMembers().contains(user), new TaskResult<Boolean>() {
             @Override
             public void onComplete(@NonNull Boolean result) {
                 stato[0] = result;
@@ -209,7 +204,7 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private boolean checkGroupActivityMember() {
-        executeAsync(() -> getThisGroupActivity().getMaterializedParticipants().contains(user), new TaskResult<Boolean>() {
+        executeAsync(() -> getThisGroupActivity().obtainMaterializedParticipants().contains(user), new TaskResult<Boolean>() {
             @Override
             public void onComplete(@NonNull Boolean result) {
                 status = result;
@@ -234,7 +229,7 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private void bindThisGroupActivity() {
-        executeAsync(() -> Group.getGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group>() {
+        executeAsync(() -> Group.obtainGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group>() {
             @Override
             public void onComplete(@NonNull Group result) {
                 thisGroup = result;
@@ -249,7 +244,7 @@ public class ActivityDetails extends AppCompatActivity {
                 }
             }
         });
-        executeAsync(() -> Activity.getActivityById(getIntent().getStringExtra("ID_GroupActivity")), new TaskResult<Activity>() {
+        executeAsync(() -> Activity.obtainActivityById(getIntent().getStringExtra("ID_GroupActivity")), new TaskResult<Activity>() {
             @Override
             public void onComplete(@NonNull Activity result) {
                 thisGroupActivity = result;
