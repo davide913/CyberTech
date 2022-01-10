@@ -53,7 +53,7 @@ public class SplashScreen extends AppCompatActivity {
         }
         if (currentUser != null) {
             MessageService.NotificationType finalType = type;
-            Utils.executeAsync(() -> User.getUserById(currentUser.getUid()), new Utils.TaskResult<User>() {
+            Utils.executeAsync(() -> User.obtainUserById(currentUser.getUid()), new Utils.TaskResult<User>() {
                 @Override
                 public void onComplete(User result) {
                     if (result != null) {
@@ -62,7 +62,7 @@ public class SplashScreen extends AppCompatActivity {
                         String deviceID = Settings.Secure.ANDROID_ID;
                         Thread t = new Thread(() -> {
                             try {
-                                if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.getMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
+                                if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.obtainMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
                                     sh.edit().putBoolean("FirstTime", false).apply();
                                     MessageService.getCurrentToken(task -> {
                                         if (task.isSuccessful()) {

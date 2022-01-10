@@ -1,6 +1,6 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceById;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.obtainQuarantineAssistanceById;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -69,7 +69,7 @@ public class RequestViz extends AppCompatActivity {
             if(id != null || idInCharge != null) {
                 Thread t = new Thread(() -> {
                     try {
-                        request[0] = getQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
+                        request[0] = obtainQuarantineAssistanceById(idInCharge == null ? id : idInCharge);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }

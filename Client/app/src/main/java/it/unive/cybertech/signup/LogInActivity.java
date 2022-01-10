@@ -106,7 +106,7 @@ public class LogInActivity extends AppCompatActivity {
                                 name = name.split(" ")[0];
                             }
                             try {
-                                u = User.getUserById(user.getUid());
+                                u = User.obtainUserById(user.getUid());
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
                                 try {

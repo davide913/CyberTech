@@ -57,7 +57,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
     protected void onStart() {
         super.onStart();
         //TODO non va
-        Utils.executeAsync(() -> user.getExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMyExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 rentedMaterials = result;
@@ -70,7 +70,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
 
             }
         });
-        Utils.executeAsync(() -> user.getMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 rentMaterials = result;

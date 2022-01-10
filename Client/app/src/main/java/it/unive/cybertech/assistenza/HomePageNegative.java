@@ -84,7 +84,7 @@ public class HomePageNegative extends Fragment {
             List<QuarantineAssistance> myQuar = null;
             try {
                 tList = AssistanceType.getAssistanceTypes();
-                myQuar = QuarantineAssistance.getJoinableQuarantineAssistance(null, null, 10);
+                myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(null, null, 10);
                 inCharge[0] = getQuarantineAssistanceByInCharge(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

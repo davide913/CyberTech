@@ -301,7 +301,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             case RentMaterialAdapter.ID:
                 Thread t = new Thread(() -> {
                     try {
-                        List<LendingInProgress> temp = material.getMaterializedRenter().getMaterializedLendingInProgress();
+                        List<LendingInProgress> temp = material.getMaterializedRenter().obtainMaterializedLendingInProgress();
                         lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
                         if (lending == null)
                             throw new RuntimeException("Lending is null");
@@ -504,16 +504,16 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         if (requestCode == FEEDBACK) {
             if (resultCode == RentFeedback.SUCCESS) {
                 double score = data.getDoubleExtra("Points", 0);
-                Utils.executeAsync(() -> User.getUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
+                Utils.executeAsync(() -> User.obtainUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User result) {
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.getMaterializedLendingInProgress();
+                                List<LendingInProgress> temp = result.obtainMaterializedLendingInProgress();
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
                                 result.removeLending(lending);
-                                lending.removeLendingInProgress();
+                                lending.deleteLendingInProgress();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

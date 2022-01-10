@@ -131,8 +131,22 @@ public class ManifestPositivityFragment extends Fragment {
                     Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                         @Override
                         public void onComplete(Boolean result) {
+                            Utils.executeAsync(()->user.deleteAllMyQuarantineAssistance(), new Utils.TaskResult<Void>() {
+                                @Override
+                                public void onComplete(Void result) {
+                                    updateFr();
+                                    dialog.cancel();
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+
+                                }
+                            });
+                            /*
                             updateFr();
                             dialog.cancel();
+                             */
                         }
 
                         @Override
@@ -140,23 +154,6 @@ public class ManifestPositivityFragment extends Fragment {
 
                         }
                     });
-                      /*
-                      Thread t = new Thread(new Runnable() {
-                          @Override
-                          public void run() {
-                              user.updatePositiveSince(null); //Imposta la data a Null sul database
-                          }
-                      });
-                      t.start();
-                      try {
-                          t.join();                           //Aspetta che il thread abbia finito prima di riaggiornare i fragments
-                      } catch (InterruptedException e) {
-                          e.printStackTrace();
-                      }
-                      updateFr();
-                      dialog.cancel();
-
-                       */
                 }
 
 
@@ -218,36 +215,6 @@ public class ManifestPositivityFragment extends Fragment {
 
                                 }
                             });
-                        /*
-                        try{
-
-
-                            Thread t = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    user.updatePositiveSince(d); //TODO vedere se funziona
-                                    try {
-                                        Collection<User> users = user.obtainActivitiesUsers();
-                                        sendNotifications(users);
-                                    }catch (ExecutionException e) {
-
-                                        e.printStackTrace();
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-
-
-                                }
-                            });
-                            t.start();
-                            t.join();
-                        }catch(ParseException | InterruptedException ex){
-                            // handle parsing exception if date string was different from the pattern applying into the SimpleDateFormat contructor
-                        }
-                        updateFr();
-                        dialog.cancel();
-
-                             */
                         }
 
                     });
