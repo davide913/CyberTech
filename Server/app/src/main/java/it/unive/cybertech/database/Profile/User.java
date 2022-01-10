@@ -43,7 +43,8 @@ import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 /**
  * Class use to describe a user's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
- * Every field have a public get and a private set.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  * The class extend Geoquerable to query the users by their position.
  *
  * @author Davide Finesso
@@ -70,8 +71,6 @@ public class User extends Geoquerable implements Comparable<User> {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private ArrayList<Device> devicesMaterialized;
     private ArrayList<LendingInProgress> lendingInProgressMaterialized;
@@ -382,8 +381,9 @@ public class User extends Geoquerable implements Comparable<User> {
      * The method return the user with that id. If there isn't a user with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoUserFoundException if a user with that id doesn't exist
      */
-    public static User obtainUserById(String id) throws InterruptedException, ExecutionException, NoUserFoundException {
+    public static User obtainUserById(@NonNull String id) throws InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -422,7 +422,7 @@ public class User extends Geoquerable implements Comparable<User> {
 
     /**
      * The method is use to delete an user from the database and all the reference to him.
-     * It start to delete all the quarantine assistance where the user are in charge, after teh method delete the user from all the group and activity where is present, later delete all the  things associate to him and finally the method delete the user
+     * It start to delete all the quarantine assistance where the user is in charge, after that the method delete the user from all the group and activity where is present, later delete all the  things associate to him and finally the method delete the user
      * It return a boolean value that describe if the operation was done.
      *
      * @author Davide Finesso
@@ -564,7 +564,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public boolean updateLocation(String newCountry, String newCity, String newAddress, double latitude, double longitude) {
+    public boolean updateLocation(@NonNull String newCountry,@NonNull String newCity,
+                                  @NonNull String newAddress, double latitude, double longitude) {
         try {
             GeoPoint geoPoint = new GeoPoint(latitude, longitude);
             Task<Void> t = updateLocationAsync(newCountry, newCity, newAddress, geoPoint);
@@ -676,6 +677,7 @@ public class User extends Geoquerable implements Comparable<User> {
             this.devices.remove(devDoc);
             if (this.devicesMaterialized != null)
                 this.obtainMaterializedDevices().remove(device);
+
             device.deleteDevice();
             return true;
         } catch (NoDeviceFoundException | NoUserFoundException | ExecutionException | InterruptedException e) {
@@ -757,11 +759,11 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method is use to obtain all the expired user's lendings in progress from the database.
+     * The method is use to obtain all the expired user's lending in progress from the database.
      *
      * @author Davide Finesso
      */
-    public List<LendingInProgress> obtainMyExpiredLending() throws ExecutionException, InterruptedException {
+    public List<LendingInProgress> obtainExpiredLending() throws ExecutionException, InterruptedException {
         ArrayList<LendingInProgress> result = new ArrayList<>();
         Timestamp timestamp = Timestamp.now();
 
@@ -774,7 +776,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method is use to obtain all the expired lending with the user's material from the database.
+     * The method is use to obtain all the expired lending with the user materials from the database.
      *
      * @author Davide Finesso
      */
@@ -903,8 +905,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
-                                           String description, Date date, double latitude, double longitude) {
+    public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType,@NonNull String title,
+                                           @NonNull String description,@NonNull Date date, double latitude, double longitude) {
         try {
             QuarantineAssistance assistance =
                     createQuarantineAssistance(assistanceType, title, description, date, latitude, longitude);
@@ -976,16 +978,16 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public static List<LendingInProgress> obtainUserLendingInProgress(String id) throws ExecutionException, InterruptedException {
+    public static List<LendingInProgress> obtainUserLendingInProgress(@NonNull String id) throws ExecutionException, InterruptedException {
         return obtainUserById(id).obtainMaterializedLendingInProgress();
     }
 
     /**
-     * The method is use to obtain all the devices from a user describe by a a passed id.
+     * The method is use to obtain all the devices from a user describe by a passed id.
      *
      * @author Davide Finesso
      */
-    public static List<Device> obtainUserDevices(String id) throws ExecutionException, InterruptedException {
+    public static List<Device> obtainUserDevices(@NonNull String id) throws ExecutionException, InterruptedException {
         return obtainUserById(id).obtainMaterializedDevices();
     }
 

@@ -28,6 +28,7 @@ import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 /**
  * Class use to describe a user's device instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -103,8 +104,9 @@ public class Device {
      * The protected method return a device from his id.
      *
      * @author Davide Finesso
+     * @throws NoDeviceFoundException if a device with that id doesn't exist
      */
-    protected static Device obtainDeviceById(String id) throws ExecutionException, InterruptedException {
+    protected static Device obtainDeviceById(@NonNull String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -123,8 +125,9 @@ public class Device {
      * The method return a user's device the user's id and a device's id.
      *
      * @author Davide Finesso
+     * @throws NoDeviceFoundException if a device with that id doesn't exist
      */
-    private static Device obtainDevice(String deviceId, String userId) throws ExecutionException, InterruptedException {
+    private static Device obtainDevice(@NonNull String deviceId,@NonNull String userId) throws ExecutionException, InterruptedException, NoDeviceFoundException {
         Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("deviceId", deviceId)
                 .whereEqualTo("userId", userId).get();
@@ -145,7 +148,7 @@ public class Device {
      *
      * @author Davide Finesso
      */
-    protected static Device createDevice(String token, String deviceId, String userId) throws ExecutionException, InterruptedException {
+    protected static Device createDevice(@NonNull String token,@NonNull String deviceId,@NonNull String userId) throws ExecutionException, InterruptedException {
         try{
             Device device = obtainDevice(deviceId, userId);
 
