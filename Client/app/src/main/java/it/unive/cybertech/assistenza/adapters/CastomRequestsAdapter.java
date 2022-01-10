@@ -30,27 +30,23 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.utils.Utils;
 
+/**
+ * A Custom Adapter the visualisation of requests with a balloon effect
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class CastomRequestsAdapter extends ArrayAdapter {
     private List<QuarantineAssistance> myList;
     private Context context;
     private static final String TAG = "Custom Request Adapter";
-    ArrayList<AssistanceType> type;
 
-    public CastomRequestsAdapter(@NonNull Context context, int resource, ArrayList<QuarantineAssistance> myList, ArrayList<AssistanceType> type) {
-        super(context, resource, myList);
-        this.myList = myList;
-        this.context = context;
-        this.type = type;
-    }
-
-    //TODO: se la chiamo dalla Request.Viz non ho bisogno del tipo, chiamo tutte le mie
     public CastomRequestsAdapter(@NonNull Context context, int resource, List<QuarantineAssistance> myList) {
         super(context, resource, myList);
         this.myList = myList;
         this.context = context;
     }
-
 
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -62,11 +58,9 @@ public class CastomRequestsAdapter extends ArrayAdapter {
         TextView title = view.findViewById(R.id.title_request);
         title.setText(request.getTitle());
 
-        @SuppressLint("SimpleDateFormat") DateFormat dateFormat = new SimpleDateFormat("hh:mm  dd-MM");
-        Date date = request.getDeliveryDateToDate();
-        String strDate = dateFormat.format(date);
         TextView dateView =  view.findViewById(R.id.date_request);
-        //dateView.setText(strDate);
+        String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM" );
+        dateView.setText(strDate);
 
         GeoPoint point = request.getLocation();
         showAddress(point, view);

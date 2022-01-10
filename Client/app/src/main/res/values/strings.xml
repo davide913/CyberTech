@@ -182,6 +182,13 @@
     <string name="irreversible_operation">Operazione irreversibile</string>
     <string name="delete_material_confirm">Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?</string>
     <string name="green_pass_covid_19">Green pass COVID-19</string>
+    <string name="attention">Attenzione!</string>
+    <string name="request_help_assistance">Se vuoi chiedere aiuto ad un volontario, clicca il tast \'Aggiungi una richiesta\' per ricevere aiuto</string>
+    <string name="delete_request_warning">Vuoi davvero eliminare la richiesta?</string>
+    <string name="request_taken_in_charge">Vuoi prendere in carico questa richiesta?</string>
+    <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
+    <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
+    <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
 
     <array name="sex">
         <item>Maschio</item>
