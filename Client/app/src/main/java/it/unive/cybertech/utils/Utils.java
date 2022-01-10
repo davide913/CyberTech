@@ -301,7 +301,7 @@ public class Utils {
                     result.city = addresses.get(0).getLocality();
                     result.address = addresses.get(0).getThoroughfare();
                     callback.onComplete(result);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     callback.onError(e);
                 }
             }).addOnFailureListener(callback::onError);

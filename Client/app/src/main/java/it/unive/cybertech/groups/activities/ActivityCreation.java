@@ -4,6 +4,7 @@ import static it.unive.cybertech.database.Groups.Activity.createActivity;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
 import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -30,13 +31,6 @@ import java.util.Objects;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
-
-import static it.unive.cybertech.database.Groups.Activity.createActivity;
-import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
-import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
-import static it.unive.cybertech.utils.Utils.executeAsync;
-
 import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
@@ -78,7 +72,7 @@ public class ActivityCreation extends AppCompatActivity {
         @NonNull GregorianCalendar calendar = new GregorianCalendar();
         @NonNull String pattern = "dd/MM/yyyy";
         @NonNull DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
-        getActivityDate().setOnClickListener(v -> {      // todo: non c'è l'orario ma solo la data
+        getActivityDate().setOnClickListener(v -> {
             int y = calendar.get(Calendar.YEAR);
             int m = calendar.get(Calendar.MONTH);
             int d = calendar.get(Calendar.DAY_OF_MONTH);

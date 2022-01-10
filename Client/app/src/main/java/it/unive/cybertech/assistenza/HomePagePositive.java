@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.assistenza.adapters.CustomRequestsAdapter;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
@@ -37,8 +37,8 @@ import it.unive.cybertech.utils.Utils;
  * @since 1.1
  */
 public class HomePagePositive extends Fragment {
-    ListView listAlreadyMade;
-    User user = CachedUser.user;
+    private ListView listAlreadyMade;
+    private final User user = CachedUser.user;
     private ArrayAdapter<QuarantineAssistance> adapter;
     private List<QuarantineAssistance> myRequestsList = new ArrayList<>();
 
@@ -62,7 +62,7 @@ public class HomePagePositive extends Fragment {
                 myRequestsList = result;
                 message_if_empty();
 
-                adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
+                adapter = new CustomRequestsAdapter(getContext(), 0, myRequestsList);
                 listAlreadyMade.setAdapter(adapter);
 
                 listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {

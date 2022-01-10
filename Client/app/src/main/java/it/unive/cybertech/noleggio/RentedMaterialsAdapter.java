@@ -24,6 +24,8 @@ import it.unive.cybertech.utils.Utils;
 
 /**
  * This is an adapter that provide a view for the rented materials
+ *
+ * @author Mattia Musone
  */
 public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterialsAdapter.ViewHolder> {
 
@@ -39,7 +41,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
      * @param showcaseList the list of item to show
      * @param tag          The custom tag to add to each view
      */
-    public RentedMaterialsAdapter(List<LendingInProgress> showcaseList, String tag) {
+    public RentedMaterialsAdapter(@NonNull List<LendingInProgress> showcaseList, String tag) {
         this.tag = tag;
         this.showcaseList = showcaseList;
     }
@@ -49,7 +51,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
      *
      * @param showcaseList the list of item to show
      */
-    public RentedMaterialsAdapter(List<LendingInProgress> showcaseList) {
+    public RentedMaterialsAdapter(@NonNull List<LendingInProgress> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
@@ -78,7 +80,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
          * @param item     the lending that is about to be displayed
          * @param position The item position in the list
          */
-        public void bind(@NonNull final LendingInProgress item, @NonNull int position) {
+        public void bind(@NonNull final LendingInProgress item, int position) {
             Utils.executeAsync(item::obtainMaterializedMaterial, new Utils.TaskResult<Material>() {
                 @Override
                 public void onComplete(Material result) {
@@ -123,7 +125,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     /**
      * Sets the listener of the click item
      */
-    void setClickListener(ItemClickListener itemClickListener) {
+    void setClickListener(@NonNull ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 

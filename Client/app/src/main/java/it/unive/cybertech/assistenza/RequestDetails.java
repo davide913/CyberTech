@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
@@ -43,6 +42,7 @@ import it.unive.cybertech.utils.Utils;
 
 /**
  * Allows the positive user to compile a form with his needs and upload the request
+ *
  * @author Mihail Racaru
  * @since 1.1
  */
@@ -53,101 +53,93 @@ public class RequestDetails extends AppCompatActivity {
     private static final int PERMISSIONS_FINE_LOCATION = 99;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private FloatingActionButton editInfo;
-    private LocationRequest locationRequest;
     private double latitude, longitude;
     private final User me = user;
     private String type;
-    private  ArrayList<AssistanceType> tList = null;
-    private  AssistanceType choosen = null;
+    private final ArrayList<AssistanceType> tList = null;
+    private AssistanceType choosen = null;
+    private Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_details);
-
         setToolbar();
         findFields();
+        spinner = findViewById(R.id.spinner_type);
+    }
 
-        Spinner spinner = findViewById(R.id.spinner_type);
-        ArrayList<String> options = new ArrayList<>();
-        ArrayList<AssistanceType> adapterList = new ArrayList<>();
+    private void init() {
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+            @Override
+            public void onComplete(ArrayList<AssistanceType> result) {
+                ArrayList<String> options = new ArrayList<>();
 
-        Thread t = new Thread(() -> {
-            try {
-                tList = AssistanceType.obtainAssistanceTypes();
+                ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, options);
+                spinner.setAdapter(spinnerArrayAdapter);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String selectedItemText = (String) parent.getItemAtPosition(position);
+                        type = selectedItemText;
 
-                for (AssistanceType a: tList) {
-                    options.add(a.getType());
-                    adapterList.add(a);
-                }
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                        if (position >= 0) {
+                            showShortToast("Selected : " + selectedItemText);
+                        }
+                    }
+
+                    public void onNothingSelected(AdapterView<?> parent) {
+                    }
+                });
+                locationRequest();
+
+                editInfo.setOnClickListener(v -> {
+                    updateGPS();
+                });
+
+                findViewById(R.id.uploadRequest).setOnClickListener(view -> {
+                    Date date = Calendar.getInstance().getTime();
+                    String title = et_requestTitle.getText().toString();
+                    String description = et_requestText.getText().toString();
+
+
+                    for (AssistanceType a : tList) {
+                        if (a.getType().equals(type))
+                            choosen = a;
+                    }
+
+                    if (!title.isEmpty() && !description.isEmpty() && !countryReq.getText().toString().isEmpty() && !cityReq.getText().toString().isEmpty()) {
+                        Utils.Dialog dialog = new Utils.Dialog(getApplicationContext());
+                        dialog.show(getString(R.string.attention), getString(R.string.request_upload));
+                        dialog.setCallback(new Utils.DialogResult() {
+                            @Override
+                            public void onSuccess() {
+                                Utils.executeAsync(() -> me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude), new Utils.TaskResult<Boolean>() {
+                                    @Override
+                                    public void onComplete(Boolean result) {
+                                        setResult(Activity.RESULT_OK);
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancel() {
+
+                            }
+                        });
+                    } else {
+                        message_if_smt_missing();
+                    }
+                });
             }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
-        spinner.setAdapter(spinnerArrayAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                String selectedItemText = (String) parent.getItemAtPosition(position);
-                type = selectedItemText;
+            @Override
+            public void onError(Exception e) {
 
-                if(position >= 0){
-                    showShortToast("Selected : " + selectedItemText);
-                }
-            }
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        locationRequest();
-
-        editInfo.setOnClickListener(v -> {
-            updateGPS();
-        });
-
-        findViewById(R.id.uploadRequest).setOnClickListener(view -> {
-            Date date = Calendar.getInstance().getTime();
-            String title = et_requestTitle.getText().toString();
-            String description = et_requestText.getText().toString();
-
-
-            for (AssistanceType a : tList) {
-                if (a.getType().equals(type))
-                    choosen = a;
-            }
-
-            if(!title.isEmpty() && !description.isEmpty() && !countryReq.getText().toString().isEmpty() && !cityReq.getText().toString().isEmpty()) {
-                Utils.Dialog dialog = new Utils.Dialog(this);
-                dialog.show(getString(R.string.attention), getString(R.string.request_upload));
-                dialog.setCallback(new Utils.DialogResult() {
-                                       @Override
-                                       public void onSuccess() {
-                                           Utils.executeAsync(() -> me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude), new Utils.TaskResult<Boolean>() {
-                                               @Override
-                                               public void onComplete(Boolean result) {
-                                                   setResult(Activity.RESULT_OK);
-                                                   finish();
-                                               }
-
-                                               @Override
-                                               public void onError(Exception e) {
-                                               }
-                                           });
-                                       }
-                                       @Override
-                                       public void onCancel() {
-
-                                       }
-                                   });
-            }
-            else {
-                message_if_smt_missing();
             }
         });
     }
@@ -168,6 +160,7 @@ public class RequestDetails extends AppCompatActivity {
 
     /**
      * Finds and sets the toolbar
+     *
      * @author Mihail Racaru
      * @since 1.1
      */
@@ -181,6 +174,7 @@ public class RequestDetails extends AppCompatActivity {
 
     /**
      * Finds all layout elements
+     *
      * @author Mihail Racaru
      * @since 1.1
      */
@@ -194,11 +188,12 @@ public class RequestDetails extends AppCompatActivity {
 
     /**
      * Initialize locationRequest
+     *
      * @author Mihail Racaru
      * @since 1.1
      */
     private void locationRequest() {
-        locationRequest = LocationRequest.create();
+        LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(30000);
         locationRequest.setFastestInterval(1000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -208,6 +203,7 @@ public class RequestDetails extends AppCompatActivity {
 
     /**
      * Sets {@link #longitude} , {@link #latitude} and calles {@link #updateValues}
+     *
      * @author Mihail Racaru
      * @since 1.1
      */
@@ -223,12 +219,13 @@ public class RequestDetails extends AppCompatActivity {
                 e.printStackTrace();
             });
         } else {
-            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
     }
 
     /**
      * Sets TextView {@link #countryReq} and {@link #cityReq} from the given location in input
+     *
      * @param location from which is computed city and country
      * @author Mihail Racaru
      * @since 1.1

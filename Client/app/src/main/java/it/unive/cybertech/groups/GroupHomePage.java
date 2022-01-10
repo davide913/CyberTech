@@ -4,6 +4,8 @@ import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,13 +36,14 @@ import it.unive.cybertech.utils.Utils.TaskResult;
 public class GroupHomePage extends AppCompatActivity {
     private @Nullable
     Group thisGroup;
+    private ProgressBar loader;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_home_page);
+        loader = findViewById(R.id.group_home_loader);
         bindThisGroup();
-        initTabs();
     }
 
     /**
@@ -72,7 +75,9 @@ public class GroupHomePage extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Group result) {
                 thisGroup = result;
+                loader.setVisibility(View.GONE);
                 initActionBar();
+                initTabs();
             }
 
             @Override

@@ -17,16 +17,13 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Objects;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.utils.Utils;
 import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
@@ -53,32 +50,16 @@ public class ActivityDetails extends AppCompatActivity {
     private @Nullable
     FloatingActionButton joinLeftButton;
     private boolean status = false;
+    private @NonNull ActionBar actionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        bindThisGroupActivity();
-        initActionBar();
-        bindLayoutObjects();
-        setTextViews();
-
-        status = checkGroupActivityMember();
-        if (!status) {
-            setButtonInfoAsNoParticipant();
-        } else {
-            setButtonInfoAsParticipant();
-        }
-        getJoinLeftButton().setOnClickListener(v -> {
-            if (!status) {
-                addGroupActivityParticipant();
-            } else {
-                removeGroupActivityParticipant();
-            }
-            setResult(RELOAD_ACTIVITY);
+        if (getIntent().getStringExtra("ID") == null || getIntent().getStringExtra("ID_GroupActivity") == null)
             finish();
-        });
-
+        bindLayoutObjects();
+        bindThisGroupActivity();
     }
 
     /**
@@ -90,10 +71,7 @@ public class ActivityDetails extends AppCompatActivity {
     private void setTextViews() {
         getActivityGroupName().setText(getThisGroupActivity().getName());
         getActivityGroupDescription().setText(getThisGroupActivity().getDescription());
-        @NonNull String pattern = "dd/MM/yyyy";
-        @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-        @NonNull Timestamp timestamp = getThisGroupActivity().getDate();
-        @NonNull String date = df.format(timestamp.toDate());
+        @NonNull String date = Utils.formatDateToString(getThisGroupActivity().getDate().toDate());
         getActivityGroupDate().setText(date);
         getActivityGroupLocation().setText(getThisGroupActivity().getPlace());
     }
@@ -111,6 +89,8 @@ public class ActivityDetails extends AppCompatActivity {
         activityGroupLocation = findViewById(R.id.activityDetails_ActivityLocation);
 
         joinLeftButton = findViewById(R.id.activityDetails_JoinLeftActivity);
+        actionBar = Objects.requireNonNull(getSupportActionBar());
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     /**
@@ -233,6 +213,22 @@ public class ActivityDetails extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Group result) {
                 thisGroup = result;
+
+                status = checkGroupActivityMember();
+                if (!status) {
+                    setButtonInfoAsNoParticipant();
+                } else {
+                    setButtonInfoAsParticipant();
+                }
+                getJoinLeftButton().setOnClickListener(v -> {
+                    if (!status) {
+                        addGroupActivityParticipant();
+                    } else {
+                        removeGroupActivityParticipant();
+                    }
+                    setResult(RELOAD_ACTIVITY);
+                    finish();
+                });
             }
 
             @Override
@@ -248,6 +244,8 @@ public class ActivityDetails extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Activity result) {
                 thisGroupActivity = result;
+                initActionBar();
+                setTextViews();
             }
 
             @Override
@@ -259,8 +257,6 @@ public class ActivityDetails extends AppCompatActivity {
                 }
             }
         });
-        if (getThisGroup().getId() == null || getThisGroup().getId().length() == 0 || getThisGroupActivity().getId() == null || getThisGroupActivity().getId().length() == 0)
-            finish();
     }
 
     /**
@@ -270,8 +266,6 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private void initActionBar() {
-        @NonNull ActionBar actionBar = Objects.requireNonNull(getSupportActionBar());
-        actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(getThisGroupActivity().getName());
     }
 

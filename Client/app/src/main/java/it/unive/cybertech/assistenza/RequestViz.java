@@ -42,11 +42,9 @@ public class RequestViz extends AppCompatActivity {
     private final User user = CachedUser.user;
     private FloatingActionButton menu, chat, deleteRequest, accept_request, stop_helping;
     private TextView textTitle, text, textCountry, textCity, textDate;
-    Toolbar toolbar;
     private Animation menuOpen, menuClose;
     boolean isOpen = false;
     private String id, idInCharge, callerClass;
-    private String title, country, city, strDate;
     private QuarantineAssistance request;
     private User target;
 
@@ -280,16 +278,16 @@ public class RequestViz extends AppCompatActivity {
      * @since 1.1
      */
     private void setFields() {
-        title = getIntent().getStringExtra("title");
+        String title = getIntent().getStringExtra("title");
         textTitle.setText(title);
 
-        country = getIntent().getStringExtra("country");
+        String country = getIntent().getStringExtra("country");
         textCountry.setText(country);
 
-        city = getIntent().getStringExtra("city");
+        String city = getIntent().getStringExtra("city");
         textCity.setText(city);
 
-        strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+        String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
         textDate.setText(strDate);
 
         text.setText(request.getDescription());
@@ -323,7 +321,7 @@ public class RequestViz extends AppCompatActivity {
      * @since 1.1
      */
     private void toolbar() {
-        toolbar = findViewById(R.id.toolbar_RequestViz);
+        Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

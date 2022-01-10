@@ -189,6 +189,14 @@
     <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
     <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
     <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
+    <string name="alerts">Avvisi</string>
+    <string name="assistance_chat">Chat di assistenza</string>
+    <string name="notification_channel_generic">Canale per le notifiche generiche</string>
+    <string name="notification_channel_quarantine_assistance">Canale utilizzato per le notifiche relative alla chat di assistenza in quarantena</string>
+    <string name="covid_notification">Notifica di esposizione</string>
+    <string name="notification_channel_covid">Canale utilizzato per avvisarti di una eventuale espoizione al nuovo coronavirus SARS-CoV-2 (COVID-19)</string>
+    <string name="notification_channel_quarantine_request_accepted">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto è stata presa in carico</string>
+    <string name="notification_channel_quarantine_assistance_dismissed">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto precedentemente presa in carico non verrà più portata avanti</string>
 
     <array name="sex">
         <item>Maschio</item>
