@@ -1,7 +1,5 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.getAllGroups;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -112,7 +110,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private void findFSGroups() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                groups = getAllGroups();
+                groups = Group.obtainAllGroups();
                 // Log.d("Size", " " + groups.size());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

@@ -13,15 +13,12 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.firebase.Timestamp;
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
@@ -67,8 +64,9 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
 
+                return null;
             }
         });
         Utils.executeAsync(() -> user.obtainMyMaterialsExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
@@ -80,8 +78,9 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
 
+                return null;
             }
         });
     }

@@ -59,7 +59,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
             AtomicReference<Material> material = new AtomicReference<>();
             Thread t = new Thread(() -> {
                 try {
-                    material.set(item.getMaterializedMaterial());
+                    material.set(item.obtainMaterializedMaterial());
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }

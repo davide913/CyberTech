@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.tasks.OnFailureListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +67,9 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 e.printStackTrace();
+                return null;
             }
         });
     }

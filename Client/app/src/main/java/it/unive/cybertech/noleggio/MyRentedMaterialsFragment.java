@@ -9,12 +9,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
@@ -62,8 +62,9 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 e.printStackTrace();
+                return null;
             }
         });
     }
@@ -82,7 +83,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
         Thread t = new Thread(() -> {
 
             try {
-                l.set(LendingInProgress.getLendingInProgressById(id));
+                l.set(LendingInProgress.obtainLendingInProgressById(id));
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }

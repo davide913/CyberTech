@@ -149,8 +149,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     private void bindThisGroupAndActivities() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup = getGroupById(idGroup);
-                activities = thisGroup.getMaterializedActivities();
+                thisGroup = obtainGroupById(idGroup);
+                activities = thisGroup.obtainMaterializedActivities();
                 Log.d("Size", " " + activities.size());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

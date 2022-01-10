@@ -68,7 +68,7 @@ public class GroupHomePage extends AppCompatActivity {
     private void bindThisGroup() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
+                thisGroup = Group.obtainGroupById(getIntent().getStringExtra("ID"));
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

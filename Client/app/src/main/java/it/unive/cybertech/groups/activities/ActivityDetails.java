@@ -190,7 +190,7 @@ public class ActivityDetails extends AppCompatActivity {
         final boolean[] stato = {false};
         @NonNull Thread t = new Thread(() -> {
             try {
-                if (getThisGroup().getMaterializedMembers().contains(user))
+                if (getThisGroup().obtainMaterializedMembers().contains(user))
                     stato[0] = true;
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -215,7 +215,7 @@ public class ActivityDetails extends AppCompatActivity {
     private boolean checkGroupActivityMember() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                if (getThisGroupActivity().getMaterializedParticipants().contains(user))
+                if (getThisGroupActivity().obtainMaterializedParticipants().contains(user))
                     status = true;
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -239,8 +239,8 @@ public class ActivityDetails extends AppCompatActivity {
     private void bindThisGroupActivity() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
-                thisGroupActivity = Activity.getActivityById(getIntent().getStringExtra("ID_GroupActivity"));
+                thisGroup = Group.obtainGroupById(getIntent().getStringExtra("ID"));
+                thisGroupActivity = Activity.obtainActivityById(getIntent().getStringExtra("ID_GroupActivity"));
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

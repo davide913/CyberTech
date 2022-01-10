@@ -4,13 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,8 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
@@ -104,7 +101,7 @@ public class LogInActivity extends AppCompatActivity {
                                 name = name.split(" ")[0];
                             }
                             try {
-                                u[0] = User.getUserById(user.getUid());
+                                u[0] = User.obtainUserById(user.getUid());
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
                                 String finalName = name;
@@ -121,11 +118,12 @@ public class LogInActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void onError(Exception e) {
+                                        public OnFailureListener onError(Exception e) {
 
+                                            return null;
                                         }
                                     });
-                                } catch (Utils.PermissionDeniedException permissionDeniedException) {
+                                } catch (Utils.PermissionDeniedException | ExecutionException | InterruptedException permissionDeniedException) {
                                     permissionDeniedException.printStackTrace();
                                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
                                 }

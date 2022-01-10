@@ -7,12 +7,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
 
 
@@ -24,23 +21,18 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.firebase.Timestamp;
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.MainActivity;
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
-import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
 
@@ -134,8 +126,9 @@ public class ManifestPositivityFragment extends Fragment {
                         }
 
                         @Override
-                        public void onError(Exception e) {
+                        public OnFailureListener onError(Exception e) {
 
+                            return null;
                         }
                     });
                       /*
@@ -200,8 +193,9 @@ public class ManifestPositivityFragment extends Fragment {
                                     }
 
                                     @Override
-                                    public void onError(Exception e) {
+                                    public OnFailureListener onError(Exception e) {
 
+                                        return null;
                                     }
                                 });
                                 updateFr();
@@ -210,8 +204,9 @@ public class ManifestPositivityFragment extends Fragment {
                             }
 
                             @Override
-                            public void onError(Exception e) {
+                            public OnFailureListener onError(Exception e) {
 
+                                return null;
                             }
                         });
                         /*

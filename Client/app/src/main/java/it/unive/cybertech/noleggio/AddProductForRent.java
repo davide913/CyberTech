@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,14 +27,12 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -161,19 +158,21 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
                                 }
 
                                 @Override
-                                public void onError(Exception e) {
+                                public OnFailureListener onError(Exception e) {
                                     e.printStackTrace();
                                     requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+                                    return null;
                                 }
                             });
                         }
 
                         @Override
-                        public void onError(Exception e) {
+                        public OnFailureListener onError(Exception e) {
 
+                            return null;
                         }
                     });
-                } catch (Utils.PermissionDeniedException e) {
+                } catch (Utils.PermissionDeniedException | ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -187,7 +186,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
             AtomicReference<ArrayAdapter<Type>> userAdapter = new AtomicReference<>();
             Thread t = new Thread(() -> {
                 try {
-                    ArrayList<Type> types = Type.getMaterialTypes();
+                    ArrayList<Type> types = Type.obtainMaterialTypes();
                     userAdapter.set(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, types));
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();

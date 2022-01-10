@@ -10,6 +10,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
-import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
@@ -60,6 +62,7 @@ public class RequestDetails extends AppCompatActivity {
     private final User me = user;
     private String type;
     private  ArrayList<AssistanceType> tList = null;
+    private  AssistanceType choosen = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,23 +74,28 @@ public class RequestDetails extends AppCompatActivity {
 
         Spinner spinner = findViewById(R.id.spinner_type);
         ArrayList<String> options = new ArrayList<>();
-        final ArrayList<AssistanceType> adapterList = new ArrayList<>();
+        ArrayList<AssistanceType> adapterList = new ArrayList<>();
 
-        Utils.executeAsync(AssistanceType::getAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
-            @Override
-            public void onComplete(ArrayList<AssistanceType> result) {
-                tList = result;
+        Thread t = new Thread(() -> {
+            try {
+                tList = AssistanceType.obtainAssistanceTypes();
+
                 for (AssistanceType a: tList) {
                     options.add(a.getType());
                     adapterList.add(a);
                 }
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
-
-            @Override
-            public void onError(Exception e) {}
         });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        final ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item, options);
         spinner.setAdapter(spinnerArrayAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
@@ -109,33 +117,57 @@ public class RequestDetails extends AppCompatActivity {
 
         findViewById(R.id.uploadRequest).setOnClickListener(view -> {
             Date date = Calendar.getInstance().getTime();
+            String title = et_requestTitle.getText().toString();
+            String description = et_requestText.getText().toString();
 
-            Thread m = new Thread(() -> {
-                try {
-                    ArrayList<AssistanceType> buffertType;
-                    AssistanceType choosen = null;
-                    buffertType = AssistanceType.getAssistanceTypes();
 
-                    for (AssistanceType a : buffertType) {
-                        if (a.getType().equals(type))
-                            choosen = a;
-                    }
-                    String title = et_requestTitle.getText().toString();
-                    String description = et_requestText.getText().toString();
-                    me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude);
-                    setResult(Activity.RESULT_OK);
-
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            m.start();
-            try {
-                m.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            for (AssistanceType a : tList) {
+                if (a.getType().equals(type))
+                    choosen = a;
             }
-            finish();
+
+            if(!title.isEmpty() && !description.isEmpty() && !countryReq.getText().toString().isEmpty() && !cityReq.getText().toString().isEmpty()) {
+                Utils.Dialog dialog = new Utils.Dialog(this);
+                dialog.show(getString(R.string.attention), getString(R.string.request_upload));
+                dialog.setCallback(new Utils.DialogResult() {
+                                       @Override
+                                       public void onSuccess() {
+                                           Utils.executeAsync(() -> me.addQuarantineAssistance(choosen, title, description, date, latitude, longitude), new Utils.TaskResult<Boolean>() {
+                                               @Override
+                                               public void onComplete(Boolean result) {
+                                                   setResult(Activity.RESULT_OK);
+                                                   finish();
+                                               }
+
+                                               @Override
+                                               public OnFailureListener onError(Exception e) {
+                                                   return null;
+                                               }
+                                           });
+                                       }
+                                       @Override
+                                       public void onCancel() {
+
+                                       }
+                                   });
+            }
+            else {
+                message_if_smt_missing();
+            }
+        });
+    }
+
+    private void message_if_smt_missing() {
+        Utils.Dialog dialog = new Utils.Dialog(this);
+        dialog.show(getString(R.string.information), getString(R.string.format_field_empty));
+        dialog.setCallback(new Utils.DialogResult() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onCancel() {
+            }
         });
     }
 

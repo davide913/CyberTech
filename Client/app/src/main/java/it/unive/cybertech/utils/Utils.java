@@ -1,57 +1,40 @@
 package it.unive.cybertech.utils;
 
-import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
-
 import android.Manifest;
 import android.app.Activity;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.material.snackbar.Snackbar;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
 
-import it.unive.cybertech.R;
 import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
@@ -71,7 +54,7 @@ public class Utils {
     public interface TaskResult<T> {
         void onComplete(T result) throws ExecutionException, InterruptedException;
 
-        void onError(Exception e);
+        OnFailureListener onError(Exception e) throws ExecutionException, InterruptedException;
     }
 
     /**
@@ -258,10 +241,22 @@ public class Utils {
             try {
                 R result = callable.call();
                 if (callback != null)
-                    handler.post(() -> callback.onComplete(result));
+                    handler.post(() -> {
+                        try {
+                            callback.onComplete(result);
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
             } catch (Exception e) {
                 if (callback != null)
-                    handler.post(() -> callback.onError(e));
+                    handler.post(() -> {
+                        try {
+                            callback.onError(e);
+                        } catch (ExecutionException | InterruptedException executionException) {
+                            executionException.printStackTrace();
+                        }
+                    });
             }
         }).start();
     }
@@ -281,8 +276,9 @@ public class Utils {
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 e.printStackTrace();
+                return null;
             }
         });
     }
@@ -300,7 +296,7 @@ public class Utils {
         }
     }
 
-    public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException {
+    public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException, ExecutionException, InterruptedException {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(activity);
             client.getLastLocation().addOnSuccessListener(activity, location -> {
@@ -315,10 +311,14 @@ public class Utils {
                     result.city = addresses.get(0).getLocality();
                     result.address = addresses.get(0).getThoroughfare();
                     callback.onComplete(result);
-                } catch (IOException e) {
-                    callback.onError(e);
+                } catch (IOException | ExecutionException | InterruptedException e) {
+                    try {
+                        callback.onError(e);
+                    } catch (ExecutionException | InterruptedException executionException) {
+                        executionException.printStackTrace();
+                    }
                 }
-            }).addOnFailureListener(callback::onError);
+            }).addOnFailureListener(callback.onError(new Exception("Error")));
         } else
             throw new PermissionDeniedException("GPS permission not granted");
     }

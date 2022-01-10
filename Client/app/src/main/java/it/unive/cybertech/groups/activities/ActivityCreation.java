@@ -166,7 +166,7 @@ public class ActivityCreation extends AppCompatActivity {
         @NonNull Thread t = new Thread(() -> {
             try {
                 String id = getIntent().getStringExtra("ID");
-                thisGroup = Group.getGroupById(id);
+                thisGroup = Group.obtainGroupById(id);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

@@ -170,6 +170,8 @@
     <string name="delete_request_warning">Vuoi davvero eliminare la richiesta?</string>
     <string name="request_taken_in_charge">Vuoi prendere in carico questa richiesta?</string>
     <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
+    <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
+    <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
 
     <array name="sex">
         <item>Maschio</item>

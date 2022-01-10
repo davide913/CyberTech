@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.Collections2;
@@ -29,11 +30,12 @@ import com.google.firebase.Timestamp;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
@@ -114,15 +116,16 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 finishWithError();
+                return null;
             }
         });
     }
 
     private void manageType() throws InterruptedException {
         expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
-        Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
+        Utils.executeAsync(() -> material.obtainMaterializedRenter(), new Utils.TaskResult<User>() {
             @Override
             public void onComplete(User renterUser) {
                 if (renterUser != null) {
@@ -151,15 +154,17 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                         }
 
                                                         @Override
-                                                        public void onError(Exception e) {
+                                                        public OnFailureListener onError(Exception e) {
                                                             e.printStackTrace();
+                                                            return null;
                                                         }
                                                     });
                                             }
 
                                             @Override
-                                            public void onError(Exception e) {
+                                            public OnFailureListener onError(Exception e) {
                                                 e.printStackTrace();
+                                                return null;
                                             }
                                         });
                                     });
@@ -172,8 +177,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                             }
 
                                             @Override
-                                            public void onError(Exception e) {
+                                            public OnFailureListener onError(Exception e) {
                                                 e.printStackTrace();
+                                                return null;
                                             }
                                         });
                                     });
@@ -266,8 +272,8 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             }
 
             @Override
-            public void onError(Exception e) {
-                if (e instanceof NoRentMaterialFoundException) {
+            public OnFailureListener onError(Exception e) {
+                if (e instanceof NoMaterialFoundException) {
                     //dateDescription.setText(R.string.showcase_until_dotted);
                     expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
                     if (material.getOwner().getId().equals(user.getId())) {
@@ -294,8 +300,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                 }
 
                                                 @Override
-                                                public void onError(Exception e) {
+                                                public OnFailureListener onError(Exception e) {
                                                     e.printStackTrace();
+                                                    return null;
                                                 }
                                             });
                                         }
@@ -335,11 +342,12 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                     }
 
                                                     @Override
-                                                    public void onError(Exception e) {
+                                                    public OnFailureListener onError(Exception e) {
                                                         e.printStackTrace();
                                                         Intent res = new Intent();
                                                         setResult(RENT_FAIL, res);
                                                         finish();
+                                                        return null;
                                                     }
                                                 });
                                             }
@@ -354,14 +362,15 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                     }
                 }
                 e.printStackTrace();
+                return null;
             }
         });
     }
 
     private void getMaterial(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+        Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
             @Override
-            public void onComplete(Material result) {
+            public void onComplete(Material result) throws ExecutionException, InterruptedException {
                 material = result;
                 actionBar.setTitle("Dettaglio: " + material.getTitle());
                 title.setText(material.getTitle());
@@ -376,15 +385,16 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 e.printStackTrace();
                 finishWithError();
+                return null;
             }
         });
     }
 
     private void getLending(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+        Utils.executeAsync(() -> LendingInProgress.obtainLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 lending = result;
@@ -392,9 +402,10 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
                 e.printStackTrace();
                 finishWithError();
+                return null;
             }
         });
     }
@@ -404,27 +415,29 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             getMaterial(id, new Utils.TaskResult<Void>() {
                 @Override
                 public void onComplete(Void result) {
-                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                    Utils.executeAsync(() -> material.obtainLending(), new Utils.TaskResult<LendingInProgress>() {
                         @Override
-                        public void onComplete(LendingInProgress result) {
+                        public void onComplete(LendingInProgress result) throws ExecutionException, InterruptedException {
                             lending = result;
                             callback.onComplete(null);
                         }
 
                         @Override
-                        public void onError(Exception e) {
+                        public OnFailureListener onError(Exception e) throws ExecutionException, InterruptedException {
                             if (e instanceof NoLendingInProgressFoundException)
                                 callback.onComplete(null);
                             else
                                 callback.onError(e);
+                            return null;
                         }
                     });
                     //getLending(material.getLending(),callback);
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public OnFailureListener onError(Exception e) throws ExecutionException, InterruptedException {
                     callback.onError(e);
+                    return null;
                 }
             });
         else
@@ -435,8 +448,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public OnFailureListener onError(Exception e) throws ExecutionException, InterruptedException {
                     callback.onError(e);
+                    return null;
                 }
             });
     }
@@ -469,8 +483,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                             }
 
                             @Override
-                            public void onError(Exception e) {
+                            public OnFailureListener onError(Exception e) {
                                 Snackbar.make(findViewById(android.R.id.content), "Errore nell'invio della richiesta", Snackbar.LENGTH_LONG).show();
+                                return null;
                             }
                         });
                     }
@@ -489,20 +504,20 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         if (requestCode == FEEDBACK) {
             if (resultCode == RentFeedback.SUCCESS) {
                 double score = data.getDoubleExtra("Points", 0);
-                Utils.executeAsync(() -> User.getUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
+                Utils.executeAsync(() -> User.obtainUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User result) {
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.getExpiredLending();
+                                List<LendingInProgress> temp = result.obtainMyExpiredLending();
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
 
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             result.removeLending(lending);
-                            lending.removeLendingInProgress();
+                            lending.deleteLendingInProgress();
                             material.updateRenter(null);
                         });
                         t.start();
@@ -518,8 +533,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                     }
 
                     @Override
-                    public void onError(Exception e) {
+                    public OnFailureListener onError(Exception e) {
 
+                        return null;
                     }
                 });
             } else {

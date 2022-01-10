@@ -3,7 +3,6 @@ package it.unive.cybertech.noleggio;
 import static it.unive.cybertech.noleggio.HomePage.NEW_MATERIAL;
 import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
 
 import android.Manifest;
 import android.content.Intent;
@@ -22,10 +21,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -64,7 +65,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
             Utils.getLocation(getActivity(), new Utils.TaskResult<Utils.Location>() {
                 @Override
                 public void onComplete(Utils.Location result) {
-                    Utils.executeAsync(() -> Material.getRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
                         @Override
                         public void onComplete(List<Material> result) {
                             Log.d(ID, "Size: " + result.size());
@@ -76,23 +77,27 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                         }
 
                         @Override
-                        public void onError(Exception e) {
+                        public OnFailureListener onError(Exception e) {
                             e.printStackTrace();
                             loader.setVisibility(View.GONE);
+                            return null;
                         }
                     });
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public OnFailureListener onError(Exception e) {
                     e.printStackTrace();
                     loader.setVisibility(View.GONE);
+                    return null;
                 }
             });
 
         } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
     }
 
@@ -117,7 +122,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         } else if (requestCode == NEW_MATERIAL && resultCode == ProductDetails.SUCCESS) {
             String id = data.getStringExtra("ID");
             if (id != null) {
-                Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+                Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
                         adapter.add(result);
@@ -130,7 +135,8 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                     }
 
                     @Override
-                    public void onError(Exception e) {
+                    public OnFailureListener onError(Exception e) {
+                        return null;
                     }
                 });
             }

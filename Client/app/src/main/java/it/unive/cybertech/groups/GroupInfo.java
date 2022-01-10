@@ -218,7 +218,7 @@ public class GroupInfo extends Fragment {
     private boolean checkGroupMember() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                status = getThisGroup().getMaterializedMembers().contains(user);
+                status = getThisGroup().obtainMaterializedMembers().contains(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

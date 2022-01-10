@@ -1,7 +1,5 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -12,7 +10,6 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
@@ -75,7 +73,7 @@ public class HomePageNegative extends Fragment {
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
 
-        Utils.executeAsync(AssistanceType::getAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
             @Override
             public void onComplete(ArrayList<AssistanceType> result) {
                 tList = result;
@@ -83,7 +81,7 @@ public class HomePageNegative extends Fragment {
                 Thread t = new Thread(() -> {
                     try {
                         myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(null, myGeoPosition, 50);
-                        inCharge = getQuarantineAssistanceByInCharge(user);
+                        inCharge = QuarantineAssistance.obtainQuarantineAssistanceByInCharge(user);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -178,7 +176,8 @@ public class HomePageNegative extends Fragment {
             }
 
             @Override
-            public void onError(Exception e) {
+            public OnFailureListener onError(Exception e) {
+                return null;
             }
         });
     }

@@ -8,33 +8,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.utils.Utils;
 
@@ -202,13 +190,16 @@ public class ProfileActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public OnFailureListener onError(Exception e) {
 
+                    return null;
                 }
             });
         } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
     }
 
