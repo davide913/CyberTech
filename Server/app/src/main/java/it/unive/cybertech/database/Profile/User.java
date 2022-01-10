@@ -4,7 +4,7 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
-import static it.unive.cybertech.database.Groups.Activity.getActivityById;
+import static it.unive.cybertech.database.Groups.Activity.obtainActivityById;
 import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
-import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
@@ -250,10 +249,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     public Date getBirthDayToDate() {
-        if (birthday != null)
-            return birthday.toDate();
-        else
-            return null;
+        return birthday.toDate();
     }
 
     private void setBirthday(Timestamp birthday) {
@@ -261,7 +257,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method return the field device materialize, if is null it create the field and after populate it.
+     * The method return the field devices materialize, if is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
@@ -270,7 +266,7 @@ public class User extends Geoquerable implements Comparable<User> {
             devicesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : devices)
-                devicesMaterialized.add(Device.getDeviceById(doc.getId()));
+                devicesMaterialized.add(Device.obtainDeviceById(doc.getId()));
         }
 
         return devicesMaterialized;
@@ -291,7 +287,7 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method return the field lending in progress materialize, if is null it create the field and after populate it if and only if the expiry date is after now
+     * The method return the field lending in progress materialize with the expiry after now. If is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
@@ -316,7 +312,7 @@ public class User extends Geoquerable implements Comparable<User> {
             materialsMaterialized = new ArrayList<>();
             for (DocumentReference doc : quarantineAssistance)
                 try {
-                    materialsMaterialized.add(Material.getMaterialById(doc.getId()));
+                    materialsMaterialized.add(Material.obtainMaterialById(doc.getId()));
                 } catch (NoMaterialFoundException e) {
                     e.printStackTrace();
                 }
@@ -425,36 +421,32 @@ public class User extends Geoquerable implements Comparable<User> {
     }
 
     /**
-     * The method is use to delete an user from the database and all the reference to him. It return a boolean value that describe if the operation was done.
+     * The method is use to delete an user from the database and all the reference to him.
+     * It start to delete all the quarantine assistance where the user are in charge, after teh method delete the user from all the group and activity where is present, later delete all the  things associate to him and finally the method delete the user
+     * It return a boolean value that describe if the operation was done.
      *
      * @author Davide Finesso
      */
     public boolean deleteUser() {
         try {
-            //delete all the quarantine assistance where i'm in charge
             DocumentReference doc = getReference(table, this.id);
-
             Task<QuerySnapshot> task = getInstance().collection(QuarantineAssistance.table)
                     .whereEqualTo("inCharge", doc).get();
-
             Tasks.await(task);
-            List<DocumentSnapshot> documents = task.getResult().getDocuments();
 
+            List<DocumentSnapshot> documents = task.getResult().getDocuments();
             for (DocumentSnapshot documentSnapshot : documents )
                 QuarantineAssistance.obtainQuarantineAssistanceById(documentSnapshot.getId())
                         .updateInCharge_QuarantineAssistance(null);
 
-            //delete him from the group and activity
             task = getInstance().collection(Group.table)
                     .whereArrayContains("members", doc).get();
-
             Tasks.await(task);
+
             documents = task.getResult().getDocuments();
-
             for (DocumentSnapshot documentSnapshot : documents )
-                Group.getGroupById(documentSnapshot.getId()).removeMember(this);
+                Group.obtainGroupById(documentSnapshot.getId()).removeMember(this);
 
-            //delete all the things of this user
             for (Material material: obtainMaterializedUserMaterials() )
                 material.deleteMaterial();
 
@@ -467,10 +459,9 @@ public class User extends Geoquerable implements Comparable<User> {
             for (QuarantineAssistance assistance: obtainMaterializedQuarantineAssistance() )
                 assistance.deleteQuarantineAssistance();
 
-            //delete user from db
             Task<Void> t = deleteUserAsync();
             Tasks.await(t);
-            this.id = null;
+            this.setId(null);
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -646,12 +637,11 @@ public class User extends Geoquerable implements Comparable<User> {
             Device device = createDevice(token, deviceId, this.id);
             DocumentReference devDoc = getReference(Device.table, device.getId());
 
-            if (notContainDevice(device.getId())) {
-                Tasks.await(addDeviceAsync(devDoc));
-                this.devices.add(devDoc);
-                if (this.devicesMaterialized != null)
+            Tasks.await(addDeviceAsync(devDoc));
+            this.devices.add(devDoc);
+            if (this.devicesMaterialized != null)
                     this.obtainMaterializedDevices().add(device);
-            }
+
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -692,19 +682,6 @@ public class User extends Geoquerable implements Comparable<User> {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * The private method is use find if the user already have a device. It return a boolean value that describe if it have or not.
-     *
-     * @author Davide Finesso
-     */
-    private boolean notContainDevice(String deviceId) {
-        for (DocumentReference document : this.devices) {
-            if (deviceId.equals(document.getId()))
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -770,6 +747,8 @@ public class User extends Geoquerable implements Comparable<User> {
             this.lendingInProgress.remove(lenDoc);
             if (this.lendingInProgressMaterialized != null)
                 this.obtainAllMaterializedLendingInProgress().remove(lending);
+
+            lending.deleteLendingInProgress();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -877,6 +856,8 @@ public class User extends Geoquerable implements Comparable<User> {
             this.materials.remove(rentDoc);
             if (this.materialsMaterialized != null)
                 this.obtainMaterializedUserMaterials().remove(material);
+
+            material.deleteMaterial();
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
             e.printStackTrace();
@@ -963,14 +944,14 @@ public class User extends Geoquerable implements Comparable<User> {
         try {
             List<QuarantineAssistance> tmp = obtainMaterializedQuarantineAssistance()
                     .stream().filter(q -> q.getId().equals(assistance.getId())).collect(Collectors.toList());
-            if (tmp.size() > 0) {       //TODO aggiungere override equals su quarantineAssistance e cambiare la condizione dell'if con contains
+            if (tmp.size() > 0) {
                 DocumentReference quarDoc = getReference(QuarantineAssistance.table, assistance.getId());
                 Tasks.await(removeQuarantineAssistanceAsync(quarDoc));
                 this.quarantineAssistance.remove(quarDoc);
                 if (this.quarantineAssistanceMaterialized != null)
                     this.obtainMaterializedQuarantineAssistance().remove(tmp.get(0));
-                Task<Void> t = quarDoc.delete();
-                Tasks.await(t);
+
+                assistance.deleteQuarantineAssistance();
                 return true;
             }
             return false;
@@ -978,6 +959,16 @@ public class User extends Geoquerable implements Comparable<User> {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * The method is use to delete all the quarantine assistance from a user and database as well.
+     *
+     * @author Davide Finesso
+     */
+    public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
+        for(QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+            this.removeQuarantineAssistance(quarantineAssistance);
     }
 
     /**
@@ -1013,9 +1004,9 @@ public class User extends Geoquerable implements Comparable<User> {
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         for (DocumentSnapshot doc : documents) {
-            Activity activity = getActivityById(doc.getId());
+            Activity activity = obtainActivityById(doc.getId());
 
-            result.addAll(activity.getMaterializedParticipants());
+            result.addAll(activity.obtainMaterializedParticipants());
         }
 
         result.remove(this);
@@ -1037,9 +1028,9 @@ public class User extends Geoquerable implements Comparable<User> {
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
         for (DocumentSnapshot doc : documents) {
-            Activity activity = getActivityById(doc.getId());
+            Activity activity = obtainActivityById(doc.getId());
 
-            for (User u : activity.getMaterializedParticipants()) {
+            for (User u : activity.obtainMaterializedParticipants()) {
                 if (u.getPositiveSince() != null && !u.equals(this)) {
                     result.add(activity);
                     break;

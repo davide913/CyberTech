@@ -12,7 +12,6 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Date;
@@ -26,6 +25,12 @@ import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
+/**
+ * Class use to describe a user's device instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ *
+ * @author Davide Finesso
+ */
 public class Device {
     public final static String table = "device";
     private Timestamp lastUsed;
@@ -34,8 +39,18 @@ public class Device {
     private String userId;
     private String id;
 
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
     public Device(){}
 
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private Device(Timestamp lastUsed, String token, String deviceId, String userId, String id) {
         this.lastUsed = lastUsed;
         this.token = token;
@@ -84,7 +99,12 @@ public class Device {
         this.userId = userId;
     }
 
-    protected static Device getDeviceById(String id) throws ExecutionException, InterruptedException {
+    /**
+     * The protected method return a device from his id.
+     *
+     * @author Davide Finesso
+     */
+    protected static Device obtainDeviceById(String id) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -99,10 +119,13 @@ public class Device {
             throw new NoDeviceFoundException("No device found with this id: " + id);
     }
 
-    private static Device getDevice(String deviceId, String userId) throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table)
+    /**
+     * The method return a user's device the user's id and a device's id.
+     *
+     * @author Davide Finesso
+     */
+    private static Device obtainDevice(String deviceId, String userId) throws ExecutionException, InterruptedException {
+        Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("deviceId", deviceId)
                 .whereEqualTo("userId", userId).get();
         Tasks.await(future);
@@ -112,15 +135,19 @@ public class Device {
             throw new NoDeviceFoundException("No device found with this deviceId: " + deviceId);
 
         Device device = documents.get(0).toObject(Device.class);
-        device.id = documents.get(0).getId();
+        device.setId( documents.get(0).getId());
 
         return device;
     }
 
-
+    /**
+     * The protected method add to the database a new device and return it.
+     *
+     * @author Davide Finesso
+     */
     protected static Device createDevice(String token, String deviceId, String userId) throws ExecutionException, InterruptedException {
         try{
-            Device device = getDevice(deviceId, userId);
+            Device device = obtainDevice(deviceId, userId);
 
             device.updateToken(token);
             device.updateLastUsed();
@@ -128,7 +155,7 @@ public class Device {
             return device;
         }
         catch (NoDeviceFoundException e) {
-            Timestamp t = new Timestamp(new Date());
+            Timestamp t = Timestamp.now();
 
             Map<String, Object> myDevice = new HashMap<>();
             myDevice.put("token", token);
@@ -142,6 +169,11 @@ public class Device {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> deleteDeviceAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -152,11 +184,16 @@ public class Device {
             throw new NoDeviceFoundException("No device found with this id: " + id);
     }
 
+    /**
+     * The protected method is use to delete a device to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     protected boolean deleteDevice() {
         try {
             Task<Void> t = this.deleteDeviceAsync();
             Tasks.await(t);
-            this.id = null;
+            this.setId( null );
             return true;
         } catch (ExecutionException | InterruptedException | NoDeviceFoundException e) {
             e.printStackTrace();
@@ -164,6 +201,11 @@ public class Device {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateLastUsedAsync(Timestamp timestamp) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -174,12 +216,17 @@ public class Device {
         throw new NoDeviceFoundException("Device not found with this id: "+ id);
     }
 
+    /**
+     * The method is use to update a device's field last used to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateLastUsed() {
         try {
-            Timestamp timestamp = new Timestamp(new Date());
+            Timestamp timestamp = Timestamp.now();
             Task<Void> t = this.updateLastUsedAsync(timestamp);
             Tasks.await(t);
-            this.lastUsed = timestamp;
+            this.setLastUsed( timestamp );
             return true;
         } catch (ExecutionException | InterruptedException | NoDeviceFoundException e) {
             e.printStackTrace();
@@ -187,6 +234,11 @@ public class Device {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateTokenAsync(@NonNull String token) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -197,11 +249,16 @@ public class Device {
         throw new NoDeviceFoundException("Device not found with this id: "+ id);
     }
 
+    /**
+     * The method is use to update a device's field token to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateToken(@NonNull String token) {
         try {
             Task<Void> t = this.updateTokenAsync(token);
             Tasks.await(t);
-            this.token = token;
+            this.setToken( token );
             return true;
         } catch (ExecutionException | InterruptedException | NoAssistanceTypeFoundException e) {
             e.printStackTrace();
@@ -209,6 +266,11 @@ public class Device {
         }
     }
 
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -217,6 +279,11 @@ public class Device {
         return Objects.equals(id, device.id);
     }
 
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

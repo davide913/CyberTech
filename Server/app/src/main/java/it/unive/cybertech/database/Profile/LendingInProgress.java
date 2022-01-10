@@ -113,13 +113,13 @@ public class LendingInProgress {
     }
 
     /**
-     * The method return the field material materialize.
+     * The method return the field device materialize, if is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
     public Material obtainMaterializedMaterial() throws ExecutionException, InterruptedException {
         if (materializeMaterial == null)
-            materializeMaterial = Material.getMaterialById(material.getId());
+            materializeMaterial = Material.obtainMaterialById(material.getId());
         return materializeMaterial;
     }
 

@@ -157,29 +157,31 @@ public class QuarantineAssistance extends Geoquerable {
         this.title = title;
     }
 
+    /**
+     * The method return the field device materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
     public AssistanceType obtainMaterializeAssistanceType() throws ExecutionException, InterruptedException {
         if(materializeAssistanceType ==  null)
-            materializeAssistanceType = AssistanceType.getAssistanceTypeById(assistanceType.getId());
+            materializeAssistanceType = AssistanceType.obtainAssistanceTypeById(assistanceType.getId());
 
         return materializeAssistanceType;
     }
 
-    private void setMaterializeAssistanceType(AssistanceType materializeAssistanceType) {
-        this.materializeAssistanceType = materializeAssistanceType;
-    }
-
+    /**
+     * The method return the field device materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
     public User obtainMaterializeInCharge() throws ExecutionException, InterruptedException {
         if(inCharge == null)
             return null;
-        
+
         if(materializeInCharge == null)
             materializeInCharge = User.obtainUserById(inCharge.getId());
 
         return materializeInCharge;
-    }
-
-    private void setMaterializeInCharge(User materializeInCharge) {
-        this.materializeInCharge = materializeInCharge;
     }
 
     /**
@@ -286,7 +288,7 @@ public class QuarantineAssistance extends Geoquerable {
             Task<Void> t = this.updateAssistanceType_QuarantineAssistanceAsync(assistanceType);
             Tasks.await(t);
             this.setAssistanceType(getReference(AssistanceType.table, assistanceType.getId()));
-            this.setMaterializeAssistanceType(assistanceType);
+            this.materializeAssistanceType = assistanceType;
             return true;
         } catch (ExecutionException | InterruptedException | NoQuarantineAssistanceFoundException e) {
             e.printStackTrace();
@@ -330,12 +332,12 @@ public class QuarantineAssistance extends Geoquerable {
             if(user != null) {
                 this.setInCharge(getReference(User.table, user.getId()));
                 this.setIsInCharge(true);
-                this.setMaterializeInCharge(user);
+                this.materializeInCharge = user;
             }
             else{
                 this.setInCharge(null);
                 this.setIsInCharge(false);
-                this.setMaterializeInCharge(null);
+                this.materializeInCharge = null;
             }
             return true;
         } catch (ExecutionException | InterruptedException | NoQuarantineAssistanceFoundException e) {

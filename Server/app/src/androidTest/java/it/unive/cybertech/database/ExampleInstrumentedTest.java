@@ -8,15 +8,12 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.firebase.geofire.GeoFireUtils;
-import com.firebase.geofire.GeoLocation;
-import com.google.firebase.firestore.GeoPoint;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
 
+import it.unive.cybertech.database.Material.Type;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 
@@ -35,13 +32,13 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        List<QuarantineAssistance> arr = QuarantineAssistance
-                .obtainJoinableQuarantineAssistance(null, new GeoPoint(37,-122),15);
+        User u = User.obtainUserById("nWZXf0hT5qSVURKdS3UkT0Te63E3");
 
-        double distanceInM = GeoFireUtils
-                .getDistanceBetween(new GeoLocation(37,-122), new GeoLocation(37.4219983,-122.084));
+        List<QuarantineAssistance> arr = u.obtainMaterializedQuarantineAssistance();
 
-        Log.d("size", ""+distanceInM/1000);
+        Log.d("size", ""+arr.size());
+
+        u.removeQuarantineAssistance(arr.get(0));
 
     }
 }
