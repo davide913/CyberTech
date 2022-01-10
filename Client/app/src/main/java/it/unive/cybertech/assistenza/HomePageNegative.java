@@ -1,6 +1,6 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.obtainQuarantineAssistanceByInCharge;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -83,9 +83,9 @@ public class HomePageNegative extends Fragment {
             ArrayList<AssistanceType> tList = null;
             List<QuarantineAssistance> myQuar = null;
             try {
-                tList = AssistanceType.getAssistanceTypes();
+                tList = AssistanceType.obtainAssistanceTypes();
                 myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(null, null, 10);
-                inCharge[0] = getQuarantineAssistanceByInCharge(user);
+                inCharge[0] = obtainQuarantineAssistanceByInCharge(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

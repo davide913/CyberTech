@@ -49,7 +49,7 @@ public class PosReportedFragment extends Fragment {
         Utils.executeAsync(() -> user.obtainPositiveActivities(), new Utils.TaskResult<List<Activity>>() {
             @Override
             public void onComplete(List<Activity> result) {
-                List<Activity> activityList = result;
+                List<Activity> activityList = result; //activity list with positives
                 Boolean var = false;
                 ImageView imageView = v.findViewById(R.id.imageView_PosReported);
                 TextView textView = v.findViewById(R.id.TextView_PosReported);
@@ -67,7 +67,7 @@ public class PosReportedFragment extends Fragment {
 
                     ArrayAdapter<Activity> adapter;
 
-                    adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList);
+                    adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList); //creation of the ListView
 
                     listView.setAdapter(adapter);
                 }
@@ -84,7 +84,7 @@ public class PosReportedFragment extends Fragment {
             public void onError(Exception e) {
 
             }
-        });
+        }); //TODO ENRICO VERIFICARE SE IL CODICE COMMENTATO SOTTO FUNZIONA ANCHE CON EXECUTEASYNC QUA SOPRA
         /*
         Thread t = new Thread(new Runnable() {
             @Override

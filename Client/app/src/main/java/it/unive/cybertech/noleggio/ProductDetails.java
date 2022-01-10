@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
+
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
@@ -127,7 +127,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     private void manageType() throws InterruptedException {
         switch (from) {
             case MyRentMaterialsFragment.ID:
-                Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
+                Utils.executeAsync(() -> material.obtainMaterializedRenter(), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User renterUser) {
                         if (renterUser != null) {
@@ -187,7 +187,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                     @Override
                     public void onError(Exception e) {
-                        if (e instanceof NoRentMaterialFoundException) {
+                        if (e instanceof NoRentMaterialFoundException) { //TODO ENRICO
                             dateDescription.setText(R.string.showcase_until_dotted);
                             date.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
                             delete.setVisibility(VISIBLE);
@@ -301,7 +301,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             case RentMaterialAdapter.ID:
                 Thread t = new Thread(() -> {
                     try {
-                        List<LendingInProgress> temp = material.getMaterializedRenter().obtainMaterializedLendingInProgress();
+                        List<LendingInProgress> temp = material.obtainMaterializedRenter().obtainMaterializedLendingInProgress();
                         lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
                         if (lending == null)
                             throw new RuntimeException("Lending is null");
@@ -374,7 +374,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     }
 
     private void getMaterial(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+        Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
             @Override
             public void onComplete(Material result) {
                 material = result;
@@ -399,7 +399,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     }
 
     private void getLending(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+        Utils.executeAsync(() -> LendingInProgress.obtainLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 lending = result;
@@ -419,7 +419,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             getMaterial(id, new Utils.TaskResult<Void>() {
                 @Override
                 public void onComplete(Void result) {
-                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                    Utils.executeAsync(() -> material.obtainLending(), new Utils.TaskResult<LendingInProgress>() {
                         @Override
                         public void onComplete(LendingInProgress result) {
                             lending = result;

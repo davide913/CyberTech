@@ -63,7 +63,7 @@ public class ManifestPositivityFragment extends Fragment {
         return v;
     }
 
-    private void initViews(View v) {
+    private void initViews(View v) {  //Configure the screen
 
         TextView mNome = v.findViewById(R.id.textView_nome2);
         TextView mCognome = v.findViewById(R.id.textView_cognome2);
@@ -119,8 +119,7 @@ public class ManifestPositivityFragment extends Fragment {
         }
 
 
-        //INVIA SEGNALAZIONE NULL
-
+        //SET POSITIVITY NULL
         bManifestNegativity.setOnClickListener(v1 -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
             builder.setTitle("Invia Guarigione");
@@ -131,7 +130,7 @@ public class ManifestPositivityFragment extends Fragment {
                     Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                         @Override
                         public void onComplete(Boolean result) {
-                            Utils.executeAsync(()->user.deleteAllMyQuarantineAssistance(), new Utils.TaskResult<Void>() {
+                            /*Utils.executeAsync(()->user.deleteAllMyQuarantineAssistance(), new Utils.TaskResult<Void>() {
                                 @Override
                                 public void onComplete(Void result) {
                                     updateFr();
@@ -143,10 +142,12 @@ public class ManifestPositivityFragment extends Fragment {
 
                                 }
                             });
-                            /*
+
+                             */
+
                             updateFr();
                             dialog.cancel();
-                             */
+
                         }
 
                         @Override
@@ -168,10 +169,8 @@ public class ManifestPositivityFragment extends Fragment {
         });
 
 
-        //INVIA SEGNALAZIONE CON DATA DEL TAMPONE
-
-
-        signPosButton.setOnClickListener(new View.OnClickListener() {
+        //SET POSITIVITY WITH A DATE
+        signPosButton.setOnClickListener(new View.OnClickListener() { //events that occur when the button is pressed
             @Override
             public void onClick(View v) {
                 String data = mDateSign.getHint().toString();
@@ -238,6 +237,7 @@ public class ManifestPositivityFragment extends Fragment {
 
     }
 
+    //Visually change the date on the screen
     private void updateLabel(View v) {
         String myFormat = "dd/MM/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
@@ -247,13 +247,14 @@ public class ManifestPositivityFragment extends Fragment {
         selectDate.setHint(sdf.format(myCalendar.getTime()));
     }
 
-
-    private void updateFr() {  //Permette di aggiornare i fragments
+    //Function that allows you to update the fragments
+    private void updateFr() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
+    //Allows you to send a notification to all users in the collection
     private void sendNotifications(Collection<User> users) {
         for (User u : users) {
             MessageService.sendMessageToUserDevices(u, MessageService.NotificationType.coronavirus,

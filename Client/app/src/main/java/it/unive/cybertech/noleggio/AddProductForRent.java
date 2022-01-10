@@ -144,7 +144,7 @@ public class AddProductForRent extends AppCompatActivity {
             AtomicReference<ArrayAdapter<Type>> userAdapter = new AtomicReference<>();
             Thread t = new Thread(() -> {
                 try {
-                    ArrayList<Type> types = Type.getMaterialTypes();
+                    ArrayList<Type> types = Type.obtainMaterialTypes();
                     userAdapter.set(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, types));
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();

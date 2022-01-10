@@ -1,6 +1,7 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.CreateGroup;
+
+import static it.unive.cybertech.database.Groups.Group.createGroup;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
 
@@ -88,7 +89,7 @@ public class GroupCreation extends AppCompatActivity {
     private void createFSGroup() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                newGroup = CreateGroup(getName().getText().toString(), getDescription().getText().toString(), user);
+                newGroup = createGroup(getName().getText().toString(), getDescription().getText().toString(), user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

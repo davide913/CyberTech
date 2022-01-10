@@ -1,6 +1,6 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
+import static it.unive.cybertech.database.Profile.QuarantineAssistance.obtainQuarantineAssistanceByInCharge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
