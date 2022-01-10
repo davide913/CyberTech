@@ -1,9 +1,9 @@
 package it.unive.cybertech.groups.activities;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import static it.unive.cybertech.database.Groups.Activity.createActivity;
+import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -11,6 +11,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -26,11 +31,6 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
-
-import static it.unive.cybertech.database.Groups.Activity.createActivity;
-import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
-import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 
 /**
  * Activity that allow the group activity creation by users.
@@ -166,7 +166,7 @@ public class ActivityCreation extends AppCompatActivity {
         @NonNull Thread t = new Thread(() -> {
             try {
                 String id = getIntent().getStringExtra("ID");
-                thisGroup = Group.getGroupById(id);
+                thisGroup = Group.obtainGroupById(id);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

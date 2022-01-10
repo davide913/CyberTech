@@ -1,11 +1,12 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.getAllGroups;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,10 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -112,7 +109,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private void findFSGroups() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                groups = getAllGroups();
+                groups = Group.obtainAllGroups();
                 // Log.d("Size", " " + groups.size());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

@@ -1,11 +1,15 @@
 package it.unive.cybertech.groups.activities;
 
-import static it.unive.cybertech.database.Groups.Group.*;
+import static it.unive.cybertech.database.Groups.Group.obtainGroupById;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,11 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -149,8 +148,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     private void bindThisGroupAndActivities() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup = getGroupById(idGroup);
-                activities = thisGroup.getMaterializedActivities();
+                thisGroup = obtainGroupById(idGroup);
+                activities = thisGroup.obtainMaterializedActivities();
                 Log.d("Size", " " + activities.size());
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();

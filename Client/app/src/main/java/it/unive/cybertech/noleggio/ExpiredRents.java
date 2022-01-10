@@ -2,26 +2,21 @@ package it.unive.cybertech.noleggio;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
-
-import com.google.firebase.Timestamp;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.utils.Utils;
 
@@ -67,7 +62,7 @@ public class ExpiredRents extends AppCompatActivity implements Utils.ItemClickLi
     protected void onStart() {
         super.onStart();
         ///Binding data to the rented list and refreshing the relative adapter
-        Utils.executeAsync(() -> user.getExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {
+        Utils.executeAsync(() -> user.obtainMyExpiredLending(), new Utils.TaskResult<List<LendingInProgress>>() {//getExpiredLending
             @Override
             public void onComplete(List<LendingInProgress> result) {
                 rentedMaterials = result;

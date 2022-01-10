@@ -83,7 +83,7 @@ public class HomePageNegative extends Fragment {
         
         Thread t = new Thread(() -> {
             try {
-                tList[0] = AssistanceType.getAssistanceTypes();
+                tList[0] = AssistanceType.obtainAssistanceTypes();
                 //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
                 myQuar[0] = QuarantineAssistance.obtainJoinableQuarantineAssistance(tList[0].get(0), myGeoPosition, 10);
 

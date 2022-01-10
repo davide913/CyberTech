@@ -1,13 +1,7 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.CreateGroup;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +9,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -88,7 +87,7 @@ public class GroupCreation extends AppCompatActivity {
     private void createFSGroup() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                newGroup = CreateGroup(getName().getText().toString(), getDescription().getText().toString(), user);
+                newGroup = Group.createGroup(getName().getText().toString(), getDescription().getText().toString(), user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

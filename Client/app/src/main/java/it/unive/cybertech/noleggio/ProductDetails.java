@@ -3,12 +3,6 @@ package it.unive.cybertech.noleggio;
 import static android.view.View.VISIBLE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +17,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.Collections2;
@@ -32,9 +32,9 @@ import java.util.Calendar;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
@@ -312,7 +312,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
             @Override
             public void onError(Exception e) {
-                if (e instanceof NoRentMaterialFoundException) {
+                if (e instanceof NoMaterialFoundException) {
                     expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
                     //If the error is that the lending doesn't exists and i'm the owner, the user can delete it's material
                     if (material.getOwner().getId().equals(user.getId())) {
@@ -413,7 +413,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
      * @param callback The callback to call when the data has been retrieved
      */
     private void getMaterial(@NonNull String id, @NonNull Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+        Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
             @Override
             public void onComplete(Material result) {
                 material = result;
@@ -472,7 +472,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 @Override
                 public void onComplete(Void result) {
                     ///After the material we should get the lending (if any)
-                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                    Utils.executeAsync(() -> material.obtainLending(), new Utils.TaskResult<LendingInProgress>() {
                         @Override
                         public void onComplete(LendingInProgress result) {
                             lending = result;
@@ -570,7 +570,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.getExpiredLending();
+                                List<LendingInProgress> temp = result.obtainMyExpiredLending();//getExpiredLending
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
 
                             } catch (Exception e) {

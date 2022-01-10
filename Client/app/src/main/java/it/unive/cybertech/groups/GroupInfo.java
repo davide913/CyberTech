@@ -7,16 +7,15 @@ import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -218,7 +217,7 @@ public class GroupInfo extends Fragment {
     private boolean checkGroupMember() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                status = getThisGroup().getMaterializedMembers().contains(user);
+                status = getThisGroup().obtainMaterializedMembers().contains(user);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

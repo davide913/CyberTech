@@ -3,24 +3,22 @@ package it.unive.cybertech.noleggio;
 import static it.unive.cybertech.noleggio.HomePage.NEW_MATERIAL;
 import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -64,7 +62,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
             Utils.getLocation(getActivity(), new Utils.TaskResult<Utils.Location>() {
                 @Override
                 public void onComplete(Utils.Location result) {
-                    Utils.executeAsync(() -> Material.getRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
                         @Override
                         public void onComplete(List<Material> result) {
                             Log.d(ID, "Size: " + result.size());
@@ -117,7 +115,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         } else if (requestCode == NEW_MATERIAL && resultCode == ProductDetails.SUCCESS) {
             String id = data.getStringExtra("ID");
             if (id != null) {
-                Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+                Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
                         adapter.add(result);

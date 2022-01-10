@@ -1,13 +1,13 @@
 package it.unive.cybertech.groups;
 
+import android.os.Bundle;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
-
-import android.os.Bundle;
-import android.view.MenuItem;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -15,8 +15,8 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.utils.Utils;
 
 /**
@@ -68,7 +68,7 @@ public class GroupHomePage extends AppCompatActivity {
     private void bindThisGroup() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
+                thisGroup = Group.obtainGroupById(getIntent().getStringExtra("ID"));
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
