@@ -2,17 +2,10 @@ package it.unive.cybertech.gestione_covid;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +14,10 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnFailureListener;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -126,9 +122,8 @@ public class ManifestPositivityFragment extends Fragment {
                         }
 
                         @Override
-                        public OnFailureListener onError(Exception e) {
+                        public void onError(Exception e) {
 
-                            return null;
                         }
                     });
                       /*
@@ -193,9 +188,7 @@ public class ManifestPositivityFragment extends Fragment {
                                     }
 
                                     @Override
-                                    public OnFailureListener onError(Exception e) {
-
-                                        return null;
+                                    public void onError(Exception e) {
                                     }
                                 });
                                 updateFr();
@@ -204,9 +197,8 @@ public class ManifestPositivityFragment extends Fragment {
                             }
 
                             @Override
-                            public OnFailureListener onError(Exception e) {
+                            public void onError(Exception e) {
 
-                                return null;
                             }
                         });
                         /*

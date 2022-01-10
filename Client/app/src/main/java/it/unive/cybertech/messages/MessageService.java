@@ -18,7 +18,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.common.collect.Collections2;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -66,9 +65,8 @@ public class MessageService extends FirebaseMessagingService {
             }
 
             @Override
-            public OnFailureListener onError(Exception e) {
+            public void onError(Exception e) {
 
-                return null;
             }
         });
     }

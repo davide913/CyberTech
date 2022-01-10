@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.concurrent.ExecutionException;
@@ -170,7 +169,7 @@ public class RequestViz extends AppCompatActivity {
             public void onSuccess() {
                 Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(user), new Utils.TaskResult<Boolean>() {
                     @Override
-                    public void onComplete(Boolean result) throws InterruptedException {
+                    public void onComplete(Boolean result) {
                         Thread t = new Thread(() -> {
                             try {
                                 target = request.obtainRequestOwner();
@@ -179,15 +178,18 @@ public class RequestViz extends AppCompatActivity {
                             }
                         });
                         t.start();
-                        t.join();
+                        try {
+                            t.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
 
                         sendNotifications(target, "accept", target.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
                     @Override
-                    public OnFailureListener onError(Exception e) {
-                        return null;
+                    public void onError(Exception e) {
                     }
                 });
                 finish();
@@ -215,7 +217,7 @@ public class RequestViz extends AppCompatActivity {
             public void onSuccess() {
                 Utils.executeAsync(() -> request.updateInCharge_QuarantineAssistance(null), new Utils.TaskResult<Boolean>() {
                     @Override
-                    public void onComplete(Boolean result) throws InterruptedException {
+                    public void onComplete(Boolean result){
                         Thread t = new Thread(() -> {
                             try {
                                 target = request.obtainRequestOwner();
@@ -224,15 +226,17 @@ public class RequestViz extends AppCompatActivity {
                             }
                         });
                         t.start();
-                        t.join();
+                        try {
+                            t.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         sendNotifications(target, "stop", target.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
                     @Override
-                    public OnFailureListener onError(Exception e) {
-
-                        return null;
+                    public void onError(Exception e) {
                     }
                 });
                 finish();

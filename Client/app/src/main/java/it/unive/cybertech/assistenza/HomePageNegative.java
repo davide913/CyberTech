@@ -1,11 +1,5 @@
 package it.unive.cybertech.assistenza;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -19,7 +13,12 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
@@ -176,8 +175,8 @@ public class HomePageNegative extends Fragment {
             }
 
             @Override
-            public OnFailureListener onError(Exception e) {
-                return null;
+            public void onError(Exception e) {
+
             }
         });
     }

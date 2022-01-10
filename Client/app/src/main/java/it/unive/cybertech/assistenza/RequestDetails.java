@@ -10,7 +10,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,7 +25,6 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
@@ -40,9 +38,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
-import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.User;
-import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
 /**
@@ -140,8 +136,7 @@ public class RequestDetails extends AppCompatActivity {
                                                }
 
                                                @Override
-                                               public OnFailureListener onError(Exception e) {
-                                                   return null;
+                                               public void onError(Exception e) {
                                                }
                                            });
                                        }

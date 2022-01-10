@@ -21,7 +21,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -32,9 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
@@ -53,9 +50,9 @@ public class Utils {
     }
 
     public interface TaskResult<T> {
-        void onComplete(T result) throws ExecutionException, InterruptedException;
+        void onComplete(T result);
 
-        OnFailureListener onError(Exception e) throws ExecutionException, InterruptedException;
+        void onError(Exception e);
     }
 
     /**
@@ -243,20 +240,12 @@ public class Utils {
                 R result = callable.call();
                 if (callback != null)
                     handler.post(() -> {
-                        try {
-                            callback.onComplete(result);
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        callback.onComplete(result);
                     });
             } catch (Exception e) {
                 if (callback != null)
                     handler.post(() -> {
-                        try {
-                            callback.onError(e);
-                        } catch (ExecutionException | InterruptedException executionException) {
-                            executionException.printStackTrace();
-                        }
+                        callback.onError(e);
                     });
             }
         }).start();
@@ -277,9 +266,9 @@ public class Utils {
             }
 
             @Override
-            public OnFailureListener onError(Exception e) {
+            public void onError(Exception e) {
                 e.printStackTrace();
-                return null;
+                //return null;
             }
         });
     }
@@ -297,7 +286,7 @@ public class Utils {
         }
     }
 
-    public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException, ExecutionException, InterruptedException {
+    public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(activity);
             client.getLastLocation().addOnSuccessListener(activity, location -> {
@@ -312,14 +301,10 @@ public class Utils {
                     result.city = addresses.get(0).getLocality();
                     result.address = addresses.get(0).getThoroughfare();
                     callback.onComplete(result);
-                } catch (IOException | ExecutionException | InterruptedException e) {
-                    try {
-                        callback.onError(e);
-                    } catch (ExecutionException | InterruptedException executionException) {
-                        executionException.printStackTrace();
-                    }
+                } catch (IOException e) {
+                    callback.onError(e);
                 }
-            }).addOnFailureListener(callback.onError(new Exception("Error")));
+            }).addOnFailureListener(callback::onError);
         } else
             throw new PermissionDeniedException("GPS permission not granted");
     }

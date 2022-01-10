@@ -1,8 +1,5 @@
 package it.unive.cybertech.signup;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -13,7 +10,9 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.google.android.gms.tasks.OnFailureListener;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.SplashScreen;
@@ -156,16 +154,12 @@ public class SignUpActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public OnFailureListener onError(Exception e) {
-
-                    return null;
+                public void onError(Exception e) {
                 }
             });
         } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
         }
     }
 
