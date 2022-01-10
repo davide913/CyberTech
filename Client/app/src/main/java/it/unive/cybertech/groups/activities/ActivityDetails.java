@@ -22,11 +22,17 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+
+import static it.unive.cybertech.groups.activities.GroupActivities.RELOAD_ACTIVITY;
+import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
+
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * Activity that allow to see all group activity details.
@@ -144,13 +150,7 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void removeGroupActivityParticipant() {
         if (checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> getThisGroupActivity().removeParticipant(user));
-            t.start();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            executeAsync(() -> getThisGroupActivity().removeParticipant(user), null);
             showShortToast(getString(R.string.GroupActivityRemoved), context);
             setButtonInfoAsNoParticipant();
             status = false;
@@ -165,13 +165,7 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void addGroupActivityParticipant() {
         if (checkGroupMember() && !checkGroupActivityMember()) {
-            @NonNull Thread t = new Thread(() -> getThisGroupActivity().addParticipant(user));
-            t.start();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            executeAsync(() -> getThisGroupActivity().addParticipant(user), null);
             showShortToast(getString(R.string.GroupActivitySubscribed), context);
             setButtonInfoAsParticipant();
             status = true;
@@ -187,21 +181,23 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private boolean checkGroupMember() {
+
         final boolean[] stato = {false};
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                if (getThisGroup().obtainMaterializedMembers().contains(user))
-                    stato[0] = true;
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> getThisGroup().getMaterializedMembers().contains(user), new TaskResult<Boolean>() {
+            @Override
+            public void onComplete(@NonNull Boolean result) {
+                stato[0] = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return stato[0];
     }
 
@@ -213,20 +209,21 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private boolean checkGroupActivityMember() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                if (getThisGroupActivity().obtainMaterializedParticipants().contains(user))
-                    status = true;
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> getThisGroupActivity().getMaterializedParticipants().contains(user), new TaskResult<Boolean>() {
+            @Override
+            public void onComplete(@NonNull Boolean result) {
+                status = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return status;
     }
 
@@ -237,24 +234,38 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private void bindThisGroupActivity() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                thisGroup = Group.obtainGroupById(getIntent().getStringExtra("ID"));
-                thisGroupActivity = Activity.obtainActivityById(getIntent().getStringExtra("ID_GroupActivity"));
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> Group.getGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group>() {
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
             }
-            @NonNull String idGroup = getThisGroup().getId();
-            @NonNull String idGroupActivity = getThisGroupActivity().getId();
-            if (idGroup == null || idGroup.length() == 0 || idGroupActivity == null || idGroupActivity.length() == 0)
-                finish();
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executeAsync(() -> Activity.getActivityById(getIntent().getStringExtra("ID_GroupActivity")), new TaskResult<Activity>() {
+            @Override
+            public void onComplete(@NonNull Activity result) {
+                thisGroupActivity = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
+        if (getThisGroup().getId() == null || getThisGroup().getId().length() == 0 || getThisGroupActivity().getId() == null || getThisGroupActivity().getId().length() == 0)
+            finish();
     }
 
     /**

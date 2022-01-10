@@ -2,6 +2,7 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import android.Manifest;

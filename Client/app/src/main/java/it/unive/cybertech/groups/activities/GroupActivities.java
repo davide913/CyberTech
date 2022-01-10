@@ -1,6 +1,7 @@
 package it.unive.cybertech.groups.activities;
 
 import static it.unive.cybertech.database.Groups.Group.obtainGroupById;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,6 +30,7 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * HomePage is a main fragment that allow user to view all group activities for a determinate group.
@@ -146,23 +148,49 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      */
     @SuppressLint("NotifyDataSetChanged")
     private void bindThisGroupAndActivities() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                thisGroup = obtainGroupById(idGroup);
-                activities = thisGroup.obtainMaterializedActivities();
-                Log.d("Size", " " + activities.size());
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> obtainGroupById(idGroup), new TaskResult<Group>() {
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-            getAdapter().setItems(activities);
-            getAdapter().notifyDataSetChanged();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executeAsync(() -> getThisGroup().getMaterializedActivities(), new TaskResult<List<Activity>>() {
+            @Override
+            public void onComplete(@NonNull List<Activity> result) {
+                activities = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
+        getAdapter().setItems(activities);
+        getAdapter().notifyDataSetChanged();
+    }
+
+    /**
+     * Return the current group only if that is not null.
+     *
+     * @return "{@link #thisGroup}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
     }
 
     /**
