@@ -28,8 +28,8 @@
     <string name="textview">TextView</string>
     <string name="name_dotted">Nome:</string>
     <string name="surname_dotted">Cognome:</string>
-    <string name="date_alert">Data Segnalazione:</string>
-    <string name="state_alert">Stato Segnalazione:</string>
+    <string name="date_alert">Segnalazione:</string>
+    <string name="state_alert">Stato segnalazione:</string>
     <string name="nulls">Null</string>
     <string name="no_sign">Nessuna segnalazione effettuata</string>
     <string name="reports_received">Segnalazioni ricevute</string>
@@ -208,6 +208,16 @@
     <string name="no_data">No Date</string>
     <string name="name_">Nome:</string>
     <string name="surname_">Cognome:</string>
+    <string name="attention_user_positive">ATTENZIONE: Utente positivo</string>
+    <string name="positive_user_in_activity">Un utente presente nelle tue attività è risultato positivo</string>
+    <string name="set_positivity">Segnala Positività</string>
+    <string name="received_reports">Segnalazioni Ricevute</string>
+    <string name="insert_a_date">Devi inserire una data!</string>
+    <string name="send_report">Inviare Segnalazione?</string>
+    <string name="confirm_sent_report">Sei sicuro di voler inviare la segnalazione?\n</string>
+    <string name="send">Invia</string>
+    <string name="send_healing">Invia Guarigione</string>
+    <string name="confirm_send_healing">Confermi di voler inviare la segnalazione di guarigione?\n</string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>

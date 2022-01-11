@@ -25,7 +25,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -155,9 +154,9 @@ public class Utils {
 
     public static class FragmentAdapter extends FragmentPagerAdapter {
 
-        class FragmentListAdapter {
-            private String title, id;
-            private Fragment fragment;
+        static class FragmentListAdapter {
+            private final String title, id;
+            private final Fragment fragment;
 
             public FragmentListAdapter(String id, String title, Fragment fragment) {
                 this.title = title;

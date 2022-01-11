@@ -12,8 +12,8 @@
 
         <View
             android:id="@+id/view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@color/GhostWhite"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -24,8 +24,10 @@
 
         <TextView
             android:id="@+id/textView_nome"
-            android:layout_width="169dp"
+            android:layout_width="0dp"
             android:layout_height="41dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
@@ -33,16 +35,17 @@
             android:text="@string/name_"
             android:textColor="#455A64"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/view"
-            app:layout_constraintHorizontal_bias="0.09"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/view"
-            app:layout_constraintVertical_bias="0.339" />
+            app:layout_constraintTop_toBottomOf="@+id/space3"
+            app:layout_constraintVertical_bias="0.042" />
 
         <TextView
             android:id="@+id/textView_cognome"
-            android:layout_width="170dp"
+            android:layout_width="0dp"
             android:layout_height="40dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="28dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
@@ -50,61 +53,63 @@
             android:paddingEnd="10dp"
             android:text="@string/surname_"
             android:textColor="#616161"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/textView_nome"
             app:layout_constraintHorizontal_bias="0.091"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView_nome" />
 
         <TextView
             android:id="@+id/textView_dateAlert"
-            android:layout_width="217dp"
+            android:layout_width="0dp"
             android:layout_height="45dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/date_alert"
             android:textColor="#616161"
-            app:layout_constraintEnd_toEndOf="@+id/textView_cognome"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/textView_cognome"
             app:layout_constraintTop_toBottomOf="@+id/textView_cognome" />
 
         <TextView
             android:id="@+id/textView_stateAlert"
-            android:layout_width="217dp"
+            android:layout_width="0dp"
             android:layout_height="43dp"
             android:layout_marginTop="28dp"
+            android:layout_marginEnd="64dp"
             android:background="@drawable/background_field"
             android:paddingStart="10dp"
             android:paddingTop="10dp"
             android:paddingEnd="10dp"
             android:text="@string/state_alert"
             android:textColor="#616161"
-            app:layout_constraintEnd_toEndOf="@+id/textView_dateAlert"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/textView_dateAlert"
             app:layout_constraintTop_toBottomOf="@+id/textView_dateAlert" />
 
         <TextView
             android:id="@+id/textView_nome2"
-            android:layout_width="99dp"
-            android:layout_height="35dp"
+            android:layout_width="85dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
             android:paddingTop="10dp"
             android:text="@string/nulls"
             android:textColor="#616161"
             app:layout_constraintBottom_toBottomOf="@+id/textView_nome"
             app:layout_constraintEnd_toEndOf="@+id/textView_nome"
-            app:layout_constraintHorizontal_bias="0.828"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="@+id/textView_nome"
             app:layout_constraintTop_toTopOf="@+id/textView_nome"
             app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/textView_cognome2"
-            android:layout_width="87dp"
-            android:layout_height="34dp"
+            android:layout_width="68dp"
+            android:layout_height="0dp"
             android:paddingTop="10dp"
             android:text="@string/nulls"
             android:textColor="#616161"
@@ -117,8 +122,8 @@
 
         <EditText
             android:id="@+id/textView_dateAlert2"
-            android:layout_width="82dp"
-            android:layout_height="46dp"
+            android:layout_width="91dp"
+            android:layout_height="45dp"
             android:clickable="false"
             android:cursorVisible="false"
             android:focusable="false"
@@ -130,16 +135,16 @@
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@+id/textView_dateAlert"
             app:layout_constraintEnd_toEndOf="@+id/textView_dateAlert"
-            app:layout_constraintHorizontal_bias="0.97"
+            app:layout_constraintHorizontal_bias="0.966"
             app:layout_constraintStart_toStartOf="@+id/textView_dateAlert"
             app:layout_constraintTop_toTopOf="@+id/textView_dateAlert"
-            app:layout_constraintVertical_bias="1.0"
+            app:layout_constraintVertical_bias="0.0"
             tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck" />
 
         <TextView
             android:id="@+id/textView_stateAlert2"
-            android:layout_width="76dp"
-            android:layout_height="42dp"
+            android:layout_width="93dp"
+            android:layout_height="0dp"
             android:inputType="text"
             android:paddingTop="10dp"
             android:text="@string/negative"
@@ -147,43 +152,40 @@
             android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="@+id/textView_stateAlert"
             app:layout_constraintEnd_toEndOf="@+id/textView_stateAlert"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.754"
             app:layout_constraintStart_toStartOf="@+id/textView_stateAlert"
             app:layout_constraintTop_toTopOf="@+id/textView_stateAlert"
-            app:layout_constraintVertical_bias="1.0"
+            app:layout_constraintVertical_bias="0.0"
             tools:ignore="TouchTargetSizeCheck" />
 
         <Button
             android:id="@+id/button_alertPos"
             android:layout_width="201dp"
             android:layout_height="58dp"
+            android:layout_marginBottom="16dp"
             android:backgroundTint="@color/ciuc"
             android:text="@string/manifest_posotivity"
             android:theme="@style/Button.ciuc"
             app:layout_constraintBottom_toBottomOf="@+id/view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.485"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
-            app:layout_constraintVertical_bias="0.426" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
             android:id="@+id/imageView2"
-            android:layout_width="348dp"
-            android:layout_height="420dp"
-            android:layout_marginStart="204dp"
+            android:layout_width="150dp"
+            android:layout_height="350dp"
             android:contentDescription="@string/todo"
             android:src="@drawable/covid_man"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
             tools:ignore="ImageContrastCheck" />
 
         <Button
             android:id="@+id/button_signGua"
             android:layout_width="198dp"
             android:layout_height="58dp"
+            android:layout_marginBottom="16dp"
             android:backgroundTint="@color/ciuc"
             android:text="@string/manifest_negativity"
             android:theme="@style/Button.ciuc"
@@ -191,9 +193,16 @@
             app:layout_constraintBottom_toBottomOf="@+id/view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.478"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Space
+            android:id="@+id/space3"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView_stateAlert"
-            app:layout_constraintVertical_bias="0.426" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
