@@ -189,6 +189,14 @@
     <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
     <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
     <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
+    <string name="no_inCharge">Nessuna Incarico preso</string>
+    <string name="no_inCharge_message">Nessuna richiesta è stata presa in carico!</string>
+    <string name="request_taken">Richiesta presa in carico</string>
+    <string name="request_taken_notification">ha preso in carico la tua richiesta di aiuto</string>
+    <string name="attention">Attenzione!</string>
+    <string name="stop_helping_notification">ha smesso di seguire la tua richiesta di aiuto</string>
+    <string name="attention">Attenzione!</string>
+    <string name="request_deleted_notification">Ha eliminato la richiesta, ti ringraziamo per la collaborazione</string>
 
     <array name="sex">
         <item>Maschio</item>
