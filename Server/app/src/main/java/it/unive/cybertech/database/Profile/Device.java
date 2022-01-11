@@ -72,6 +72,10 @@ public class Device {
         return lastUsed;
     }
 
+    public Date obtainLastUsed() {
+        return lastUsed.toDate();
+    }
+
     private void setLastUsed(Timestamp lastUsed) {
         this.lastUsed = lastUsed;
     }
@@ -106,7 +110,7 @@ public class Device {
      * @author Davide Finesso
      * @throws NoDeviceFoundException if a device with that id doesn't exist
      */
-    protected static Device obtainDeviceById(@NonNull String id) throws ExecutionException, InterruptedException {
+    protected static Device obtainDeviceById(@NonNull String id) throws ExecutionException, InterruptedException, NoDeviceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -148,7 +152,8 @@ public class Device {
      *
      * @author Davide Finesso
      */
-    protected static Device createDevice(@NonNull String token,@NonNull String deviceId,@NonNull String userId) throws ExecutionException, InterruptedException {
+    protected static Device createDevice(@NonNull String token,@NonNull String deviceId,@NonNull String userId)
+            throws ExecutionException, InterruptedException {
         try{
             Device device = obtainDevice(deviceId, userId);
 
@@ -177,7 +182,7 @@ public class Device {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteDeviceAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteDeviceAsync() throws ExecutionException, InterruptedException, NoDeviceFoundException{
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -209,7 +214,7 @@ public class Device {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateLastUsedAsync(Timestamp timestamp) throws ExecutionException, InterruptedException {
+    private Task<Void> updateLastUsedAsync(Timestamp timestamp) throws ExecutionException, InterruptedException, NoDeviceFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -242,7 +247,7 @@ public class Device {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateTokenAsync(@NonNull String token) throws ExecutionException, InterruptedException {
+    private Task<Void> updateTokenAsync(@NonNull String token) throws ExecutionException, InterruptedException, NoDeviceFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 

@@ -260,7 +260,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteGroupAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteGroupAsync() throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -297,7 +297,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException {
+    private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -329,7 +329,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -362,7 +362,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateNameAsync(String name) throws ExecutionException, InterruptedException {
+    private Task<Void> updateNameAsync(String name) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -394,7 +394,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addMessageAsync(@NonNull DocumentReference message) throws Exception {
+    private Task<Void> addMessageAsync(@NonNull DocumentReference message) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -409,7 +409,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public boolean addMessage(@NonNull Chat message) throws Exception {
+    public boolean addMessage(@NonNull Chat message) {
         try {
             DocumentReference messDoc = getReference(Chat.table, message.getId());
             Task<Void> t = addMessageAsync(messDoc);
@@ -429,7 +429,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeMessageAsync(@NonNull DocumentReference message) throws Exception {
+    private Task<Void> removeMessageAsync(@NonNull DocumentReference message) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -444,7 +444,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public boolean removeMessage(@NonNull Chat message) throws Exception {
+    public boolean removeMessage(@NonNull Chat message) {
         try {
             DocumentReference messDoc = getReference(Chat.table, message.getId());
             Task<Void> t = removeMessageAsync(messDoc);
@@ -466,7 +466,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> addMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -501,7 +501,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> removeMemberAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -571,7 +571,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addActivityAsync(@NonNull DocumentReference user) throws Exception {
+    private Task<Void> addActivityAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -586,7 +586,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public boolean addActivity(@NonNull Activity activity) throws Exception {
+    public boolean addActivity(@NonNull Activity activity) {
         try {
             DocumentReference actDoc = getReference(Activity.table, activity.getId());
             Task<Void> t = addActivityAsync(actDoc);
@@ -606,7 +606,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws ExecutionException, InterruptedException {
+    private Task<Void> removeActivityAsync(@NonNull DocumentReference activity) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
