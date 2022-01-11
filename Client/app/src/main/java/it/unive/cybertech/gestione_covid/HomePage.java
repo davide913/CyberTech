@@ -21,7 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
-
+/**
+ * HomePage is the Fragment that initializes the
+ * ViewPager and creates the various Fragments displayed.
+ *
+ * @author Enrico De Zorzi
+ * @since 1.0
+ */
 public class HomePage extends Fragment {
 
 
@@ -38,7 +44,12 @@ public class HomePage extends Fragment {
         return view;
     }
 
-    //create the fragments of the ViewPager
+    /**
+     * setupViewPager initializes (with the adapter) the ViewPager and creates the Fragments.
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getChildFragmentManager());
         adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività"); //Creation of the first fragments

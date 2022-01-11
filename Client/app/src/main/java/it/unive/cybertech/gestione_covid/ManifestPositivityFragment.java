@@ -45,6 +45,13 @@ import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
+    /**
+     * ManifestPositivityFragment is the main fragment displayed when entering the Covid-19 section.
+     * This Fragment contains the code that allows a user to send a report to other users.
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
 
 public class ManifestPositivityFragment extends Fragment {
     final Calendar myCalendar = Calendar.getInstance();
@@ -63,6 +70,13 @@ public class ManifestPositivityFragment extends Fragment {
         return v;
     }
 
+    /**
+     * InitViews initializes the screen.
+     * Set the correct values in the various fields and calls up methods when buttons are touched.
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
     private void initViews(View v) {  //Configure the screen
 
         TextView mNome = v.findViewById(R.id.textView_nome2);
@@ -84,7 +98,7 @@ public class ManifestPositivityFragment extends Fragment {
             signPosButton.setVisibility(View.INVISIBLE);
             bManifestNegativity.setVisibility(View.VISIBLE);
         } else {
-            mDateSign.setHint("Nessuna segnalazione inviata");
+            mDateSign.setHint("No Date");
             mStateSign.setText("Negativo");
             signPosButton.setVisibility(View.VISIBLE);
             bManifestNegativity.setVisibility(View.INVISIBLE);
@@ -92,6 +106,13 @@ public class ManifestPositivityFragment extends Fragment {
 
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
+
+            /**
+             * onDateSet allows you to select a date from a DatePicker.
+             *
+             * @author Enrico De Zorzi
+             * @since 1.3
+             */
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
@@ -104,7 +125,7 @@ public class ManifestPositivityFragment extends Fragment {
         };
 
 
-        if (mDateSign.getHint().equals("Nessuna segnalazione inviata")) {
+        if (mDateSign.getHint().equals("No Date")) {
 
             mDateSign.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -117,7 +138,14 @@ public class ManifestPositivityFragment extends Fragment {
         }
 
 
-        //SET POSITIVITY NULL
+        /**
+         * When the button is clicked to report healing from Covid:
+         * - The correct parameters are set in the fields;
+         * -The user who sent the healing is removed from positive users.
+         *
+         * @author Enrico De Zorzi
+         * @since 1.2
+         */
         bManifestNegativity.setOnClickListener(v1 -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
             builder.setTitle("Invia Guarigione");
@@ -128,21 +156,6 @@ public class ManifestPositivityFragment extends Fragment {
                     Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                         @Override
                         public void onComplete(Boolean result) {
-                            /*Utils.executeAsync(()->user.deleteAllMyQuarantineAssistance(), new Utils.TaskResult<Void>() {
-                                @Override
-                                public void onComplete(Void result) {
-                                    updateFr();
-                                    dialog.cancel();
-                                }
-
-                                @Override
-                                public void onError(Exception e) {
-
-                                }
-                            });
-
-                             */
-
                             updateFr();
                             dialog.cancel();
 
@@ -167,12 +180,20 @@ public class ManifestPositivityFragment extends Fragment {
         });
 
 
-        //SET POSITIVITY WITH A DATE
+        /**
+         * When the button is pressed to report positivity to Covid-19:
+         * - The correct parameters are set in the fields;
+         * - The user is added to the list of positive users;
+         * - A notification is sent to all users in his own activity.
+         *
+         * @author Enrico De Zorzi
+         * @since 1.2
+         */
         signPosButton.setOnClickListener(new View.OnClickListener() { //events that occur when the button is pressed
             @Override
             public void onClick(View v) {
                 String data = mDateSign.getHint().toString();
-                if (!data.equals("Nessuna segnalazione inviata")) {
+                if (!data.equals("No Date")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setTitle("Inviare Segnalazione?");
                     builder.setMessage("Sei sicuro di voler inviare la segnalazione?\n");
@@ -235,7 +256,12 @@ public class ManifestPositivityFragment extends Fragment {
 
     }
 
-    //Visually change the date on the screen
+        /**
+         * updateLabel visually changes the displayed date and sets it to the correct format.
+         *
+         * @author Enrico De Zorzi
+         * @since 1.3
+         */
     private void updateLabel(View v) {
         String myFormat = "dd/MM/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
@@ -245,14 +271,25 @@ public class ManifestPositivityFragment extends Fragment {
         selectDate.setHint(sdf.format(myCalendar.getTime()));
     }
 
-    //Function that allows you to update the fragments
+        /**
+         * updateFr allows you to update all Fragments of the Covid-19 section.
+         *
+         * @author Enrico De Zorzi
+         * @since 1.2
+         */
     private void updateFr() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.gestione_covid.HomePage()).commit();
     }
 
-    //Allows you to send a notification to all users in the collection
+        /**
+         * sendNotification is the function that given a Collection
+         * sends the notification to the devices of all users in the Collection
+         *
+         * @author Enrico De Zorzi
+         * @since 1.4
+         */
     private void sendNotifications(Collection<User> users) {
         for (User u : users) {
             MessageService.sendMessageToUserDevices(u, MessageService.NotificationType.coronavirus,

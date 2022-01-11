@@ -189,7 +189,10 @@
     <string name="stop_helping_request">Stai per abbandonare la richiesta</string>
     <string name="format_field_empty">Per consentire agli untenti volontari di potervi aiutare al meglio, tutti i campi devono essere compilati</string>
     <string name="request_upload">La richiesta di aiuto verrà caricata, procedere?</string>
-
+    <string name="negative">Negativo</string>
+    <string name="no_data">No Date</string>
+    <string name="name_">Nome:</string>
+    <string name="surname_">Cognome:</string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>
