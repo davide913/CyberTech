@@ -197,6 +197,14 @@
     <string name="notification_channel_covid">Canale utilizzato per avvisarti di una eventuale espoizione al nuovo coronavirus SARS-CoV-2 (COVID-19)</string>
     <string name="notification_channel_quarantine_request_accepted">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto è stata presa in carico</string>
     <string name="notification_channel_quarantine_assistance_dismissed">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto precedentemente presa in carico non verrà più portata avanti</string>
+    <string name="no_inCharge">Nessuna Incarico preso</string>
+    <string name="no_inCharge_message">Nessuna richiesta è stata presa in carico!</string>
+    <string name="request_taken">Richiesta presa in carico</string>
+    <string name="request_taken_notification">ha preso in carico la tua richiesta di aiuto</string>
+    <string name="attention">Attenzione!</string>
+    <string name="stop_helping_notification">ha smesso di seguire la tua richiesta di aiuto</string>
+    <string name="attention">Attenzione!</string>
+    <string name="request_deleted_notification">Ha eliminato la richiesta, ti ringraziamo per la collaborazione</string>
 
     <string name="negative">Negativo</string>
     <string name="no_data">No Date</string>

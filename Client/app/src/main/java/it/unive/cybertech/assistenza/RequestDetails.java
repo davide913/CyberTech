@@ -144,6 +144,11 @@ public class RequestDetails extends AppCompatActivity {
         });
     }
 
+    /**
+     * Message thrown at user when a form field is missing
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void message_if_smt_missing() {
         Utils.Dialog dialog = new Utils.Dialog(this);
         dialog.show(getString(R.string.information), getString(R.string.format_field_empty));

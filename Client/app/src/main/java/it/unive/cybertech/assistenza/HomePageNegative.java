@@ -113,6 +113,8 @@ public class HomePageNegative extends Fragment {
                         }
 
                         for (AssistanceType a: tList) {
+                            if(selectedItemText.equals("Tutte le richieste"))
+                                aux = null;
                             if(a.getType().equals(selectedItemText))
                                 aux = a;
                         }
