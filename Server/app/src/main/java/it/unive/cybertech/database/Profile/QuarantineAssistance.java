@@ -124,7 +124,7 @@ public class QuarantineAssistance extends Geoquerable {
         return deliveryDate;
     }
 
-    public Date getDeliveryDateToDate() {
+    public Date obtainDeliveryDateToDate() {
         return deliveryDate.toDate();
     }
 
@@ -189,7 +189,9 @@ public class QuarantineAssistance extends Geoquerable {
      * @author Davide Finesso
      */
     protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType,@NonNull String title,
-                                                                     @NonNull String description,@NonNull Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
+                                                                     @NonNull String description,@NonNull Date date, double latitude, double longitude)
+            throws ExecutionException, InterruptedException {
+
         DocumentReference AssTypeRef = getReference(AssistanceType.table, assistanceType.getId());
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
@@ -215,7 +217,7 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteQuarantineAssistanceAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteQuarantineAssistanceAsync() throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -236,7 +238,7 @@ public class QuarantineAssistance extends Geoquerable {
             Tasks.await(t);
             this.id = null;
             return true;
-        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+        } catch (ExecutionException | InterruptedException | NoQuarantineAssistanceFoundException e) {
             e.printStackTrace();
             return false;
         }
@@ -267,7 +269,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
+    private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType)
+            throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -302,7 +305,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user)
+            throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -387,7 +391,9 @@ public class QuarantineAssistance extends Geoquerable {
      * @author Davide Finesso
      * @param user is used to get the id
      */
-    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user) throws ExecutionException, InterruptedException {
+    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user)
+            throws ExecutionException, InterruptedException {
+
         Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("isInCharge", true)
                 .whereEqualTo("inCharge", getReference(User.table, user.getId())).get();
@@ -414,7 +420,9 @@ public class QuarantineAssistance extends Geoquerable {
      * @param radiusInKm parameter for filter the query. Describe maximum distance from the center
      */
     public static List<QuarantineAssistance> obtainJoinableQuarantineAssistance( AssistanceType type, GeoPoint position,
-                                                                                  double radiusInKm ) throws ExecutionException, InterruptedException {
+                                                                                  double radiusInKm )
+            throws ExecutionException, InterruptedException {
+
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
@@ -446,7 +454,7 @@ public class QuarantineAssistance extends Geoquerable {
         arr.sort(new Comparator<QuarantineAssistance>() {
             @Override
             public int compare(QuarantineAssistance o1, QuarantineAssistance o2) {
-                return o2.getDeliveryDateToDate().compareTo(o1.getDeliveryDateToDate());
+                return o2.getDeliveryDate().compareTo(o1.getDeliveryDate());
             }
         });
 

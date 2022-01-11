@@ -74,7 +74,7 @@ public class Chat {
         return dateTime;
     }
 
-    public Date getDateTimeToDate() {
+    public Date obtainDateTimeToDate() {
         return dateTime.toDate();
     }
 
@@ -155,7 +155,7 @@ public class Chat {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteChatAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteChatAsync() throws ExecutionException, InterruptedException, NoChatFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 

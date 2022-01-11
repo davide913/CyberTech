@@ -247,7 +247,7 @@ public class User extends Geoquerable implements Comparable<User> {
         return birthday;
     }
 
-    public Date getBirthDayToDate() {
+    public Date obtainBirthDayToDate() {
         return birthday.toDate();
     }
 
@@ -350,9 +350,6 @@ public class User extends Geoquerable implements Comparable<User> {
                                   @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
-        if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
-            throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
-
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 
         Map<String, Object> myUser = new HashMap<>();
@@ -410,7 +407,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -474,7 +471,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -506,7 +503,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -544,7 +541,7 @@ public class User extends Geoquerable implements Comparable<User> {
      * @author Davide Finesso
      */
     private Task<Void> updateLocationAsync(String newCountry, String newCity, String newAddress, GeoPoint geoPoint)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, NoUserFoundException {
 
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -586,7 +583,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -618,7 +615,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
+    private Task<Void> addDeviceAsync(@NonNull DocumentReference device)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -655,7 +653,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
+    private Task<Void> removeDeviceAsync(@NonNull DocumentReference device)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -691,7 +690,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
+    private Task<Void> addLendingAsync(@NonNull DocumentReference lending)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -726,7 +726,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
+    private Task<Void> removeLendingAsync(@NonNull DocumentReference lending)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
