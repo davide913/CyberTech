@@ -29,8 +29,14 @@ import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.noleggio.ExpiredRents;
-import it.unive.cybertech.utils.Utils;
 
+/**
+ * This is the first class invoked after the splash screen
+ * It manage all the other fragment and the slide panel (hamburger menu)
+ * It sets the user's profile info to it
+ *
+ * @author Mattia Musone
+ * */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
@@ -61,16 +67,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         profilePicture.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));
-        });
-        profilePicture.setOnLongClickListener(v -> {
-            MessageService.getCurrentToken(task -> {
-                if (task.isSuccessful()) {
-                    new Utils.Dialog(this).show("Token", task.getResult());
-                    Log.d("TOKEN", task.getResult());
-                } else
-                    Log.e("MAIN", "Error retriving token");
-            });
-            return false;
         });
     }
 
@@ -127,6 +123,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * This function opens the relative menu base on the provided id
+     * only for the rest section, it shows an icon
+     *
+     * @param id The id of the section to open
+     * */
     @SuppressLint("NonConstantResourceId")
     private void openSection(int id) {
         MenuItem item = null;

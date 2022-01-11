@@ -108,9 +108,9 @@ public class HomePageNegative extends Fragment {
                     {
                         String selectedItemText = (String) parent.getItemAtPosition(position);
 
-                        if(position >= 0){
+                        /*if(position >= 0){
                             showShortToast("Selected : " + selectedItemText);
-                        }
+                        }*/
 
                         for (AssistanceType a: tList) {
                             if(selectedItemText.equals("Tutte le richieste"))

@@ -81,9 +81,9 @@ public class RequestDetails extends AppCompatActivity {
                         String selectedItemText = (String) parent.getItemAtPosition(position);
                         type = selectedItemText;
 
-                        if (position >= 0) {
+                        /*if (position >= 0) {
                             showShortToast("Selected : " + selectedItemText);
-                        }
+                        }*/
                     }
 
                     public void onNothingSelected(AdapterView<?> parent) {

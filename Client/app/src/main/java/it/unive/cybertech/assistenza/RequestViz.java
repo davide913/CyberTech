@@ -323,8 +323,8 @@ public class RequestViz extends AppCompatActivity {
     private void toolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         setTitle("Dettagli richiesta");
     }
