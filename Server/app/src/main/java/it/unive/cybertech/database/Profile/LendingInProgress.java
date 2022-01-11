@@ -30,6 +30,7 @@ import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundExc
 /**
  * Class use to describe a lending in progresses instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -43,8 +44,6 @@ public class LendingInProgress {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private Material materializeMaterial;
 
@@ -128,7 +127,9 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    public static LendingInProgress createLendingInProgress(Material material, Date expiryDate) throws ExecutionException, InterruptedException, LendingInProgressException {
+    public static LendingInProgress createLendingInProgress(@NonNull Material material,@NonNull Date expiryDate)
+            throws ExecutionException, InterruptedException, LendingInProgressException {
+
         DocumentReference docRefMaterial = getReference(Material.table, material.getId());
 
         Task<QuerySnapshot> lending = getInstance().collection(LendingInProgress.table).whereEqualTo("material", docRefMaterial).get();
@@ -152,8 +153,9 @@ public class LendingInProgress {
      * The method return the lending in progress with that id. If there isn't a quarantine assistance with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoLendingInProgressFoundException if a lending in progress with that id doesn't exist
      */
-    public static LendingInProgress obtainLendingInProgressById(String id) throws ExecutionException, InterruptedException {
+    public static LendingInProgress obtainLendingInProgressById(@NonNull String id) throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 

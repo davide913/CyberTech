@@ -19,10 +19,13 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Material.Exception.NoMaterialTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
 /**
  * Class use to describe a material's type instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
+ *
  *
  * @author Davide Finesso
  */
@@ -54,8 +57,9 @@ public class Type {
      * if there isn't any material type with that id it throw an exception
      *
      * @author Davide Finesso
+     * @throws NoMaterialTypeFoundException if a material type with that id doesn't exist
      */
-    private static Type obtainMaterialTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+    private static Type obtainMaterialTypeById(@NonNull String id) throws  InterruptedException, ExecutionException, NoMaterialTypeFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -75,12 +79,12 @@ public class Type {
      *
      * @author Davide Finesso
      */
-    public static ArrayList<Type> obtainMaterialTypes() throws ExecutionException, InterruptedException {
+    public static List<Type> obtainMaterialTypes() throws ExecutionException, InterruptedException {
         Task<QuerySnapshot> future = getInstance().collection(table).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        ArrayList<Type> arr = new ArrayList<>();
+        List<Type> arr = new ArrayList<>();
         for (DocumentSnapshot snapshot: documents)
             arr.add(Type.obtainMaterialTypeById(snapshot.getId()));
 

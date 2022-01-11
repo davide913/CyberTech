@@ -24,11 +24,13 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 /**
  * Class use to describe a group instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
- * Every field have a public get and a private set.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -44,8 +46,6 @@ public class Group {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private User ownerMaterialized;
     private ArrayList<User> membersMaterialized;
@@ -207,7 +207,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public static Group createGroup(String name, String description, User creator) throws ExecutionException, InterruptedException {
+    public static Group createGroup(@NonNull String name,@NonNull String description,@NonNull User creator) throws ExecutionException, InterruptedException {
         DocumentReference userRef = getReference(User.table, creator.getId());
 
         Map<String, Object> myGroup = new HashMap<>();
@@ -229,8 +229,9 @@ public class Group {
      * The method return the group with that id. If there isn't a group with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoGroupFoundException if a group with that id doesn't exist
      */
-    public static Group obtainGroupById(String id) throws ExecutionException, InterruptedException {
+    public static Group obtainGroupById(@NonNull String id) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -311,7 +312,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public boolean updateDescription(String description) {
+    public boolean updateDescription(@NonNull String description) {
         try {
             Task<Void> t = updateDescriptionAsync(description);
             Tasks.await(t);
@@ -376,7 +377,7 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public boolean updateName(String name) {
+    public boolean updateName(@NonNull String name) {
         try {
             Task<Void> t = updateNameAsync(name);
             Tasks.await(t);
@@ -451,6 +452,8 @@ public class Group {
             this.messages.remove(message);
             if(this.messagesMaterialized != null)
                 this.obtainMaterializedMessages().remove(message);
+
+            message.deleteChat();
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();
@@ -626,6 +629,8 @@ public class Group {
             this.activities.remove(actDoc);
             if(this.activitiesMaterialized != null)
                 this.obtainMaterializedActivities().remove(activity);
+
+            activity.deleteActivity();
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();

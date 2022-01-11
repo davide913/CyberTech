@@ -26,11 +26,13 @@ import java.util.concurrent.ExecutionException;
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoActivityFoundException;
 import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 /**
  * Class use to describe an activity instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -46,8 +48,6 @@ public class Activity {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private User ownerMaterialized;
     private ArrayList<User> participantsMaterialized;
@@ -166,7 +166,8 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    public static Activity createActivity(String name, String description, String place, Date date, User owner) throws ExecutionException, InterruptedException {
+    public static Activity createActivity(@NonNull String name,@NonNull String description,@NonNull String place,
+                                          @NonNull Date date,@NonNull User owner) throws ExecutionException, InterruptedException {
         Timestamp t = new Timestamp(date);
         DocumentReference userDoc = Database.getReference(User.table, owner.getId());
 
@@ -186,8 +187,9 @@ public class Activity {
      * The protected method return the activity with that id. If there isn't a activity with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoActivityFoundException if an activity with that id doesn't exist
      */
-    public static Activity obtainActivityById(String id) throws ExecutionException, InterruptedException {
+    public static Activity obtainActivityById(@NonNull String id) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -225,7 +227,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    public boolean deleteActivity() {
+    protected boolean deleteActivity() {
         try {
             Task<Void> t = deleteActivityAsync();
             Tasks.await(t);
@@ -257,7 +259,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    protected boolean updateOwner(User user) {
+    protected boolean updateOwner(@NonNull User user) {
         try {
             DocumentReference docRef = getReference(User.table, user.getId());
             Task<Void> t = updateOwnerAsync(docRef);
@@ -291,7 +293,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    public boolean updateDescription(String description) {
+    public boolean updateDescription(@NonNull String description) {
         try {
             Task<Void> t = updateDescriptionAsync(description);
             Tasks.await(t);
@@ -323,7 +325,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    public boolean updatePlace(String place) {
+    public boolean updatePlace(@NonNull String place) {
         try {
             Task<Void> t = updatePlaceAsync(place);
             Tasks.await(t);
@@ -355,7 +357,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    public boolean updateDate(Date date) {
+    public boolean updateDate(@NonNull Date date) {
         try {
             Timestamp timestamp = new Timestamp(date);
             Task<Void> t = updateDateAsync(timestamp);
@@ -442,8 +444,10 @@ public class Activity {
      * The method is use to get the membership group of the passed activity. The method can throw an exception if there is any group with that activity.
      *
      * @author Davide Finesso
+     * @param activity is use to get the activity's id to find the membership group
+     * @throws NoGroupFoundException if the activity doesn't have any membership
      */
-    public static Group obtainGroupFromActivity(Activity activity) throws ExecutionException, InterruptedException, NoGroupFoundException {
+    public static Group obtainGroupFromActivity(@NonNull Activity activity) throws ExecutionException, InterruptedException, NoGroupFoundException {
         DocumentReference actDoc = getReference(table, activity.getId());
 
         Task<QuerySnapshot> future = getInstance().collection(Group.table)

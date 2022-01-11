@@ -33,6 +33,7 @@ import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFound
 /**
  * Class use to describe a quarantine assistance's instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  * The class extend Geoquerable to query the quarantine assistance by their position.
  *
  * @author Davide Finesso
@@ -51,8 +52,6 @@ public class QuarantineAssistance extends Geoquerable {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private AssistanceType materializeAssistanceType;
     private User materializeInCharge;
@@ -141,7 +140,7 @@ public class QuarantineAssistance extends Geoquerable {
         this.location = location;
     }
 
-    private boolean isInCharge() {
+    public boolean getIsInCharge() {
         return isInCharge;
     }
 
@@ -189,8 +188,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType, String title,
-                                                                  String description, Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
+    protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType,@NonNull String title,
+                                                                     @NonNull String description,@NonNull Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
         DocumentReference AssTypeRef = getReference(AssistanceType.table, assistanceType.getId());
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
@@ -231,7 +230,7 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    public boolean deleteQuarantineAssistance() {
+    protected boolean deleteQuarantineAssistance() {
         try {
             Task<Void> t = deleteQuarantineAssistanceAsync();
             Tasks.await(t);
@@ -247,8 +246,10 @@ public class QuarantineAssistance extends Geoquerable {
      * The method return the quarantine assistance with that id. If there isn't a quarantine assistance with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoQuarantineAssistanceFoundException if a quarantine assistance with that id doesn't exist
      */
-    public static QuarantineAssistance obtainQuarantineAssistanceById(String id) throws ExecutionException, InterruptedException {
+    public static QuarantineAssistance obtainQuarantineAssistanceById(@NonNull String id)
+            throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -384,8 +385,9 @@ public class QuarantineAssistance extends Geoquerable {
      * This method return a quarantine assistance with field in charge equals to an user passed as a parameter. If there isn't quarantine assistance with that user as in charge, the method return null.
      *
      * @author Davide Finesso
+     * @param user is used to get the id
      */
-    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(User user) throws ExecutionException, InterruptedException {
+    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user) throws ExecutionException, InterruptedException {
         Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("isInCharge", true)
                 .whereEqualTo("inCharge", getReference(User.table, user.getId())).get();
@@ -407,6 +409,9 @@ public class QuarantineAssistance extends Geoquerable {
      * The result is also sort by date.
      *
      * @author Davide Finesso
+     * @param type parameter for filter the query. Describe the type assistance
+     * @param position parameter for filter the query. Describe the center
+     * @param radiusInKm parameter for filter the query. Describe maximum distance from the center
      */
     public static List<QuarantineAssistance> obtainJoinableQuarantineAssistance( AssistanceType type, GeoPoint position,
                                                                                   double radiusInKm ) throws ExecutionException, InterruptedException {
@@ -453,8 +458,9 @@ public class QuarantineAssistance extends Geoquerable {
      * The result is also sort by date.
      *
      * @author Davide Finesso
+     * @throws NoQuarantineAssistanceFoundException if a quarantine assistance with that id doesn't exist
      */
-    public User obtainRequestOwner() throws ExecutionException, InterruptedException {
+    public User obtainRequestOwner() throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference doc = getReference(table, this.id);
 
         Task<QuerySnapshot> t = getInstance().collection(User.table)
