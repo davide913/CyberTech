@@ -1,6 +1,5 @@
 package it.unive.cybertech.groups.activities;
 
-import static it.unive.cybertech.database.Groups.Group.obtainGroupById;
 import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.annotation.SuppressLint;
@@ -27,6 +26,7 @@ import java.util.Objects;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.groups.GroupHomePage;
 import it.unive.cybertech.utils.Utils;
 import it.unive.cybertech.utils.Utils.TaskResult;
 
@@ -53,6 +53,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         @NonNull View view = inflater.inflate(R.layout.fragment_group_activities, container, false);
+        thisGroup = ((GroupHomePage) requireActivity()).getThisGroup();
         initFragment();
         bindLayoutObjects(view);
         setContainer();
@@ -146,25 +147,12 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      */
     @SuppressLint("NotifyDataSetChanged")
     private void bindThisGroupAndActivities() {
-        executeAsync(() -> obtainGroupById(idGroup), new TaskResult<Group>() {
-            @Override
-            public void onComplete(@NonNull Group result) {
-                thisGroup = result;
-            }
-
-            @Override
-            public void onError(@NonNull Exception e) {
-                try {
-                    throw new Exception(e);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
-        });
         executeAsync(() -> getThisGroup().obtainMaterializedActivities(), new TaskResult<List<Activity>>() {
             @Override
             public void onComplete(@NonNull List<Activity> result) {
                 activities = result;
+                getAdapter().setItems(activities);
+                getAdapter().notifyDataSetChanged();
             }
 
             @Override
@@ -176,8 +164,6 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
                 }
             }
         });
-        getAdapter().setItems(activities);
-        getAdapter().notifyDataSetChanged();
     }
 
     /**

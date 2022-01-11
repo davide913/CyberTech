@@ -4,6 +4,8 @@ import static it.unive.cybertech.database.Database.deleteFromCollectionAsync;
 import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getReference;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
@@ -18,11 +20,13 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Groups.Exception.NoChatFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.User;
 
 /**
  * Class use to describe a chat instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -35,8 +39,6 @@ public class Chat {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private User senderMaterialized;
 
@@ -113,7 +115,7 @@ public class Chat {
      *
      * @author Davide Finesso
      */
-    public static Chat createChat(Date date, User sender, String message) throws ExecutionException, InterruptedException {
+    public static Chat createChat(@NonNull Date date,@NonNull User sender,@NonNull String message) throws ExecutionException, InterruptedException {
         Timestamp t = new Timestamp(date);
         DocumentReference userRef = getReference(User.table, sender.getId());
 
@@ -131,8 +133,9 @@ public class Chat {
      * The protected method return the chat with that id. If there isn't a chat with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoChatFoundException if a chat with that id doesn't exist
      */
-    protected static Chat obtainChatById(String id) throws ExecutionException, InterruptedException {
+    protected static Chat obtainChatById(@NonNull String id) throws ExecutionException, InterruptedException, NoChatFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -167,7 +170,7 @@ public class Chat {
      *
      * @author Davide Finesso
      */
-    public boolean deleteChat() {
+    protected boolean deleteChat() {
         try {
             Task<Void> t = deleteChatAsync();
             Tasks.await(t);

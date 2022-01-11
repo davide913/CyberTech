@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +52,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     FloatingActionButton newGroupButton;
     private @Nullable
     GroupListAdapter adapter;
+    private ProgressBar loader;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,6 +89,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private void bindLayoutObjects(@NonNull final View view) {
         groupsContainer = view.findViewById(R.id.groups_list);
         newGroupButton = view.findViewById(R.id.add_group);
+        loader = view.findViewById(R.id.groups_home_progress);
     }
 
     /**
@@ -115,6 +118,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
                 groups = result;
                 getAdapter().setItems(groups);
                 getAdapter().notifyDataSetChanged();
+                loader.setVisibility(View.GONE);
             }
 
             @Override

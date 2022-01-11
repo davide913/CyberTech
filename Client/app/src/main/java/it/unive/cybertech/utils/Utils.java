@@ -25,7 +25,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,19 +35,33 @@ import java.util.concurrent.Callable;
 import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.Sex;
 
+/**
+ * This class is only a namespace for utils and common function
+ *
+ * @author Mattia Musone
+ */
 public class Utils {
     public static final int HANDLER_DELAY = 500;
 
+    /**
+     * Interface used by the Utils.Dialog class when a Dialog button is pressed
+     */
     public interface DialogResult {
         void onSuccess();
 
         void onCancel();
     }
 
+    /**
+     * Interface used by the list adapter when an item is pressed
+     */
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }
 
+    /**
+     * Interface used by the Utils.executeAsync method to notify the end of a task
+     */
     public interface TaskResult<T> {
         void onComplete(T result);
 
@@ -56,23 +69,7 @@ public class Utils {
     }
 
     /**
-     * It can be invoked in this way
-     * <p>
-     * new Utils.Dialog(c).showDialog("title", "message");
-     * <p>
-     * OR
-     * <p>
-     * new Utils.Dialog(this)
-     * .setCallback(new Utils.DialogResult() {
-     *
-     * @Override public void onSuccess() {
-     * }
-     * @Override public void onCancel() {
-     * }
-     * })
-     * [.hideCancelButton()]
-     * [.hideOkButton()]
-     * .showDialog("", "");
+     * Create an alert dialog that display a message to the user
      */
     public static class Dialog {
         private DialogResult result;
@@ -80,6 +77,11 @@ public class Utils {
         private final String okButtonText, cancelButtonText;
         private final Context c;
 
+        /**
+         * The constructor
+         *
+         * @param c The context
+         */
         public Dialog(Context c) {
             showOkButton = true;
             showCancelButton = true;
@@ -88,6 +90,15 @@ public class Utils {
             this.c = c;
         }
 
+        /**
+         * More detailed constructor that allow to customize the alert buttons
+         *
+         * @param c                The context
+         * @param showOkButton     Indicate if the "ok" button should be showed
+         * @param okButtonText     The "ok" button text displayed to the user
+         * @param showCancelButton Indicate if the "cancel" button should be showed
+         * @param cancelButtonText The "cancel" button text displayed to the user
+         */
         public Dialog(Context c, boolean showOkButton, String okButtonText, boolean showCancelButton, String cancelButtonText) {
             this.showOkButton = showOkButton;
             this.showCancelButton = showCancelButton;
@@ -96,21 +107,37 @@ public class Utils {
             this.c = c;
         }
 
+        /**
+         * Set a callback to be called when a button is pressed.
+         * It is not mandatory
+         */
         public Dialog setCallback(DialogResult fun) {
             result = fun;
             return this;
         }
 
+        /**
+         * Hide the left most button "cancel"
+         */
         public Dialog hideCancelButton() {
             showCancelButton = false;
             return this;
         }
 
+        /**
+         * Hide the right most button "ok"
+         */
         public Dialog hideOkButton() {
             showOkButton = false;
             return this;
         }
 
+        /**
+         * Shows the dialog
+         *
+         * @param title   The title displayed to the ussr
+         * @param message The message displayed to the ussr
+         */
         public void show(String title, String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
@@ -118,6 +145,12 @@ public class Utils {
             buildAndShow(builder);
         }
 
+        /**
+         * Shows the dialog
+         *
+         * @param title   The title displayed to the ussr
+         * @param content The view to inflate instead of the default one
+         */
         public void show(String title, View content) {
             AlertDialog.Builder builder = new AlertDialog.Builder(c)
                     .setTitle(title)
@@ -125,6 +158,9 @@ public class Utils {
             buildAndShow(builder);
         }
 
+        /**
+         * Private function used to build the dialog and display it
+         */
         private void buildAndShow(AlertDialog.Builder builder) {
             if (showOkButton)
                 builder.setPositiveButton(okButtonText, (dialog, which) -> {
@@ -142,6 +178,12 @@ public class Utils {
         }
     }
 
+    /**
+     * Function that convert a string to a Sex enum
+     *
+     * @param sex String sex
+     * @return Sex
+     */
     public static Sex convertToSex(@NonNull String sex) {
         switch (sex.toLowerCase()) {
             case "maschio":
@@ -153,33 +195,59 @@ public class Utils {
         }
     }
 
+    /**
+     * This class provide a custom fragment adapter to manage the fragments
+     */
     public static class FragmentAdapter extends FragmentPagerAdapter {
 
-        class FragmentListAdapter {
-            private String title, id;
-            private Fragment fragment;
+        /**
+         * Custom data structure to hold the fragments
+         */
+        static class FragmentListAdapter {
+            private final String title, id;
+            private final Fragment fragment;
 
-            public FragmentListAdapter(String id, String title, Fragment fragment) {
+            /**
+             * The constructor
+             *
+             * @param id       The id to associate to the passed fragment
+             * @param title    The title of the fragment to display
+             * @param fragment The fragment
+             */
+            public FragmentListAdapter(@NonNull String id, @NonNull String title, @NonNull Fragment fragment) {
                 this.title = title;
                 this.id = id;
                 this.fragment = fragment;
             }
 
+            /**
+             * Get the fragment title
+             */
             public String getTitle() {
                 return title;
             }
 
+            /**
+             * Get the fragment id
+             */
             public String getId() {
                 return id;
             }
 
+            /**
+             * Get the fragment
+             */
             public Fragment getFragment() {
                 return fragment;
             }
         }
 
+        //The list holding all the fragment in the custom data
         private final List<FragmentListAdapter> mFragmentList = new ArrayList<>();
 
+        /**
+         * The constructor
+         */
         public FragmentAdapter(FragmentManager manager) {
             super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
@@ -195,7 +263,14 @@ public class Utils {
             return mFragmentList.size();
         }
 
-        public void addFragment(Fragment fragment, String title, String id) {
+        /**
+         * Adds a fragment to the list of fragment
+         *
+         * @param fragment The fragment to add
+         * @param id       The id to associate to the passed fragment
+         * @param title    The title of the fragment to display
+         */
+        public void addFragment(@NonNull Fragment fragment, @NonNull String title, @NonNull String id) {
             mFragmentList.add(new FragmentListAdapter(id, title, fragment));
         }
 
@@ -205,7 +280,14 @@ public class Utils {
             return mFragmentList.get(position).getTitle();
         }
 
-        public Fragment getFragmentById(String id) {
+        /**
+         * Search a fragment by the provided id and returns it, if any
+         *
+         * @param id he id of the fragment to look for
+         * @return The fragment with the provided id
+         * */
+        @Nullable
+        public Fragment getFragmentById(@NonNull String id) {
             for (FragmentListAdapter p : mFragmentList)
                 if (p.getId().equals(id))
                     return p.fragment;
@@ -225,14 +307,31 @@ public class Utils {
         context.startActivity(intent);
     }
 
+    /**
+     * Simple date to string formatter (dd/MM/yyyy)
+     *
+     * @param date The date to convert
+     * */
     public static String formatDateToString(@NotNull Date date) {
         return formatDateToString(date, "dd/MM/yyyy");
     }
 
+    /**
+     * Simple date to string formatter with a custom pattern
+     *
+     * @param date The date to convert
+     * @param pattern The pattern to use
+     * */
     public static String formatDateToString(@NotNull Date date, @NotNull String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }
 
+    /**
+     * This function allow to run some code asynchronous
+     *
+     * @param callable A callable code to execute in a new task
+     * @param callback If provided, it will be called at the end of the task execution
+     * */
     public static <R> void executeAsync(@NonNull Callable<R> callable, TaskResult<R> callback) {
         Handler handler = new Handler(Looper.getMainLooper());
         new Thread(() -> {
@@ -251,28 +350,9 @@ public class Utils {
         }).start();
     }
 
-    /*
-     * How to use executeAsync
-     * new Utils.TaskResult<YourReturnType>
-
-     * Vedi la funzione "initList" in ShowcaseFragment
+    /**
+     * Custom class that represent a location returned by the GPS
      * */
-    private void test() {
-        Utils.executeAsync(() -> { /*Your db function here*/
-            return null;
-        }, new Utils.TaskResult<Boolean>() {
-            @Override
-            public void onComplete(Boolean result) {
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-                //return null;
-            }
-        });
-    }
-
     public static class Location {
         public String city;
         public String country;
@@ -280,13 +360,25 @@ public class Utils {
         public double latitude, longitude;
     }
 
+    /**
+     * Custom exception thrown when the GPS permission are denied
+     * */
     public static class PermissionDeniedException extends Exception {
         public PermissionDeniedException(String message) {
             super(message);
         }
     }
 
+    /**
+     * Return the current location of the user.
+     * First checks if the permission are grantedm otherwise an exception will be thrown
+     *
+     * @param activity The activity from which the call start
+     * @param callback The callback to invoke when the location is returned
+     * @throws PermissionDeniedException when the permission of the location are denied
+     * */
     public static void getLocation(@NonNull Activity activity, @NonNull TaskResult<Location> callback) throws PermissionDeniedException {
+        //Check the GPS permission
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(activity);
             client.getLastLocation().addOnSuccessListener(activity, location -> {
@@ -301,7 +393,7 @@ public class Utils {
                     result.city = addresses.get(0).getLocality();
                     result.address = addresses.get(0).getThoroughfare();
                     callback.onComplete(result);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     callback.onError(e);
                 }
             }).addOnFailureListener(callback::onError);

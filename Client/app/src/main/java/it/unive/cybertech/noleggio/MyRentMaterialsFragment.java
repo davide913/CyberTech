@@ -26,6 +26,8 @@ import it.unive.cybertech.utils.Utils;
 
 /**
  * This class shows the material that a user offers to others.
+ *
+ * @author Mattia Musone
  * */
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 

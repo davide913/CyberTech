@@ -5,6 +5,8 @@ import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
@@ -17,10 +19,12 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
 /**
  * Class use to describe a user's device instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -34,8 +38,7 @@ public class AssistanceType {
      *
      * @author Davide Finesso
      */
-    public AssistanceType() {
-    }
+    public AssistanceType() {}
 
     public String getId() {
         return id;
@@ -57,8 +60,9 @@ public class AssistanceType {
      * The method return the assistance type with that id. If there isn't a assistance type with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoAssistanceTypeFoundException if a assistance type with that id doesn't exist
      */
-    public static AssistanceType obtainAssistanceTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+    protected static AssistanceType obtainAssistanceTypeById(@NonNull String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -78,12 +82,12 @@ public class AssistanceType {
      *
      * @author Davide Finesso
      */
-    public static ArrayList<AssistanceType> obtainAssistanceTypes() throws ExecutionException, InterruptedException {
+    public static List<AssistanceType> obtainAssistanceTypes() throws ExecutionException, InterruptedException {
         Task<QuerySnapshot> future = getInstance().collection(table).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        ArrayList<AssistanceType> arr = new ArrayList<>();
+        List<AssistanceType> arr = new ArrayList<>();
         for (DocumentSnapshot snapshot: documents)
             arr.add(obtainAssistanceTypeById(snapshot.getId()));
 

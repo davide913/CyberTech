@@ -2,14 +2,6 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +12,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,8 +29,14 @@ import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.noleggio.ExpiredRents;
-import it.unive.cybertech.utils.Utils;
 
+/**
+ * This is the first class invoked after the splash screen
+ * It manage all the other fragment and the slide panel (hamburger menu)
+ * It sets the user's profile info to it
+ *
+ * @author Mattia Musone
+ * */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
@@ -60,19 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
 
         profilePicture.setOnClickListener(v -> {
-            /*MessageService.sendMessage(null,//"d1pHJ4UjQUWK9ZZ6oclPRs:APA91bFx67MJ8EXjSHzXGW2dZrW7DFdMo6OQa7wozGDgNGgV4BM14wgc96a9y3nB6vVTXPGjnmOvZ3DtQfgFoBFrnG1mgUZyyTrngdV1UqKiUxpFvFadcv6Eb6Elvp3Khy4F-fFSNQL0",
-                    MessageService.NotificationType.assistance_chat, "test", "aaaaa", this);*/
             startActivity(new Intent(this, ProfileActivity.class));
-        });
-        profilePicture.setOnLongClickListener(v -> {
-            MessageService.getCurrentToken(task -> {
-                if (task.isSuccessful()) {
-                    new Utils.Dialog(this).show("Token", task.getResult());
-                    Log.d("TOKEN", task.getResult());
-                } else
-                    Log.e("MAIN", "Error retriving token");
-            });
-            return false;
         });
     }
 
@@ -129,6 +123,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * This function opens the relative menu base on the provided id
+     * only for the rest section, it shows an icon
+     *
+     * @param id The id of the section to open
+     * */
     @SuppressLint("NonConstantResourceId")
     private void openSection(int id) {
         MenuItem item = null;

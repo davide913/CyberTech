@@ -21,6 +21,16 @@ import it.unive.cybertech.signup.LogInActivity;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This is the first class launched by the system
+ * It checks if an user is logged in otherwise it opens the login section.
+ *
+ * It capture also an intent, provided by the Firebase classes, that manage the notification click.
+ *
+ * If the user is the first time that use the app, it also add the device id to the user's devices in the database
+ *
+ * @author Mattia Musone
+ * */
 public class SplashScreen extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -38,6 +48,7 @@ public class SplashScreen extends AppCompatActivity {
         MessageService.NotificationType type = null;
         MessageService.initNotificationChannels(this);
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        //Filter, if any, the intent by the Firebase notification click
         if (getIntent().getExtras() != null) {
             for (String key : getIntent().getExtras().keySet()) {
                 String value = getIntent().getExtras().getString(key);
@@ -61,6 +72,7 @@ public class SplashScreen extends AppCompatActivity {
                         String deviceID = Settings.Secure.ANDROID_ID;
                         Thread t = new Thread(() -> {
                             try {
+                                //add this phone id
                                 if (sh.getBoolean("FirstTime", true) || Collections2.filter(result.obtainMaterializedDevices(), d -> d.getDeviceId().equals(deviceID)).size() == 0) {
                                     sh.edit().putBoolean("FirstTime", false).apply();
                                     MessageService.getCurrentToken(task -> {

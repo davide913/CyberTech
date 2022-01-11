@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -29,13 +30,16 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
+import it.unive.cybertech.database.Material.Exception.NoMaterialTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 
 /**
  * Class use to describe a user's material instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
  * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
  *
  * @author Davide Finesso
  */
@@ -55,8 +59,6 @@ public class Material extends Geoquerable {
 
     /**
      * Materialize field for increase the performance.
-     *
-     * @author Davide Finesso
      */
     private User materializeOwner;
     private User materializeRenter;
@@ -101,8 +103,6 @@ public class Material extends Geoquerable {
     public DocumentReference getOwner() {
         return owner;
     }
-
-
 
     private void setOwner(DocumentReference owner) {
         this.owner = owner;
@@ -184,6 +184,7 @@ public class Material extends Geoquerable {
      * The method return the field renter materialize, if the material has no renter it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoMaterialFoundException if a material doesn't has a renter
      */
     public User obtainMaterializedRenter() throws ExecutionException, InterruptedException, NoMaterialFoundException {
         if(renter == null) {
@@ -212,7 +213,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
+    public static Material createMaterial(@NonNull User owner,@NonNull String title,@NonNull String description, String photo,
                                           @NonNull Type type, double latitude, double longitude, Date date)
             throws ExecutionException, InterruptedException {
 
@@ -243,8 +244,9 @@ public class Material extends Geoquerable {
      * The method return the material with that id. If there isn't a material with that id it throw an exception.
      *
      * @author Davide Finesso
+     * @throws NoMaterialFoundException if a material with that id doesn't exist
      */
-    public static Material obtainMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
+    public static Material obtainMaterialById(@NonNull String id) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -368,12 +370,15 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updatePhotoAsync(@NonNull String photo) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePhotoAsync(String photo) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("photo", photo);
+            if(photo == null)
+                return docRef.update("photo", FieldValue.delete());
+            else
+                return docRef.update("photo", photo);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -405,11 +410,14 @@ public class Material extends Geoquerable {
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            if (user == null)
+            if (user == null) {
                 docRef.update("isRent", false);
-            else
+                return docRef.update("renter", FieldValue.delete());
+            }
+            else {
                 docRef.update("isRent", true);
-            return docRef.update("renter", user);
+                return docRef.update("renter", user);
+            }
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
@@ -461,7 +469,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    public boolean updateExpiryDate(Date date) {
+    public boolean updateExpiryDate(@NonNull Date date) {
         try {
             Timestamp timestamp = new Timestamp(date);
             Task<Void> t = this.updateExpiryDateAsync(timestamp);
@@ -479,8 +487,9 @@ public class Material extends Geoquerable {
      * if there isn't any landing associate it throw an exception
      *
      * @author Davide Finesso
+     * @throws NoLendingInProgressFoundException if an instance of the class material hasn't a reference to a lending in progress
      */
-    public LendingInProgress obtainLending() throws ExecutionException, InterruptedException {
+    public LendingInProgress obtainLending() throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
 
         Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
                 .whereEqualTo("material", getReference(table, id)).get();
@@ -496,9 +505,14 @@ public class Material extends Geoquerable {
      * The method is use to get all the material that can be rent in a specify area.
      *
      * @author Davide Finesso
+     * @param latitude Describe the latitude of the center
+     * @param longitude Describe the longitude of the center
+     * @param radiusInKm Describe the maximum distance from the center
+     * @param userId Describe the user's reference
+     * @throws NoUserFoundException if a parameter userId doesn't refer to any user in his table
      */
-    public static List<Material> obtainRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
-            throws ExecutionException, InterruptedException {
+    public static List<Material> obtainRentableMaterials(double latitude, double longitude, double radiusInKm,@NonNull String userId)
+            throws ExecutionException, InterruptedException, NoUserFoundException{
         ArrayList<Material> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)

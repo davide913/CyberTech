@@ -63,6 +63,8 @@ import it.unive.cybertech.utils.Utils;
  * In this case, the owner can confirm the delivery and provide the feedback about the material's treatment
  * </p>
  * In every case, the material and the relative lending (if any) will be loaded
+ *
+ * @author Mattia Musone
  */
 public class ProductDetails extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -570,7 +572,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.obtainMyExpiredLending();//getExpiredLending
+                                List<LendingInProgress> temp = result.obtainExpiredLending();
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
 
                             } catch (Exception e) {

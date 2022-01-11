@@ -42,11 +42,9 @@ public class RequestViz extends AppCompatActivity {
     private final User user = CachedUser.user;
     private FloatingActionButton menu, chat, deleteRequest, accept_request, stop_helping;
     private TextView textTitle, text, textCountry, textCity, textDate;
-    Toolbar toolbar;
     private Animation menuOpen, menuClose;
     boolean isOpen = false;
     private String id, idInCharge, callerClass;
-    private String title, country, city, strDate;
     private QuarantineAssistance request;
     private User target;
 
@@ -111,7 +109,7 @@ public class RequestViz extends AppCompatActivity {
 
         }
         else {
-            new Utils.Dialog(this).show("Nessuna Incarico preso", "Nessuna richiesta è stata presa in carico!");
+            new Utils.Dialog(this).show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
             String allGone = "allGone";
             animatedMenu(allGone);
         }
@@ -280,16 +278,16 @@ public class RequestViz extends AppCompatActivity {
      * @since 1.1
      */
     private void setFields() {
-        title = getIntent().getStringExtra("title");
+        String title = getIntent().getStringExtra("title");
         textTitle.setText(title);
 
-        country = getIntent().getStringExtra("country");
+        String country = getIntent().getStringExtra("country");
         textCountry.setText(country);
 
-        city = getIntent().getStringExtra("city");
+        String city = getIntent().getStringExtra("city");
         textCity.setText(city);
 
-        strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+        String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
         textDate.setText(strDate);
 
         text.setText(request.getDescription());
@@ -323,10 +321,10 @@ public class RequestViz extends AppCompatActivity {
      * @since 1.1
      */
     private void toolbar() {
-        toolbar = findViewById(R.id.toolbar_RequestViz);
+        Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         setTitle("Dettagli richiesta");
     }
@@ -436,15 +434,15 @@ public class RequestViz extends AppCompatActivity {
         switch (event) {
             case "accept":
                 MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_accepted,
-                        "Richiesta presa in carico", name +" "+"ha preso in carico la tua richiesta di aiuto",
+                        getString(R.string.request_taken), name +" "+getString(R.string.request_taken_notification),
                         this);
             case "stop":
                 MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_stop_helping,
-                        "Attenzione!", "L'utente" + " " + name + " "+"ha smesso di seguire la tua richiesta di aiuto",
+                        getString(R.string.attention), name + " "+getString(R.string.stop_helping_notification),
                         this);
             case "delete":
                 MessageService.sendMessageToUserDevices(user, MessageService.NotificationType.request_stop_helping,
-                        "Attenzione!", name + " "+"Ha eliminato la richiesta, ti ringraziamo per la collaborazione",
+                        getString(R.string.attention), name + " "+getString(R.string.request_deleted_notification),
                         this);
         }
     }

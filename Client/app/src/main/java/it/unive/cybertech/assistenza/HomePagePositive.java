@@ -19,12 +19,13 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.assistenza.adapters.CustomRequestsAdapter;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
@@ -37,8 +38,8 @@ import it.unive.cybertech.utils.Utils;
  * @since 1.1
  */
 public class HomePagePositive extends Fragment {
-    ListView listAlreadyMade;
-    User user = CachedUser.user;
+    private ListView listAlreadyMade;
+    private final User user = CachedUser.user;
     private ArrayAdapter<QuarantineAssistance> adapter;
     private List<QuarantineAssistance> myRequestsList = new ArrayList<>();
 
@@ -60,9 +61,10 @@ public class HomePagePositive extends Fragment {
             @Override
             public void onComplete(List<QuarantineAssistance> result) {
                 myRequestsList = result;
-                message_if_empty();
 
-                adapter = new CastomRequestsAdapter(getContext(), 0, myRequestsList);
+                myRequestsList.sort((o1, o2) -> o2.getDeliveryDateToDate().compareTo(o1.getDeliveryDateToDate()));
+
+                adapter = new CustomRequestsAdapter(getContext(), 0, myRequestsList);
                 listAlreadyMade.setAdapter(adapter);
 
                 listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
@@ -135,29 +137,6 @@ public class HomePagePositive extends Fragment {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * If the user is positive and there is no request made, a default message will pop up every time
-     * he opens his assistance Home Page.
-     *
-     * @author Mihail Racaru
-     * @since 1.1
-     */
-    private void message_if_empty() {
-        if(myRequestsList.size() == 0) {
-            Utils.Dialog dialog = new Utils.Dialog(getContext());
-            dialog.show(getString(R.string.information), getString(R.string.request_help_assistance));
-            dialog.setCallback(new Utils.DialogResult() {
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onCancel() {
-                }
-            });
         }
     }
 

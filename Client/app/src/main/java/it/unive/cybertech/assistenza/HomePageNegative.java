@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.assistenza.adapters.CustomRequestsAdapter;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
@@ -46,9 +46,9 @@ public class HomePageNegative extends Fragment {
     private ListView listView;
     private final User user = CachedUser.user;
     private ArrayAdapter<QuarantineAssistance> adapter;
-    private ArrayList<AssistanceType> tList = new ArrayList<>();
+    private List<AssistanceType> tList = new ArrayList<>();
     private List<QuarantineAssistance> myQuar = new ArrayList<>();
-    private ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<>();
+    private List<QuarantineAssistance> myQuarantineList = new ArrayList<>();
     private QuarantineAssistance inCharge = null;
     private AssistanceType aux = null;
 
@@ -72,9 +72,9 @@ public class HomePageNegative extends Fragment {
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
 
-        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<List<AssistanceType>>() {
             @Override
-            public void onComplete(ArrayList<AssistanceType> result) {
+            public void onComplete(List<AssistanceType> result) {
                 tList = result;
 
                 Thread t = new Thread(() -> {
@@ -97,7 +97,7 @@ public class HomePageNegative extends Fragment {
                 }
                 catch(InterruptedException ignored) {}
 
-                adapter = new CastomRequestsAdapter(getContext(), 0, myQuarantineList);
+                adapter = new CustomRequestsAdapter(getContext(), 0, myQuarantineList);
                 listView.setAdapter(adapter);
 
                 ArrayAdapter<String> arr = new ArrayAdapter<>(getContext(), R.layout.spinner_item, names);
@@ -108,11 +108,13 @@ public class HomePageNegative extends Fragment {
                     {
                         String selectedItemText = (String) parent.getItemAtPosition(position);
 
-                        if(position >= 0){
+                        /*if(position >= 0){
                             showShortToast("Selected : " + selectedItemText);
-                        }
+                        }*/
 
                         for (AssistanceType a: tList) {
+                            if(selectedItemText.equals("Tutte le richieste"))
+                                aux = null;
                             if(a.getType().equals(selectedItemText))
                                 aux = a;
                         }
