@@ -77,10 +77,6 @@
             android:name=".noleggio.AddProductForRent"
             android:exported="true" />
         <activity
-            android:name=".gestione_covid.ReportPositivityActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Cybertech.NoActionBar" />
-        <activity
             android:name=".assistenza.RequestDetails"
             android:exported="false"
             android:parentActivityName=".MainActivity"
