@@ -46,9 +46,9 @@ public class HomePageNegative extends Fragment {
     private ListView listView;
     private final User user = CachedUser.user;
     private ArrayAdapter<QuarantineAssistance> adapter;
-    private ArrayList<AssistanceType> tList = new ArrayList<>();
+    private List<AssistanceType> tList = new ArrayList<>();
     private List<QuarantineAssistance> myQuar = new ArrayList<>();
-    private ArrayList<QuarantineAssistance> myQuarantineList = new ArrayList<>();
+    private List<QuarantineAssistance> myQuarantineList = new ArrayList<>();
     private QuarantineAssistance inCharge = null;
     private AssistanceType aux = null;
 
@@ -72,9 +72,9 @@ public class HomePageNegative extends Fragment {
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
 
-        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<List<AssistanceType>>() {
             @Override
-            public void onComplete(ArrayList<AssistanceType> result) {
+            public void onComplete(List<AssistanceType> result) {
                 tList = result;
 
                 Thread t = new Thread(() -> {

@@ -182,9 +182,9 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
         super.onStart();
         try {
             ///Building the adapter of material types
-            Utils.executeAsync(Type::obtainMaterialTypes, new Utils.TaskResult<ArrayList<Type>>() {
+            Utils.executeAsync(Type::obtainMaterialTypes, new Utils.TaskResult<List<Type>>() {
                 @Override
-                public void onComplete(ArrayList<Type> result) {
+                public void onComplete(List<Type> result) {
                     ArrayAdapter<Type> userAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, result);
                     type.setAdapter(userAdapter);
                 }

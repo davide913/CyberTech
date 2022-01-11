@@ -33,7 +33,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.AssistanceType;
@@ -70,9 +69,9 @@ public class RequestDetails extends AppCompatActivity {
     }
 
     private void init() {
-        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<ArrayList<AssistanceType>>() {
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<List<AssistanceType>>() {
             @Override
-            public void onComplete(ArrayList<AssistanceType> result) {
+            public void onComplete(List<AssistanceType> result) {
                 ArrayList<String> options = new ArrayList<>();
 
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, options);
@@ -172,8 +171,8 @@ public class RequestDetails extends AppCompatActivity {
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_Request);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
         setTitle("Dettagli Richiesta");
     }
 

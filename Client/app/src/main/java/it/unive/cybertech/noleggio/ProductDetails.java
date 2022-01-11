@@ -572,7 +572,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.obtainMyExpiredLending();//getExpiredLending
+                                List<LendingInProgress> temp = result.obtainExpiredLending();
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
 
                             } catch (Exception e) {
