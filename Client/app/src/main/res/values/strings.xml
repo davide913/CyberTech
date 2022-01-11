@@ -198,6 +198,10 @@
     <string name="notification_channel_quarantine_request_accepted">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto è stata presa in carico</string>
     <string name="notification_channel_quarantine_assistance_dismissed">Canale utilizzato per avvisare l\'utente positivo che una sua richiesta di aiuto precedentemente presa in carico non verrà più portata avanti</string>
 
+    <string name="negative">Negativo</string>
+    <string name="no_data">No Date</string>
+    <string name="name_">Nome:</string>
+    <string name="surname_">Cognome:</string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>

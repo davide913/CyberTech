@@ -21,16 +21,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.cybertech.R;
-
+/**
+ * HomePage is the Fragment that initializes the
+ * ViewPager and creates the various Fragments displayed.
+ *
+ * @author Enrico De Zorzi
+ * @since 1.0
+ */
 public class HomePage extends Fragment {
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_home_page_covid);
-        //TODO Use cachedUser to interact with the database
-        //initViews();
     }
 
     @Nullable
@@ -41,7 +44,12 @@ public class HomePage extends Fragment {
         return view;
     }
 
-    //create the fragments of the ViewPager
+    /**
+     * setupViewPager initializes (with the adapter) the ViewPager and creates the Fragments.
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getChildFragmentManager());
         adapter.addFragment(new ManifestPositivityFragment(), "Segnala Positività"); //Creation of the first fragments

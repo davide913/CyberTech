@@ -23,7 +23,13 @@ import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
 import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
-
+/**
+ * PosReportedFragment is the second fragment of the Covid-19 Section.
+ * In this Fragment it is possible to view (if present) the positive reports received from other users.
+ *
+ * @author Enrico De Zorzi
+ * @since 1.0
+ */
 public class PosReportedFragment extends Fragment {
 
 
@@ -44,6 +50,14 @@ public class PosReportedFragment extends Fragment {
         return v;
     }
 
+    /**
+     * InitViews initializes the screen.
+     * Set the correct values in the various fields.
+     * Set the fields to Visible or Invisible based on the reports received
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
     private void initViews(View v) throws ExecutionException, InterruptedException {
 
         Utils.executeAsync(() -> user.obtainPositiveActivities(), new Utils.TaskResult<List<Activity>>() {
@@ -84,53 +98,7 @@ public class PosReportedFragment extends Fragment {
             public void onError(Exception e) {
 
             }
-        }); //TODO ENRICO VERIFICARE SE IL CODICE COMMENTATO SOTTO FUNZIONA ANCHE CON EXECUTEASYNC QUA SOPRA
-        /*
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<Activity> activityList = user.obtainPositiveActivities();
-                    Boolean var = false;
-                    ImageView imageView = v.findViewById(R.id.imageView_PosReported);
-                    TextView textView = v.findViewById(R.id.TextView_PosReported);
-                    TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
-                    ListView listView = v.findViewById(R.id.ListView_signReported);
-
-                    if(!activityList.isEmpty())
-                        var = true;
-
-                    if(var){
-                        imageView.setVisibility(View.INVISIBLE);
-                        textView.setVisibility(View.INVISIBLE);
-                        listView.setVisibility(View.VISIBLE);
-                        textView1.setVisibility(View.VISIBLE);
-
-                        ArrayAdapter<Activity> adapter;
-
-                        adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList);
-
-                        listView.setAdapter(adapter);
-                    }
-                    else{
-                        imageView.setVisibility(View.VISIBLE);
-                        textView.setVisibility(View.VISIBLE);
-                        listView.setVisibility(View.INVISIBLE);
-                        textView1.setVisibility(View.INVISIBLE);
-                    }
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
         });
-        t.start();
-        t.join();
-
-         */
-
     }
 
 
