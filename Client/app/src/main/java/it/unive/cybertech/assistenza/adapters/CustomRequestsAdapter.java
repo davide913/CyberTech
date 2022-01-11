@@ -3,6 +3,7 @@ package it.unive.cybertech.assistenza.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
@@ -50,13 +51,11 @@ public class CustomRequestsAdapter extends ArrayAdapter<QuarantineAssistance> {
 
         TextView title = view.findViewById(R.id.title_request);
         title.setText(request.getTitle());
-/*
-        if(request.getIsInCharge){
-            title.setTextColor(Color.GREEN);
+
+        if(request.getIsInCharge()){
+            title.setTextColor(Color.parseColor("#FF32CD32"));
             view.findViewById(R.id.progressListBar).setVisibility(View.VISIBLE);
         }
-
- */
 
         TextView dateView = view.findViewById(R.id.date_request);
         String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
