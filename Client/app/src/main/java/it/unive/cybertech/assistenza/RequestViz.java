@@ -323,9 +323,6 @@ public class RequestViz extends AppCompatActivity {
     private void toolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
-
         setTitle("Dettagli richiesta");
     }
 
@@ -363,6 +360,7 @@ public class RequestViz extends AppCompatActivity {
                 deleteRequest.setClickable(false);
                 chat.setVisibility(View.GONE);
                 deleteRequest.setVisibility(View.GONE);
+
                 isOpen = false;
             } else {
                 chat.setVisibility(View.VISIBLE);
@@ -398,8 +396,6 @@ public class RequestViz extends AppCompatActivity {
                 stop_helping.startAnimation(menuClose);
                 stop_helping.setClickable(false);
                 stop_helping.setVisibility(View.GONE);
-
-
             }
             else {
                 chat.startAnimation(menuOpen);
@@ -410,7 +406,6 @@ public class RequestViz extends AppCompatActivity {
                 stop_helping.setClickable(true);
                 stop_helping.setVisibility(View.VISIBLE);
             }
-
         }
         if(caller.equals("allGone")) {
             findViewById(R.id.textTitle).setVisibility(View.GONE);

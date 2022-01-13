@@ -108,10 +108,6 @@ public class HomePageNegative extends Fragment {
                     {
                         String selectedItemText = (String) parent.getItemAtPosition(position);
 
-                        /*if(position >= 0){
-                            showShortToast("Selected : " + selectedItemText);
-                        }*/
-
                         for (AssistanceType a: tList) {
                             if(selectedItemText.equals("Tutte le richieste"))
                                 aux = null;
@@ -228,17 +224,4 @@ public class HomePageNegative extends Fragment {
             e.printStackTrace();
         }
     }
-
-    /**
-     * Used to show a Toast with the given message String
-     *
-     * @param message, the input String
-     * @author Mihail Racaru
-     * @since 1.1
-     */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
 }

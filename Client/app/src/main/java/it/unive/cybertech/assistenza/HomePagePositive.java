@@ -57,7 +57,7 @@ public class HomePagePositive extends Fragment {
     private void initView(View view) throws ExecutionException, InterruptedException {
         listAlreadyMade = view.findViewById(R.id.lst_myRequests);
 
-        Utils.executeAsync(() -> user.obtainMaterializedQuarantineAssistance(), new Utils.TaskResult<List<QuarantineAssistance>>() {
+        Utils.executeAsync(user::obtainMaterializedQuarantineAssistance, new Utils.TaskResult<List<QuarantineAssistance>>() {
             @Override
             public void onComplete(List<QuarantineAssistance> result) {
                 myRequestsList = result;
