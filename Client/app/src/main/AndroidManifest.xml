@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cybertech">
         <activity
+            android:name=".assistenza.ChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".groups.activities.ActivityDetails"
             android:exported="true" />
         <activity
@@ -60,14 +63,14 @@
             android:noHistory="true"
             android:theme="@style/Theme.Cybertech.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="OPEN_SPLASH_SCREEN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity

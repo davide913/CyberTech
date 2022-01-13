@@ -4,6 +4,7 @@ import static it.unive.cybertech.database.Profile.QuarantineAssistance.obtainQua
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -19,11 +20,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.Chat;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Showables;
 import it.unive.cybertech.utils.Utils;
 
 /**
@@ -70,7 +73,7 @@ public class RequestViz extends AppCompatActivity {
                 });
 
                 chat.setOnClickListener(v -> {
-                    finish();
+                    openChat();
                 });
 
                 stop_helping.setOnClickListener(v -> {
@@ -103,7 +106,7 @@ public class RequestViz extends AppCompatActivity {
                 });
 
                 chat.setOnClickListener(v -> {
-                    finish();
+                    openChat();
                 });
             }
 
@@ -113,6 +116,27 @@ public class RequestViz extends AppCompatActivity {
             String allGone = "allGone";
             animatedMenu(allGone);
         }
+    }
+
+    private void openChat(){
+        chat.setEnabled(false);
+        Utils.executeAsync(() -> request.obtainMaterializeChat(), new Utils.TaskResult<Chat>() {
+            @Override
+            public void onComplete(Chat result) {
+                Intent i =new Intent(getApplicationContext(), ChatActivity.class);
+                i.putExtra("ID", result.getId());
+                startActivity(i);
+                chat.setEnabled(true);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+                chat.setEnabled(true);
+                Showables.showShortToast(getString(R.string.error_opening_chat), getApplicationContext());
+            }
+        });
+
     }
 
     /**
