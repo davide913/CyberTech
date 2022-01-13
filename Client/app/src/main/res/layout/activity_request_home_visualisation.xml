@@ -26,9 +26,9 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="17dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="13dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="17dp"
             android:text="TextView"
             android:textColor="@color/Black"
             android:textSize="24sp"
@@ -68,6 +68,21 @@
             android:text="TextView"
             android:textColor="#000000"
             android:textSize="15sp" />
+
+        <ProgressBar
+            android:id="@+id/progressListBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:visibility="gone"
+            android:layout_height="29dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="353dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="61dp" />
     </RelativeLayout>
 
 </RelativeLayout>

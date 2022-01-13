@@ -2,10 +2,6 @@ package it.unive.cybertech.noleggio;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.ComponentName;
@@ -13,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,20 +23,19 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
@@ -188,9 +182,9 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
         super.onStart();
         try {
             ///Building the adapter of material types
-            Utils.executeAsync(Type::getMaterialTypes, new Utils.TaskResult<ArrayList<Type>>() {
+            Utils.executeAsync(Type::obtainMaterialTypes, new Utils.TaskResult<List<Type>>() {
                 @Override
-                public void onComplete(ArrayList<Type> result) {
+                public void onComplete(List<Type> result) {
                     ArrayAdapter<Type> userAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, result);
                     type.setAdapter(userAdapter);
                 }

@@ -1,18 +1,9 @@
 package it.unive.cybertech.assistenza;
 
-import static it.unive.cybertech.database.Profile.QuarantineAssistance.getQuarantineAssistanceByInCharge;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +12,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.firestore.GeoPoint;
 
@@ -31,21 +28,34 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.assistenza.adapters.CastomRequestsAdapter;
+import it.unive.cybertech.assistenza.adapters.CustomRequestsAdapter;
 import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.CachedUser;
+import it.unive.cybertech.utils.Utils;
 
+/**
+ * The Fragment that allows volunteer users of Family Share (Plugin) to interact with help requests made
+ * by users found positive to COVID-19.
+ *
+ * @author Mihail Racaru
+ * @since 1.1
+ */
 public class HomePageNegative extends Fragment {
-    ListView listView;
-    User user = CachedUser.user;
+    private ListView listView;
+    private final User user = CachedUser.user;
+    private ArrayAdapter<QuarantineAssistance> adapter;
+    private List<AssistanceType> tList = new ArrayList<>();
+    private List<QuarantineAssistance> myQuar = new ArrayList<>();
+    private List<QuarantineAssistance> myQuarantineList = new ArrayList<>();
+    private QuarantineAssistance inCharge = null;
+    private AssistanceType aux = null;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home_page_assistenza, container, false);
-
 
         try {
             initViews(view);
@@ -53,148 +63,129 @@ public class HomePageNegative extends Fragment {
             e.printStackTrace();
         }
 
-        //TODO use CachedUser to work with database
         return view;
     }
 
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
     private void initViews(View view) throws ExecutionException, InterruptedException {
-        final ArrayAdapter<QuarantineAssistance>[] adapter = new ArrayAdapter[1];
-
-        final ArrayList<QuarantineAssistance>[] myQuarantineList = new ArrayList[]{new ArrayList<>()};
         listView = view.findViewById(R.id.listRequests);
-
-        final ArrayList<AssistanceType> adapterList = new ArrayList<>();
-        final QuarantineAssistance[] inCharge = {null};
-        final String[] homeType = new String[1];
-        final List<QuarantineAssistance>[] myQuar = new List[]{null};
-        final ArrayList<AssistanceType>[] tList = new ArrayList[]{null};
-        final AssistanceType[] aux = {null};
         GeoPoint myGeoPosition = user.getLocation();
-        Log.d("Paese", user.getCountry());
-        Log.d("CIttà", user.getCity());
-
-
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
-        
-        Thread t = new Thread(() -> {
-            try {
-                tList[0] = AssistanceType.getAssistanceTypes();
-                //TODO: dovrà essere messo un tipo generico in posizione zero "Tutti" che mostra tutta la lista, quindi la getJoinable(null, null, ...)
-                myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(tList[0].get(0), myGeoPosition, 10);
 
-                inCharge[0] = getQuarantineAssistanceByInCharge(user);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+        Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<List<AssistanceType>>() {
+            @Override
+            public void onComplete(List<AssistanceType> result) {
+                tList = result;
 
-            for (AssistanceType a: tList[0]) {
-                names.add(a.getType());
-                adapterList.add(a);
-            }
-            for (QuarantineAssistance a: myQuar[0]) {
-                myQuarantineList[0].add(a);
-            }
-            Log.d("Dimensione primo Thread", String.valueOf(myQuar[0].size()));
-        });
-        t.start();
-        t.join();
-
-        adapter[0] = new CastomRequestsAdapter(getContext(), 0, myQuarantineList[0]);
-        listView.setAdapter(adapter[0]);
-
-        ArrayAdapter<String> arr = new ArrayAdapter<>(getContext(), R.layout.spinner_item, names);
-        sp.setAdapter(arr);
-        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-        {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                String selectedItemText = (String) parent.getItemAtPosition(position);
-                homeType[0] = selectedItemText;
-
-                if(position >= 0){
-                    showShortToast("Selected : " + selectedItemText);
-                }
-
-                for (AssistanceType a: tList[0]) {
-                    if(a.getType().equals(selectedItemText))
-                        aux[0] = a;
-                }
-
-                Thread m = new Thread(() -> {
-                    myQuarantineList[0] = new ArrayList<>();
-                    Log.d("Dimensione dopo reset nel secondo Thread", String.valueOf(myQuarantineList[0].size()));
+                Thread t = new Thread(() -> {
                     try {
-                        myQuar[0] = QuarantineAssistance.getJoinableQuarantineAssistance(aux[0], myGeoPosition, 10);
-                        Log.d("Tipo", aux[0].getType());
-                        Log.d("Dimensione", String.valueOf(myQuar[0].size()));
-
+                        myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(null, myGeoPosition, 50);
+                        inCharge = QuarantineAssistance.obtainQuarantineAssistanceByInCharge(user);
                     } catch (ExecutionException | InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    for (QuarantineAssistance a: myQuar[0]) {
-                        myQuarantineList[0].add(a);
+                    for (AssistanceType a: tList) {
+                        names.add(a.getType());
+                    }
+                    names.add(0, "Tutte le richieste");
+                    myQuarantineList.addAll(myQuar);
+                });
+                t.start();
+                try {
+                    t.join();
+                }
+                catch(InterruptedException ignored) {}
+
+                adapter = new CustomRequestsAdapter(getContext(), 0, myQuarantineList);
+                listView.setAdapter(adapter);
+
+                ArrayAdapter<String> arr = new ArrayAdapter<>(getContext(), R.layout.spinner_item, names);
+                sp.setAdapter(arr);
+                sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                {
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                    {
+                        String selectedItemText = (String) parent.getItemAtPosition(position);
+
+                        for (AssistanceType a: tList) {
+                            if(selectedItemText.equals("Tutte le richieste"))
+                                aux = null;
+                            if(a.getType().equals(selectedItemText))
+                                aux = a;
+                        }
+
+                        Thread m = new Thread(() -> {
+                            myQuarantineList = new ArrayList<>();
+
+                            try {
+                                myQuar = QuarantineAssistance.obtainJoinableQuarantineAssistance(aux, myGeoPosition, 50);
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                            myQuarantineList.addAll(myQuar);
+                        });
+                        m.start();
+                        try {
+                            m.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        adapter.clear();
+                        adapter.addAll(myQuarantineList);
+                        adapter.notifyDataSetChanged();
                     }
 
-                    if(myQuarantineList[0] != null)
-                        Log.d("Dimensione finale", String.valueOf(myQuarantineList[0].size()));
+                    public void onNothingSelected(AdapterView<?> parent){}
                 });
-                m.start();
-                try {
-                    m.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                //per aggiornare la listView in base al filtro
-                adapter[0].clear();
-                adapter[0].addAll(myQuarantineList[0]);
-                adapter[0].notifyDataSetChanged();
+                listView.setOnItemClickListener(((parent, view1, position, id) -> {
+                    Intent newIntent = new Intent(getContext(), RequestViz.class);
+
+                    geoDecoder(adapter.getItem(position), newIntent);
+                    String taken = null;
+                    try {
+                        taken = inCharge.getId();
+                    }
+                    catch(NullPointerException ignored) {}
+
+                    newIntent.putExtra("alreadyTaken", taken);
+                    newIntent.putExtra("id", adapter.getItem(position).getId());
+                    newIntent.putExtra("class", "Homenegative");
+
+                    startActivityForResult(newIntent, 1);
+                }));
+
+                view.findViewById(R.id.alreadyTaken).setOnClickListener(v -> {
+                    Intent newIntent = new Intent(getContext(), RequestViz.class);
+
+                    String id;
+                    if(inCharge != null) {
+                        id = inCharge.getId();
+                        geoDecoder(inCharge, newIntent);
+
+                        newIntent.putExtra("user", id);
+                    }
+                    startActivityForResult(newIntent, 0);
+                });
             }
 
-            public void onNothingSelected(AdapterView<?> parent){}
-        });
+            @Override
+            public void onError(Exception e) {
 
-
-        listView.setOnItemClickListener(((parent, view1, position, id) -> {
-            Intent newIntent = new Intent(getContext(), RequestViz.class);
-
-            geoDecoder(adapter[0].getItem(position), newIntent);
-            String taken = null;
-            try {
-                taken = inCharge[0].getId();
             }
-            catch(NullPointerException ignored) {}
-
-            newIntent.putExtra("alreadyTaken", taken);
-            newIntent.putExtra("id", adapter[0].getItem(position).getId());
-            newIntent.putExtra("class", "Homenegative");
-
-            startActivityForResult(newIntent, 1);
-        }));
-
-        //Poter prendere in carico una richiesta solo se sei negativo
-        view.findViewById(R.id.alreadyTaken).setOnClickListener(v -> {
-            Intent newIntent = new Intent(getContext(), RequestViz.class);
-
-            String id = null;
-            if(inCharge[0] != null) {
-                id = inCharge[0].getId();
-                geoDecoder(inCharge[0], newIntent);
-
-                newIntent.putExtra("user", id);
-            }
-            startActivityForResult(newIntent, 0);
         });
     }
 
-    private void updateFr(){  //Permette di aggiornare i fragments
+    /**
+     * Allows to update Fragment
+     *
+     * @author Mihail Racaru
+     * @since 1.1
+     */
+    private void updateFr(){
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         ft.replace(R.id.main_fragment_content, new it.unive.cybertech.assistenza.HomePageNegative()).commit();
@@ -205,6 +196,14 @@ public class HomePageNegative extends Fragment {
         updateFr();
     }
 
+    /**
+     * Finds the nearest location to the given coordinates from request, if find none, the putExtra
+     * method is set at a default value "Out of Bounds"
+     *
+     * @param request, the input request given
+     * @author Mihail Racaru
+     * @since 1.1
+     */
     private void geoDecoder(QuarantineAssistance request, Intent newIntent){
         GeoPoint point = request.getLocation();
 
@@ -212,22 +211,17 @@ public class HomePageNegative extends Fragment {
         @NonNull List<Address> addresses;
         try {
             addresses = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
-            Log.d("Latitudine", String.valueOf(point.getLatitude()));
-            Log.d("Longitudine", String.valueOf(point.getLongitude()));
             if(addresses.size() != 0) {
                 newIntent.putExtra("country",addresses.get(0).getCountryName());
                 newIntent.putExtra("city", addresses.get(0).getLocality());
             }
-            else {      //per richieste in posizioni estreme
+            else {
                 newIntent.putExtra("country", "Out of Bounds");
                 newIntent.putExtra("city", "Out of Bounds");
             }
             newIntent.putExtra("title",  request.getTitle());
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }

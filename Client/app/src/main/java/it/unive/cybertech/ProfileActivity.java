@@ -2,38 +2,27 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.appcompat.widget.SwitchCompat;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.EditText;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import it.unive.cybertech.utils.Utils;
@@ -57,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     FloatingActionButton editInfo, logoutButton;
     private @Nullable
     EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
+    private SwitchCompat greenPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +69,6 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         getEditInfo().setOnClickListener(v -> updateValues());
-
         getLogoutButton().setOnClickListener(v -> logout(context));
 
     }
@@ -120,6 +109,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         getEmail().setText(currentUser.getEmail());
         getPwd().setText("********");
+
+        greenPass.setChecked(user.isGreenPass());
     }
 
     /**
@@ -143,6 +134,26 @@ public class ProfileActivity extends AppCompatActivity {
 
         editInfo = findViewById(R.id.profile_editInfo);
         logoutButton = findViewById(R.id.profile_logout);
+
+        greenPass = findViewById(R.id.profile_green_pass);
+        greenPass.setOnCheckedChangeListener(this::updateGreenpass);
+    }
+
+    private void updateGreenpass(View v, boolean checked){
+        Utils.executeAsync(() -> user.updateGreenPass(checked), new Utils.TaskResult<Boolean>() {
+            @Override
+            public void onComplete(Boolean result) {
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+                greenPass.setOnCheckedChangeListener(null);
+                greenPass.setChecked(false);
+                greenPass.setOnCheckedChangeListener((v, c)->updateGreenpass(v, c));
+            }
+        });
     }
 
     /**

@@ -22,7 +22,14 @@ import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
 import it.unive.cybertech.utils.CachedUser;
-
+import it.unive.cybertech.utils.Utils;
+/**
+ * PosReportedFragment is the second fragment of the Covid-19 Section.
+ * In this Fragment it is possible to view (if present) the positive reports received from other users.
+ *
+ * @author Enrico De Zorzi
+ * @since 1.0
+ */
 public class PosReportedFragment extends Fragment {
 
 
@@ -43,51 +50,55 @@ public class PosReportedFragment extends Fragment {
         return v;
     }
 
+    /**
+     * InitViews initializes the screen.
+     * Set the correct values in the various fields.
+     * Set the fields to Visible or Invisible based on the reports received
+     *
+     * @author Enrico De Zorzi
+     * @since 1.0
+     */
     private void initViews(View v) throws ExecutionException, InterruptedException {
 
-        Thread t = new Thread(new Runnable() {
+        Utils.executeAsync(() -> user.obtainPositiveActivities(), new Utils.TaskResult<List<Activity>>() {
             @Override
-            public void run() {
-                try {
-                    List<Activity> activityList = user.GetPositiveActivities();
-                    Boolean var = false;
-                    ImageView imageView = v.findViewById(R.id.imageView_PosReported);
-                    TextView textView = v.findViewById(R.id.TextView_PosReported);
-                    TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
-                    ListView listView = v.findViewById(R.id.ListView_signReported);
+            public void onComplete(List<Activity> result) {
+                List<Activity> activityList = result; //activity list with positives
+                Boolean var = false;
+                ImageView imageView = v.findViewById(R.id.imageView_PosReported);
+                TextView textView = v.findViewById(R.id.TextView_PosReported);
+                TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
+                ListView listView = v.findViewById(R.id.ListView_signReported);
 
-                    if(!activityList.isEmpty())
-                        var = true;
+                if(!activityList.isEmpty())
+                    var = true;
 
-                    if(var){
-                        imageView.setVisibility(View.INVISIBLE);
-                        textView.setVisibility(View.INVISIBLE);
-                        listView.setVisibility(View.VISIBLE);
-                        textView1.setVisibility(View.VISIBLE);
+                if(var){
+                    imageView.setVisibility(View.INVISIBLE);
+                    textView.setVisibility(View.INVISIBLE);
+                    listView.setVisibility(View.VISIBLE);
+                    textView1.setVisibility(View.VISIBLE);
 
-                        ArrayAdapter<Activity> adapter;
+                    ArrayAdapter<Activity> adapter;
 
-                        adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList);
+                    adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList); //creation of the ListView
 
-                        listView.setAdapter(adapter);
-                    }
-                    else{
-                        imageView.setVisibility(View.VISIBLE);
-                        textView.setVisibility(View.VISIBLE);
-                        listView.setVisibility(View.INVISIBLE);
-                        textView1.setVisibility(View.INVISIBLE);
-                    }
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    listView.setAdapter(adapter);
+                }
+                else{
+                    imageView.setVisibility(View.VISIBLE);
+                    textView.setVisibility(View.VISIBLE);
+                    listView.setVisibility(View.INVISIBLE);
+                    textView1.setVisibility(View.INVISIBLE);
                 }
 
             }
-        });
-        t.start();
-        t.join();
 
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
     }
 
 

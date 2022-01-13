@@ -1,25 +1,28 @@
 package it.unive.cybertech.noleggio;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
-
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class display a form in order to evaluate the lending and the material's condition
+ *
+ * If the feedback is negative, the points will be subtracted from the user lending point and if the user has a negative score, then he cannot gets lending until he pay for the damage
+ * Otherwise a positive score will be added to his lending points
+ *
+ * @author Mattia Musone
+ *  */
 public class RentFeedback extends AppCompatActivity {
     private static final int BAD_SCORE_BOUND = 3;
     static final int SUCCESS = 1, FAIL = 0;
@@ -29,7 +32,6 @@ public class RentFeedback extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rent_feedback);
         ActionBar actionBar = getSupportActionBar();
-        //actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.feedback);
         RatingBar rating = findViewById(R.id.rating_rent_feedback);
         LinearLayout feedbackLayout = findViewById(R.id.feedback_rent_feedback);
@@ -40,12 +42,14 @@ public class RentFeedback extends AppCompatActivity {
                 lost = findViewById(R.id.lost_rent_feedback_group);
 
         rating.setOnRatingBarChangeListener((ratingBar, rating1, fromUser) -> {
+            //If the stars are under a bound score, then shows the layout with more information about the negative feedback
             if (rating1 <= BAD_SCORE_BOUND)
                 feedbackLayout.setVisibility(View.VISIBLE);
             else
                 feedbackLayout.setVisibility(View.GONE);
         });
         done.setOnClickListener(v -> {
+            //Calculate the score
             double score = rating.getRating() / 2;
             if (rating.getRating() <= BAD_SCORE_BOUND) {
                 score = -0.5;
@@ -66,6 +70,7 @@ public class RentFeedback extends AppCompatActivity {
                         public void onSuccess() {
                             Intent data = new Intent();
                             data.putExtra("Points", finalScore);
+                            //Set the result for the caller activity
                             setResult(SUCCESS, data);
                             finish();
                         }

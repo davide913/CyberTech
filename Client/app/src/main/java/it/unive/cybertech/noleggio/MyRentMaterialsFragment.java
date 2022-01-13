@@ -5,17 +5,17 @@ import static it.unive.cybertech.utils.CachedUser.user;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +24,15 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class shows the material that a user offers to others.
+ *
+ * @author Mattia Musone
+ * */
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "MyRentMaterialsFragment";
+    ///The list of items owned by the user
     private List<Material> items;
     private RentMaterialAdapter adapter;
     private ProgressBar loader;
@@ -51,9 +57,12 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         initList();
     }
 
+    /**
+     * This function initialize the list getting data from the database asynchronous
+     * */
     private void initList() {
         super.onStart();
-        Utils.executeAsync(() -> user.getMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
+        Utils.executeAsync(() -> user.obtainMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
             @Override
             public void onComplete(List<Material> result) {
                 Log.d(ID, "Size: " + result.size());
@@ -61,6 +70,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
                 items = result;
                 adapter.setItems(items);
                 adapter.notifyDataSetChanged();
+                //Hide the loader
                 loader.setVisibility(View.GONE);
                 list.setVisibility(View.VISIBLE);
             }
@@ -76,6 +86,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RENT_CODE)
+            //If a material has been deleted, remove it from the list
             if (resultCode == ProductDetails.SUCCESS || resultCode == ProductDetails.RENT_DELETE) {
                 int pos = data.getIntExtra("Position", -1);
                 if (pos >= 0) {
@@ -85,6 +96,13 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
             }
     }
 
+    /**
+     * When an item is clicked, it opens the activity that shows the details.
+     * Some data are passed in order to obtain information on the activity result
+     *
+     * @param view the view clicked
+     * @param position the item position in the list
+     * */
     public void onItemClick(View view, int position) {
         Intent i = new Intent(getActivity(), ProductDetails.class);
         i.putExtra("ID", items.get(position).getId());
@@ -93,9 +111,14 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         startActivityForResult(i, RENT_CODE);
     }
 
-    public void addMaterialToList(Material m) {
+    /**
+     * This function add a material to the list of rent
+     *
+     * @param material The material to add in the list
+     * */
+    public void addMaterialToList(@NonNull Material material) {
         if (adapter != null)
-            adapter.add(m);
-        items.add(m);
+            adapter.add(material);
+        items.add(material);
     }
 }

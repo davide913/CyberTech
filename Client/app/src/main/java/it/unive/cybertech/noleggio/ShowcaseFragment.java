@@ -3,24 +3,22 @@ package it.unive.cybertech.noleggio;
 import static it.unive.cybertech.noleggio.HomePage.NEW_MATERIAL;
 import static it.unive.cybertech.noleggio.HomePage.RENT_CODE;
 import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Showables.showShortToast;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,6 +29,12 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class shows the list of product in the showcase that are available at the moment.
+ * Clicking an item you can see the product details
+ *
+ * @author Mattia Musone
+ * */
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
@@ -51,6 +55,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         adapter.setClickListener(this);
         loader = view.findViewById(R.id.showcase_loader);
         list.setAdapter(adapter);
+        //Open an activity in order to add a new product to the showcase
         add.setOnClickListener(v -> {
             startActivityForResult(new Intent(getActivity(), AddProductForRent.class), NEW_MATERIAL);
         });
@@ -58,16 +63,22 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         return view;
     }
 
+    /**
+     * This function initialize the list getting the current user location and the items around him
+     * */
     private void initList() {
         super.onStart();
         try {
+            //Get the location
             Utils.getLocation(getActivity(), new Utils.TaskResult<Utils.Location>() {
                 @Override
                 public void onComplete(Utils.Location result) {
-                    Utils.executeAsync(() -> Material.getRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                    //Once you have the location you can obtain the items around you
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
                         @Override
                         public void onComplete(List<Material> result) {
                             Log.d(ID, "Size: " + result.size());
+                            //Set the list and notify the adapter
                             items = result;
                             adapter.setItems(items);
                             adapter.notifyDataSetChanged();
@@ -92,6 +103,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
 
         } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
+            //If a permission exception is thrown, then ask for them to the user
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
     }
@@ -99,7 +111,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //TODO gestire aggiunta materiale
+        //This branch manage a user that have rented a material so we need to remove it from the list and add it to the rented one
         if (requestCode == RENT_CODE && resultCode == ProductDetails.SUCCESS) {
             int pos = data.getIntExtra("Position", -1);
             if (pos >= 0) {
@@ -114,10 +126,11 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                     }
                 }
             }
+            //Else if the activity previously started was about a new material, we must add it in the showcase list
         } else if (requestCode == NEW_MATERIAL && resultCode == ProductDetails.SUCCESS) {
             String id = data.getStringExtra("ID");
             if (id != null) {
-                Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+                Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
                         adapter.add(result);
@@ -137,11 +150,16 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
         }
     }
 
+    /**
+     * Function called when a item in the list is clicked
+     * */
     public void onItemClick(View view, int position) {
+        //If the user has a negative lending point, then he cannot open the product details in order to start a lending
         if (user.getLendingPoint() < 0) {
             HomePage h = (HomePage) getParentFragment();
             if (h != null)
                 h.notifyNegativeLendingPoint();
+            //Otherwise start the activity for product details
         } else {
             Intent i = new Intent(getActivity(), ProductDetails.class);
             Material m = items.get(position);

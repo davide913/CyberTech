@@ -3,11 +3,6 @@ package it.unive.cybertech.noleggio;
 import static android.view.View.VISIBLE;
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +17,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.collect.Collections2;
@@ -31,13 +32,40 @@ import java.util.Calendar;
 import java.util.List;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class has 5 functions because it's the class that shows the material to the user but it also manage the different operation based on the material situation
+ *
+ * <p>
+ * 1) The product is in the showcase and the user is not the owner of the material
+ * In this case will be showed a button to rent this material
+ * </p>
+ * <p>
+ * 2) The product is in the showcase or other pages but it's owned by the current user.
+ * In this case the user can manage the material, remove it (if nobody rented) or accept an eventual extension request
+ * </p>
+ * <p>
+ * 3) The material is in rented section
+ * In this case, the user can require an extension of the lending
+ * </p>
+ * <p>
+ * 4) The lending (form a renter) is expired and need to be delivered to the owner
+ * In this case the user have to confirm it's delivery
+ * </p>
+ * <p>
+ * 5) The lending (form the owner) is expired and the delivery is done
+ * In this case, the owner can confirm the delivery and provide the feedback about the material's treatment
+ * </p>
+ * In every case, the material and the relative lending (if any) will be loaded
+ *
+ * @author Mattia Musone
+ */
 public class ProductDetails extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     private Material material;
@@ -59,7 +87,6 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     private Context context;
     private LinearLayout extensionRenterLayout;
 
-    //cambiare tutta la logica. Prendere sempre il lending e il material e gestire se è null o meno con progress bar
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,10 +120,8 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         requestDate = findViewById(R.id.expire_date_rent_details);
         renterLayout.setVisibility(View.GONE);
         extensionLayout.setVisibility(View.GONE);
-
         if (from.equals(MyRentMaterialsFragment.ID))
             confirm.setVisibility(View.GONE);
-
     }
 
     @Override
@@ -120,22 +145,35 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         });
     }
 
+    /**
+     * The main function that manage the visualization of the product
+     *
+     * @throws InterruptedException something went wrong retrieving data
+     */
     private void manageType() throws InterruptedException {
         expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
-        Utils.executeAsync(() -> material.getMaterializedRenter(), new Utils.TaskResult<User>() {
+        Utils.executeAsync(() -> material.obtainMaterializedRenter(), new Utils.TaskResult<User>() {
             @Override
             public void onComplete(User renterUser) {
+                //If the renter is not null, it means that someone has rented the material
                 if (renterUser != null) {
+                    //Set renter name
                     renter.setText(renterUser.getName() + " " + renterUser.getSurname());
+                    //If a lending is in progress (as it should due to the fact that the runter exists)
                     if (lending != null) {
+                        //If the lending is not expired
                         if (lending.getExpiryDate().compareTo(Timestamp.now()) > 0) {
+                            //If the current user is the owner, then manage the owner layout
                             if (material.getOwner().getId().equals(user.getId())) {
                                 renterLayout.setVisibility(VISIBLE);
                                 expireDateRent.setText(Utils.formatDateToString(lending.getExpiryDate().toDate()));
+                                //If an extension request has been made, show the relative layout
                                 if (lending.getEndExpiryDate() != null) {
                                     requestDate.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
                                     extensionLayout.setVisibility(VISIBLE);
+                                    //When the renter has made an extension request an the user wants to accept it
                                     acceptExtension.setOnClickListener(v -> {
+                                        //Update the lending end date
                                         Utils.executeAsync(() -> lending.updateExpiryDate(lending.getEndExpiryDate().toDate()), new Utils.TaskResult<Boolean>() {
                                             @Override
                                             public void onComplete(Boolean result) {
@@ -163,6 +201,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                             }
                                         });
                                     });
+                                    //When the renter has made an extension request an the user wants to reject it
                                     rejectExtension.setOnClickListener(v -> {
                                         Utils.executeAsync(() -> lending.updateEndExpiryDate(null), new Utils.TaskResult<Boolean>() {
                                             @Override
@@ -178,14 +217,17 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                         });
                                     });
                                 }
+                                //If the user is not the owner (so it's the renter)
                             } else {
                                 expireDateMaterial.setText(Utils.formatDateToString(lending.getDateExpiryDate()));
                                 extend.setVisibility(VISIBLE);
+                                //Show the rent extension request layout
                                 extend.setOnClickListener(v -> {
                                     new Utils.Dialog(context)
                                             .setCallback(new Utils.DialogResult() {
                                                 @Override
                                                 public void onSuccess() {
+                                                    //Start the datepicjer
                                                     Calendar now = Calendar.getInstance();
                                                     DatePickerDialog datePickerDialog = new DatePickerDialog(
                                                             context, ProductDetails.this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
@@ -199,14 +241,17 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                                                 }
                                             })
-                                            .show("Estensione prestito", "Continuando ti verrà chiesta la data ultima di consegna che desideri. Sarà cura dell'utente accettare o rifiutare la proposta");
+                                            .show(getString(R.string.rent_extension), getString(R.string.rent_extension_request_description));
                                 });
                             }
+                            //If the lending is not expired
                         } else {
                             expireDateRent.setTextColor(getColor(R.color.red_fs));
+                            //Check if the user is the owner
                             if (material.getOwner().getId().equals(user.getId())) {
                                 renterLayout.setVisibility(VISIBLE);
                                 expireDateRent.setText(Utils.formatDateToString(lending.getExpiryDate().toDate()));
+                                //If the lending has been delivered, shows the button to complete the lending
                                 if (lending.getWaitingForFeedback()) {
                                     complete.setVisibility(VISIBLE);
                                     complete.setOnClickListener(v -> {
@@ -215,6 +260,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                 .setCallback(new Utils.DialogResult() {
                                                     @Override
                                                     public void onSuccess() {
+                                                        //Start the activity for the feedback
                                                         startActivityForResult(new Intent(context, RentFeedback.class), FEEDBACK);
                                                     }
 
@@ -222,15 +268,16 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                     public void onCancel() {
 
                                                     }
-                                                }).show("Prestito terminato", "Prima di concludere ci serve il tuo feedback");
+                                                }).show(getString(R.string.rent_terminated), getString(R.string.rent_terminated_feedback_required));
                                         /*} else
                                             new Utils.Dialog(context)
                                                     .hideCancelButton()
                                                     .show("Attesa di restituzione", "L'utente non ha ancora confermato di aver restituito il materiale. Fino ad allora non potrai terminare il rpestito.");*/
                                     });
                                 } else {
-                                    expireDateRent.append(" (in attesa di restituzione)");
+                                    expireDateRent.append(" (" + getString(R.string.waiting_for_feedback) + ")");
                                 }
+                                //If i'm not the renter, show the button to confirm the product delivery
                             } else {
                                 complete.setVisibility(VISIBLE);
                                 complete.setOnClickListener(v -> {
@@ -257,7 +304,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                                 public void onCancel() {
 
                                                 }
-                                            }).show("Prestito terminato", "L'utente ora valuterà la cura prestata e ti verrà assegnato un punteggio di merito o demerito");
+                                            }).show(getString(R.string.rent_terminated), getString(R.string.rent_terminated_feedback_required_renter));
                                 });
                             }
                         }
@@ -267,9 +314,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
             @Override
             public void onError(Exception e) {
-                if (e instanceof NoRentMaterialFoundException) {
-                    //dateDescription.setText(R.string.showcase_until_dotted);
+                if (e instanceof NoMaterialFoundException) {
                     expireDateMaterial.setText(Utils.formatDateToString(material.getExpiryDate().toDate()));
+                    //If the error is that the lending doesn't exists and i'm the owner, the user can delete it's material
                     if (material.getOwner().getId().equals(user.getId())) {
                         delete.setVisibility(VISIBLE);
                         delete.setOnClickListener(v -> {
@@ -305,16 +352,19 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                                         }
                                     })
-                                    .show("Operazione irreversibile", "Procedendo eliminerai il tuo materiale in prestito per sempre e non potrai più recuperarlo. Procedere?");
+                                    .show(getString(R.string.irreversible_operation), getString(R.string.delete_material_confirm));
                         });
                     } else {
+                        //If i'm the renter, shows the rent button
                         confirm.setVisibility(VISIBLE);
                         confirm.setOnClickListener(view -> {
+                            //If the user reliability is lower than 0
                             if (user.getLendingPoint() < 0)
                                 new Utils.Dialog(context)
                                         .hideCancelButton()
                                         .show(getString(R.string.unreliable), getString(R.string.unreliable_description));
                             else
+                                //else show the disclosure
                                 new Utils.Dialog(context)
                                         .setCallback(new Utils.DialogResult() {
                                             @Override
@@ -358,8 +408,14 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         });
     }
 
-    private void getMaterial(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> Material.getMaterialById(id), new Utils.TaskResult<Material>() {
+    /**
+     * Retrive the material from the database and call the callback when it's done
+     *
+     * @param id       The material id
+     * @param callback The callback to call when the data has been retrieved
+     */
+    private void getMaterial(@NonNull String id, @NonNull Utils.TaskResult<Void> callback) {
+        Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
             @Override
             public void onComplete(Material result) {
                 material = result;
@@ -383,8 +439,14 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         });
     }
 
-    private void getLending(String id, Utils.TaskResult<Void> callback) {
-        Utils.executeAsync(() -> LendingInProgress.getLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
+    /**
+     * Retrieve the lending from the database and call the callback when it's done
+     *
+     * @param id       The material id
+     * @param callback The callback to call when the data has been retrieved
+     */
+    private void getLending(@NonNull String id, @NonNull Utils.TaskResult<Void> callback) {
+        Utils.executeAsync(() -> LendingInProgress.obtainLendingInProgressById(id), new Utils.TaskResult<LendingInProgress>() {
             @Override
             public void onComplete(LendingInProgress result) {
                 lending = result;
@@ -399,12 +461,20 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         });
     }
 
-    private void getDataFromDB(Utils.TaskResult<Void> callback) {
+    /**
+     * Retrieve data from the database
+     * It checks where the ID come from in order to know if the ID passed is a material ID or a lending ID
+     *
+     * @param callback A callback to call when the data retrieving is done
+     */
+    private void getDataFromDB(@NonNull Utils.TaskResult<Void> callback) {
+        ///It's a material, so call the get material function
         if (from.equals(ShowcaseFragment.ID) || from.equals(MyRentMaterialsFragment.ID))
             getMaterial(id, new Utils.TaskResult<Void>() {
                 @Override
                 public void onComplete(Void result) {
-                    Utils.executeAsync(() -> material.getLending(), new Utils.TaskResult<LendingInProgress>() {
+                    ///After the material we should get the lending (if any)
+                    Utils.executeAsync(() -> material.obtainLending(), new Utils.TaskResult<LendingInProgress>() {
                         @Override
                         public void onComplete(LendingInProgress result) {
                             lending = result;
@@ -419,7 +489,6 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                 callback.onError(e);
                         }
                     });
-                    //getLending(material.getLending(),callback);
                 }
 
                 @Override
@@ -428,9 +497,11 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                 }
             });
         else
+            ///It's a lending, so call the get lending function
             getLending(id, new Utils.TaskResult<Void>() {
                 @Override
                 public void onComplete(Void result) {
+                    ///After a lending we have to retrieve the material (always exists)
                     getMaterial(lending.getMaterial().getId(), callback);
                 }
 
@@ -454,23 +525,25 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
         Calendar pickedDate = Calendar.getInstance();
         pickedDate.set(year, month, dayOfMonth);
+        ///Shows a dialog to confirm the rent extension request
         new Utils.Dialog(this)
                 .setCallback(new Utils.DialogResult() {
                     @Override
                     public void onSuccess() {
+                        ///If confirmed, then update the database
                         Utils.executeAsync(() -> lending.updateEndExpiryDate(pickedDate.getTime()), new Utils.TaskResult<Boolean>() {
                             @Override
                             public void onComplete(Boolean result) {
                                 if (result) {
                                     extensionRenterLayout.setVisibility(VISIBLE);
                                     extensionDateRequest.setText(Utils.formatDateToString(lending.getEndExpiryDate().toDate()));
-                                    Snackbar.make(findViewById(android.R.id.content), "Richiesta inviata con successo", Snackbar.LENGTH_LONG).show();
+                                    Snackbar.make(findViewById(android.R.id.content), getString(R.string.request_sended), Snackbar.LENGTH_LONG).show();
                                 }
                             }
 
                             @Override
                             public void onError(Exception e) {
-                                Snackbar.make(findViewById(android.R.id.content), "Errore nell'invio della richiesta", Snackbar.LENGTH_LONG).show();
+                                Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_sending_request), Snackbar.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -480,29 +553,33 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
 
                     }
                 })
-                .show("Estensione prestito", "Confermi la nuova data di restituzione: " + Utils.formatDateToString(pickedDate.getTime()));
+                .show(getString(R.string.rent_extension), getString(R.string.confirm_rent_extension) + Utils.formatDateToString(pickedDate.getTime()));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        ///If the feedback activity finished
         if (requestCode == FEEDBACK) {
+            ///Check if returns a successful code
             if (resultCode == RentFeedback.SUCCESS) {
+                ///Get the calculated points
                 double score = data.getDoubleExtra("Points", 0);
-                Utils.executeAsync(() -> User.getUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
+                //Update the user total lending point and remove the lending from the database
+                Utils.executeAsync(() -> User.obtainUserById(material.getRenter().getId()), new Utils.TaskResult<User>() {
                     @Override
                     public void onComplete(User result) {
                         Thread t = new Thread(() -> {
                             result.updateLendingPoint((long) (result.getLendingPoint() + score));
                             try {
-                                List<LendingInProgress> temp = result.getExpiredLending();
+                                List<LendingInProgress> temp = result.obtainExpiredLending();
                                 lending = Collections2.filter(temp, o -> o.getMaterial().getId().equals(material.getId())).iterator().next();
 
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             result.removeLending(lending);
-                            lending.removeLendingInProgress();
+                            lending.deleteLendingInProgress();
                             material.updateRenter(null);
                         });
                         t.start();
@@ -513,6 +590,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                         }
                         Intent res = new Intent();
                         res.putExtra("Position", pos);
+                        //Notify the caller that the lending ended successfully
                         setResult(RENT_TERMINATED, res);
                         finish();
                     }
@@ -528,6 +606,9 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
         }
     }
 
+    /**
+     * Finish the activity and set the error
+     */
     private void finishWithError() {
         setResult(EXCEPTION, null);
         finish();

@@ -1,13 +1,8 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.CreateGroup;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,13 +11,18 @@ import android.os.Handler;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * The activity that allow to create a new group by Families Share (Plugin) users.
@@ -86,19 +86,21 @@ public class GroupCreation extends AppCompatActivity {
      * @since 1.1
      */
     private void createFSGroup() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                newGroup = CreateGroup(getName().getText().toString(), getDescription().getText().toString(), user);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> Group.createGroup(getName().getText().toString(), getDescription().getText().toString(), user), new TaskResult<Group>() {
+            @Override
+            public void onComplete(Group result) {
+                newGroup = result;
+            }
+
+            @Override
+            public void onError(Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         showShortToast(getString(R.string.GroupCreationDone), context);
         @NonNull Handler handler = new Handler();
         handler.postDelayed(() -> {
