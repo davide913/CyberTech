@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Geoquerable;
+import it.unive.cybertech.database.Profile.Exception.NoChatFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 
@@ -41,6 +42,7 @@ import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFound
 public class QuarantineAssistance extends Geoquerable {
     public final static String table = "quarantineAssistance";
     private DocumentReference assistanceType;
+    private DocumentReference chat;
     private String description;
     private DocumentReference inCharge;
     private boolean isInCharge;
@@ -55,13 +57,15 @@ public class QuarantineAssistance extends Geoquerable {
      */
     private AssistanceType materializeAssistanceType;
     private User materializeInCharge;
+    private Chat materializeChat;
 
     /**
      * Public empty constructor use only for firebase database.
      *
      * @author Davide Finesso
      */
-    public QuarantineAssistance() {}
+    public QuarantineAssistance() {
+    }
 
     /**
      * Private constructor in order to prevent the programmers to instantiate the class.
@@ -69,7 +73,7 @@ public class QuarantineAssistance extends Geoquerable {
      * @author Davide Finesso
      */
     private QuarantineAssistance(DocumentReference assistanceType, String description, Timestamp deliveryDate,
-                                GeoPoint location, String geohash, String title, String id) {
+                                 GeoPoint location, String geohash, String title, String id) {
         this.assistanceType = assistanceType;
         this.description = description;
         this.isInCharge = false;
@@ -80,7 +84,7 @@ public class QuarantineAssistance extends Geoquerable {
         this.id = id;
     }
 
-    public DocumentReference getAssistanceType(){
+    public DocumentReference getAssistanceType() {
         return assistanceType;
     }
 
@@ -96,7 +100,7 @@ public class QuarantineAssistance extends Geoquerable {
         this.description = description;
     }
 
-    public DocumentReference getInCharge(){
+    public DocumentReference getInCharge() {
         return inCharge;
     }
 
@@ -156,13 +160,21 @@ public class QuarantineAssistance extends Geoquerable {
         this.title = title;
     }
 
+    public DocumentReference getChat() {
+        return chat;
+    }
+
+    public void setChat(DocumentReference chat) {
+        this.chat = chat;
+    }
+
     /**
      * The method return the field device materialize, if is null it create the field and after populate it.
      *
      * @author Davide Finesso
      */
     public AssistanceType obtainMaterializeAssistanceType() throws ExecutionException, InterruptedException {
-        if(materializeAssistanceType ==  null)
+        if (materializeAssistanceType == null)
             materializeAssistanceType = AssistanceType.obtainAssistanceTypeById(assistanceType.getId());
 
         return materializeAssistanceType;
@@ -174,10 +186,10 @@ public class QuarantineAssistance extends Geoquerable {
      * @author Davide Finesso
      */
     public User obtainMaterializeInCharge() throws ExecutionException, InterruptedException {
-        if(inCharge == null)
+        if (inCharge == null)
             return null;
 
-        if(materializeInCharge == null)
+        if (materializeInCharge == null)
             materializeInCharge = User.obtainUserById(inCharge.getId());
 
         return materializeInCharge;
@@ -188,8 +200,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType,@NonNull String title,
-                                                                     @NonNull String description,@NonNull Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
+    protected static QuarantineAssistance createQuarantineAssistance(@NonNull AssistanceType assistanceType, @NonNull String title,
+                                                                     @NonNull String description, @NonNull Date date, double latitude, double longitude) throws ExecutionException, InterruptedException {
         DocumentReference AssTypeRef = getReference(AssistanceType.table, assistanceType.getId());
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
@@ -204,6 +216,7 @@ public class QuarantineAssistance extends Geoquerable {
         myQuarantine.put("geohash", geohash);
         myQuarantine.put("title", title);
         myQuarantine.put("isInCharge", false);
+        myQuarantine.put("chat", null);
 
         DocumentReference addedDocRef = Database.addToCollection(table, myQuarantine);
 
@@ -245,8 +258,8 @@ public class QuarantineAssistance extends Geoquerable {
     /**
      * The method return the quarantine assistance with that id. If there isn't a quarantine assistance with that id it throw an exception.
      *
-     * @author Davide Finesso
      * @throws NoQuarantineAssistanceFoundException if a quarantine assistance with that id doesn't exist
+     * @author Davide Finesso
      */
     public static QuarantineAssistance obtainQuarantineAssistanceById(@NonNull String id)
             throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
@@ -306,7 +319,7 @@ public class QuarantineAssistance extends Geoquerable {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
-        if(user == null) {
+        if (user == null) {
             docRef.update("isInCharge", false);
             return docRef.update("inCharge", FieldValue.delete());
         }
@@ -326,16 +339,15 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    public boolean updateInCharge_QuarantineAssistance(User user)  {
+    public boolean updateInCharge_QuarantineAssistance(User user) {
         try {
             Task<Void> t = this.updateInCharge_QuarantineAssistanceAsync(user);
             Tasks.await(t);
-            if(user != null) {
+            if (user != null) {
                 this.setInCharge(getReference(User.table, user.getId()));
                 this.setIsInCharge(true);
                 this.materializeInCharge = user;
-            }
-            else{
+            } else {
                 this.setInCharge(null);
                 this.setIsInCharge(false);
                 this.materializeInCharge = null;
@@ -384,8 +396,8 @@ public class QuarantineAssistance extends Geoquerable {
     /**
      * This method return a quarantine assistance with field in charge equals to an user passed as a parameter. If there isn't quarantine assistance with that user as in charge, the method return null.
      *
-     * @author Davide Finesso
      * @param user is used to get the id
+     * @author Davide Finesso
      */
     public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user) throws ExecutionException, InterruptedException {
         Task<QuerySnapshot> future = getInstance().collection(table)
@@ -395,7 +407,7 @@ public class QuarantineAssistance extends Geoquerable {
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        if(documents.size() != 0) {
+        if (documents.size() != 0) {
             QuarantineAssistance quarantineAssistance = documents.get(0).toObject(QuarantineAssistance.class);
             quarantineAssistance.setId(documents.get(0).getId());
 
@@ -408,29 +420,28 @@ public class QuarantineAssistance extends Geoquerable {
      * This method return all joinable quarantine assistance. It's possible to add some filter by the parameter of the method.
      * The result is also sort by date.
      *
-     * @author Davide Finesso
-     * @param type parameter for filter the query. Describe the type assistance
-     * @param position parameter for filter the query. Describe the center
+     * @param type       parameter for filter the query. Describe the type assistance
+     * @param position   parameter for filter the query. Describe the center
      * @param radiusInKm parameter for filter the query. Describe maximum distance from the center
+     * @author Davide Finesso
      */
-    public static List<QuarantineAssistance> obtainJoinableQuarantineAssistance( AssistanceType type, GeoPoint position,
-                                                                                  double radiusInKm ) throws ExecutionException, InterruptedException {
+    public static List<QuarantineAssistance> obtainJoinableQuarantineAssistance(AssistanceType type, GeoPoint position,
+                                                                                double radiusInKm) throws ExecutionException, InterruptedException {
         ArrayList<QuarantineAssistance> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
                 .whereEqualTo("isInCharge", false);
 
-        if(type != null)
+        if (type != null)
             query = query.whereEqualTo("assistanceType", getReference(AssistanceType.table, type.getId()));
 
         List<DocumentSnapshot> documents;
 
-        if(position == null) {
+        if (position == null) {
             Task<QuerySnapshot> future = query.get();
             Tasks.await(future);
             documents = future.getResult().getDocuments();
-        }
-        else{
+        } else {
             documents = getGeoQueries(query, radiusInKm * 1000,
                     new GeoLocation(position.getLatitude(), position.getLongitude()));
         }
@@ -457,21 +468,56 @@ public class QuarantineAssistance extends Geoquerable {
      * This method return the owner of this quarantine assistance.
      * The result is also sort by date.
      *
-     * @author Davide Finesso
      * @throws NoQuarantineAssistanceFoundException if a quarantine assistance with that id doesn't exist
+     * @author Davide Finesso
      */
     public User obtainRequestOwner() throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference doc = getReference(table, this.id);
 
         Task<QuerySnapshot> t = getInstance().collection(User.table)
-                                .whereArrayContains("quarantineAssistance", doc).get();
+                .whereArrayContains("quarantineAssistance", doc).get();
         Tasks.await(t);
         List<DocumentSnapshot> documents = t.getResult().getDocuments();
 
-        if(documents.isEmpty())
+        if (documents.isEmpty())
             throw new NoQuarantineAssistanceFoundException("No quarantine assistance find with this id: " + id);
 
         return User.obtainUserById(documents.get(0).getId());
+    }
+
+
+    public Chat obtainMaterializeChat() throws ExecutionException, InterruptedException {
+        return createQuarantineChat();
+    }
+
+    private boolean updateChatAsync() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = getReference(table, id);
+        DocumentSnapshot document = getDocument(docRef);
+
+        if (document.exists()) {
+            Tasks.await(docRef.update("chat", chat));
+            this.setDescription(description);
+            return true;
+        } else
+            return false;
+    }
+
+    public Chat createQuarantineChat() throws ExecutionException, InterruptedException {
+        if (materializeChat == null)
+            if (chat == null) {
+                materializeChat = Chat.createChat(obtainMaterializeInCharge(), obtainRequestOwner());
+                chat = getReference(Chat.table, materializeChat.getId());
+                updateChatAsync();
+            } else {
+                try {
+                    materializeChat = Chat.obtainChatById(chat.getId());
+                } catch (NoChatFoundException e) {
+                    materializeChat = Chat.createChat(obtainMaterializeInCharge(), obtainRequestOwner());
+                    chat = getReference(Chat.table, materializeChat.getId());
+                    updateChatAsync();
+                }
+            }
+        return materializeChat;
     }
 
     /**

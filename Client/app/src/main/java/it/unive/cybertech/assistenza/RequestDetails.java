@@ -10,6 +10,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -50,12 +51,11 @@ public class RequestDetails extends AppCompatActivity {
     private final @NonNull
     Context context = RequestDetails.this;
     private static final int PERMISSIONS_FINE_LOCATION = 99;
-    private FusedLocationProviderClient fusedLocationProviderClient;
     private FloatingActionButton editInfo;
     private double latitude, longitude;
     private final User me = user;
     private String type;
-    private final ArrayList<AssistanceType> tList = null;
+    private List<AssistanceType> tList = new ArrayList<>();
     private AssistanceType choosen = null;
     private Spinner spinner;
 
@@ -65,31 +65,27 @@ public class RequestDetails extends AppCompatActivity {
         setContentView(R.layout.activity_request_details);
         setToolbar();
         findFields();
-        spinner = findViewById(R.id.spinner_type);
-    }
 
-    private void init() {
         Utils.executeAsync(AssistanceType::obtainAssistanceTypes, new Utils.TaskResult<List<AssistanceType>>() {
             @Override
             public void onComplete(List<AssistanceType> result) {
+                tList = result;
                 ArrayList<String> options = new ArrayList<>();
+
+                for (AssistanceType a : tList) {
+                    options.add(a.getType());
+                }
 
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, options);
                 spinner.setAdapter(spinnerArrayAdapter);
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String selectedItemText = (String) parent.getItemAtPosition(position);
-                        type = selectedItemText;
-
-                        /*if (position >= 0) {
-                            showShortToast("Selected : " + selectedItemText);
-                        }*/
+                        type = (String) parent.getItemAtPosition(position);
                     }
 
                     public void onNothingSelected(AdapterView<?> parent) {
                     }
                 });
-                locationRequest();
 
                 editInfo.setOnClickListener(v -> {
                     updateGPS();
@@ -100,14 +96,13 @@ public class RequestDetails extends AppCompatActivity {
                     String title = et_requestTitle.getText().toString();
                     String description = et_requestText.getText().toString();
 
-
                     for (AssistanceType a : tList) {
                         if (a.getType().equals(type))
                             choosen = a;
                     }
 
                     if (!title.isEmpty() && !description.isEmpty() && !countryReq.getText().toString().isEmpty() && !cityReq.getText().toString().isEmpty()) {
-                        Utils.Dialog dialog = new Utils.Dialog(getApplicationContext());
+                        Utils.Dialog dialog = new Utils.Dialog(context);
                         dialog.show(getString(R.string.attention), getString(R.string.request_upload));
                         dialog.setCallback(new Utils.DialogResult() {
                             @Override
@@ -126,9 +121,7 @@ public class RequestDetails extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onCancel() {
-
-                            }
+                            public void onCancel() {}
                         });
                     } else {
                         message_if_smt_missing();
@@ -137,9 +130,7 @@ public class RequestDetails extends AppCompatActivity {
             }
 
             @Override
-            public void onError(Exception e) {
-
-            }
+            public void onError(Exception e) {}
         });
     }
 
@@ -171,8 +162,6 @@ public class RequestDetails extends AppCompatActivity {
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_Request);
         setSupportActionBar(toolbar);
-        //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setDisplayShowHomeEnabled(true);
         setTitle("Dettagli Richiesta");
     }
 
@@ -183,6 +172,7 @@ public class RequestDetails extends AppCompatActivity {
      * @since 1.1
      */
     private void findFields() {
+        spinner = findViewById(R.id.spinner_type);
         et_requestTitle = findViewById(R.id.requestTitle);
         et_requestText = findViewById(R.id.requestText);
         editInfo = findViewById(R.id.edit_location);
@@ -191,75 +181,29 @@ public class RequestDetails extends AppCompatActivity {
     }
 
     /**
-     * Initialize locationRequest
-     *
-     * @author Mihail Racaru
-     * @since 1.1
-     */
-    private void locationRequest() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(30000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setMaxWaitTime(100);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-    }
-
-    /**
-     * Sets {@link #longitude} , {@link #latitude} and calles {@link #updateValues}
+     * Sets {@link #longitude} , {@link #latitude} and textView {@link #countryReq}, {@link #cityReq}
      *
      * @author Mihail Racaru
      * @since 1.1
      */
     private void updateGPS() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
-                showShortToast(getString(R.string.localizationUpdated));
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-                updateValues(location);
-            }).addOnFailureListener(e -> {
-                Toast.makeText(context, R.string.genericError, Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
+        try {
+            Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
+                @Override
+                public void onComplete(Utils.Location result) {
+                    longitude = result.longitude;
+                    latitude = result.latitude;
+                    countryReq.setText(result.country);
+                    cityReq.setText(result.city);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                }
             });
-        } else {
+        } catch (Utils.PermissionDeniedException e) {
+            e.printStackTrace();
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
     }
-
-    /**
-     * Sets TextView {@link #countryReq} and {@link #cityReq} from the given location in input
-     *
-     * @param location from which is computed city and country
-     * @author Mihail Racaru
-     * @since 1.1
-     */
-    private void updateValues(@NonNull Location location) {
-        @NonNull Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        @NonNull List<Address> addresses;
-        try {
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            @NonNull String newCountry = addresses.get(0).getCountryName();
-            countryReq.setText(newCountry);
-            @NonNull String newCity = addresses.get(0).getLocality();
-            cityReq.setText(newCity);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Used to show a Toast with the given message String
-     *
-     * @param message, the input String
-     * @author Mihail Racaru
-     * @since 1.1
-     */
-    private void showShortToast(@NonNull String message) {
-        @NonNull Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
 }

@@ -54,7 +54,7 @@ public class MessageService extends FirebaseMessagingService {
         coronavirus,
         assistance_chat,
         request_accepted,
-        request_stop_helping
+        request_stop_helping,
     }
 
     private final static String TAG = "FirebaseMessage";

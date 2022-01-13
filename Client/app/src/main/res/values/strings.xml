@@ -218,6 +218,10 @@
     <string name="send">Invia</string>
     <string name="send_healing">Invia Guarigione</string>
     <string name="confirm_send_healing">Confermi di voler inviare la segnalazione di guarigione?\n</string>
+    <string name="write_something">Scrivi qualcosa...</string>
+    <string name="error_sending_chat_message">Non è stato possibile inviare il messaggio</string>
+    <string name="error_opening_chat">Errore nell\'apertura della chat</string>
+    <string name="user_asked_for_assistance"> richiede la tua assistenza</string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>
