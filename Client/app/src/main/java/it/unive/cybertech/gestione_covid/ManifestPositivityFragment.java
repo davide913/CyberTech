@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.User;
@@ -139,6 +140,19 @@ public class ManifestPositivityFragment extends Fragment {
                             Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                                 @Override
                                 public void onComplete(Boolean result) {
+                                    Thread t = new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                user.deleteAllMyQuarantineAssistance();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                    t.start();
                                     updateFr();
                                 }
 
