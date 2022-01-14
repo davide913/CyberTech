@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.User;
@@ -144,9 +145,7 @@ public class ManifestPositivityFragment extends Fragment {
                         public void onSuccess() {
                             Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                                 @Override
-                                public void onComplete(Boolean result) {
-                                    updateFr();
-                                }
+                                public void onComplete(Boolean result) { updateFr();}
 
                                 @Override
                                 public void onError(Exception e) {
