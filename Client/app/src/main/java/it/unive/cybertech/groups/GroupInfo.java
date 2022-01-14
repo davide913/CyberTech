@@ -49,6 +49,7 @@ public class GroupInfo extends Fragment {
     FloatingActionButton joinLeftButton;
     private boolean status = false;
 
+
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
         @NonNull final View view = inflater.inflate(R.layout.fragment_group_information, container, false);
@@ -139,7 +140,7 @@ public class GroupInfo extends Fragment {
     private void removeGroupParticipant() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                getThisGroup().removeMember(user);
+                status = !getThisGroup().removeMember(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -152,7 +153,6 @@ public class GroupInfo extends Fragment {
         }
         showShortToast(getString(R.string.LeftGroup), requireContext());
         setButtonInfoAsNoParticipant();
-        status = false;
     }
 
     /**
@@ -164,7 +164,7 @@ public class GroupInfo extends Fragment {
     private void addGroupParticipant() {
         @NonNull Thread t = new Thread(() -> {
             try {
-                getThisGroup().addMember(user);
+                status = getThisGroup().addMember(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -176,8 +176,7 @@ public class GroupInfo extends Fragment {
             e.printStackTrace();
         }
         showShortToast(getString(R.string.NowMember), requireContext());
-        setButtonInfoAsNoParticipant();
-        status = true;
+        setButtonInfoAsParticipant();
     }
 
     /**
