@@ -9,14 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
 import java.util.List;
-
 import it.unive.cybertech.R;
-import it.unive.cybertech.database.Groups.Group;
 
 public class CustomSignReceivedAdapter extends ArrayAdapter {
     private static final String TAG = "CustomOrderArrayAdapterTrader";

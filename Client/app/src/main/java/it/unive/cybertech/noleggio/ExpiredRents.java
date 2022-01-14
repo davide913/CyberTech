@@ -23,7 +23,7 @@ import it.unive.cybertech.utils.Utils;
 /**
  * This activity shows the expired rent and lending for the user
  * Rent refers to the material that the user offers to others, while rented means that material that the user borrowed from others
- *
+ * <p>
  * It returns some data in order to refresh the list in case of complete rent
  *
  * @author Mattia Musone

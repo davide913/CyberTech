@@ -17,12 +17,12 @@ import it.unive.cybertech.utils.Utils;
 
 /**
  * This class display a form in order to evaluate the lending and the material's condition
- *
+ * <p>
  * If the feedback is negative, the points will be subtracted from the user lending point and if the user has a negative score, then he cannot gets lending until he pay for the damage
  * Otherwise a positive score will be added to his lending points
  *
  * @author Mattia Musone
- *  */
+ */
 public class RentFeedback extends AppCompatActivity {
     private static final int BAD_SCORE_BOUND = 3;
     static final int SUCCESS = 1, FAIL = 0;

@@ -1,8 +1,7 @@
-package it.unive.cybertech;
+package it.unive.cybertech.profile;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
-import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import android.Manifest;
@@ -25,13 +24,14 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
 
+import it.unive.cybertech.R;
 import it.unive.cybertech.utils.Utils;
 
 /**
  * ProfileActivity is the main activity that allow user to view and edit some personal, account or
  * localization info:
- * - Email update is manage in "{@link it.unive.cybertech.EditEmail}"
- * - Password update is manage in "{@link it.unive.cybertech.EditPassword}"
+ * - Email update is manage in "{@link EditEmail}"
+ * - Password update is manage in "{@link EditPassword}"
  *
  * @author Daniele Dotto
  * @since 1.0
@@ -74,21 +74,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Initialize GPS settings.
-     *
-     * @author Daniele Dotto
-     * @since 1.1
-
-    private void initGPSsettings() {
-        @NonNull final LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(30000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setMaxWaitTime(100);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-    }*/
-
-    /**
      * Set values to EditTexts contained in Layout.
      *
      * @author Daniele Dotto
@@ -98,8 +83,8 @@ public class ProfileActivity extends AppCompatActivity {
         getName().setText(user.getName());
         getSurname().setText(user.getSurname());
         getSex().setText(user.getSex().toString().toUpperCase().substring(0, 1));
-        if (user.getBirthDayToDate() != null) {
-            @NonNull String dateOfBirthString = Utils.formatDateToString(user.getBirthDayToDate());
+        if (user.obtainBirthDayToDate() != null) {
+            @NonNull String dateOfBirthString = Utils.formatDateToString(user.obtainBirthDayToDate());
             getDateOfBirth().setText(dateOfBirthString);
         }
 
@@ -157,42 +142,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Behaviour according to permission given by user.
-     *
-     * @author Daniele Dotto
-     * @since 1.0
-
-     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-     if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-     updateGPS();
-     } else {
-     showShortToast(getString(R.string.positionPrivilegeNeeded), context);
-     }
-     }*/
-
-    /**
-     * Update GPS coordinates (latitude and longitude).
-     * The user is asked to give permission for geolocalisation if they have not been given yet.
-     *
-     * @author Daniele Dotto
-     * @since 1.0
-
-    private void updateGPS() {
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-    getFusedLocationProviderClient().getLastLocation().addOnSuccessListener(this, location -> {
-    showShortToast(getString(R.string.localizationUpdated), context);
-    updateValues(location);
-    }).addOnFailureListener(e -> {
-    showShortToast(getString(R.string.genericError), context);
-    e.printStackTrace();
-    });
-    } else {
-    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
-    }
-    }*/
-
-    /**
      * Update EditText values about geolocalisation:
      *
      * @author Daniele Dotto
@@ -210,6 +159,12 @@ public class ProfileActivity extends AppCompatActivity {
                         double longitude = result.longitude;
                         @NonNull Thread t = new Thread(() -> user.updateLocation(result.country, result.city, result.address, latitude, longitude));
                         t.start();
+                    try {
+                        t.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    setTextEditTexts();
                 }
 
                 @Override

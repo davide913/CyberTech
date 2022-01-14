@@ -18,14 +18,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Objects;
 
 import it.unive.cybertech.R;
@@ -33,6 +29,13 @@ import it.unive.cybertech.SplashScreen;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * Provide a signup method for the user
+ * Actually only email is supported
+ * See "{@link it.unive.cybertech.signup.LogInActivity}" for Google singin
+ *
+ * @author Mattia Musone
+ * */
 public class SignUpActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_FINE_LOCATION = 5;
@@ -59,8 +62,6 @@ public class SignUpActivity extends AppCompatActivity {
 
 
         @NonNull GregorianCalendar calendar = new GregorianCalendar();
-        @NonNull String pattern = "dd/MM/yyyy";
-        @NonNull DateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
         dateOfBirth.setOnClickListener(v -> {
             int y = calendar.get(Calendar.YEAR);
             int m = calendar.get(Calendar.MONTH);
@@ -68,7 +69,7 @@ public class SignUpActivity extends AppCompatActivity {
             @NonNull DatePickerDialog dialog = new DatePickerDialog(context, (view, year, month, dayOfMonth) -> {
                 calendar.set(year, month, dayOfMonth);
                 inputDateOfBirth = calendar.getTime();
-                @NonNull String dateStr = dateFormat.format(inputDateOfBirth);
+                @NonNull String dateStr = Utils.formatDateToString(inputDateOfBirth);
                 dateOfBirth.setText(dateStr);
             }, y, m, d);
             dialog.show();
@@ -82,6 +83,11 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Checks if all the required fields are compiled
+     *
+     * @return Indicate if all the fields are fill
+     * */
     private boolean checkFields() {
         boolean ok = true;
         if (name.getText().length() <= 0) {
@@ -115,6 +121,16 @@ public class SignUpActivity extends AppCompatActivity {
         return ok;
     }
 
+    /**
+     * Do the registration with the provided informations
+     *
+     * @param email The email for the registration
+     * @param password The password to use for login
+     * @param name The user name
+     * @param surname The user surname
+     * @param dateOfBirth The date of birth of the user
+     * @param sex The string sex of the user
+     * */
     private void signInWithEmailAndPassword(@NonNull String email, @NonNull String password, @NonNull String name, @NonNull String surname, @NonNull Date dateOfBirth, @NonNull String sex) {
         try {
             Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
@@ -124,7 +140,7 @@ public class SignUpActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             new Thread(() -> {
                                 try {
-                                    FirebaseUser us = task.getResult().getUser();
+                                    //Create the user in the database
                                     User u = User.createUser(Objects.requireNonNull(task.getResult().getUser()).getUid(), name.trim(), surname.trim(), Utils.convertToSex(sex), dateOfBirth, location.address, location.city, location.country, (long) location.latitude, (long) location.longitude, false);
                                     if (u != null) {
                                         @NonNull Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
@@ -136,6 +152,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     mAuth.signOut();
                                 }
                             }).start();
+                            //Manage the firebase exception
                         } else {
                             try {
                                 throw Objects.requireNonNull(task.getException());
@@ -189,6 +206,6 @@ public class SignUpActivity extends AppCompatActivity {
                         }
                     })
                     .hideCancelButton()
-                    .show("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
+                    .show(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 }

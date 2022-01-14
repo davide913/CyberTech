@@ -203,8 +203,6 @@
     <string name="request_taken_notification">ha preso in carico la tua richiesta di aiuto</string>
     <string name="stop_helping_notification">ha smesso di seguire la tua richiesta di aiuto</string>
     <string name="request_deleted_notification">Ha eliminato la richiesta, ti ringraziamo per la collaborazione</string>
-
-    <string name="negative">Negativo</string>
     <string name="no_data">No Date</string>
     <string name="name_">Nome:</string>
     <string name="surname_">Cognome:</string>
@@ -222,6 +220,15 @@
     <string name="error_sending_chat_message">Non è stato possibile inviare il messaggio</string>
     <string name="error_opening_chat">Errore nell\'apertura della chat</string>
     <string name="user_asked_for_assistance"> richiede la tua assistenza</string>
+    <string name="login_failed">Login fallito</string>
+    <string name="wrong_credentials">Credenziali errate</string>
+    <string name="user_not_found">Utente inesistente</string>
+    <string name="generic_error">Errore generico</string>
+    <string name="retry_later">Si prega di riprovare più tardi</string>
+    <string name="welcome_back">Bentornato</string>
+    <string name="negative">Negativo</string>
+    <string name="positive">Positivo</string>
+    <string name="notification_channel_quarantine_assistance_deleted" > Canale utilizzato per avvisare l\'utente negativo che la richiesta presa in carico è stata eliminata </string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>

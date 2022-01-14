@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Groups.Activity;
+import it.unive.cybertech.database.Groups.Exception.NoGroupFoundException;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
@@ -247,7 +248,7 @@ public class User extends Geoquerable implements Comparable<User> {
         return birthday;
     }
 
-    public Date getBirthDayToDate() {
+    public Date obtainBirthDayToDate() {
         return birthday.toDate();
     }
 
@@ -309,7 +310,7 @@ public class User extends Geoquerable implements Comparable<User> {
     public List<Material> obtainMaterializedUserMaterials() throws ExecutionException, InterruptedException {
         if (materialsMaterialized == null) {
             materialsMaterialized = new ArrayList<>();
-            for (DocumentReference doc : quarantineAssistance)
+            for (DocumentReference doc : materials)
                 try {
                     materialsMaterialized.add(Material.obtainMaterialById(doc.getId()));
                 } catch (NoMaterialFoundException e) {
@@ -350,9 +351,6 @@ public class User extends Geoquerable implements Comparable<User> {
                                   @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
-        if (sex != Sex.female && sex != Sex.male && sex != Sex.nonBinary)
-            throw new NoUserFoundException("for create a user, the sex need to be male, female or nonBinary");
-
         GeoPoint geoPoint = new GeoPoint(latitude, longitude);
 
         Map<String, Object> myUser = new HashMap<>();
@@ -380,8 +378,8 @@ public class User extends Geoquerable implements Comparable<User> {
     /**
      * The method return the user with that id. If there isn't a user with that id it throw an exception.
      *
-     * @author Davide Finesso
      * @throws NoUserFoundException if a user with that id doesn't exist
+     * @author Davide Finesso
      */
     public static User obtainUserById(@NonNull String id) throws InterruptedException, ExecutionException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
@@ -410,7 +408,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteUserAsync() throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -435,7 +433,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(task);
 
             List<DocumentSnapshot> documents = task.getResult().getDocuments();
-            for (DocumentSnapshot documentSnapshot : documents )
+            for (DocumentSnapshot documentSnapshot : documents)
                 QuarantineAssistance.obtainQuarantineAssistanceById(documentSnapshot.getId())
                         .updateInCharge_QuarantineAssistance(null);
 
@@ -444,19 +442,19 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(task);
 
             documents = task.getResult().getDocuments();
-            for (DocumentSnapshot documentSnapshot : documents )
+            for (DocumentSnapshot documentSnapshot : documents)
                 Group.obtainGroupById(documentSnapshot.getId()).removeMember(this);
 
-            for (Material material: obtainMaterializedUserMaterials() )
+            for (Material material : obtainMaterializedUserMaterials())
                 material.deleteMaterial();
 
-            for (LendingInProgress lending: obtainAllMaterializedLendingInProgress() )
+            for (LendingInProgress lending : obtainAllMaterializedLendingInProgress())
                 lending.deleteLendingInProgress();
 
-            for (Device device: obtainMaterializedDevices() )
+            for (Device device : obtainMaterializedDevices())
                 device.deleteDevice();
 
-            for (QuarantineAssistance assistance: obtainMaterializedQuarantineAssistance() )
+            for (QuarantineAssistance assistance : obtainMaterializedQuarantineAssistance())
                 assistance.deleteQuarantineAssistance();
 
             Task<Void> t = deleteUserAsync();
@@ -474,7 +472,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateGreenPassAsync(boolean val) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -506,7 +504,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePositiveSinceAsync(Date date) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -544,7 +542,7 @@ public class User extends Geoquerable implements Comparable<User> {
      * @author Davide Finesso
      */
     private Task<Void> updateLocationAsync(String newCountry, String newCity, String newAddress, GeoPoint geoPoint)
-            throws ExecutionException, InterruptedException {
+            throws ExecutionException, InterruptedException, NoUserFoundException {
 
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -564,7 +562,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public boolean updateLocation(@NonNull String newCountry,@NonNull String newCity,
+    public boolean updateLocation(@NonNull String newCountry, @NonNull String newCity,
                                   @NonNull String newAddress, double latitude, double longitude) {
         try {
             GeoPoint geoPoint = new GeoPoint(latitude, longitude);
@@ -586,7 +584,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateLendingPointAsync(long val) throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -618,7 +616,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
+    private Task<Void> addDeviceAsync(@NonNull DocumentReference device)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -641,7 +640,7 @@ public class User extends Geoquerable implements Comparable<User> {
             Tasks.await(addDeviceAsync(devDoc));
             this.devices.add(devDoc);
             if (this.devicesMaterialized != null)
-                    this.obtainMaterializedDevices().add(device);
+                this.obtainMaterializedDevices().add(device);
 
             return true;
         } catch (ExecutionException | InterruptedException | NoUserFoundException e) {
@@ -655,7 +654,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeDeviceAsync(@NonNull DocumentReference device) throws ExecutionException, InterruptedException {
+    private Task<Void> removeDeviceAsync(@NonNull DocumentReference device)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -691,7 +691,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
+    private Task<Void> addLendingAsync(@NonNull DocumentReference lending)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -726,7 +727,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeLendingAsync(@NonNull DocumentReference lending) throws ExecutionException, InterruptedException {
+    private Task<Void> removeLendingAsync(@NonNull DocumentReference lending)
+            throws ExecutionException, InterruptedException, NoUserFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -905,8 +907,8 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType,@NonNull String title,
-                                           @NonNull String description,@NonNull Date date, double latitude, double longitude) {
+    public boolean addQuarantineAssistance(@NonNull AssistanceType assistanceType, @NonNull String title,
+                                           @NonNull String description, @NonNull Date date, double latitude, double longitude) {
         try {
             QuarantineAssistance assistance =
                     createQuarantineAssistance(assistanceType, title, description, date, latitude, longitude);
@@ -969,7 +971,7 @@ public class User extends Geoquerable implements Comparable<User> {
      * @author Davide Finesso
      */
     public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
-        for(QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+        for (QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
             this.removeQuarantineAssistance(quarantineAssistance);
     }
 
@@ -1040,6 +1042,30 @@ public class User extends Geoquerable implements Comparable<User> {
             }
         }
 
+        return result;
+    }
+
+    /**
+     * Obtain the groups where the user is in
+     *
+     * @author Davide Finesso
+     */
+    public List<Group> obtainGroups() throws ExecutionException, InterruptedException {
+        List<Group> result = new ArrayList<>();
+        DocumentReference userDoc = getReference(table, this.id);
+
+        Task<QuerySnapshot> future = getInstance().collection(Group.table)
+                .whereArrayContains("members", userDoc).get();
+        Tasks.await(future);
+        List<DocumentSnapshot> documents = future.getResult().getDocuments();
+
+        for (DocumentSnapshot doc : documents) {
+            try {
+                Group g = Group.obtainGroupById(doc.getId());
+                result.add(g);
+            } catch (NoGroupFoundException e) {
+            }
+        }
         return result;
     }
 

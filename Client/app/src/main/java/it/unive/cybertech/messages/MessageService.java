@@ -55,6 +55,7 @@ public class MessageService extends FirebaseMessagingService {
         assistance_chat,
         request_accepted,
         request_stop_helping,
+        request_deleted
     }
 
     private final static String TAG = "FirebaseMessage";
@@ -164,6 +165,10 @@ public class MessageService extends FirebaseMessagingService {
                             break;
                         case request_stop_helping:
                             notification.put("android_channel_id", "request_stop_helping");
+                            notification.put("icon", "notification_icon");
+                            break;
+                        case request_deleted:
+                            notification.put("android_channel_id", "request_deleted");
                             notification.put("icon", "notification_icon");
                             break;
                     }
@@ -277,6 +282,10 @@ public class MessageService extends FirebaseMessagingService {
                 iconResource = R.drawable.notification_icon;
                 argb = ctx.getColor(R.color.orange_fs);
                 break;
+            case request_deleted:
+                iconResource = R.drawable.notification_icon;
+                argb = ctx.getColor(R.color.red_fs);
+                break;
 
         }
         createNotificationChannelIfNotExists(type, ctx);
@@ -328,6 +337,11 @@ public class MessageService extends FirebaseMessagingService {
                 description = ctx.getString(R.string.notification_channel_quarantine_assistance_dismissed);
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
+            case request_deleted:
+                name = ctx.getString(R.string.alerts);
+                description = ctx.getString(R.string.notification_channel_quarantine_assistance_deleted);
+                importance = NotificationManager.IMPORTANCE_HIGH;
+                break;
         }
 
         //Call the system API to create a new notification channel
@@ -339,7 +353,7 @@ public class MessageService extends FirebaseMessagingService {
 
     /**
      * Function to get the string value of the notification channel
-     * */
+     */
     private static String getChannelIDByType(NotificationType type) {
         switch (type) {
             default:
@@ -353,17 +367,20 @@ public class MessageService extends FirebaseMessagingService {
                 return "request_accepted";
             case request_stop_helping:
                 return "request_stop_helping";
+            case request_deleted:
+                return "request_deleted";
         }
     }
 
     /**
      * Function that create all the notification channels
-     * */
+     */
     public static void initNotificationChannels(Context ctx) {
         createNotificationChannelIfNotExists(NotificationType.base, ctx);
         createNotificationChannelIfNotExists(NotificationType.coronavirus, ctx);
         createNotificationChannelIfNotExists(NotificationType.assistance_chat, ctx);
         createNotificationChannelIfNotExists(NotificationType.request_accepted, ctx);
         createNotificationChannelIfNotExists(NotificationType.request_stop_helping, ctx);
+        createNotificationChannelIfNotExists(NotificationType.request_deleted, ctx);
     }
 }

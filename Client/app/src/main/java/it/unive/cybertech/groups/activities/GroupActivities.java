@@ -40,15 +40,24 @@ import it.unive.cybertech.utils.Utils.TaskResult;
  */
 public class GroupActivities extends Fragment implements Utils.ItemClickListener {
     private static final int ACTIVITY_DETAILS_CODE = 0;
+    private static final int ACTIVITY_CREATION_CODE = 2;
     protected static final int RELOAD_ACTIVITY = 990;
-    private @Nullable Context context;
-    private @NonNull List<Activity> activities = new ArrayList<>();
-    private @Nullable FragmentActivity fragmentActivity;
-    private @Nullable ActivityListAdapter adapter;
-    private @Nullable String idGroup;
-    private @Nullable Group thisGroup;
-    private @Nullable RecyclerView activitiesContainer;
-    private @Nullable FloatingActionButton newActivityButton;
+    private @Nullable
+    Context context;
+    private @NonNull
+    List<Activity> activities = new ArrayList<>();
+    private @Nullable
+    FragmentActivity fragmentActivity;
+    private @Nullable
+    ActivityListAdapter adapter;
+    private @Nullable
+    String idGroup;
+    private @Nullable
+    Group thisGroup;
+    private @Nullable
+    RecyclerView activitiesContainer;
+    private @Nullable
+    FloatingActionButton newActivityButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -57,12 +66,12 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
         initFragment();
         bindLayoutObjects(view);
         setContainer();
-        bindThisGroupAndActivities();
+        bindThisGroupAndActivities(true);
 
         Objects.requireNonNull(newActivityButton).setOnClickListener(v -> {
             @NonNull Intent i = new Intent(context, ActivityCreation.class);
             i.putExtra("ID", idGroup);
-            startActivity(i);
+            startActivityForResult(i,ACTIVITY_CREATION_CODE);
         });
         return view;
     }
@@ -99,7 +108,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      */
     private void initFragment() {
         context = requireContext();
-        fragmentActivity = requireActivity();
+        fragmentActivity = getActivity();
         idGroup = fragmentActivity.getIntent().getStringExtra("ID");
     }
 
@@ -130,10 +139,10 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == ACTIVITY_DETAILS_CODE) {
-            if(resultCode == RELOAD_ACTIVITY) {
+        if (requestCode == ACTIVITY_DETAILS_CODE || requestCode == ACTIVITY_CREATION_CODE) {
+            if (resultCode == RELOAD_ACTIVITY) {
                 if (fragmentActivity != null) {
-                    fragmentActivity.recreate();
+                    bindThisGroupAndActivities(false);
                 }
             }
         }
@@ -146,8 +155,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      * @since 1.1
      */
     @SuppressLint("NotifyDataSetChanged")
-    private void bindThisGroupAndActivities() {
-        executeAsync(() -> getThisGroup().obtainMaterializedActivities(), new TaskResult<List<Activity>>() {
+    private void bindThisGroupAndActivities(boolean caching) {
+        executeAsync(() -> getThisGroup().obtainMaterializedActivities(caching), new TaskResult<List<Activity>>() {
             @Override
             public void onComplete(@NonNull List<Activity> result) {
                 activities = result;
@@ -173,7 +182,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull Group getThisGroup() {
+    private @NonNull
+    Group getThisGroup() {
         return Objects.requireNonNull(thisGroup);
     }
 
@@ -184,7 +194,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull ActivityListAdapter getAdapter() {
+    private @NonNull
+    ActivityListAdapter getAdapter() {
         return Objects.requireNonNull(adapter);
     }
 

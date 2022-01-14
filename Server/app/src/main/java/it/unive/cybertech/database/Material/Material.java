@@ -168,6 +168,8 @@ public class Material extends Geoquerable {
         return expiryDate;
     }
 
+    public Date obtainExpiryDateToDate(){return expiryDate.toDate();}
+
     private void setExpiryDate(Timestamp expiryDate) {
         this.expiryDate = expiryDate;
     }
@@ -187,8 +189,8 @@ public class Material extends Geoquerable {
      * @throws NoMaterialFoundException if a material doesn't has a renter
      */
     public User obtainMaterializedRenter() throws ExecutionException, InterruptedException, NoMaterialFoundException {
-        if(renter == null) {
-            if (materializeRenter != null)
+        if(renter != null) {
+            if (materializeRenter == null)
                 materializeRenter = User.obtainUserById(renter.getId());
 
             return materializeRenter;
@@ -267,7 +269,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteMaterialAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteMaterialAsync() throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -306,7 +308,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
+    private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException, NoMaterialFoundException{
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -338,7 +340,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException {
+    private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -370,7 +372,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updatePhotoAsync(String photo) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePhotoAsync(String photo) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -405,7 +407,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateRenterAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateRenterAsync(DocumentReference user) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -454,7 +456,7 @@ public class Material extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
+    private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 

@@ -212,7 +212,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteActivityAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteActivityAsync() throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -244,7 +244,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateOwnerAsync(DocumentReference user) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -278,7 +278,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException {
+    private Task<Void> updateDescriptionAsync(String description) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -310,7 +310,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updatePlaceAsync(String place) throws ExecutionException, InterruptedException {
+    private Task<Void> updatePlaceAsync(String place) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -342,7 +342,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateDateAsync(Timestamp timestamp) throws ExecutionException, InterruptedException {
+    private Task<Void> updateDateAsync(Timestamp timestamp) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -375,7 +375,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> addParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> addParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -410,7 +410,7 @@ public class Activity {
      *
      * @author Davide Finesso
      */
-    private Task<Void> removeParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException {
+    private Task<Void> removeParticipantAsync(@NonNull DocumentReference user) throws ExecutionException, InterruptedException, NoActivityFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 

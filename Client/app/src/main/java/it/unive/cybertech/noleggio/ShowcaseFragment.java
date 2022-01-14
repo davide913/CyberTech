@@ -34,7 +34,7 @@ import it.unive.cybertech.utils.Utils;
  * Clicking an item you can see the product details
  *
  * @author Mattia Musone
- * */
+ */
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
@@ -65,7 +65,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
 
     /**
      * This function initialize the list getting the current user location and the items around him
-     * */
+     */
     private void initList() {
         super.onStart();
         try {
@@ -74,7 +74,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                 @Override
                 public void onComplete(Utils.Location result) {
                     //Once you have the location you can obtain the items around you
-                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 50, user.getId()), new Utils.TaskResult<List<Material>>() {
                         @Override
                         public void onComplete(List<Material> result) {
                             Log.d(ID, "Size: " + result.size());
@@ -133,12 +133,14 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                 Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
-                        adapter.add(result);
-                        HomePage h = (HomePage) getParentFragment();
-                        if (h != null) {
-                            MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
-                            if (f != null)
-                                f.addMaterialToList(result);
+                        if (result != null) {
+                            adapter.add(result);
+                            HomePage h = (HomePage) getParentFragment();
+                            if (h != null) {
+                                MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
+                                if (f != null)
+                                    f.addMaterialToList(result);
+                            }
                         }
                     }
 
@@ -147,12 +149,17 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                     }
                 });
             }
+        }else if (requestCode == RENT_CODE && resultCode == ProductDetails.RENT_DELETE) {
+            int pos = data.getIntExtra("Position", -1);
+            if (pos >= 0) {
+                adapter.removeAt(pos);
+            }
         }
     }
 
     /**
      * Function called when a item in the list is clicked
-     * */
+     */
     public void onItemClick(View view, int position) {
         //If the user has a negative lending point, then he cannot open the product details in order to start a lending
         if (user.getLendingPoint() < 0) {

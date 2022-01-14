@@ -100,7 +100,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
      */
     private void initFragment() {
         context = requireContext();
-        fragmentActivity = requireActivity();
+        fragmentActivity = getActivity();
     }
 
     /**

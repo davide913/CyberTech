@@ -100,6 +100,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             finish();
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
         extensionRenterLayout = findViewById(R.id.extension_renter_details_layout);
         confirm = findViewById(R.id.confirm_rent_showcase);
         acceptExtension = findViewById(R.id.accept_extension_details);
@@ -219,7 +220,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                 }
                                 //If the user is not the owner (so it's the renter)
                             } else {
-                                expireDateMaterial.setText(Utils.formatDateToString(lending.getDateExpiryDate()));
+                                expireDateMaterial.setText(Utils.formatDateToString(lending.obtainDateExpiryToDate()));
                                 extend.setVisibility(VISIBLE);
                                 //Show the rent extension request layout
                                 extend.setOnClickListener(v -> {
@@ -327,13 +328,6 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                             Utils.executeAsync(() -> user.removeMaterial(material), new Utils.TaskResult<Boolean>() {
                                                 @Override
                                                 public void onComplete(Boolean result) {
-                                                    Thread t = new Thread(material::deleteMaterial);
-                                                    t.start();
-                                                    try {
-                                                        t.join();
-                                                    } catch (InterruptedException interruptedException) {
-                                                        interruptedException.printStackTrace();
-                                                    }
                                                     Intent res = new Intent();
                                                     res.putExtra("Position", pos);
                                                     setResult(RENT_DELETE, res);
@@ -515,7 +509,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -27,6 +27,13 @@ import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.Showables;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class represent a chat between the positive user that have made the assistance request and the user in charge
+ * The chat is in real-time
+ * Note: at the moment the chat is visualized day by day
+ *
+ * @author Mattia Musone
+ * */
 public class ChatActivity extends AppCompatActivity implements Utils.ItemClickListener {
 
     private RecyclerView list;
@@ -41,6 +48,7 @@ public class ChatActivity extends AppCompatActivity implements Utils.ItemClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         id = getIntent().getStringExtra("ID");
+        //if the chat id is not provided we cannot proceed, so close this activity (rude way)
         if (id == null)
             finish();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -54,7 +62,9 @@ public class ChatActivity extends AppCompatActivity implements Utils.ItemClickLi
         adapter = new ChatAdapter(items);
         adapter.setClickListener(this);
         list.setAdapter(adapter);
+        //Bind the send message button click
         send.setOnClickListener(v -> {
+            //Send the message only if the user has written something
             if (message.length() > 0) {
                 send.setEnabled(false);
                 String messageStr = message.getText().toString();
@@ -65,6 +75,7 @@ public class ChatActivity extends AppCompatActivity implements Utils.ItemClickLi
                         message.setText("");
                         adapter.add(result);
                         list.scrollToPosition(items.size() - 1);
+                        //When a message is sent, send a notification to the other user
                         Utils.executeAsync(() -> chat.obtainOtherUser(user), new Utils.TaskResult<User>() {
                             @Override
                             public void onComplete(User result) {
@@ -91,10 +102,12 @@ public class ChatActivity extends AppCompatActivity implements Utils.ItemClickLi
     @Override
     protected void onStart() {
         super.onStart();
+        //Get the chat for this day
         Utils.executeAsync(() -> Chat.obtainChatById(id), new Utils.TaskResult<Chat>() {
             @Override
             public void onComplete(Chat result) {
                 chat = result;
+                //Bind a listener to the database changes in order to add new messages to the real-time chat
                 chat.setListener(message -> {
                     if (!items.contains(message)) {
                         adapter.add(message);

@@ -98,12 +98,12 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/deleteRequest"
-        android:tooltipText="Elimina la richiesta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="92dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:tooltipText="Elimina la richiesta"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/menu_open"
         app:layout_constraintEnd_toEndOf="@+id/menu_open"
@@ -111,12 +111,12 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/chat_from_request"
-        android:tooltipText="Vai alla chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="96dp"
         android:clickable="true"
         android:focusable="true"
+        android:tooltipText="Vai alla chat"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/menu_open"
         app:layout_constraintEnd_toEndOf="@+id/menu_open"
@@ -137,14 +137,14 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/stopHelping"
-        android:tooltipText="Non eseguire più"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:tooltipText="Non eseguire più"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/chat_from_request"
+        app:layout_constraintBottom_toTopOf="@+id/menu_open"
         app:layout_constraintEnd_toEndOf="@+id/chat_from_request"
         app:srcCompat="@drawable/ic_stop_helping" />
 

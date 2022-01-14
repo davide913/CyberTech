@@ -70,7 +70,7 @@ public class GroupHomePage extends AppCompatActivity {
      * @since 1.1
      */
     private void bindThisGroup() {
-        executeAsync(() -> Group.obtainGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group> () {
+        executeAsync(() -> Group.obtainGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group>() {
 
             @Override
             public void onComplete(@NonNull Group result) {

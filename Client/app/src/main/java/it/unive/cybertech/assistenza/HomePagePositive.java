@@ -19,7 +19,6 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -62,7 +61,7 @@ public class HomePagePositive extends Fragment {
             public void onComplete(List<QuarantineAssistance> result) {
                 myRequestsList = result;
 
-                myRequestsList.sort((o1, o2) -> o2.getDeliveryDateToDate().compareTo(o1.getDeliveryDateToDate()));
+                myRequestsList.sort((o1, o2) -> o2.obtainDeliveryDateToDate().compareTo(o1.obtainDeliveryDateToDate()));
 
                 adapter = new CustomRequestsAdapter(getContext(), 0, myRequestsList);
                 listAlreadyMade.setAdapter(adapter);
@@ -70,7 +69,7 @@ public class HomePagePositive extends Fragment {
                 listAlreadyMade.setOnItemClickListener(((parent, view1, position, id) -> {
                     Intent newIntent = new Intent(getContext(), RequestViz.class);
 
-                    String strDate = Utils.formatDateToString(myRequestsList.get(position).getDeliveryDateToDate(), "kk:mm  dd-MM" );
+                    String strDate = Utils.formatDateToString(myRequestsList.get(position).obtainDeliveryDateToDate(), "kk:mm  dd-MM" );
                     geoPointer(newIntent, position);
                     putExtra(newIntent, position, strDate);
 

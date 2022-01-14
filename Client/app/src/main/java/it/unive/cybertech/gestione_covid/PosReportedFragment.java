@@ -2,9 +2,7 @@ package it.unive.cybertech.gestione_covid;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 
-import androidx.fragment.app.Fragment;
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +11,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import androidx.fragment.app.Fragment;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
-import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.gestione_covid.adapters.CustomSignReceivedAdapter;
-import it.unive.cybertech.utils.CachedUser;
 import it.unive.cybertech.utils.Utils;
+
 /**
  * PosReportedFragment is the second fragment of the Covid-19 Section.
  * In this Fragment it is possible to view (if present) the positive reports received from other users.
@@ -70,10 +68,10 @@ public class PosReportedFragment extends Fragment {
                 TextView textView1 = v.findViewById(R.id.textView_UltimeSegnalazioni);
                 ListView listView = v.findViewById(R.id.ListView_signReported);
 
-                if(!activityList.isEmpty())
+                if (!activityList.isEmpty())
                     var = true;
 
-                if(var){
+                if (var) {
                     imageView.setVisibility(View.INVISIBLE);
                     textView.setVisibility(View.INVISIBLE);
                     listView.setVisibility(View.VISIBLE);
@@ -84,8 +82,7 @@ public class PosReportedFragment extends Fragment {
                     adapter = new CustomSignReceivedAdapter(getContext(), 0, activityList); //creation of the ListView
 
                     listView.setAdapter(adapter);
-                }
-                else{
+                } else {
                     imageView.setVisibility(View.VISIBLE);
                     textView.setVisibility(View.VISIBLE);
                     listView.setVisibility(View.INVISIBLE);

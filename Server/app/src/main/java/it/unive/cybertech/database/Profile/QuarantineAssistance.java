@@ -128,7 +128,7 @@ public class QuarantineAssistance extends Geoquerable {
         return deliveryDate;
     }
 
-    public Date getDeliveryDateToDate() {
+    public Date obtainDeliveryDateToDate() {
         return deliveryDate.toDate();
     }
 
@@ -228,7 +228,7 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteQuarantineAssistanceAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteQuarantineAssistanceAsync() throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -245,11 +245,14 @@ public class QuarantineAssistance extends Geoquerable {
      */
     protected boolean deleteQuarantineAssistance() {
         try {
+            if(chat != null)
+                Chat.obtainChatById(chat.getId()).deleteChat();
+
             Task<Void> t = deleteQuarantineAssistanceAsync();
             Tasks.await(t);
             this.id = null;
             return true;
-        } catch (ExecutionException | InterruptedException | NoLendingInProgressFoundException e) {
+        } catch (ExecutionException | InterruptedException | NoQuarantineAssistanceFoundException e) {
             e.printStackTrace();
             return false;
         }
@@ -280,7 +283,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType) throws ExecutionException, InterruptedException {
+    private Task<Void> updateAssistanceType_QuarantineAssistanceAsync(@NonNull AssistanceType assistanceType)
+            throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -315,7 +319,8 @@ public class QuarantineAssistance extends Geoquerable {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user) throws ExecutionException, InterruptedException {
+    private Task<Void> updateInCharge_QuarantineAssistanceAsync(User user)
+            throws ExecutionException, InterruptedException, NoQuarantineAssistanceFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -399,7 +404,9 @@ public class QuarantineAssistance extends Geoquerable {
      * @param user is used to get the id
      * @author Davide Finesso
      */
-    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user) throws ExecutionException, InterruptedException {
+    public static QuarantineAssistance obtainQuarantineAssistanceByInCharge(@NonNull User user)
+            throws ExecutionException, InterruptedException {
+
         Task<QuerySnapshot> future = getInstance().collection(table)
                 .whereEqualTo("isInCharge", true)
                 .whereEqualTo("inCharge", getReference(User.table, user.getId())).get();
@@ -457,7 +464,7 @@ public class QuarantineAssistance extends Geoquerable {
         arr.sort(new Comparator<QuarantineAssistance>() {
             @Override
             public int compare(QuarantineAssistance o1, QuarantineAssistance o2) {
-                return o2.getDeliveryDateToDate().compareTo(o1.getDeliveryDateToDate());
+                return o2.getDeliveryDate().compareTo(o1.getDeliveryDate());
             }
         });
 

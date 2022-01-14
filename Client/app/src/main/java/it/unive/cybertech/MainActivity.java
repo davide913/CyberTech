@@ -29,6 +29,7 @@ import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.noleggio.ExpiredRents;
+import it.unive.cybertech.profile.ProfileActivity;
 
 /**
  * This is the first class invoked after the splash screen
@@ -36,11 +37,12 @@ import it.unive.cybertech.noleggio.ExpiredRents;
  * It sets the user's profile info to it
  *
  * @author Mattia Musone
- * */
+ */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawer;
     private Menu menu;
+    private boolean firstTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ((TextView) header.findViewById(R.id.user_email)).setText(fUser.getEmail());
         if (fUser.getPhotoUrl() != null)
             Picasso.get().load(fUser.getPhotoUrl()).into(profilePicture);
-
+        firstTime = true;
         profilePicture.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));
         });
@@ -95,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     openSection(R.id.nav_menu_quarantine_assistance);
                     break;
             }
+        else if (firstTime) openSection(R.id.nav_menu_home);
+        firstTime = false;
     }
 
     @Override
@@ -128,15 +132,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * only for the rest section, it shows an icon
      *
      * @param id The id of the section to open
-     * */
+     */
     @SuppressLint("NonConstantResourceId")
-    private void openSection(int id) {
+    void openSection(int id) {
         MenuItem item = null;
         if (menu != null)
             item = menu.findItem(R.id.nav_main_menu_notification_showcase);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         switch (id) {
+            case R.id.nav_menu_home:
+                if (item != null)
+                    item.setVisible(false);
+                ft.replace(R.id.main_fragment_content, new it.unive.cybertech.HomePage()).commit();
+                break;
             case R.id.nav_menu_covid:
                 if (item != null)
                     item.setVisible(false);

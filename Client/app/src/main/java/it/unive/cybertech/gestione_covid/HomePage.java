@@ -41,7 +41,7 @@ public class HomePage extends Fragment {
      * @since 1.0
      */
     private void setupViewPager(ViewPager viewPager) {
-        Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getParentFragmentManager());
+        Utils.FragmentAdapter adapter = new Utils.FragmentAdapter(getChildFragmentManager());
         adapter.addFragment(new ManifestPositivityFragment(), getString(R.string.set_positivity), "ManifestPositivityFragment"); //Creation of the first fragments
         adapter.addFragment(new PosReportedFragment(), getString(R.string.received_reports), "PosReportedFragment"); //Creation of the second fragments
         viewPager.setAdapter(adapter);
