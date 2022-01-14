@@ -139,22 +139,7 @@ public class ManifestPositivityFragment extends Fragment {
                         public void onSuccess() {
                             Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                                 @Override
-                                public void onComplete(Boolean result) {
-                                    Thread t = new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                user.deleteAllMyQuarantineAssistance();
-                                            } catch (ExecutionException e) {
-                                                e.printStackTrace();
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                    t.start();
-                                    updateFr();
-                                }
+                                public void onComplete(Boolean result) { updateFr();}
 
                                 @Override
                                 public void onError(Exception e) {
