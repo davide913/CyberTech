@@ -1,5 +1,8 @@
 package it.unive.cybertech.noleggio;
 
+import static it.unive.cybertech.utils.CachedUser.user;
+import static it.unive.cybertech.utils.Utils.ItemClickListener;
+
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.Base64;
@@ -13,23 +16,34 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import static it.unive.cybertech.utils.CachedUser.user;
-import static it.unive.cybertech.utils.Utils.ItemClickListener;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 
+/**
+ * This is an adapter that provide a view for the materials in the showcase.
+ * If a material showed in the list it belongs to the current user, a label (your) is showed and the color will be blue
+ *
+ * @author Mattia Musone
+ */
 public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHolder> {
 
     private List<Material> showcaseList;
+    //A callback to call when an item is clicked
     private ItemClickListener clickListener;
 
-    public ShowcaseAdapter(List<Material> showcaseList) {
+    /**
+     * The constructor
+     *
+     * @param showcaseList the list of item to show
+     */
+    public ShowcaseAdapter(@NonNull List<Material> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
+    /**
+     * A viewholder that is used for caching the view
+     */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView title, description;
         private final ImageView image;
@@ -46,7 +60,13 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final Material item, int position) {
+        /**
+         * Bind a lending to it's field
+         *
+         * @param item     the lending that is about to be displayed
+         * @param position The item position in the list
+         */
+        public void bind(@NonNull final Material item, int position) {
             String titleStr = item.getTitle();
             if (item.getOwner().getId().equals(user.getId())) {
                 titleStr += " (TUO)";
@@ -82,18 +102,42 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
         return showcaseList.size();
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    /**
+     * Sets the listener of the click item
+     */
+    void setClickListener(@NonNull ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<Material> materials) {
+    /**
+     * Upload the list item replacing with new ones
+     *
+     * @param materials the new list of lending
+     * */
+    public void setItems(@NonNull List<Material> materials) {
         this.showcaseList = materials;
     }
 
+    /**
+     * Remove an item at the provided position and notify the adapter.
+     * Note: no check is made about the index
+     *
+     * @param position The item position in the list
+     * */
     public Material removeAt(int position) {
         Material removed = showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
         return removed;
+    }
+
+    /**
+     * Add a new lending at the end of the list
+     *
+     * @param material The item to add
+     * */
+    public void add(@NonNull Material material) {
+        showcaseList.add(material);
+        notifyItemInserted(showcaseList.size() - 1);
     }
 }

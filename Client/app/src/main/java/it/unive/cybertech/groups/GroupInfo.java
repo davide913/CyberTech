@@ -4,27 +4,27 @@ import static it.unive.cybertech.groups.HomePage.RELOAD_GROUP;
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
 import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * Fragment that belongs to "{@link it.unive.cybertech.groups.GroupHomePage}".
@@ -48,7 +48,6 @@ public class GroupInfo extends Fragment {
     private @Nullable
     FloatingActionButton joinLeftButton;
     private boolean status = false;
-
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable final Bundle savedInstanceState) {
@@ -138,21 +137,10 @@ public class GroupInfo extends Fragment {
      * @since 1.1
      */
     private void removeGroupParticipant() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                status = !getThisGroup().removeMember(user);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executeAsync(() -> getThisGroup().removeMember(user), null);
         showShortToast(getString(R.string.LeftGroup), requireContext());
         setButtonInfoAsNoParticipant();
+        status = false;
     }
 
     /**
@@ -162,21 +150,10 @@ public class GroupInfo extends Fragment {
      * @since 1.1
      */
     private void addGroupParticipant() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                status = getThisGroup().addMember(user);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executeAsync(() -> getThisGroup().addMember(user), null);
         showShortToast(getString(R.string.NowMember), requireContext());
-        setButtonInfoAsParticipant();
+        setButtonInfoAsNoParticipant();
+        status = true;
     }
 
     /**
@@ -215,24 +192,28 @@ public class GroupInfo extends Fragment {
      * @since 1.1
      */
     private boolean checkGroupMember() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                status = getThisGroup().getMaterializedMembers().contains(user);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> getThisGroup().obtainMaterializedMembers().contains(user), new TaskResult<Boolean>() {
+
+            @Override
+            public void onComplete(@NonNull Boolean result) {
+                status = result;
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return status;
     }
 
     /**
      * Return the entire group only if that is not null.
+     *
      * @return "{@link #thisGroup}"
      * @author Daniele Dotto
      * @since 1.1
@@ -244,6 +225,7 @@ public class GroupInfo extends Fragment {
 
     /**
      * Return the button that allow to left or join the group (only if that is not null).
+     *
      * @return "{@link #joinLeftButton}"
      * @author Daniele Dotto
      * @since 1.1

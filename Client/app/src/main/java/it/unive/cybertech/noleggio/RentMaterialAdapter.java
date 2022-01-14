@@ -18,16 +18,30 @@ import java.util.List;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 
+/**
+ * This is an adapter that provide a view for the rent materials (my materials in the showcase for other users)
+ *
+ * @author Mattia Musone
+ */
 public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapter.ViewHolder>{
 
     public static final String ID = "RentMaterialAdapter";
     private List<Material> showcaseList;
+    //A callback to call when an item is clicked
     private ItemClickListener clickListener;
 
-    public RentMaterialAdapter(List<Material> showcaseList) {
+    /**
+     * The constructor
+     *
+     * @param showcaseList the list of item to show
+     */
+    public RentMaterialAdapter(@NonNull List<Material> showcaseList) {
         this.showcaseList = showcaseList;
     }
 
+    /**
+     * A viewholder that is used for caching the view
+     */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView title, description;
         private final ImageView image;
@@ -44,7 +58,13 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
             if (clickListener != null) clickListener.onItemClick(view, getAdapterPosition());
         }
 
-        public void bind(final Material item, int position) {
+        /**
+         * Bind a lending to it's field
+         *
+         * @param item     the lending that is about to be displayed
+         * @param position The item position in the list
+         */
+        public void bind(@NonNull final Material item, int position) {
             title.setText(item.getTitle());
             description.setText(item.getDescription());
             itemView.setOnClickListener(v -> clickListener.onItemClick(v, position));
@@ -76,17 +96,41 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
         return showcaseList.size();
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    /**
+     * Sets the listener of the click item
+     */
+    void setClickListener(@NonNull ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
-    public void setItems(List<Material> materials){
+    /**
+     * Upload the list item replacing with new ones
+     *
+     * @param materials the new list of lending
+     * */
+    public void setItems(@NonNull List<Material> materials){
         this.showcaseList = materials;
     }
 
+    /**
+     * Remove an item at the provided position and notify the adapter.
+     * Note: no check is made about the index
+     *
+     * @param position The item position in the list
+     * */
     public void removeAt(int position){
         showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
+    }
+
+    /**
+     * Add a new lending at the end of the list
+     *
+     * @param material The item to add
+     * */
+    public void add(@NonNull Material material) {
+        showcaseList.add(material);
+        notifyItemInserted(showcaseList.size() - 1);
     }
 }

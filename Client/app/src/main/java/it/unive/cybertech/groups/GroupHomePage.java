@@ -1,23 +1,27 @@
 package it.unive.cybertech.groups;
 
+import static it.unive.cybertech.utils.Utils.executeAsync;
+
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
-import android.os.Bundle;
-import android.view.MenuItem;
-
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
-import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.groups.activities.GroupActivities;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * The main activity called by fragment "{@link it.unive.cybertech.groups.HomePage}".
@@ -32,14 +36,14 @@ import it.unive.cybertech.utils.Utils;
 public class GroupHomePage extends AppCompatActivity {
     private @Nullable
     Group thisGroup;
+    private ProgressBar loader;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_home_page);
+        loader = findViewById(R.id.group_home_loader);
         bindThisGroup();
-        initTabs();
-        initActionBar();
     }
 
     /**
@@ -66,19 +70,25 @@ public class GroupHomePage extends AppCompatActivity {
      * @since 1.1
      */
     private void bindThisGroup() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                thisGroup = Group.getGroupById(getIntent().getStringExtra("ID"));
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> Group.obtainGroupById(getIntent().getStringExtra("ID")), new TaskResult<Group> () {
+
+            @Override
+            public void onComplete(@NonNull Group result) {
+                thisGroup = result;
+                loader.setVisibility(View.GONE);
+                initActionBar();
+                initTabs();
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

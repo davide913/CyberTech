@@ -1,6 +1,7 @@
 package it.unive.cybertech.database;
 
 import static it.unive.cybertech.database.Database.getDocument;
+import static it.unive.cybertech.database.Database.getInstance;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,21 +9,20 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.GeoPoint;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
-import it.unive.cybertech.database.Groups.Activity;
-import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Material.Type;
+import it.unive.cybertech.database.Profile.Chat;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
-import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -31,7 +31,7 @@ import it.unive.cybertech.database.Profile.User;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest{
+public class ExampleInstrumentedTest {
     @Test
     public void useAppContext() throws Exception {
         // Context of the app under test.
@@ -40,33 +40,21 @@ public class ExampleInstrumentedTest{
 
         //scrivi qui sotto
 
-        User u = User.getUserById("oYFnMCvE3efkOrbMCS8NBJI5Ph83");
+        //String date = "13012022";
+        //Chat chat = Chat.createChat("MLA4AELjJTfGundss458Q3Es3eC2", "s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
+        //Chat chat = Chat.obtainChatById("L7uUlzbpKiFYLkNe9zv0");
+        //User u = User.obtainUserById("MLA4AELjJTfGundss458Q3Es3eC2");
+        //chat.sendMessage(u, "dfgdfgdfg");
+        QuarantineAssistance q = QuarantineAssistance.obtainQuarantineAssistanceById("D1vABnDdtzjAJBeWXKbH");
+        Chat c = q.obtainMaterializeChat();
+        c.test();
+        /*User u = User.obtainUserById("nWZXf0hT5qSVURKdS3UkT0Te63E3");
 
-        Collection<User> collection =  u.obtainActivitiesUsers();
+        List<QuarantineAssistance> arr = u.obtainMaterializedQuarantineAssistance();
 
+        Log.d("size", ""+arr.size());
 
-
-        Group g = Group.getGroupById("8roUO1MxMI9HVLryDEhG");
-
-        DocumentReference doc = g.getOwner();
-
-        doc.getId().equals(u.getId());
-
-        User u1 = User.getUserById(doc.getId());
-
-        u1.equals(u);
-
-        g.addMember(u);
-
-        List<User> arr = g.getMaterializedMembers();
-
-        g.removeMember(u);
-
-        arr = g.getMaterializedMembers();
-
-
-
-
+        u.removeQuarantineAssistance(arr.get(0));*/
 
     }
 }

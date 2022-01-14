@@ -1,11 +1,15 @@
 package it.unive.cybertech.groups;
 
-import static it.unive.cybertech.database.Groups.Group.getAllGroups;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,20 +18,16 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * HomePage is a main fragment that allow user to view all Families Share (plugin) groups.
@@ -49,9 +49,10 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private @Nullable
     RecyclerView groupsContainer;
     private @Nullable
-    GroupListAdapter adapter;
-    private @Nullable
     FloatingActionButton newGroupButton;
+    private @Nullable
+    GroupListAdapter adapter;
+    private ProgressBar loader;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,6 +89,7 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private void bindLayoutObjects(@NonNull final View view) {
         groupsContainer = view.findViewById(R.id.groups_list);
         newGroupButton = view.findViewById(R.id.add_group);
+        loader = view.findViewById(R.id.groups_home_progress);
     }
 
     /**
@@ -110,22 +112,24 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
      */
     @SuppressLint("NotifyDataSetChanged")
     private void findFSGroups() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                groups = getAllGroups();
-                // Log.d("Size", " " + groups.size());
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(Group::obtainAllGroups, new TaskResult<List<Group>>() {
+            @Override
+            public void onComplete(List<Group> result) {
+                groups = result;
+                getAdapter().setItems(groups);
+                getAdapter().notifyDataSetChanged();
+                loader.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-            Objects.requireNonNull(adapter).setItems(groups);
-            adapter.notifyDataSetChanged();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -174,6 +178,18 @@ public class HomePage extends Fragment implements Utils.ItemClickListener {
     private @NonNull
     List<Group> getGroups() {
         return Objects.requireNonNull(groups);
+    }
+
+    /**
+     * Return the group list adapter only if that is not null.
+     *
+     * @return "{@link #adapter}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull
+    GroupListAdapter getAdapter() {
+        return Objects.requireNonNull(adapter);
     }
 
 

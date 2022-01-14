@@ -1,29 +1,25 @@
 package it.unive.cybertech.signup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,15 +40,13 @@ import it.unive.cybertech.utils.Utils;
 public class LogInActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private FusedLocationProviderClient fusedLocationClient;
-    private Location location;
+    private static final int PERMISSIONS_FINE_LOCATION = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
         mAuth = FirebaseAuth.getInstance();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         LinearLayout googleSignIn = findViewById(R.id.google_sign_in);
         Button login = findViewById(R.id.login);
         TextView signup = findViewById(R.id.signup);
@@ -98,7 +92,7 @@ public class LogInActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         new Thread(() -> {
-                            User u = null;
+                            final User[] u = {null};
                             FirebaseUser user = mAuth.getCurrentUser();
                             String name = user.getDisplayName(), surname = null;
                             if (name.contains(" ")) {
@@ -106,18 +100,35 @@ public class LogInActivity extends AppCompatActivity {
                                 name = name.split(" ")[0];
                             }
                             try {
-                                u = User.getUserById(user.getUid());
+                                u[0] = User.obtainUserById(user.getUid());
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
+                                String finalName = name;
+                                String finalSurname = surname;
                                 try {
-                                    u = User.createUser(user.getUid(), name.trim(), surname, Sex.nonBinary, null, null,null, null, (long) location.getLatitude(), (long) location.getLongitude(), false);
-                                } catch (ExecutionException | InterruptedException executionException) {
-                                    executionException.printStackTrace();
+                                    Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
+                                        @Override
+                                        public void onComplete(Utils.Location location) {
+                                            try {
+                                                u[0] = User.createUser(user.getUid(), finalName.trim(), finalSurname, Sex.nonBinary, null, location.address, location.city, location.country, (long) location.latitude, (long) location.longitude, false);
+                                            } catch (ExecutionException | InterruptedException executionException) {
+                                                executionException.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e) {
+
+                                        }
+                                    });
+                                } catch (Utils.PermissionDeniedException permissionDeniedException) {
+                                    permissionDeniedException.printStackTrace();
+                                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
                                 }
                             } catch (InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
                             }
-                            if (u != null) {
+                            if (u[0] != null) {
                                 startActivity(new Intent(getApplicationContext(), SplashScreen.class));
                                 finish();
                             } else
@@ -159,12 +170,6 @@ public class LogInActivity extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkGPSPermission();
-    }
-
     private void showGPSDialogInformation() {
         final AppCompatActivity ac = this;
         Utils.Dialog dialog = new Utils.Dialog(this);
@@ -184,27 +189,6 @@ public class LogInActivity extends AppCompatActivity {
         }).show(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 
-    private void checkGPSPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            showGPSDialogInformation();
-        else
-            initGPS();
-    }
-
-    private void initGPS() {
-        try {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, location -> {
-                        if (location != null) {
-                            this.location = location;
-                        }
-                    });
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -223,8 +207,6 @@ public class LogInActivity extends AppCompatActivity {
                     })
                     .hideCancelButton()
                     .show("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
-        else
-            initGPS();
     }
 
     @Override

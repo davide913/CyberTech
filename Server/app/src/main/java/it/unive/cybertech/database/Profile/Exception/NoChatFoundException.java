@@ -1,4 +1,4 @@
-package it.unive.cybertech.database.Groups.Exception;
+package it.unive.cybertech.database.Profile.Exception;
 /**
  * This class describe a no chat found exception. it extends runtime exception
  *

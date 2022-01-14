@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -24,15 +25,24 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Geoquerable;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
+import it.unive.cybertech.database.Material.Exception.NoMaterialTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoLendingInProgressFoundException;
-import it.unive.cybertech.database.Profile.Exception.NoRentMaterialFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 import it.unive.cybertech.database.Profile.LendingInProgress;
 import it.unive.cybertech.database.Profile.User;
 
+/**
+ * Class use to describe a user's material instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
+ *
+ * @author Davide Finesso
+ */
 public class Material extends Geoquerable {
     public final static String table = "material";
     private String id;
@@ -47,14 +57,29 @@ public class Material extends Geoquerable {
     private Timestamp expiryDate;
     private DocumentReference type;
 
-    public Material() {
-    }
+    /**
+     * Materialize field for increase the performance.
+     */
+    private User materializeOwner;
+    private User materializeRenter;
 
-    private Material(String id, DocumentReference owner, String title,
-                     String description, String photo, DocumentReference renter, boolean isRent,
-                     GeoPoint location, String geohash, DocumentReference type, Timestamp expiryDate) {
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
+    public Material() {}
+
+    /**
+     * Private constructor in order to prevent the programmers to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
+    private Material(String id, DocumentReference ownerReference, String title, String description, String photo,
+                     DocumentReference renter, boolean isRent, GeoPoint location, String geohash,
+                     DocumentReference type, Timestamp expiryDate, User owner) {
         this.id = id;
-        this.owner = owner;
+        this.owner = ownerReference;
         this.title = title;
         this.description = description;
         this.photo = photo;
@@ -64,6 +89,7 @@ public class Material extends Geoquerable {
         this.geohash = geohash;
         this.type = type;
         this.expiryDate = expiryDate;
+        this.materializeOwner = owner;
     }
 
     public String getId() {
@@ -76,10 +102,6 @@ public class Material extends Geoquerable {
 
     public DocumentReference getOwner() {
         return owner;
-    }
-
-    public User getMaterializedOwner() throws ExecutionException, InterruptedException {
-        return User.getUserById(owner.getId());
     }
 
     private void setOwner(DocumentReference owner) {
@@ -122,12 +144,6 @@ public class Material extends Geoquerable {
         return renter;
     }
 
-    public User getMaterializedRenter() throws ExecutionException, InterruptedException, NoRentMaterialFoundException {
-        if (renter != null)
-            return User.getUserById(renter.getId());
-        else throw new NoRentMaterialFoundException("The material has no renter");
-    }
-
     private void setRenter(DocumentReference renter) {
         this.renter = renter;
     }
@@ -164,17 +180,50 @@ public class Material extends Geoquerable {
         isRent = rent;
     }
 
-    public static Material createMaterial(@NonNull User owner, String title, String description, String photo,
+    /**
+     * The method return the field renter materialize, if the material has no renter it throw an exception.
+     *
+     * @author Davide Finesso
+     * @throws NoMaterialFoundException if a material doesn't has a renter
+     */
+    public User obtainMaterializedRenter() throws ExecutionException, InterruptedException, NoMaterialFoundException {
+        if(renter == null) {
+            if (materializeRenter != null)
+                materializeRenter = User.obtainUserById(renter.getId());
+
+            return materializeRenter;
+        }
+        else throw new NoMaterialFoundException("The material ("+ id +") has no renter");
+    }
+
+    /**
+     * The method return the field owner materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public User obtainMaterializedOwner() throws ExecutionException, InterruptedException {
+        if(materializeOwner == null)
+            materializeOwner = User.obtainUserById(owner.getId());
+
+        return materializeOwner;
+    }
+
+    /**
+     * The method add to the database a new material and return it.
+     *
+     * @author Davide Finesso
+     */
+    public static Material createMaterial(@NonNull User owner,@NonNull String title,@NonNull String description, String photo,
                                           @NonNull Type type, double latitude, double longitude, Date date)
             throws ExecutionException, InterruptedException {
 
         DocumentReference docPro = getReference(User.table, owner.getId());
-        DocumentReference docType = getReference(Type.table, type.getID());
+        DocumentReference docType = getReference(Type.table, type.getId());
         String geohash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
         Timestamp timestamp = new Timestamp(date);
         GeoPoint location = new GeoPoint(latitude, longitude);
 
-        Map<String, Object> myMaterial = new HashMap<>();          //create "table"
+        Map<String, Object> myMaterial = new HashMap<>();
         myMaterial.put("title", title);
         myMaterial.put("owner", docPro);
         myMaterial.put("isRent", false);
@@ -188,10 +237,16 @@ public class Material extends Geoquerable {
         DocumentReference addedDocRef = addToCollection(table, myMaterial);
 
         return new Material(addedDocRef.getId(), docPro, title, description,
-                photo, null, false, location, geohash, docType, timestamp);
+                photo, null, false, location, geohash, docType, timestamp, owner);
     }
 
-    public static Material getMaterialById(@NonNull String id) throws ExecutionException, InterruptedException {
+    /**
+     * The method return the material with that id. If there isn't a material with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     * @throws NoMaterialFoundException if a material with that id doesn't exist
+     */
+    public static Material obtainMaterialById(@NonNull String id) throws ExecutionException, InterruptedException, NoMaterialFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -207,6 +262,11 @@ public class Material extends Geoquerable {
         throw new NoMaterialFoundException("No material found with this id: " + id);
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> deleteMaterialAsync() throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -217,8 +277,20 @@ public class Material extends Geoquerable {
             throw new NoMaterialFoundException("No material found with this id: " + id);
     }
 
+    /**
+     * The method is use to delete a material from the database.
+     * Before delete the method check if there is any lending in progress associate with this material and delete it.
+     * It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean deleteMaterial() {
         try {
+            try {
+                this.obtainLending().deleteLendingInProgress();
+            }
+            catch ( NoLendingInProgressFoundException exception ){};
+
             Task<Void> t = deleteMaterialAsync();
             Tasks.await(t);
             this.id = null;
@@ -229,6 +301,11 @@ public class Material extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateTitleAsync(@NonNull String title) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -239,6 +316,11 @@ public class Material extends Geoquerable {
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
+    /**
+     * The method is use to update a material field title to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateTitle(@NonNull String title) {
         try {
             Task<Void> t = updateTitleAsync(title);
@@ -251,7 +333,11 @@ public class Material extends Geoquerable {
         }
     }
 
-
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateDescriptionAsync(@NonNull String description) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
@@ -262,6 +348,11 @@ public class Material extends Geoquerable {
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
+    /**
+     * The method is use to update a material field description to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateDescription(@NonNull String description) {
         try {
             Task<Void> t = updateDescriptionAsync(description);
@@ -274,17 +365,29 @@ public class Material extends Geoquerable {
         }
     }
 
-
-    private Task<Void> updatePhotoAsync(@NonNull String photo) throws ExecutionException, InterruptedException {
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
+    private Task<Void> updatePhotoAsync(String photo) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            return docRef.update("photo", photo);
+            if(photo == null)
+                return docRef.update("photo", FieldValue.delete());
+            else
+                return docRef.update("photo", photo);
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
+    /**
+     * The method is use to update a material field photo to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updatePhoto(String photo) {
         try {
             Task<Void> t = updatePhotoAsync(photo);
@@ -297,20 +400,33 @@ public class Material extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateRenterAsync(DocumentReference user) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
         if (document.exists()) {
-            if (user == null)
+            if (user == null) {
                 docRef.update("isRent", false);
-            else
+                return docRef.update("renter", FieldValue.delete());
+            }
+            else {
                 docRef.update("isRent", true);
-            return docRef.update("renter", user);
+                return docRef.update("renter", user);
+            }
         } else
             throw new NoMaterialFoundException("material not found, id: " + id);
     }
 
+    /**
+     * The method is use to update a material field renter to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
     public boolean updateRenter(User user) {
         try {
             Task<Void> t;
@@ -324,6 +440,7 @@ public class Material extends Geoquerable {
                 setRenter(docUser);
                 this.isRent = true;
             }
+            this.materializeRenter = user;
             Tasks.await(t);
             return true;
         } catch (ExecutionException | InterruptedException | NoMaterialFoundException e) {
@@ -332,6 +449,11 @@ public class Material extends Geoquerable {
         }
     }
 
+    /**
+     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
+     *
+     * @author Davide Finesso
+     */
     private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
@@ -342,7 +464,12 @@ public class Material extends Geoquerable {
             throw new NoLendingInProgressFoundException("No Lending in progress with this id: " + this.id);
     }
 
-    public boolean updateExpiryDate(Date date) {
+    /**
+     * The method is use to update a material field expiry date to the database. It return a boolean value that describe if the operation was done.
+     *
+     * @author Davide Finesso
+     */
+    public boolean updateExpiryDate(@NonNull Date date) {
         try {
             Timestamp timestamp = new Timestamp(date);
             Task<Void> t = this.updateExpiryDateAsync(timestamp);
@@ -355,21 +482,37 @@ public class Material extends Geoquerable {
         }
     }
 
-    public LendingInProgress getLending() throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to get the lending in progress associate to this material and return it.
+     * if there isn't any landing associate it throw an exception
+     *
+     * @author Davide Finesso
+     * @throws NoLendingInProgressFoundException if an instance of the class material hasn't a reference to a lending in progress
+     */
+    public LendingInProgress obtainLending() throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
 
         Task<QuerySnapshot> task = getInstance().collection(LendingInProgress.table)
                 .whereEqualTo("material", getReference(table, id)).get();
         Tasks.await(task);
         List<DocumentSnapshot> list = task.getResult().getDocuments();
         if (!list.isEmpty())
-            return LendingInProgress.getLendingInProgressById(list.get(0).getId());
+            return LendingInProgress.obtainLendingInProgressById(list.get(0).getId());
 
-        throw new NoLendingInProgressFoundException("no lending found connect to this material: " + id);
+        throw new NoLendingInProgressFoundException("No lending found connect to this material: " + id);
     }
 
-    //funzione per mattia!
-    public static List<Material> getRentableMaterials(double latitude, double longitude, double radiusInKm, String userId)
-            throws ExecutionException, InterruptedException {
+    /**
+     * The method is use to get all the material that can be rent in a specify area.
+     *
+     * @author Davide Finesso
+     * @param latitude Describe the latitude of the center
+     * @param longitude Describe the longitude of the center
+     * @param radiusInKm Describe the maximum distance from the center
+     * @param userId Describe the user's reference
+     * @throws NoUserFoundException if a parameter userId doesn't refer to any user in his table
+     */
+    public static List<Material> obtainRentableMaterials(double latitude, double longitude, double radiusInKm,@NonNull String userId)
+            throws ExecutionException, InterruptedException, NoUserFoundException{
         ArrayList<Material> arr = new ArrayList<>();
 
         Query query = getInstance().collection(table)
@@ -383,10 +526,33 @@ public class Material extends Geoquerable {
         for (DocumentSnapshot doc : documents) {
             Timestamp t = doc.getTimestamp("expiryDate");
             if (t != null && t.compareTo(timestamp) > 0 && doc.getDocumentReference("owner") != userRef) {
-                arr.add(Material.getMaterialById(doc.getId()));
+                arr.add(Material.obtainMaterialById(doc.getId()));
             }
         }
 
         return arr;
+    }
+
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Material material = (Material) o;
+        return Objects.equals(id, material.id);
+    }
+
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

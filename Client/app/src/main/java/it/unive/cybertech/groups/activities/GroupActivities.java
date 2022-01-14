@@ -1,11 +1,14 @@
 package it.unive.cybertech.groups.activities;
 
-import static it.unive.cybertech.database.Groups.Group.*;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,22 +17,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.groups.GroupHomePage;
 import it.unive.cybertech.utils.Utils;
+import it.unive.cybertech.utils.Utils.TaskResult;
 
 /**
  * HomePage is a main fragment that allow user to view all group activities for a determinate group.
@@ -54,6 +53,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         @NonNull View view = inflater.inflate(R.layout.fragment_group_activities, container, false);
+        thisGroup = ((GroupHomePage) requireActivity()).getThisGroup();
         initFragment();
         bindLayoutObjects(view);
         setContainer();
@@ -147,23 +147,34 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      */
     @SuppressLint("NotifyDataSetChanged")
     private void bindThisGroupAndActivities() {
-        @NonNull Thread t = new Thread(() -> {
-            try {
-                thisGroup = getGroupById(idGroup);
-                activities = thisGroup.getMaterializedActivities();
-                Log.d("Size", " " + activities.size());
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+        executeAsync(() -> getThisGroup().obtainMaterializedActivities(), new TaskResult<List<Activity>>() {
+            @Override
+            public void onComplete(@NonNull List<Activity> result) {
+                activities = result;
+                getAdapter().setItems(activities);
+                getAdapter().notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(@NonNull Exception e) {
+                try {
+                    throw new Exception(e);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
-        t.start();
-        try {
-            t.join();
-            getAdapter().setItems(activities);
-            getAdapter().notifyDataSetChanged();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    }
+
+    /**
+     * Return the current group only if that is not null.
+     *
+     * @return "{@link #thisGroup}"
+     * @author Daniele Dotto
+     * @since 1.1
+     */
+    private @NonNull Group getThisGroup() {
+        return Objects.requireNonNull(thisGroup);
     }
 
     /**

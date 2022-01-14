@@ -5,49 +5,64 @@ import static it.unive.cybertech.database.Database.getInstance;
 import static it.unive.cybertech.database.Database.getReference;
 
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
+/**
+ * Class use to describe a user's device instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
+ *
+ * @author Davide Finesso
+ */
 public class AssistanceType {
     public final static String table = "assistanceType";
-    private String Type;
+    private String type;
     private String id;
 
-    public AssistanceType() {
-    }
+    /**
+     * Public empty constructor use only for firebase database.
+     *
+     * @author Davide Finesso
+     */
+    public AssistanceType() {}
 
-    public AssistanceType(String type, String id) {
-        Type = type;
-        this.id = id;
-    }
-
-    public String getID() {
+    public String getId() {
         return id;
     }
 
-    private void setID(String ID) {
+    private void setId(String ID) {
         this.id = ID;
     }
 
     private void setType(String type) {
-        Type = type;
+        this.type = type;
     }
 
     public String getType() {
-        return Type;
+        return type;
     }
 
-    public static AssistanceType getAssistanceTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+    /**
+     * The method return the assistance type with that id. If there isn't a assistance type with that id it throw an exception.
+     *
+     * @author Davide Finesso
+     * @throws NoAssistanceTypeFoundException if a assistance type with that id doesn't exist
+     */
+    protected static AssistanceType obtainAssistanceTypeById(@NonNull String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -55,49 +70,60 @@ public class AssistanceType {
 
         if (document.exists()) {
             assistanceType = document.toObject(AssistanceType.class);
-            assistanceType.setID(document.getId());
+            assistanceType.setId(document.getId());
 
             return assistanceType;
         } else
             throw new NoAssistanceTypeFoundException("No Assistance Type found with this id: " + id);
     }
 
-    /*public static AssistanceType getAssistanceTypeByName(@NonNull String name) throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table).whereEqualTo("type", name).get();
+    /**
+     * The method return all the assistance type present in the database.
+     *
+     * @author Davide Finesso
+     */
+    public static List<AssistanceType> obtainAssistanceTypes() throws ExecutionException, InterruptedException {
+        Task<QuerySnapshot> future = getInstance().collection(table).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        if (documents.isEmpty())
-            throw new NoAssistanceTypeFoundException("No assistance type found with this type: " + name);
-
-        AssistanceType assistance = documents.get(0).toObject(AssistanceType.class);
-        assistance.id = documents.get(0).getId();
-
-        return assistance;
-    }*/
-
-    public static ArrayList<AssistanceType> getAssistanceTypes() throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table).get();
-        Tasks.await(future);
-        List<DocumentSnapshot> documents = future.getResult().getDocuments();
-
-        ArrayList<AssistanceType> arr = new ArrayList<>();
-        for (DocumentSnapshot t: documents) {
-            AssistanceType assistance = t.toObject(AssistanceType.class);
-            assistance.id = t.getId();
-
-            arr.add(assistance);
-        }
+        List<AssistanceType> arr = new ArrayList<>();
+        for (DocumentSnapshot snapshot: documents)
+            arr.add(obtainAssistanceTypeById(snapshot.getId()));
 
         return arr;
     }
 
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssistanceType that = (AssistanceType) o;
+        return Objects.equals(id, that.id);
+    }
+
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    /**
+     * Return the toString of an assistance type as his type.
+     *
+     * @author Davide Finesso
+     */
     @Override
     public String toString() {
-        return Type;
+        return type;
     }
 }

@@ -10,18 +10,25 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.cybertech.database.Material.Exception.NoTypeFoundException;
+import it.unive.cybertech.database.Material.Exception.NoMaterialTypeFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoAssistanceTypeFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
 
-//TODO testata e funzionante
+/**
+ * Class use to describe a material's type instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+ * Every field have a public get and a private set to keep the data as same as database.
+ * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
+ *
+ *
+ * @author Davide Finesso
+ */
 public class Type {
     public final static String table = "materialType";
     private String typeName;
@@ -29,20 +36,15 @@ public class Type {
 
     public Type(){};
 
-    public Type(String typeName, String id) {
-        this.typeName = typeName;
-        this.id = id;
-    }
-
-    public String getType() {
+    public String getTypeName() {
         return typeName;
     }
 
-    private void setType(String typeName) {
+    private void setTypeName(String typeName) {
         this.typeName = typeName;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 
@@ -50,8 +52,14 @@ public class Type {
         this.id = id;
     }
 
-    //TODO verificare se puo servire o meno
-    private static Type getMaterialTypeById(String id) throws  InterruptedException, ExecutionException, NoAssistanceTypeFoundException {
+    /**
+     * The private method is use to get the material type by his id.
+     * if there isn't any material type with that id it throw an exception
+     *
+     * @author Davide Finesso
+     * @throws NoMaterialTypeFoundException if a material type with that id doesn't exist
+     */
+    private static Type obtainMaterialTypeById(@NonNull String id) throws  InterruptedException, ExecutionException, NoMaterialTypeFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -63,33 +71,54 @@ public class Type {
 
             return type;
         } else
-            throw new NoTypeFoundException("No Material Type found with this id: " + id);
+            throw new NoMaterialTypeFoundException("No Material Type found with this id: " + id);
     }
 
-    //TODO funzionante, il toObject non funzionava!
-    public static ArrayList<Type> getMaterialTypes() throws ExecutionException, InterruptedException {
-        FirebaseFirestore db = getInstance();      //create of object db
-
-        Task<QuerySnapshot> future = db.collection(table).get();
-        // future.get() blocks on response
+    /**
+     * The method is use to get all the material type from database.
+     *
+     * @author Davide Finesso
+     */
+    public static List<Type> obtainMaterialTypes() throws ExecutionException, InterruptedException {
+        Task<QuerySnapshot> future = getInstance().collection(table).get();
         Tasks.await(future);
         List<DocumentSnapshot> documents = future.getResult().getDocuments();
 
-        ArrayList<Type> arr = new ArrayList<>();
-        for (DocumentSnapshot t: documents) {
-            Type type = new Type();
-            //type = t.toObject(Type.class);
-            Map<String, Object> map = t.getData();
-
-            type.setId(t.getId());
-            type.setType((String) map.get("typeName"));
-
-            arr.add(type);
-        }
+        List<Type> arr = new ArrayList<>();
+        for (DocumentSnapshot snapshot: documents)
+            arr.add(Type.obtainMaterialTypeById(snapshot.getId()));
 
         return arr;
     }
 
+    /**
+     * Compare their id because are unique.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Type type = (Type) o;
+        return Objects.equals(id, type.id);
+    }
+
+    /**
+     * Return the hash by the unique field id.
+     *
+     * @author Davide Finesso
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    /**
+     * Return the toString of an type material as his type name.
+     *
+     * @author Davide Finesso
+     */
     @NonNull
     @Override
     public String toString() {

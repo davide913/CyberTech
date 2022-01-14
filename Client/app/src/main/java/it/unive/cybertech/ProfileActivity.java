@@ -2,44 +2,34 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
+import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.appcompat.widget.SwitchCompat;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.EditText;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+
+import it.unive.cybertech.utils.Utils;
 
 /**
  * ProfileActivity is the main activity that allow user to view and edit some personal, account or
  * localization info:
- * - Position can be updated from {@link #updateGPS()}
  * - Email update is manage in "{@link it.unive.cybertech.EditEmail}"
  * - Password update is manage in "{@link it.unive.cybertech.EditPassword}"
  *
@@ -54,8 +44,9 @@ public class ProfileActivity extends AppCompatActivity {
     FirebaseUser currentUser = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser());
     private @Nullable
     FloatingActionButton editInfo, logoutButton;
-    private @Nullable EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
-    private @Nullable FusedLocationProviderClient fusedLocationProviderClient;
+    private @Nullable
+    EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
+    private SwitchCompat greenPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
         initActionBar();
         bindLayoutObjects();
         setTextEditTexts();
-        initGPSsettings();
+        //initGPSsettings();
 
         getEmail().setOnClickListener(v -> startActivity(new Intent(context, EditEmail.class)));
 
@@ -77,8 +68,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        getEditInfo().setOnClickListener(v -> updateGPS());
-
+        getEditInfo().setOnClickListener(v -> updateValues());
         getLogoutButton().setOnClickListener(v -> logout(context));
 
     }
@@ -88,7 +78,7 @@ public class ProfileActivity extends AppCompatActivity {
      *
      * @author Daniele Dotto
      * @since 1.1
-     */
+
     private void initGPSsettings() {
         @NonNull final LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(30000);
@@ -96,7 +86,7 @@ public class ProfileActivity extends AppCompatActivity {
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setMaxWaitTime(100);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-    }
+    }*/
 
     /**
      * Set values to EditTexts contained in Layout.
@@ -108,11 +98,10 @@ public class ProfileActivity extends AppCompatActivity {
         getName().setText(user.getName());
         getSurname().setText(user.getSurname());
         getSex().setText(user.getSex().toString().toUpperCase().substring(0, 1));
-        @NonNull Timestamp dateOfBirthDB = user.getBirthday();
-        @NonNull String pattern = "dd/MM/yyyy";
-        @NonNull DateFormat df = new SimpleDateFormat(pattern, Locale.getDefault());
-        @NonNull String dateOfBirthString = df.format(dateOfBirthDB);
-        getDateOfBirth().setText(dateOfBirthString);
+        if (user.getBirthDayToDate() != null) {
+            @NonNull String dateOfBirthString = Utils.formatDateToString(user.getBirthDayToDate());
+            getDateOfBirth().setText(dateOfBirthString);
+        }
 
         getCountry().setText(user.getCountry());
         getCity().setText(user.getCity());
@@ -120,6 +109,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         getEmail().setText(currentUser.getEmail());
         getPwd().setText("********");
+
+        greenPass.setChecked(user.isGreenPass());
     }
 
     /**
@@ -143,6 +134,26 @@ public class ProfileActivity extends AppCompatActivity {
 
         editInfo = findViewById(R.id.profile_editInfo);
         logoutButton = findViewById(R.id.profile_logout);
+
+        greenPass = findViewById(R.id.profile_green_pass);
+        greenPass.setOnCheckedChangeListener(this::updateGreenpass);
+    }
+
+    private void updateGreenpass(View v, boolean checked){
+        Utils.executeAsync(() -> user.updateGreenPass(checked), new Utils.TaskResult<Boolean>() {
+            @Override
+            public void onComplete(Boolean result) {
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+                greenPass.setOnCheckedChangeListener(null);
+                greenPass.setChecked(false);
+                greenPass.setOnCheckedChangeListener((v, c)->updateGreenpass(v, c));
+            }
+        });
     }
 
     /**
@@ -150,17 +161,15 @@ public class ProfileActivity extends AppCompatActivity {
      *
      * @author Daniele Dotto
      * @since 1.0
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-            updateGPS();
-        } else {
-            showShortToast(getString(R.string.positionPrivilegeNeeded), context);
-        }
-    }
+     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+     if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+     updateGPS();
+     } else {
+     showShortToast(getString(R.string.positionPrivilegeNeeded), context);
+     }
+     }*/
 
     /**
      * Update GPS coordinates (latitude and longitude).
@@ -168,20 +177,20 @@ public class ProfileActivity extends AppCompatActivity {
      *
      * @author Daniele Dotto
      * @since 1.0
-     */
+
     private void updateGPS() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            getFusedLocationProviderClient().getLastLocation().addOnSuccessListener(this, location -> {
-                showShortToast(getString(R.string.localizationUpdated), context);
-                updateValues(location);
-            }).addOnFailureListener(e -> {
-                showShortToast(getString(R.string.genericError), context);
-                e.printStackTrace();
-            });
-        } else {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
-        }
+    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+    getFusedLocationProviderClient().getLastLocation().addOnSuccessListener(this, location -> {
+    showShortToast(getString(R.string.localizationUpdated), context);
+    updateValues(location);
+    }).addOnFailureListener(e -> {
+    showShortToast(getString(R.string.genericError), context);
+    e.printStackTrace();
+    });
+    } else {
+    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
     }
+    }*/
 
     /**
      * Update EditText values about geolocalisation:
@@ -192,23 +201,25 @@ public class ProfileActivity extends AppCompatActivity {
      * @see "{@link #address}"
      * @since 1.0
      */
-    private void updateValues(@NonNull Location location) {
-        @NonNull Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        @NonNull List<Address> addresses;
+    private void updateValues() {
         try {
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            @NonNull String newCountry = addresses.get(0).getCountryName();
-            getCountry().setText(newCountry);
-            @NonNull String newCity = addresses.get(0).getLocality();
-            getCity().setText(newCity);
-            @NonNull String newAddress = addresses.get(0).getThoroughfare();
-            getAddress().setText(newAddress);
-            @NonNull Thread t = new Thread(() -> user.updateLocation(newCountry, newCity, newAddress, latitude, longitude));
-            t.start();
-        } catch (IOException e) {
+            Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
+                @Override
+                public void onComplete(Utils.Location result) {
+                        double latitude = result.latitude;
+                        double longitude = result.longitude;
+                        @NonNull Thread t = new Thread(() -> user.updateLocation(result.country, result.city, result.address, latitude, longitude));
+                        t.start();
+                }
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
+        } catch (Utils.PermissionDeniedException e) {
             e.printStackTrace();
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
         }
     }
 
@@ -246,7 +257,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull FloatingActionButton getEditInfo() {
+    private @NonNull
+    FloatingActionButton getEditInfo() {
         return Objects.requireNonNull(editInfo);
     }
 
@@ -257,7 +269,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull FloatingActionButton getLogoutButton() {
+    private @NonNull
+    FloatingActionButton getLogoutButton() {
         return Objects.requireNonNull(logoutButton);
     }
 
@@ -268,7 +281,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getName() {
+    private @NonNull
+    EditText getName() {
         return Objects.requireNonNull(name);
     }
 
@@ -279,7 +293,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getSurname() {
+    private @NonNull
+    EditText getSurname() {
         return Objects.requireNonNull(surname);
     }
 
@@ -290,7 +305,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getDateOfBirth() {
+    private @NonNull
+    EditText getDateOfBirth() {
         return Objects.requireNonNull(dateOfBirth);
     }
 
@@ -301,7 +317,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getSex() {
+    private @NonNull
+    EditText getSex() {
         return Objects.requireNonNull(sex);
     }
 
@@ -312,7 +329,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getCountry() {
+    private @NonNull
+    EditText getCountry() {
         return Objects.requireNonNull(country);
     }
 
@@ -323,7 +341,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getCity() {
+    private @NonNull
+    EditText getCity() {
         return Objects.requireNonNull(city);
     }
 
@@ -334,7 +353,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getAddress() {
+    private @NonNull
+    EditText getAddress() {
         return Objects.requireNonNull(address);
     }
 
@@ -345,7 +365,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getEmail() {
+    private @NonNull
+    EditText getEmail() {
         return Objects.requireNonNull(email);
     }
 
@@ -356,7 +377,8 @@ public class ProfileActivity extends AppCompatActivity {
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull EditText getPwd() {
+    private @NonNull
+    EditText getPwd() {
         return Objects.requireNonNull(pwd);
     }
 
@@ -366,10 +388,11 @@ public class ProfileActivity extends AppCompatActivity {
      * @return "{@link #fusedLocationProviderClient}"
      * @author Daniele Dotto
      * @since 1.1
-     */
-    private @NonNull FusedLocationProviderClient getFusedLocationProviderClient() {
+
+    private @NonNull
+    FusedLocationProviderClient getFusedLocationProviderClient() {
         return Objects.requireNonNull(fusedLocationProviderClient);
-    }
+    }*/
 
 
 }

@@ -14,7 +14,7 @@
         <!-- Customize your theme here. -->
         <item name="colorButtonNormal">@color/secondary</item>
         <item name="colorAccent">@color/secondary</item>
-        <!-- <item name="colorControlNormal">@color/white</item> Icone bianche -->
+        <item name="colorControlNormal">@color/white</item> <!-- Icone bianche -->
         <item name="android:textAppearanceButton">@style/ButtonText</item>
      </style>
 
