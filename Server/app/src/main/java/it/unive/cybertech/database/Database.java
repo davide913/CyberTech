@@ -19,6 +19,11 @@ import java.util.concurrent.ExecutionException;
  */
 public class Database {
 
+    /**
+     * Private constructor in order to block the library user to instantiate the class.
+     *
+     * @author Davide Finesso
+     */
     private Database() {}
 
     /**
@@ -71,6 +76,8 @@ public class Database {
      * This method return a document snapshot by the document reference. It wait until the async operation is finish.
      *
      * @author Davide Finesso
+     * @throws InterruptedException possible when the static method await is waiting the task
+     * @throws ExecutionException possible when the static method await is waiting the task
      */
     public static DocumentSnapshot getDocument(DocumentReference reference) throws InterruptedException, ExecutionException {
         Task<DocumentSnapshot> val = getDocumentAsync(reference);
@@ -82,6 +89,8 @@ public class Database {
      * This method return a document snapshot by a specify element ( id ) in a table. It wait until the async operation is finish.
      *
      * @author Davide Finesso
+     * @throws InterruptedException possible when the static method await is waiting the task
+     * @throws ExecutionException possible when the static method await is waiting the task
      */
     public static DocumentSnapshot getDocument(String table, String id) throws InterruptedException, ExecutionException {
         Task<DocumentSnapshot> val = getDocumentAsync(table, id);
@@ -103,6 +112,8 @@ public class Database {
      * This method return a document reference of a element just add. it wait until the async operation is finish.
      *
      * @author Davide Finesso
+     * @throws InterruptedException possible when the static method await is waiting the task
+     * @throws ExecutionException possible when the static method await is waiting the task
      */
     public static <K, V> DocumentReference addToCollection(String table, Map<K, V> map) throws InterruptedException, ExecutionException {
         Task<DocumentReference> t = addToCollectionAsync(table, map);
@@ -125,6 +136,7 @@ public class Database {
      *
      * @author Davide Finesso
      */
+    /*
     public static boolean deleteFromCollection(String table, String id) {
         Task<Void> t = deleteFromCollectionAsync(table, id);
         try {
@@ -135,4 +147,5 @@ public class Database {
         }
         return false;
     }
+     */
 }

@@ -87,7 +87,7 @@ public class LendingInProgress {
         return this.expiryDate;
     }
 
-    public Date getDateExpiryDate() {
+    public Date obtainDateExpiryToDate() {
         return this.expiryDate.toDate();
     }
 
@@ -98,6 +98,8 @@ public class LendingInProgress {
     public Timestamp getEndExpiryDate() {
         return endExpiryDate;
     }
+
+    public Date obtainEndExpiryDateToDate(){return endExpiryDate == null ? null : endExpiryDate.toDate();}
 
     private void setEndExpiryDate(Timestamp endExpiryDate) {
         this.endExpiryDate = endExpiryDate;
@@ -126,6 +128,7 @@ public class LendingInProgress {
      * The method add to the database a new lending in progress and return it.
      *
      * @author Davide Finesso
+     * @throws LendingInProgressException if already exist a lending with material parameter
      */
     public static LendingInProgress createLendingInProgress(@NonNull Material material,@NonNull Date expiryDate)
             throws ExecutionException, InterruptedException, LendingInProgressException {
@@ -175,7 +178,7 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    private Task<Void> deleteLendingInProgressAsync() throws ExecutionException, InterruptedException {
+    private Task<Void> deleteLendingInProgressAsync() throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -207,7 +210,7 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException {
+    private Task<Void> updateExpiryDateAsync(Timestamp date) throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -240,7 +243,7 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateWaitingForFeedbackAsync(boolean val) throws ExecutionException, InterruptedException {
+    private Task<Void> updateWaitingForFeedbackAsync(boolean val) throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -272,7 +275,7 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateEndExpiryDateAsync(Date date) throws ExecutionException, InterruptedException {
+    private Task<Void> updateEndExpiryDateAsync(Date date) throws ExecutionException, InterruptedException, NoLendingInProgressFoundException {
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -310,7 +313,7 @@ public class LendingInProgress {
      *
      * @author Davide Finesso
      */
-    private Task<Void> updateMaterialAsync(Material material) throws ExecutionException, InterruptedException {
+    private Task<Void> updateMaterialAsync(Material material) throws ExecutionException, InterruptedException, NoLendingInProgressFoundException{
         DocumentReference docRef = getReference(table, this.id);
         DocumentSnapshot document = getDocument(docRef);
 

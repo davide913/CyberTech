@@ -5,16 +5,13 @@ import static it.unive.cybertech.database.Database.getDocument;
 import static it.unive.cybertech.database.Database.getReference;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.database.Database;
 import it.unive.cybertech.database.Profile.Exception.NoChatFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 /**
  * Class use to describe a chat instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
@@ -38,6 +36,11 @@ import it.unive.cybertech.database.Profile.Exception.NoChatFoundException;
  */
 public class Chat {
 
+    /**
+     * Interface use to for implements the real time chat.
+     *
+     * @author Davide Finesso
+     */
     public interface MessageListener {
         void OnNewMessage(Message m);
     }
@@ -47,16 +50,32 @@ public class Chat {
     private DocumentReference firstUser;
     private DocumentReference secondUser;
 
+    /**
+     * Static class use to describe a message instance. it has a field final to describe the table where it is save, it can be use from the other class to access to his table.
+     * The class is static because is strongly connect to the chat class ( can't exist a chat without a message and vice versa ).
+     * Every field has a public get and a private set to keep the data as same as database.
+     * firebase required a get and set to serialize and deserialize the object; for don't mix our "getter" with the firebase deserialization we call the method obtain
+     *
+     * @author Davide Finesso
+     */
     public static class Message {
         private Timestamp dateTime;
         private String senderId;
         private String message;
         private String id;
 
-        public Message() {
+        /**
+         * Public empty constructor use only for firebase database.
+         *
+         * @author Davide Finesso
+         */
+        public Message() {}
 
-        }
-
+        /**
+         * Private constructor in order to prevent the programmers to instantiate the class.
+         *
+         * @author Davide Finesso
+         */
         public Message(String id, Timestamp dateTime, String senderId, String message) {
             this.dateTime = dateTime;
             this.senderId = senderId;
@@ -64,7 +83,13 @@ public class Chat {
             this.id = id;
         }
 
-        public static Message fromMap(HashMap<String, Object> map) {
+        /**
+         * The static method return a message from an hashMap.
+         *
+         * @throws Exception if something goes wrong with the message's constructor
+         * @author Davide Finesso
+         */
+        public static Message fromMap(@NonNull HashMap<String, Object> map) {
             try {
                 return new Message((String) map.get("id"), (Timestamp) map.get("dateTime"), (String) map.get("sender"), (String) map.get("message"));
             } catch (Exception e) {
@@ -77,7 +102,7 @@ public class Chat {
             return dateTime;
         }
 
-        public Date getDateTimeToDate() {
+        public Date obtainDateTimeToDate() {
             return dateTime.toDate();
         }
 
@@ -142,8 +167,7 @@ public class Chat {
      *
      * @author Davide Finesso
      */
-    public Chat() {
-    }
+    public Chat() {}
 
     /**
      * Private constructor in order to prevent the programmers to instantiate the class.
@@ -154,13 +178,6 @@ public class Chat {
         this.id = id;
         this.firstUser = firstUser;
         this.secondUser = secondUser;
-        try {
-            DocumentSnapshot senderT = Tasks.await(firstUser.get());
-            DocumentSnapshot receiverT = Tasks.await(secondUser.get());
-            this.otherUserMaterialized = senderT.toObject(User.class);
-            this.otherUserMaterialized = receiverT.toObject(User.class);
-        } catch (ExecutionException | InterruptedException e) {
-        }
     }
 
     public String getId() {
@@ -193,7 +210,7 @@ public class Chat {
     private User otherUserMaterialized;
 
     /**
-     * The method return the field sender materialize, if is null the method get it from database.
+     * The method return the field other user materialize; is called other because it can be the first or the second user, if is null the method get it from database after a if clause.
      *
      * @author Davide Finesso
      */
@@ -204,6 +221,13 @@ public class Chat {
         return otherUserMaterialized;
     }
 
+    /**
+     * The method add to the database a new chat and return it.
+     *
+     * @param first describe the first user of the chat
+     * @param second describe the first user of the chat
+     * @author Davide Finesso
+     */
     public static Chat createChat(@NonNull User first, @NonNull User second) throws ExecutionException, InterruptedException {
         DocumentReference userRef = getReference(User.table, first.getId());
         DocumentReference receiverRef = getReference(User.table, second.getId());
@@ -217,11 +241,20 @@ public class Chat {
     }
 
     /**
-     * The method add to the database a new chat and return it.
+     * The method is use to add a message to a chat and return it.
+     * The message are collect by the date. Every daily chat is save in a separate array.
      *
+     * @param sender describe the sender of the message
+     * @param message describe the message
+     * @throws NoUserFoundException if the sender is not one of the member of the chat
+     * @throws NoChatFoundException if the chat, with that id, doesn't exist
      * @author Davide Finesso
      */
-    public Chat.Message sendMessage(@NonNull User sender, @NonNull String message) throws ExecutionException, InterruptedException {
+    public Chat.Message sendMessage(@NonNull User sender, @NonNull String message)
+            throws ExecutionException, InterruptedException, NoChatFoundException, NoUserFoundException {
+        if( !sender.getId().equals(firstUser.getId()) && !sender.getId().equals(secondUser.getId()))
+            throw new NoUserFoundException("Chat ( "+ this.getId() +" ) has a different user associate");
+
         DocumentReference docRef = getReference(table, id);
         DocumentSnapshot document = getDocument(docRef);
 
@@ -242,7 +275,15 @@ public class Chat {
         return new Message(idMessage, t, sender.getId(), message);
     }
 
-    public List<Chat.Message> obtainMessageListByDay(@NonNull Timestamp date) throws ExecutionException, InterruptedException {
+    /**
+     * The method return all the message equals to the parameter date. the result can be empty if there isn't any message in that day.
+     *
+     * @param date describe the date to match
+     * @throws NoChatFoundException if the chat, with that id, doesn't exist
+     * @author Davide Finesso
+     */
+    public List<Chat.Message> obtainMessageListByDay(@NonNull Timestamp date)
+            throws ExecutionException, InterruptedException, NoChatFoundException {
         List<Chat.Message> list = new ArrayList<>();
 
         DocumentReference docRef = getReference(table, id);
@@ -260,6 +301,12 @@ public class Chat {
         return list;
     }
 
+    /**
+     * The method set a listener pass by the parameter to the interface "OnNewMessage" when a database change occur.
+     *
+     * @param listener describe the listener
+     * @author Davide Finesso
+     */
     public void setListener(MessageListener listener) {
         DocumentReference docRef = getReference(table, id);
         docRef.addSnapshotListener((value, error) -> {
@@ -276,7 +323,7 @@ public class Chat {
     }
 
     /**
-     * The protected method return the chat with that id. If there isn't a chat with that id it throw an exception.
+     * The method return the chat with that id. If there isn't a chat with that id it throw an exception.
      *
      * @throws NoChatFoundException if a chat with that id doesn't exist
      * @author Davide Finesso
