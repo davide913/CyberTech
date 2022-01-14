@@ -113,7 +113,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
      * Upload the list item replacing with new ones
      *
      * @param materials the new list of lending
-     * */
+     */
     public void setItems(@NonNull List<Material> materials) {
         this.showcaseList = materials;
     }
@@ -123,7 +123,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
      * Note: no check is made about the index
      *
      * @param position The item position in the list
-     * */
+     */
     public Material removeAt(int position) {
         Material removed = showcaseList.remove(position);
         notifyItemRemoved(position);
@@ -135,7 +135,7 @@ public class ShowcaseAdapter extends RecyclerView.Adapter<ShowcaseAdapter.ViewHo
      * Add a new lending at the end of the list
      *
      * @param material The item to add
-     * */
+     */
     public void add(@NonNull Material material) {
         showcaseList.add(material);
         notifyItemInserted(showcaseList.size() - 1);

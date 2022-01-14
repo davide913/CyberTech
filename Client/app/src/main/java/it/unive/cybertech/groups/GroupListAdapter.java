@@ -1,5 +1,7 @@
 package it.unive.cybertech.groups;
 
+import static it.unive.cybertech.utils.Utils.ItemClickListener;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +17,18 @@ import java.util.Objects;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Group;
 
-import static it.unive.cybertech.utils.Utils.ItemClickListener;
-
 /**
  * Adapter used by class "{@link it.unive.cybertech.groups.HomePage}" to manage the groups list
+ *
  * @author Daniele Dotto
  * @since 1.1
  */
 public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.ViewHolder> {
 
-    private @Nullable List<Group> groups;
-    private @Nullable ItemClickListener clickListener;
+    private @Nullable
+    List<Group> groups;
+    private @Nullable
+    ItemClickListener clickListener;
 
     public GroupListAdapter(@NonNull List<Group> groups) {
         this.groups = groups;
@@ -33,11 +36,13 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     /**
      * Return the entire group list only if that is not null.
+     *
      * @return "{@link #groups}"
      * @author Daniele Dotto
      * @since 1.1
      */
-    private @NonNull List<Group> getGroups() {
+    private @NonNull
+    List<Group> getGroups() {
         return Objects.requireNonNull(groups);
     }
 
@@ -45,7 +50,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
     @Override
     public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, int viewType) {
         @NonNull LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        @NonNull View view = inflater.inflate(R.layout.group_list_item, parent,false);
+        @NonNull View view = inflater.inflate(R.layout.group_list_item, parent, false);
         return new GroupListAdapter.ViewHolder(view);
     }
 
@@ -56,6 +61,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     /**
      * It needs to know how many groups are present in Families Share (plugin) community.
+     *
      * @return the "{@link #groups}" size.
      * @author Daniele Dotto
      * @since 1.1
@@ -71,6 +77,7 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     /**
      * Allow to update the entire group list.
+     *
      * @param groups The new group list passed by user that substitute the old one
      * @author Daniele Dotto
      * @since 1.1
@@ -81,14 +88,17 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
     /**
      * Allow to manage the individual group item located in RecyclerView
+     *
      * @author Daniele Dotto
      * @since 1.1
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private final @NonNull TextView title, description, participants;
+        private final @NonNull
+        TextView title, description, participants;
 
         /**
          * Bind the text info to layout TextViews
+         *
          * @param view The fragment/activity view
          */
         public ViewHolder(@NonNull final View view) {
@@ -105,7 +115,8 @@ public class GroupListAdapter extends RecyclerView.Adapter<GroupListAdapter.View
 
         /**
          * Set the text info to layout TextViews.
-         * @param item The clicked group by the user
+         *
+         * @param item     The clicked group by the user
          * @param position Item list position
          * @author Daniele Dotto
          * @since 1.1

@@ -28,7 +28,7 @@ import it.unive.cybertech.utils.Utils;
  * This class shows the material that a user offers to others.
  *
  * @author Mattia Musone
- * */
+ */
 public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "MyRentMaterialsFragment";
@@ -59,7 +59,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
 
     /**
      * This function initialize the list getting data from the database asynchronous
-     * */
+     */
     private void initList() {
         super.onStart();
         Utils.executeAsync(() -> user.obtainMaterializedUserMaterials(), new Utils.TaskResult<List<Material>>() {
@@ -100,9 +100,9 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
      * When an item is clicked, it opens the activity that shows the details.
      * Some data are passed in order to obtain information on the activity result
      *
-     * @param view the view clicked
+     * @param view     the view clicked
      * @param position the item position in the list
-     * */
+     */
     public void onItemClick(View view, int position) {
         Intent i = new Intent(getActivity(), ProductDetails.class);
         i.putExtra("ID", items.get(position).getId());
@@ -115,7 +115,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
      * This function add a material to the list of rent
      *
      * @param material The material to add in the list
-     * */
+     */
     public void addMaterialToList(@NonNull Material material) {
         if (adapter != null)
             adapter.add(material);

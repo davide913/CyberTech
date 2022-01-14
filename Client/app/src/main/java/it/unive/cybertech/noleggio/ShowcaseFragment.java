@@ -34,7 +34,7 @@ import it.unive.cybertech.utils.Utils;
  * Clicking an item you can see the product details
  *
  * @author Mattia Musone
- * */
+ */
 public class ShowcaseFragment extends Fragment implements Utils.ItemClickListener {
 
     public static final String ID = "ShowcaseFragment";
@@ -65,7 +65,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
 
     /**
      * This function initialize the list getting the current user location and the items around him
-     * */
+     */
     private void initList() {
         super.onStart();
         try {
@@ -152,7 +152,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
 
     /**
      * Function called when a item in the list is clicked
-     * */
+     */
     public void onItemClick(View view, int position) {
         //If the user has a negative lending point, then he cannot open the product details in order to start a lending
         if (user.getLendingPoint() < 0) {

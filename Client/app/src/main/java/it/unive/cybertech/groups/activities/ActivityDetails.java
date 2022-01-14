@@ -50,7 +50,8 @@ public class ActivityDetails extends AppCompatActivity {
     private @Nullable
     FloatingActionButton joinLeftButton;
     private boolean status = false;
-    private @NonNull ActionBar actionBar;
+    private @NonNull
+    ActionBar actionBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

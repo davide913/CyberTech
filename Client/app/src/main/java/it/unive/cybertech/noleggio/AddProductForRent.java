@@ -201,7 +201,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
 
     /**
      * Functions that find all the activities of installed app that support the image capture in order to pick an image from the device
-     * */
+     */
     private void pickImage() {
         Intent i = new Intent();
         i.setType("image/*");

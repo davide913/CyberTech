@@ -339,7 +339,7 @@ public class MessageService extends FirebaseMessagingService {
 
     /**
      * Function to get the string value of the notification channel
-     * */
+     */
     private static String getChannelIDByType(NotificationType type) {
         switch (type) {
             default:
@@ -358,7 +358,7 @@ public class MessageService extends FirebaseMessagingService {
 
     /**
      * Function that create all the notification channels
-     * */
+     */
     public static void initNotificationChannels(Context ctx) {
         createNotificationChannelIfNotExists(NotificationType.base, ctx);
         createNotificationChannelIfNotExists(NotificationType.coronavirus, ctx);

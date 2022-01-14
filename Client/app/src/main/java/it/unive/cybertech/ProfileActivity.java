@@ -2,7 +2,6 @@ package it.unive.cybertech;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
-import static it.unive.cybertech.utils.Utils.executeAsync;
 import static it.unive.cybertech.utils.Utils.logout;
 
 import android.Manifest;
@@ -155,42 +154,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
-
-    /**
-     * Behaviour according to permission given by user.
-     *
-     * @author Daniele Dotto
-     * @since 1.0
-
-     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-     if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-     updateGPS();
-     } else {
-     showShortToast(getString(R.string.positionPrivilegeNeeded), context);
-     }
-     }*/
-
-    /**
-     * Update GPS coordinates (latitude and longitude).
-     * The user is asked to give permission for geolocalisation if they have not been given yet.
-     *
-     * @author Daniele Dotto
-     * @since 1.0
-
-    private void updateGPS() {
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-    getFusedLocationProviderClient().getLastLocation().addOnSuccessListener(this, location -> {
-    showShortToast(getString(R.string.localizationUpdated), context);
-    updateValues(location);
-    }).addOnFailureListener(e -> {
-    showShortToast(getString(R.string.genericError), context);
-    e.printStackTrace();
-    });
-    } else {
-    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
-    }
-    }*/
 
     /**
      * Update EditText values about geolocalisation:

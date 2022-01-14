@@ -23,7 +23,7 @@ import it.unive.cybertech.database.Material.Material;
  *
  * @author Mattia Musone
  */
-public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapter.ViewHolder>{
+public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapter.ViewHolder> {
 
     public static final String ID = "RentMaterialAdapter";
     private List<Material> showcaseList;
@@ -71,7 +71,7 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
             if (item.getPhoto() != null) {
                 byte[] arr = Base64.decode(item.getPhoto(), Base64.DEFAULT);
                 if (arr != null && arr.length > 0)
-                image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
+                    image.setImageBitmap(BitmapFactory.decodeByteArray(arr, 0, arr.length));
             }
         }
     }
@@ -107,8 +107,8 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
      * Upload the list item replacing with new ones
      *
      * @param materials the new list of lending
-     * */
-    public void setItems(@NonNull List<Material> materials){
+     */
+    public void setItems(@NonNull List<Material> materials) {
         this.showcaseList = materials;
     }
 
@@ -117,8 +117,8 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
      * Note: no check is made about the index
      *
      * @param position The item position in the list
-     * */
-    public void removeAt(int position){
+     */
+    public void removeAt(int position) {
         showcaseList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showcaseList.size());
@@ -128,7 +128,7 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
      * Add a new lending at the end of the list
      *
      * @param material The item to add
-     * */
+     */
     public void add(@NonNull Material material) {
         showcaseList.add(material);
         notifyItemInserted(showcaseList.size() - 1);

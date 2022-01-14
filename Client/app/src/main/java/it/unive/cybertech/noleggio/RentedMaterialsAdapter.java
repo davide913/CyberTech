@@ -133,7 +133,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
      * Upload the list item replacing with new ones
      *
      * @param materials the new list of lending
-     * */
+     */
     public void setItems(@NonNull List<LendingInProgress> materials) {
         this.showcaseList = materials;
     }
@@ -143,7 +143,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
      * Note: no check is made about the index
      *
      * @param position The item position in the list
-     * */
+     */
     public void removeAt(int position) {
         showcaseList.remove(position);
         notifyItemRemoved(position);
@@ -154,7 +154,7 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
      * Add a new lending at the end of the list
      *
      * @param lending The item to add
-     * */
+     */
     public void add(@NotNull LendingInProgress lending) {
         showcaseList.add(lending);
         notifyItemInserted(showcaseList.size() - 1);

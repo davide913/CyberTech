@@ -13,7 +13,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -37,6 +36,13 @@ import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This class provide a way to login to the user
+ * The allowed methods are: email or Google
+ * Note: we don't check if the email exists
+ *
+ * @author Mattia Musone
+ */
 public class LogInActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -59,21 +65,24 @@ public class LogInActivity extends AppCompatActivity {
         login.setOnClickListener(v -> {
             boolean ok = true;
             if (email.getText().length() == 0) {
-                email.setError("Campo obbligatorio");
+                email.setError(getString(R.string.field_required));
                 ok = false;
             }
             if (password.getText().length() == 0) {
-                password.setError("Campo obbligatorio");
+                password.setError(getString(R.string.field_required));
                 ok = false;
             }
             if (ok)
-                loginWithCredentials(email.getText().toString(), password.getText().toString(), this);
+                loginWithCredentials(email.getText().toString(), password.getText().toString());
         });
         signup.setOnClickListener(v -> {
             startActivity(new Intent(this, SignUpActivity.class));
         });
     }
 
+    /**
+     * This function get the app id in order to authenticate with Google Firebase login system and starts the activity to manage the Google-signin account
+     */
     private void getIDForAuthWithGoogle() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.firebase_key))
@@ -85,6 +94,11 @@ public class LogInActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, 0);
     }
 
+    /**
+     * Proceed to atuhenticate a user to the app with the token id provided
+     *
+     * @param idToken The token id of the application authenticated
+     */
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         Context c = this;
@@ -94,13 +108,16 @@ public class LogInActivity extends AppCompatActivity {
                         new Thread(() -> {
                             final User[] u = {null};
                             FirebaseUser user = mAuth.getCurrentUser();
+                            //Split the name and surname provided by google
                             String name = user.getDisplayName(), surname = null;
                             if (name.contains(" ")) {
                                 surname = name.substring(name.indexOf(" ")).trim();
                                 name = name.split(" ")[0];
                             }
                             try {
+                                //If the user already exists in the database (registered with the firebase user unique id provided) then get it
                                 u[0] = User.obtainUserById(user.getUid());
+                                //otherwise register it
                             } catch (NoUserFoundException e) {
                                 e.printStackTrace();
                                 String finalName = name;
@@ -110,6 +127,7 @@ public class LogInActivity extends AppCompatActivity {
                                         @Override
                                         public void onComplete(Utils.Location location) {
                                             try {
+                                                //Create the user in the databse
                                                 u[0] = User.createUser(user.getUid(), finalName.trim(), finalSurname, Sex.nonBinary, null, location.address, location.city, location.country, (long) location.latitude, (long) location.longitude, false);
                                             } catch (ExecutionException | InterruptedException executionException) {
                                                 executionException.printStackTrace();
@@ -118,7 +136,7 @@ public class LogInActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onError(Exception e) {
-
+                                            Utils.logout(getApplicationContext());
                                         }
                                     });
                                 } catch (Utils.PermissionDeniedException permissionDeniedException) {
@@ -128,70 +146,60 @@ public class LogInActivity extends AppCompatActivity {
                             } catch (InterruptedException | ExecutionException e) {
                                 e.printStackTrace();
                             }
+                            //If everything gone right, then open the splashscreen and let user proceed
                             if (u[0] != null) {
                                 startActivity(new Intent(getApplicationContext(), SplashScreen.class));
                                 finish();
                             } else
-                                mAuth.signOut();
+                                Utils.logout(getApplicationContext());
                         }).start();
                     } else {
-                        try {
-                            throw task.getException();
-                        } catch (FirebaseAuthInvalidCredentialsException e) {
-                            new Utils.Dialog(c).show("Login fallito", "Credenziali errate");
-                            e.printStackTrace();
-                        } catch (FirebaseAuthInvalidUserException e) {
-                            new Utils.Dialog(c).show("Login fallito", "Utente inesistente");
-                        } catch (Exception e) {
-                            new Utils.Dialog(c).show("Login fallito", "Errore generico");
-                        }
+                        manageFirebaseException(task.getException());
                     }
                 });
     }
 
-    private void loginWithCredentials(String email, String pwd, Context c) {
+    /**
+     * manage the type of exception thrown by firebase.
+     * The firebase exception are abount something wrong with the user credential, so we need to manage it
+     *
+     * @param ex The exception thrown
+     */
+    private void manageFirebaseException(Exception ex) {
+        ex.printStackTrace();
+        //Means that the credentials are wrong
+        if (ex instanceof FirebaseAuthInvalidCredentialsException)
+            new Utils.Dialog(getApplicationContext()).show(getString(R.string.login_failed), getString(R.string.wrong_credentials));
+            //Means that the user does not exists
+        else if (ex instanceof FirebaseAuthInvalidUserException)
+            new Utils.Dialog(getApplicationContext()).show(getString(R.string.login_failed), getString(R.string.user_not_found));
+            //Otherwise print a generic error
+        else
+            new Utils.Dialog(getApplicationContext()).show(getString(R.string.login_failed), getString(R.string.generic_error));
+    }
+
+    /**
+     * Login with username and password
+     *
+     * @param email The email of the user
+     * @param pwd   The password associated to the account
+     */
+    private void loginWithCredentials(String email, String pwd) {
         mAuth.signInWithEmailAndPassword(email, pwd)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         startActivity(new Intent(getApplicationContext(), SplashScreen.class));
                         finish();
                     } else {
-                        try {
-                            throw task.getException();
-                        } catch (FirebaseAuthInvalidCredentialsException e) {
-                            new Utils.Dialog(c).show("Login fallito", "Credenziali errate");
-                            e.printStackTrace();
-                        } catch (FirebaseAuthInvalidUserException e) {
-                            new Utils.Dialog(c).show("Login fallito", "Utente inesistente");
-                        } catch (Exception e) {
-                            new Utils.Dialog(c).show("Login fallito", "Errore generico");
-                        }
+                        manageFirebaseException(task.getException());
                     }
                 });
-    }
-
-    private void showGPSDialogInformation() {
-        final AppCompatActivity ac = this;
-        Utils.Dialog dialog = new Utils.Dialog(this);
-        dialog.setCallback(new Utils.DialogResult() {
-            @Override
-            public void onSuccess() {
-                ActivityCompat.requestPermissions(ac, new String[]{
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION},
-                        1);
-            }
-
-            @Override
-            public void onCancel() {
-                finish();
-            }
-        }).show(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //if the user does not granted the permission display an alert
         if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
             new Utils.Dialog(this)
                     .setCallback(new Utils.DialogResult() {
@@ -206,19 +214,20 @@ public class LogInActivity extends AppCompatActivity {
                         }
                     })
                     .hideCancelButton()
-                    .show("Impossibile continuare", "Senza l'accesso alla posizione non è possibile continuare la registrazione");
+                    .show(getString(R.string.position_required), getString(R.string.position_required_description));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //Callback of the google login
         if (requestCode == 0) {
             try {
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                new Utils.Dialog(this).show("Login fallito", "Si prega di riprovare più tardi");
+                new Utils.Dialog(this).show(getString(R.string.login_failed), getString(R.string.retry_later));
                 e.printStackTrace();
             }
         }

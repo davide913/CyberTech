@@ -118,6 +118,9 @@ public class RequestViz extends AppCompatActivity {
         }
     }
 
+    /**
+     * This function open the chat activity retrieving the chat ID and passing it to the activity
+     * */
     private void openChat(){
         chat.setEnabled(false);
         Utils.executeAsync(() -> request.obtainMaterializeChat(), new Utils.TaskResult<Chat>() {

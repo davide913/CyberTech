@@ -16,6 +16,13 @@ import it.unive.cybertech.R;
 import it.unive.cybertech.database.Profile.Chat;
 import it.unive.cybertech.utils.Utils;
 
+/**
+ * This is an adapter that provide a view for the chat.
+ * We have two layout, one from the point of view of the sender (MESSAGE_SENT) and the other one from the receiver (MESSAGE_RECEIVED)
+ * If the current user equals the user that has sent the message show the first layout otherwise the other one
+ *
+ * @author Mattia Musone
+ * */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private static final int MESSAGE_SENT = 0;
@@ -42,9 +49,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
         public ViewHolder(View view, int type) {
             super(view);
+            //Bind the view for the sender
             if (type == MESSAGE_SENT) {
                 message = view.findViewById(R.id.quarantine_assistance_chat_sender_text);
                 time = view.findViewById(R.id.quarantine_assistance_chat_sender_time);
+                //Bind the view for the viewer
             } else {
                 message = view.findViewById(R.id.assistance_other_chat_text);
                 time = view.findViewById(R.id.assistance_other_chat_time);
@@ -57,7 +66,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         }
 
         /**
-         * Bind a lending to it's field
+         * Bind the message to the view setting the text and the time
          *
          * @param item     the lending that is about to be displayed
          * @param position The item position in the list
@@ -132,7 +141,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     /**
-     * Add a new lending at the end of the list
+     * Add a new chat message at the end of the list
      *
      * @param chat The item to add
      */
