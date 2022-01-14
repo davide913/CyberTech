@@ -149,6 +149,11 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                     }
                 });
             }
+        }else if (requestCode == RENT_CODE && resultCode == ProductDetails.RENT_DELETE) {
+            int pos = data.getIntExtra("Position", -1);
+            if (pos >= 0) {
+                adapter.removeAt(pos);
+            }
         }
     }
 

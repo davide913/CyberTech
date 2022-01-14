@@ -317,7 +317,7 @@ public class RequestViz extends AppCompatActivity {
         String city = getIntent().getStringExtra("city");
         textCity.setText(city);
 
-        String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+        String strDate = Utils.formatDateToString(request.obtainDeliveryDateToDate(), "kk:mm  dd/MM");
         textDate.setText(strDate);
 
         text.setText(request.getDescription());

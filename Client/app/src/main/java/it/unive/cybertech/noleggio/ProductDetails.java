@@ -220,7 +220,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                 }
                                 //If the user is not the owner (so it's the renter)
                             } else {
-                                expireDateMaterial.setText(Utils.formatDateToString(lending.getDateExpiryDate()));
+                                expireDateMaterial.setText(Utils.formatDateToString(lending.obtainDateExpiryToDate()));
                                 extend.setVisibility(VISIBLE);
                                 //Show the rent extension request layout
                                 extend.setOnClickListener(v -> {
@@ -328,13 +328,6 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
                                             Utils.executeAsync(() -> user.removeMaterial(material), new Utils.TaskResult<Boolean>() {
                                                 @Override
                                                 public void onComplete(Boolean result) {
-                                                    Thread t = new Thread(material::deleteMaterial);
-                                                    t.start();
-                                                    try {
-                                                        t.join();
-                                                    } catch (InterruptedException interruptedException) {
-                                                        interruptedException.printStackTrace();
-                                                    }
                                                     Intent res = new Intent();
                                                     res.putExtra("Position", pos);
                                                     setResult(RENT_DELETE, res);

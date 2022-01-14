@@ -119,6 +119,7 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
     public void addMaterialToList(@NonNull Material material) {
         if (adapter != null)
             adapter.add(material);
-        items.add(material);
+        if (items != null)
+            items.add(material);
     }
 }

@@ -189,8 +189,8 @@ public class Material extends Geoquerable {
      * @throws NoMaterialFoundException if a material doesn't has a renter
      */
     public User obtainMaterializedRenter() throws ExecutionException, InterruptedException, NoMaterialFoundException {
-        if(renter == null) {
-            if (materializeRenter != null)
+        if(renter != null) {
+            if (materializeRenter == null)
                 materializeRenter = User.obtainUserById(renter.getId());
 
             return materializeRenter;

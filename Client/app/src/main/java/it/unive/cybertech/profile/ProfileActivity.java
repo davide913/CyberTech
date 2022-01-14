@@ -83,8 +83,8 @@ public class ProfileActivity extends AppCompatActivity {
         getName().setText(user.getName());
         getSurname().setText(user.getSurname());
         getSex().setText(user.getSex().toString().toUpperCase().substring(0, 1));
-        if (user.getBirthDayToDate() != null) {
-            @NonNull String dateOfBirthString = Utils.formatDateToString(user.getBirthDayToDate());
+        if (user.obtainBirthDayToDate() != null) {
+            @NonNull String dateOfBirthString = Utils.formatDateToString(user.obtainBirthDayToDate());
             getDateOfBirth().setText(dateOfBirthString);
         }
 

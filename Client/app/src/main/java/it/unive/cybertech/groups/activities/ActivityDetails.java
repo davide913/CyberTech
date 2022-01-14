@@ -248,8 +248,9 @@ public class ActivityDetails extends AppCompatActivity {
                 thisGroupActivity = result;
                 initActionBar();
                 setTextViews();
-                getJoinLeftButton().setVisibility(View.VISIBLE);
                 status = checkGroupActivityMember();
+                if (user.getPositiveSince() == null || status)
+                    getJoinLeftButton().setVisibility(View.VISIBLE);
                 if (!status) {
                     setButtonInfoAsNoParticipant();
                 } else {

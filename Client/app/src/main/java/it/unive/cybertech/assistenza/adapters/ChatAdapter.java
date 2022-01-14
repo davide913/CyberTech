@@ -72,7 +72,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
          */
         public void bind(@NonNull final Chat.Message item, int position) {
             message.setText(item.getMessage());
-            time.setText(Utils.formatDateToString(item.getDateTimeToDate(), "HH:mm"));
+            time.setText(Utils.formatDateToString(item.obtainDateTimeToDate(), "HH:mm"));
         }
     }
 

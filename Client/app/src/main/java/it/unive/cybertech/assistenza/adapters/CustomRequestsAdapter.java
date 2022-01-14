@@ -58,7 +58,7 @@ public class CustomRequestsAdapter extends ArrayAdapter<QuarantineAssistance> {
         }
 
         TextView dateView = view.findViewById(R.id.date_request);
-        String strDate = Utils.formatDateToString(request.getDeliveryDateToDate(), "kk:mm  dd/MM");
+        String strDate = Utils.formatDateToString(request.obtainDeliveryDateToDate(), "kk:mm  dd/MM");
         dateView.setText(strDate);
 
         GeoPoint point = request.getLocation();

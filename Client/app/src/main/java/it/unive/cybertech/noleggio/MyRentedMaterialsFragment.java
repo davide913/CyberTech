@@ -98,7 +98,7 @@ public class MyRentedMaterialsFragment extends Fragment implements Utils.ItemCli
             @Override
             public void onComplete(LendingInProgress result) {
                 adapter.add(result);
-                items.add(result);
+                //items.add(result);
             }
 
             @Override

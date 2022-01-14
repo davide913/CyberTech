@@ -158,6 +158,6 @@ public class RentedMaterialsAdapter extends RecyclerView.Adapter<RentedMaterials
     public void add(@NotNull LendingInProgress lending) {
         showcaseList.add(lending);
         notifyItemInserted(showcaseList.size() - 1);
-        notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
+        //notifyItemRangeChanged(showcaseList.size() - 1, showcaseList.size());
     }
 }
