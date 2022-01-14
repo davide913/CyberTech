@@ -1,4 +1,4 @@
-package it.unive.cybertech;
+package it.unive.cybertech.profile;
 
 import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 import static it.unive.cybertech.utils.Utils.logout;
@@ -27,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
+
+import it.unive.cybertech.R;
 
 /**
  * EditPassword is the activity that allow user to edit own password to login on "Families Share".

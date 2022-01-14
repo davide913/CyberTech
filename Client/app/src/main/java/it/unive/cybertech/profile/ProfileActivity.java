@@ -1,4 +1,4 @@
-package it.unive.cybertech;
+package it.unive.cybertech.profile;
 
 import static it.unive.cybertech.utils.CachedUser.user;
 import static it.unive.cybertech.utils.Showables.showShortToast;
@@ -24,13 +24,14 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
 
+import it.unive.cybertech.R;
 import it.unive.cybertech.utils.Utils;
 
 /**
  * ProfileActivity is the main activity that allow user to view and edit some personal, account or
  * localization info:
- * - Email update is manage in "{@link it.unive.cybertech.EditEmail}"
- * - Password update is manage in "{@link it.unive.cybertech.EditPassword}"
+ * - Email update is manage in "{@link EditEmail}"
+ * - Password update is manage in "{@link EditPassword}"
  *
  * @author Daniele Dotto
  * @since 1.0
@@ -71,21 +72,6 @@ public class ProfileActivity extends AppCompatActivity {
         getLogoutButton().setOnClickListener(v -> logout(context));
 
     }
-
-    /**
-     * Initialize GPS settings.
-     *
-     * @author Daniele Dotto
-     * @since 1.1
-
-    private void initGPSsettings() {
-        @NonNull final LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(30000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setMaxWaitTime(100);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-    }*/
 
     /**
      * Set values to EditTexts contained in Layout.
@@ -173,6 +159,12 @@ public class ProfileActivity extends AppCompatActivity {
                         double longitude = result.longitude;
                         @NonNull Thread t = new Thread(() -> user.updateLocation(result.country, result.city, result.address, latitude, longitude));
                         t.start();
+                    try {
+                        t.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    setTextEditTexts();
                 }
 
                 @Override

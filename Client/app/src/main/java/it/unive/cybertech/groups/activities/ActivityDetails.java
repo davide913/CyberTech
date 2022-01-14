@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,11 +19,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Groups.Activity;
 import it.unive.cybertech.database.Groups.Group;
+import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.utils.Utils;
 import it.unive.cybertech.utils.Utils.TaskResult;
 
@@ -126,7 +130,15 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void removeGroupActivityParticipant() {
         if (checkGroupActivityMember()) {
-            executeAsync(() -> getThisGroupActivity().removeParticipant(user), null);
+            Thread t = new Thread(() -> {
+                getThisGroupActivity().removeParticipant(user);
+            });
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             showShortToast(getString(R.string.GroupActivityRemoved), context);
             setButtonInfoAsNoParticipant();
             status = false;
@@ -141,7 +153,15 @@ public class ActivityDetails extends AppCompatActivity {
      */
     private void addGroupActivityParticipant() {
         if (checkGroupMember() && !checkGroupActivityMember()) {
-            executeAsync(() -> getThisGroupActivity().addParticipant(user), null);
+            Thread t = new Thread(() -> {
+                getThisGroupActivity().addParticipant(user);
+            });
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             showShortToast(getString(R.string.GroupActivitySubscribed), context);
             setButtonInfoAsParticipant();
             status = true;
@@ -157,23 +177,21 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private boolean checkGroupMember() {
-
         final boolean[] stato = {false};
-        executeAsync(() -> getThisGroup().obtainMaterializedMembers().contains(user), new TaskResult<Boolean>() {
-            @Override
-            public void onComplete(@NonNull Boolean result) {
-                stato[0] = result;
-            }
-
-            @Override
-            public void onError(@NonNull Exception e) {
-                try {
-                    throw new Exception(e);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
+        Thread t = new Thread(() -> {
+            try {
+                List<User> tmp = getThisGroup().obtainMaterializedMembers();
+                stato[0] = tmp != null && tmp.contains(user);
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
         });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return stato[0];
     }
 
@@ -185,21 +203,20 @@ public class ActivityDetails extends AppCompatActivity {
      * @since 1.1
      */
     private boolean checkGroupActivityMember() {
-        executeAsync(() -> getThisGroupActivity().obtainMaterializedParticipants().contains(user), new TaskResult<Boolean>() {
-            @Override
-            public void onComplete(@NonNull Boolean result) {
-                status = result;
-            }
-
-            @Override
-            public void onError(@NonNull Exception e) {
-                try {
-                    throw new Exception(e);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
+        Thread t = new Thread(() -> {
+            try {
+                List<User> tmp = getThisGroupActivity().obtainMaterializedParticipants();
+                status = tmp != null && tmp.contains(user);
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
         });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return status;
     }
 
@@ -214,22 +231,6 @@ public class ActivityDetails extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Group result) {
                 thisGroup = result;
-
-                status = checkGroupActivityMember();
-                if (!status) {
-                    setButtonInfoAsNoParticipant();
-                } else {
-                    setButtonInfoAsParticipant();
-                }
-                getJoinLeftButton().setOnClickListener(v -> {
-                    if (!status) {
-                        addGroupActivityParticipant();
-                    } else {
-                        removeGroupActivityParticipant();
-                    }
-                    setResult(RELOAD_ACTIVITY);
-                    finish();
-                });
             }
 
             @Override
@@ -247,6 +248,22 @@ public class ActivityDetails extends AppCompatActivity {
                 thisGroupActivity = result;
                 initActionBar();
                 setTextViews();
+                getJoinLeftButton().setVisibility(View.VISIBLE);
+                status = checkGroupActivityMember();
+                if (!status) {
+                    setButtonInfoAsNoParticipant();
+                } else {
+                    setButtonInfoAsParticipant();
+                }
+                getJoinLeftButton().setOnClickListener(v -> {
+                    if (!status) {
+                        addGroupActivityParticipant();
+                    } else {
+                        removeGroupActivityParticipant();
+                    }
+                    setResult(RELOAD_ACTIVITY);
+                    finish();
+                });
             }
 
             @Override

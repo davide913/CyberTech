@@ -65,7 +65,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
         initFragment();
         bindLayoutObjects(view);
         setContainer();
-        bindThisGroupAndActivities();
+        bindThisGroupAndActivities(true);
 
         Objects.requireNonNull(newActivityButton).setOnClickListener(v -> {
             @NonNull Intent i = new Intent(context, ActivityCreation.class);
@@ -107,7 +107,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      */
     private void initFragment() {
         context = requireContext();
-        fragmentActivity = requireActivity();
+        fragmentActivity = getActivity();
         idGroup = fragmentActivity.getIntent().getStringExtra("ID");
     }
 
@@ -141,7 +141,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
         if (requestCode == ACTIVITY_DETAILS_CODE) {
             if (resultCode == RELOAD_ACTIVITY) {
                 if (fragmentActivity != null) {
-                    fragmentActivity.recreate();
+                    bindThisGroupAndActivities(false);
                 }
             }
         }
@@ -154,8 +154,8 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
      * @since 1.1
      */
     @SuppressLint("NotifyDataSetChanged")
-    private void bindThisGroupAndActivities() {
-        executeAsync(() -> getThisGroup().obtainMaterializedActivities(), new TaskResult<List<Activity>>() {
+    private void bindThisGroupAndActivities(boolean caching) {
+        executeAsync(() -> getThisGroup().obtainMaterializedActivities(caching), new TaskResult<List<Activity>>() {
             @Override
             public void onComplete(@NonNull List<Activity> result) {
                 activities = result;

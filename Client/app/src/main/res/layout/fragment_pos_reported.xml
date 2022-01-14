@@ -22,10 +22,11 @@
 
         <TextView
             android:id="@+id/TextView_PosReported"
-            android:layout_width="256dp"
-            android:layout_height="34dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="116dp"
             android:text="@string/no_sign_received"
+            android:textAlignment="center"
             android:textSize="18sp"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/imageView_PosReported"
@@ -37,16 +38,17 @@
 
         <ListView
             android:id="@+id/ListView_signReported"
-            android:layout_width="391dp"
-            android:layout_height="462dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView_UltimeSegnalazioni" />
 
         <ImageView
             android:id="@+id/imageView_PosReported"
-            android:layout_width="341dp"
+            android:layout_width="0dp"
             android:layout_height="220dp"
             android:contentDescription="@string/todo"
             android:src="@drawable/personecovid"
@@ -60,12 +62,12 @@
             android:id="@+id/textView_UltimeSegnalazioni"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
+            android:layout_marginTop="16dp"
             android:text="@string/ultime_sign"
             android:textSize="18sp"
             android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/ListView_signReported"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/view_pos_reported" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

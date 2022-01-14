@@ -1,14 +1,8 @@
-package it.unive.cybertech;
+package it.unive.cybertech.profile;
 
 import static it.unive.cybertech.utils.Showables.showShortToast;
 import static it.unive.cybertech.utils.Utils.HANDLER_DELAY;
 import static it.unive.cybertech.utils.Utils.logout;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -17,6 +11,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.AuthCredential;
@@ -29,6 +29,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
+
+import it.unive.cybertech.R;
 
 /**
  * EditEmail is the activity that allow user to edit own email address to login on "Families Share (Plugin)".

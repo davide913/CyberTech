@@ -55,7 +55,6 @@ public class GroupInfo extends Fragment {
         initFragment();
         bindLayoutObjects(view);
         status = checkGroupMember();
-        setTextViews();
 
         getJoinLeftButton().setOnClickListener(v -> {
             if (!status) {
@@ -126,7 +125,7 @@ public class GroupInfo extends Fragment {
      * @since 1.1
      */
     private void initFragment() {
-        activity = (GroupHomePage) requireActivity();
+        activity = (GroupHomePage) getActivity();
         thisGroup = activity.getThisGroup();
     }
 
@@ -197,6 +196,8 @@ public class GroupInfo extends Fragment {
             @Override
             public void onComplete(@NonNull Boolean result) {
                 status = result;
+                getJoinLeftButton().setVisibility(View.VISIBLE);
+                setTextViews();
             }
 
             @Override

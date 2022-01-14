@@ -190,8 +190,8 @@ public class Group {
      *
      * @author Davide Finesso
      */
-    public List<Activity> obtainMaterializedActivities() throws ExecutionException, InterruptedException {
-        if(activitiesMaterialized == null) {
+    public List<Activity> obtainMaterializedActivities(boolean caching) throws ExecutionException, InterruptedException {
+        if(activitiesMaterialized == null || !caching) {
             activitiesMaterialized = new ArrayList<>();
 
             for (DocumentReference doc : activities) {
@@ -200,6 +200,15 @@ public class Group {
         }
 
         return activitiesMaterialized;
+    }
+
+    /**
+     * The method return the field activities materialize, if is null it create the field and after populate it.
+     *
+     * @author Davide Finesso
+     */
+    public List<Activity> obtainMaterializedActivities() throws ExecutionException, InterruptedException {
+        return obtainMaterializedActivities(true);
     }
 
     /**

@@ -203,8 +203,6 @@
     <string name="request_taken_notification">ha preso in carico la tua richiesta di aiuto</string>
     <string name="stop_helping_notification">ha smesso di seguire la tua richiesta di aiuto</string>
     <string name="request_deleted_notification">Ha eliminato la richiesta, ti ringraziamo per la collaborazione</string>
-
-    <string name="negative">Negativo</string>
     <string name="no_data">No Date</string>
     <string name="name_">Nome:</string>
     <string name="surname_">Cognome:</string>
@@ -227,6 +225,9 @@
     <string name="user_not_found">Utente inesistente</string>
     <string name="generic_error">Errore generico</string>
     <string name="retry_later">Si prega di riprovare più tardi</string>
+    <string name="welcome_back">Bentornato</string>
+    <string name="negative">Negativo</string>
+    <string name="positive">Positivo</string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>

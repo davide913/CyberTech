@@ -29,6 +29,7 @@ import it.unive.cybertech.assistenza.HomePageNegative;
 import it.unive.cybertech.assistenza.HomePagePositive;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.noleggio.ExpiredRents;
+import it.unive.cybertech.profile.ProfileActivity;
 
 /**
  * This is the first class invoked after the splash screen
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     openSection(R.id.nav_menu_quarantine_assistance);
                     break;
             }
+        else openSection(R.id.nav_menu_home);
     }
 
     @Override
@@ -130,13 +132,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * @param id The id of the section to open
      * */
     @SuppressLint("NonConstantResourceId")
-    private void openSection(int id) {
+    void openSection(int id) {
         MenuItem item = null;
         if (menu != null)
             item = menu.findItem(R.id.nav_main_menu_notification_showcase);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
         switch (id) {
+            case R.id.nav_menu_home:
+                if (item != null)
+                    item.setVisible(false);
+                ft.replace(R.id.main_fragment_content, new it.unive.cybertech.HomePage()).commit();
+                break;
             case R.id.nav_menu_covid:
                 if (item != null)
                     item.setVisible(false);
