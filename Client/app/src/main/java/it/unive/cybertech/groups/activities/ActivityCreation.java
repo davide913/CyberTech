@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuItem;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -140,6 +141,8 @@ public class ActivityCreation extends AppCompatActivity {
             i.putExtra("ID", idGroup);
             i.putExtra("ID_GroupActivity", getNewGroupActivity().getId());
             startActivity(i);
+            setResult(GroupActivities.RELOAD_ACTIVITY);
+            finish();
         }, HANDLER_DELAY);
     }
 
@@ -293,5 +296,14 @@ public class ActivityCreation extends AppCompatActivity {
     private @NonNull
     Activity getNewGroupActivity() {
         return Objects.requireNonNull(newGroupActivity);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

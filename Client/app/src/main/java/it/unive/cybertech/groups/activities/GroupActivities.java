@@ -40,6 +40,7 @@ import it.unive.cybertech.utils.Utils.TaskResult;
  */
 public class GroupActivities extends Fragment implements Utils.ItemClickListener {
     private static final int ACTIVITY_DETAILS_CODE = 0;
+    private static final int ACTIVITY_CREATION_CODE = 2;
     protected static final int RELOAD_ACTIVITY = 990;
     private @Nullable
     Context context;
@@ -70,7 +71,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
         Objects.requireNonNull(newActivityButton).setOnClickListener(v -> {
             @NonNull Intent i = new Intent(context, ActivityCreation.class);
             i.putExtra("ID", idGroup);
-            startActivity(i);
+            startActivityForResult(i,ACTIVITY_CREATION_CODE);
         });
         return view;
     }
@@ -138,7 +139,7 @@ public class GroupActivities extends Fragment implements Utils.ItemClickListener
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ACTIVITY_DETAILS_CODE) {
+        if (requestCode == ACTIVITY_DETAILS_CODE || requestCode == ACTIVITY_CREATION_CODE) {
             if (resultCode == RELOAD_ACTIVITY) {
                 if (fragmentActivity != null) {
                     bindThisGroupAndActivities(false);

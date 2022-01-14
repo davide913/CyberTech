@@ -74,7 +74,7 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                 @Override
                 public void onComplete(Utils.Location result) {
                     //Once you have the location you can obtain the items around you
-                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 100, user.getId()), new Utils.TaskResult<List<Material>>() {
+                    Utils.executeAsync(() -> Material.obtainRentableMaterials(result.latitude, result.longitude, 50, user.getId()), new Utils.TaskResult<List<Material>>() {
                         @Override
                         public void onComplete(List<Material> result) {
                             Log.d(ID, "Size: " + result.size());
@@ -133,12 +133,14 @@ public class ShowcaseFragment extends Fragment implements Utils.ItemClickListene
                 Utils.executeAsync(() -> Material.obtainMaterialById(id), new Utils.TaskResult<Material>() {
                     @Override
                     public void onComplete(Material result) {
-                        adapter.add(result);
-                        HomePage h = (HomePage) getParentFragment();
-                        if (h != null) {
-                            MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
-                            if (f != null)
-                                f.addMaterialToList(result);
+                        if (result != null) {
+                            adapter.add(result);
+                            HomePage h = (HomePage) getParentFragment();
+                            if (h != null) {
+                                MyRentMaterialsFragment f = (MyRentMaterialsFragment) h.getFragmentByID(MyRentMaterialsFragment.ID);
+                                if (f != null)
+                                    f.addMaterialToList(result);
+                            }
                         }
                     }
 

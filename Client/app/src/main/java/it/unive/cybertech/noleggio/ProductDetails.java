@@ -100,6 +100,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
             finish();
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
         extensionRenterLayout = findViewById(R.id.extension_renter_details_layout);
         confirm = findViewById(R.id.confirm_rent_showcase);
         acceptExtension = findViewById(R.id.accept_extension_details);
@@ -515,7 +516,7 @@ public class ProductDetails extends AppCompatActivity implements DatePickerDialo
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);

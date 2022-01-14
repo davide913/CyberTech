@@ -5,6 +5,7 @@ import static it.unive.cybertech.utils.CachedUser.user;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -78,6 +79,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
         loadImage.setOnClickListener(v -> pickImage());
         date.setOnClickListener(v -> {
             Calendar now = Calendar.getInstance();
+            now.add(Calendar.DAY_OF_MONTH, 1);
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     this, this, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH));
             datePickerDialog.getDatePicker().setMinDate(now.getTimeInMillis());
@@ -120,6 +122,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
                 }
                 String finalBaseString = baseString;
                 try {
+                    Context c = this;
                     Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
                         @Override
                         public void onComplete(Utils.Location location) {
@@ -136,7 +139,7 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
-                                        new Utils.Dialog(getApplicationContext())
+                                        new Utils.Dialog(c)
                                                 .hideCancelButton()
                                                 .setCallback(new Utils.DialogResult() {
                                                     @Override
