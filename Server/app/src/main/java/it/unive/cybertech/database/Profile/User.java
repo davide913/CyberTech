@@ -1045,6 +1045,11 @@ public class User extends Geoquerable implements Comparable<User> {
         return result;
     }
 
+    /**
+     * Obtain the groups where the user is in
+     *
+     * @author Davide Finesso
+     */
     public List<Group> obtainGroups() throws ExecutionException, InterruptedException {
         List<Group> result = new ArrayList<>();
         DocumentReference userDoc = getReference(table, this.id);
