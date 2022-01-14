@@ -97,6 +97,7 @@ public class RequestViz extends AppCompatActivity {
             }
 
             if(callerClass != null && callerClass.equals("positive")) {
+
                 menu.setOnClickListener(v -> {
                     animatedMenu(callerClass);
                 });
@@ -105,9 +106,11 @@ public class RequestViz extends AppCompatActivity {
                     delete_request();
                 });
 
-                chat.setOnClickListener(v -> {
-                    openChat();
-                });
+                if (request.getIsInCharge()) {
+                    chat.setOnClickListener(v -> {
+                        openChat();
+                    });
+                }
             }
 
         }
@@ -378,22 +381,35 @@ public class RequestViz extends AppCompatActivity {
     private void animatedMenu(@NonNull String caller) {
         if(caller.equals("positive")) {
             if (isOpen) {
-                chat.startAnimation(menuClose);
-                deleteRequest.startAnimation(menuClose);
-                chat.setClickable(false);
-                deleteRequest.setClickable(false);
-                chat.setVisibility(View.GONE);
-                deleteRequest.setVisibility(View.GONE);
+                if(request.getIsInCharge()) {
+                    chat.startAnimation(menuClose);
+                    deleteRequest.startAnimation(menuClose);
+                    chat.setClickable(false);
+                    deleteRequest.setClickable(false);
+                    chat.setVisibility(View.GONE);
+                    deleteRequest.setVisibility(View.GONE);
+                }
+                else {
+                    deleteRequest.startAnimation(menuClose);
+                    deleteRequest.setClickable(false);
+                    deleteRequest.setVisibility(View.GONE);
+                }
 
                 isOpen = false;
             } else {
-                chat.setVisibility(View.VISIBLE);
-                deleteRequest.setVisibility(View.VISIBLE);
-                chat.startAnimation(menuOpen);
-                deleteRequest.startAnimation(menuOpen);
-                chat.setClickable(true);
-                deleteRequest.setClickable(true);
-
+                if(request.getIsInCharge()) {
+                    chat.setVisibility(View.VISIBLE);
+                    deleteRequest.setVisibility(View.VISIBLE);
+                    chat.startAnimation(menuOpen);
+                    deleteRequest.startAnimation(menuOpen);
+                    chat.setClickable(true);
+                    deleteRequest.setClickable(true);
+                }
+                else {
+                    deleteRequest.setVisibility(View.VISIBLE);
+                    deleteRequest.startAnimation(menuOpen);
+                    deleteRequest.setClickable(true);
+                }
                 isOpen = true;
             }
         }

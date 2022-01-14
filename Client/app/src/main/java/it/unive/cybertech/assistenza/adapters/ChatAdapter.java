@@ -22,7 +22,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final int MESSAGE_RECEIVED = 1;
 
     private List<Chat.Message> showcaseList;
-    //A callback to call when an item is clicked
     private Utils.ItemClickListener clickListener;
 
     /**
@@ -72,10 +71,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public int getItemViewType(int position) {
         Chat.Message message = showcaseList.get(position);
         if (message.amITheSender(user))
-            // If the current user is the sender of the message
             return MESSAGE_SENT;
         else
-            // If some other user sent the message
             return MESSAGE_RECEIVED;
     }
 
