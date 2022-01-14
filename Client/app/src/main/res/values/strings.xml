@@ -228,6 +228,7 @@
     <string name="welcome_back">Bentornato</string>
     <string name="negative">Negativo</string>
     <string name="positive">Positivo</string>
+    <string name="notification_channel_quarantine_assistance_deleted" > Canale utilizzato per avvisare l\'utente negativo che la richiesta presa in carico è stata eliminata </string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>
