@@ -245,6 +245,9 @@ public class QuarantineAssistance extends Geoquerable {
      */
     protected boolean deleteQuarantineAssistance() {
         try {
+            if(chat != null)
+                Chat.obtainChatById(chat.getId()).deleteChat();
+
             Task<Void> t = deleteQuarantineAssistanceAsync();
             Tasks.await(t);
             this.id = null;

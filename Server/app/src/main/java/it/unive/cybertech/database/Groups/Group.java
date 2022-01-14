@@ -41,7 +41,6 @@ public class Group {
     private String description;
     private DocumentReference owner;
     private ArrayList<DocumentReference> members;
-    private ArrayList<DocumentReference> messages;
     private ArrayList<DocumentReference> activities;
 
     /**
@@ -49,7 +48,6 @@ public class Group {
      */
     private User ownerMaterialized;
     private ArrayList<User> membersMaterialized;
-    private ArrayList<Chat> messagesMaterialized;
     private ArrayList<Activity> activitiesMaterialized;
 
     /**
@@ -65,14 +63,13 @@ public class Group {
      * @author Davide Finesso
      */
     private Group(String id, String name, String description, DocumentReference ownerDoc,
-                 ArrayList<DocumentReference> members, ArrayList<DocumentReference> messages,
-                  ArrayList<DocumentReference> activities, User owner) {
+                 ArrayList<DocumentReference> members, ArrayList<DocumentReference> activities,
+                  User owner) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.owner = ownerDoc;
         this.members = members;
-        this.messages = messages;
         this.activities = activities;
         this.ownerMaterialized = owner;
     }
@@ -117,14 +114,6 @@ public class Group {
         this.members = members;
     }
 
-    public List<DocumentReference> getMessages() {
-        return messages;
-    }
-
-    private void setMessages(ArrayList<DocumentReference> messages) {
-        this.messages = messages;
-    }
-
     public List<DocumentReference> getActivities() {
         return activities;
     }
@@ -162,30 +151,6 @@ public class Group {
     }
 
     /**
-     * The method return the field messages materialize order by date time. If the field is null it create the field and after populate it.
-     *
-     * @author Davide Finesso
-     */
-    public List<Chat> obtainMaterializedMessages() throws ExecutionException, InterruptedException {
-        if(messagesMaterialized == null) {
-            messagesMaterialized = new ArrayList<>();
-
-            for (DocumentReference doc : messages) {
-                messagesMaterialized.add(Chat.obtainChatById(doc.getId()));
-            }
-
-            messagesMaterialized.sort(new Comparator<Chat>() {
-                @Override
-                public int compare(Chat o1, Chat o2) {
-                    return o1.getDateTime().compareTo(o2.getDateTime());
-                }
-            });
-        }
-
-        return messagesMaterialized;
-    }
-
-    /**
      * The method return the field activities materialize, if is null it create the field and after populate it.
      *
      * @author Davide Finesso
@@ -218,7 +183,7 @@ public class Group {
         DocumentReference addedDocRef = Database.addToCollection(table, myGroup);
 
         Group group = new Group(addedDocRef.getId(), name, description, userRef, new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), creator);
+                    new ArrayList<>(), creator);
 
         group.addMember(creator);
 
@@ -246,9 +211,6 @@ public class Group {
 
             if(group.activities == null)
                 group.activities = new ArrayList<>();
-
-            if(group.messages == null)
-                group.messages = new ArrayList<>();
 
             return group;
         } else
@@ -279,8 +241,6 @@ public class Group {
         try {
             for (Activity activity : obtainMaterializedActivities())
                 activity.deleteActivity();
-            for(Chat chat : obtainMaterializedMessages())
-                chat.deleteChat();
 
             Task<Void> t = deleteGroupAsync();
             Tasks.await(t);
@@ -382,78 +342,6 @@ public class Group {
             Task<Void> t = updateNameAsync(name);
             Tasks.await(t);
             this.name = name;
-            return true;
-        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
-     *
-     * @author Davide Finesso
-     */
-    private Task<Void> addMessageAsync(@NonNull DocumentReference message) throws ExecutionException, InterruptedException, NoGroupFoundException {
-        DocumentReference docRef = getReference(table, id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists())
-            return docRef.update("messages", FieldValue.arrayUnion(message));
-        else
-            throw new NoGroupFoundException("No group found with this id: " + id);
-    }
-
-    /**
-     * The method is use to add a group message to the database. It return a boolean value that describe if the operation was done.
-     *
-     * @author Davide Finesso
-     */
-    public boolean addMessage(@NonNull Chat message) {
-        try {
-            DocumentReference messDoc = getReference(Chat.table, message.getId());
-            Task<Void> t = addMessageAsync(messDoc);
-            Tasks.await(t);
-            this.messages.add(messDoc);
-            if(this.messagesMaterialized != null)
-                this.obtainMaterializedMessages().add(message);
-            return true;
-        } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * the private method is use to update the changes in the database. it returns a task and the caller function waits until it finishes.
-     *
-     * @author Davide Finesso
-     */
-    private Task<Void> removeMessageAsync(@NonNull DocumentReference message) throws ExecutionException, InterruptedException, NoGroupFoundException {
-        DocumentReference docRef = getReference(table, id);
-        DocumentSnapshot document = getDocument(docRef);
-
-        if (document.exists())
-            return docRef.update("members", FieldValue.arrayRemove(message));
-        else
-            throw new NoGroupFoundException("No group found with this id: " + id);
-    }
-
-    /**
-     * The method is use to remove a group message to the database. It return a boolean value that describe if the operation was done.
-     *
-     * @author Davide Finesso
-     */
-    public boolean removeMessage(@NonNull Chat message) {
-        try {
-            DocumentReference messDoc = getReference(Chat.table, message.getId());
-            Task<Void> t = removeMessageAsync(messDoc);
-            Tasks.await(t);
-            this.messages.remove(message);
-            if(this.messagesMaterialized != null)
-                this.obtainMaterializedMessages().remove(message);
-
-            message.deleteChat();
             return true;
         } catch (ExecutionException | InterruptedException | NoGroupFoundException e) {
             e.printStackTrace();

@@ -18,11 +18,14 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Date;
 import java.util.List;
 
 import it.unive.cybertech.database.Material.Type;
+import it.unive.cybertech.database.Profile.AssistanceType;
 import it.unive.cybertech.database.Profile.Chat;
 import it.unive.cybertech.database.Profile.QuarantineAssistance;
+import it.unive.cybertech.database.Profile.Sex;
 import it.unive.cybertech.database.Profile.User;
 
 /**
@@ -40,21 +43,22 @@ public class ExampleInstrumentedTest {
 
         //scrivi qui sotto
 
-        //String date = "13012022";
-        //Chat chat = Chat.createChat("MLA4AELjJTfGundss458Q3Es3eC2", "s5M1ZmoqwPO3XplqWBw0KhqwWyi1");
-        //Chat chat = Chat.obtainChatById("L7uUlzbpKiFYLkNe9zv0");
-        //User u = User.obtainUserById("MLA4AELjJTfGundss458Q3Es3eC2");
-        //chat.sendMessage(u, "dfgdfgdfg");
-        QuarantineAssistance q = QuarantineAssistance.obtainQuarantineAssistanceById("D1vABnDdtzjAJBeWXKbH");
-        Chat c = q.obtainMaterializeChat();
-        c.test();
-        /*User u = User.obtainUserById("nWZXf0hT5qSVURKdS3UkT0Te63E3");
+        User davide = User.createUser("davide", "davide", "davide", Sex.male, new Date(10,10,10),
+                "via rss", "abano", "italy", 10,10, true);
 
-        List<QuarantineAssistance> arr = u.obtainMaterializedQuarantineAssistance();
+        User u = User.obtainUserById("davide.finesso@hotmail.it");
 
-        Log.d("size", ""+arr.size());
 
-        u.removeQuarantineAssistance(arr.get(0));*/
+        //u.addQuarantineAssistance(AssistanceType.obtainAssistanceTypes().get(0), "title Davide1",
+        //        "description Davide1",new Date(10,10,10), 10,10);
 
+        davide.addDevice("tokenDavide", "deviceIDDavide");
+
+        davide.addQuarantineAssistance(AssistanceType.obtainAssistanceTypes().get(0), "title Davide",
+                "description Davide",new Date(10,10,10), 10,10);
+
+        davide.obtainMaterializedQuarantineAssistance().get(0).updateInCharge_QuarantineAssistance(u);
+
+        davide.deleteUser();
     }
 }
