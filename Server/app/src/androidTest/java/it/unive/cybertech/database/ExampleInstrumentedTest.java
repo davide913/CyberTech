@@ -43,7 +43,9 @@ public class ExampleInstrumentedTest {
 
         //scrivi qui sotto
 
-        User davide = User.createUser("davide", "davide", "davide", Sex.male, new Date(10,10,10),
+        User davide = User.obtainUserById("BQbdfmklqXM1veEGezdPXmmvN0B2");
+        davide.deleteAllMyQuarantineAssistance();
+        /*User davide = User.createUser("davide", "davide", "davide", Sex.male, new Date(10,10,10),
                 "via rss", "abano", "italy", 10,10, true);
 
         User u = User.obtainUserById("davide.finesso@hotmail.it");
@@ -59,6 +61,6 @@ public class ExampleInstrumentedTest {
 
         davide.obtainMaterializedQuarantineAssistance().get(0).updateInCharge_QuarantineAssistance(u);
 
-        davide.deleteUser();
+        davide.deleteUser();*/
     }
 }

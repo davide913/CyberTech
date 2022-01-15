@@ -9,6 +9,7 @@ import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
@@ -40,6 +41,7 @@ import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 /**
@@ -248,8 +250,12 @@ public class User extends Geoquerable implements Comparable<User> {
         return birthday;
     }
 
+    @Nullable
     public Date obtainBirthDayToDate() {
-        return birthday.toDate();
+        if (birthday != null)
+            return birthday.toDate();
+        else
+            return null;
     }
 
     private void setBirthday(Timestamp birthday) {
@@ -347,7 +353,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, @NonNull Date birthDay,
+    public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, Date birthDay,
                                   @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 
@@ -971,8 +977,16 @@ public class User extends Geoquerable implements Comparable<User> {
      * @author Davide Finesso
      */
     public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
-        for (QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
-            this.removeQuarantineAssistance(quarantineAssistance);
+        try {
+            for (QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+                quarantineAssistance.deleteQuarantineAssistance();
+        } catch (NoQuarantineAssistanceFoundException e) {
+            e.printStackTrace();
+        }
+        DocumentReference quarDoc = getReference(User.table, this.id);
+        Tasks.await(quarDoc.update("quarantineAssistance", null));
+        quarantineAssistance = new ArrayList<>();
+        quarantineAssistanceMaterialized = new ArrayList<>();
     }
 
     /**

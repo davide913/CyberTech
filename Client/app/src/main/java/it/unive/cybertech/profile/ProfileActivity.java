@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,6 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
     FloatingActionButton editInfo, logoutButton;
     private @Nullable
     EditText name, surname, dateOfBirth, sex, country, address, city, email, pwd;
+    private TextView lendingPoint;
     private SwitchCompat greenPass;
 
     @Override
@@ -55,7 +57,6 @@ public class ProfileActivity extends AppCompatActivity {
         initActionBar();
         bindLayoutObjects();
         setTextEditTexts();
-        //initGPSsettings();
 
         getEmail().setOnClickListener(v -> startActivity(new Intent(context, EditEmail.class)));
 
@@ -96,6 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
         getPwd().setText("********");
 
         greenPass.setChecked(user.isGreenPass());
+        lendingPoint.setText(getString(R.string.rent_score) + user.getLendingPoint());
     }
 
     /**
@@ -122,9 +124,10 @@ public class ProfileActivity extends AppCompatActivity {
 
         greenPass = findViewById(R.id.profile_green_pass);
         greenPass.setOnCheckedChangeListener(this::updateGreenpass);
+        lendingPoint = findViewById(R.id.profile_lending_point);
     }
 
-    private void updateGreenpass(View v, boolean checked){
+    private void updateGreenpass(View v, boolean checked) {
         Utils.executeAsync(() -> user.updateGreenPass(checked), new Utils.TaskResult<Boolean>() {
             @Override
             public void onComplete(Boolean result) {
@@ -136,7 +139,7 @@ public class ProfileActivity extends AppCompatActivity {
                 e.printStackTrace();
                 greenPass.setOnCheckedChangeListener(null);
                 greenPass.setChecked(false);
-                greenPass.setOnCheckedChangeListener((v, c)->updateGreenpass(v, c));
+                greenPass.setOnCheckedChangeListener((v, c) -> updateGreenpass(v, c));
             }
         });
     }
@@ -155,10 +158,10 @@ public class ProfileActivity extends AppCompatActivity {
             Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
                 @Override
                 public void onComplete(Utils.Location result) {
-                        double latitude = result.latitude;
-                        double longitude = result.longitude;
-                        @NonNull Thread t = new Thread(() -> user.updateLocation(result.country, result.city, result.address, latitude, longitude));
-                        t.start();
+                    double latitude = result.latitude;
+                    double longitude = result.longitude;
+                    @NonNull Thread t = new Thread(() -> user.updateLocation(result.country, result.city, result.address, latitude, longitude));
+                    t.start();
                     try {
                         t.join();
                     } catch (InterruptedException e) {
@@ -346,7 +349,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private @NonNull
     FusedLocationProviderClient getFusedLocationProviderClient() {
-        return Objects.requireNonNull(fusedLocationProviderClient);
+    return Objects.requireNonNull(fusedLocationProviderClient);
     }*/
 
 

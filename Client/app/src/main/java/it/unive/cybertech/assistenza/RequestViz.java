@@ -6,12 +6,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -115,7 +117,20 @@ public class RequestViz extends AppCompatActivity {
 
         }
         else {
-            new Utils.Dialog(this).show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
+            new Utils.Dialog(this)
+                    .hideCancelButton()
+                    .setCallback(new Utils.DialogResult() {
+                        @Override
+                        public void onSuccess() {
+                            finish();
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    })
+                    .show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
             String allGone = "allGone";
             animatedMenu(allGone);
         }
@@ -164,7 +179,7 @@ public class RequestViz extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     if(target != null)
-                        sendNotifications(target, "delete", CachedUser.user.getName());
+                        sendNotifications(target, "delete", user.getName());
                     user.removeQuarantineAssistance(request);
                     setResult(Activity.RESULT_OK);
                 });
@@ -212,7 +227,7 @@ public class RequestViz extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        sendNotifications(target, "accept", target.getName());
+                        sendNotifications(target, "accept", user.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
@@ -259,7 +274,7 @@ public class RequestViz extends AppCompatActivity {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        sendNotifications(target, "stop", target.getName());
+                        sendNotifications(target, "stop", user.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
@@ -353,7 +368,19 @@ public class RequestViz extends AppCompatActivity {
     private void toolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_RequestViz);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
         setTitle("Dettagli richiesta");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

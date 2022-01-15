@@ -114,14 +114,15 @@ public class RentMaterialAdapter extends RecyclerView.Adapter<RentMaterialAdapte
 
     /**
      * Remove an item at the provided position and notify the adapter.
-     * Note: no check is made about the index
      *
      * @param position The item position in the list
      */
     public void removeAt(int position) {
-        showcaseList.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, showcaseList.size());
+        if (position > 0) {
+            showcaseList.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, showcaseList.size());
+        }
     }
 
     /**

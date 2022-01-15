@@ -36,8 +36,8 @@ import it.unive.cybertech.utils.Utils;
  */
 public class RequestDetails extends AppCompatActivity {
     EditText et_requestTitle, et_requestText, countryReq, cityReq;
-    private final @NonNull
-    Context context = RequestDetails.this;
+    private @NonNull
+    Context context;
     private static final int PERMISSIONS_FINE_LOCATION = 99;
     private FloatingActionButton editInfo;
     private double latitude, longitude;
@@ -51,6 +51,7 @@ public class RequestDetails extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_details);
+        context = this;
         setToolbar();
         findFields();
 

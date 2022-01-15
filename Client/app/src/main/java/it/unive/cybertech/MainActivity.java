@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             switch (type) {
                 default:
                 case base:
+                    openSection(R.id.nav_menu_home);
                     break;
                 case coronavirus:
                     openSection(R.id.nav_menu_covid);
