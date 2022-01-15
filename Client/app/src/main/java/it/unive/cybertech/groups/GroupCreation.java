@@ -90,6 +90,14 @@ public class GroupCreation extends AppCompatActivity {
             @Override
             public void onComplete(Group result) {
                 newGroup = result;
+                showShortToast(getString(R.string.GroupCreationDone), context);
+                @NonNull Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    @NonNull Intent intent = new Intent(context, GroupHomePage.class);
+                    intent.putExtra("ID", getNewGroup().getId());
+                    context.startActivity(intent);
+                    finish();
+                }, 800);
             }
 
             @Override
@@ -101,13 +109,6 @@ public class GroupCreation extends AppCompatActivity {
                 }
             }
         });
-        showShortToast(getString(R.string.GroupCreationDone), context);
-        @NonNull Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            @NonNull Intent intent = new Intent(context, GroupHomePage.class);
-            intent.putExtra("ID", getNewGroup().getId());
-            context.startActivity(intent);
-        }, 800);
     }
 
     /**

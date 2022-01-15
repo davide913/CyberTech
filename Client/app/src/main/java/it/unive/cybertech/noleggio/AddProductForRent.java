@@ -41,6 +41,7 @@ import java.util.List;
 import it.unive.cybertech.R;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Material.Type;
+import it.unive.cybertech.utils.Showables;
 import it.unive.cybertech.utils.Utils;
 
 /**
@@ -123,12 +124,14 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
                 String finalBaseString = baseString;
                 try {
                     Context c = this;
+                    done.setEnabled(false);
                     Utils.getLocation(this, new Utils.TaskResult<Utils.Location>() {
                         @Override
                         public void onComplete(Utils.Location location) {
                             Utils.executeAsync(() -> Material.createMaterial(user, title.getText().toString(), description.getText().toString(), finalBaseString, (Type) type.getSelectedItem(), location.latitude, location.longitude, new SimpleDateFormat("dd/MM/yyyy").parse(date.getText().toString())), new Utils.TaskResult<Material>() {
                                 @Override
                                 public void onComplete(Material result) {
+                                    done.setEnabled(true);
                                     if (result != null) {
                                         Thread t = new Thread(() -> {
                                             user.addMaterial(result);
@@ -157,24 +160,28 @@ public class AddProductForRent extends AppCompatActivity implements DatePickerDi
                                                 })
                                                 .show(getString(R.string.done_exclamation), getString(R.string.material_published_to_showcase));
                                     } else
-                                        new Utils.Dialog(getApplicationContext()).show(getString(R.string.error), getString(R.string.material_error));
+                                        new Utils.Dialog(c).show(getString(R.string.error), getString(R.string.material_error));
                                 }
 
                                 @Override
                                 public void onError(Exception e) {
+                                    done.setEnabled(true);
                                     e.printStackTrace();
-                                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
+                                    if (e.getMessage().contains("FirebaseFirestoreException"))
+                                        Showables.showShortToast(getString(R.string.image_too_large), c);
                                 }
                             });
                         }
 
                         @Override
                         public void onError(Exception e) {
-
+                            done.setEnabled(true);
                         }
                     });
                 } catch (Utils.PermissionDeniedException e) {
+                    done.setEnabled(true);
                     e.printStackTrace();
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_FINE_LOCATION);
                 }
             }
         });
