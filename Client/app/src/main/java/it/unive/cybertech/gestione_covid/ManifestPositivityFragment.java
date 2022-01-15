@@ -21,13 +21,16 @@ import androidx.fragment.app.FragmentTransaction;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.cybertech.R;
+import it.unive.cybertech.database.Profile.QuarantineAssistance;
 import it.unive.cybertech.database.Profile.User;
 import it.unive.cybertech.messages.MessageService;
 import it.unive.cybertech.utils.Utils;
@@ -145,7 +148,10 @@ public class ManifestPositivityFragment extends Fragment {
                         public void onSuccess() {
                             Utils.executeAsync(() -> user.updatePositiveSince(null), new Utils.TaskResult<Boolean>() {
                                 @Override
-                                public void onComplete(Boolean result) { updateFr();}
+                                public void onComplete(Boolean result) {
+                                    //deleteAllMyQA();
+                                    updateFr();
+                                }
 
                                 @Override
                                 public void onError(Exception e) {
@@ -228,6 +234,25 @@ public class ManifestPositivityFragment extends Fragment {
             }
         });
     }
+
+    /*
+    private void deleteAllMyQA() {
+        Thread t = new Thread(() -> {
+            try {
+                user.deleteAllMyQuarantineAssistance();
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+     */
 
     /**
      * updateLabel visually changes the displayed date and sets it to the correct format.
