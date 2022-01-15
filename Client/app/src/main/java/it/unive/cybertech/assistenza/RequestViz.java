@@ -115,7 +115,19 @@ public class RequestViz extends AppCompatActivity {
 
         }
         else {
-            new Utils.Dialog(this).show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
+            Utils.Dialog dialog = new Utils.Dialog(this);
+            dialog.show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
+            dialog.setCallback(new Utils.DialogResult() {
+                @Override
+                public void onSuccess() {
+                    finish();
+                }
+
+                @Override
+                public void onCancel() {
+                    finish();
+                }
+            });
             String allGone = "allGone";
             animatedMenu(allGone);
         }
@@ -164,7 +176,7 @@ public class RequestViz extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     if(target != null)
-                        sendNotifications(target, "delete", CachedUser.user.getName());
+                        sendNotifications(target, "delete", user.getName());
                     user.removeQuarantineAssistance(request);
                     setResult(Activity.RESULT_OK);
                 });
@@ -212,7 +224,7 @@ public class RequestViz extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        sendNotifications(target, "accept", target.getName());
+                        sendNotifications(target, "accept", user.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
@@ -259,7 +271,7 @@ public class RequestViz extends AppCompatActivity {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        sendNotifications(target, "stop", target.getName());
+                        sendNotifications(target, "stop", user.getName());
                         setResult(Activity.RESULT_OK);
                     }
 
