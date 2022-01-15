@@ -122,4 +122,16 @@ public class MyRentMaterialsFragment extends Fragment implements Utils.ItemClick
         if (items != null)
             items.add(material);
     }
+
+    /**
+     * This function remove a material to the list of rent
+     *
+     * @param material The material to add in the list
+     */
+    public void removeMaterial(@NonNull Material material) {
+        if (adapter != null && items != null)
+            adapter.removeAt(items.indexOf(material));
+        if (items != null)
+            items.remove(material);
+    }
 }

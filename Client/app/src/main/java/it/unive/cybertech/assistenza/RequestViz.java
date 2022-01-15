@@ -115,7 +115,20 @@ public class RequestViz extends AppCompatActivity {
 
         }
         else {
-            new Utils.Dialog(this).show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
+            new Utils.Dialog(this)
+                    .hideCancelButton()
+                    .setCallback(new Utils.DialogResult() {
+                        @Override
+                        public void onSuccess() {
+                            finish();
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    })
+                    .show(getString(R.string.no_inCharge), getString(R.string.no_inCharge_message));
             String allGone = "allGone";
             animatedMenu(allGone);
         }

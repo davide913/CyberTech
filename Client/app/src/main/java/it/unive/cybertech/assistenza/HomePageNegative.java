@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -50,12 +51,12 @@ public class HomePageNegative extends Fragment {
     private List<QuarantineAssistance> myQuarantineList = new ArrayList<>();
     private QuarantineAssistance inCharge = null;
     private AssistanceType aux = null;
+    private ProgressBar loader;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_home_page_assistenza, container, false);
-
         try {
             initViews(view);
         } catch (ExecutionException | InterruptedException e) {
@@ -67,6 +68,7 @@ public class HomePageNegative extends Fragment {
 
     private void initViews(View view) throws ExecutionException, InterruptedException {
         listView = view.findViewById(R.id.listRequests);
+        loader = view.findViewById(R.id.loader_home_page_assistance);
         GeoPoint myGeoPosition = user.getLocation();
         Spinner sp = view.findViewById(R.id.homeNegSpinner);
         ArrayList<String> names = new ArrayList<>();
@@ -95,7 +97,7 @@ public class HomePageNegative extends Fragment {
                     t.join();
                 }
                 catch(InterruptedException ignored) {}
-
+                loader.setVisibility(View.GONE);
                 adapter = new CustomRequestsAdapter(getContext(), 0, myQuarantineList);
                 listView.setAdapter(adapter);
 

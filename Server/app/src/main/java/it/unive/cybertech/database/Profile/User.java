@@ -9,6 +9,7 @@ import static it.unive.cybertech.database.Profile.Device.createDevice;
 import static it.unive.cybertech.database.Profile.QuarantineAssistance.createQuarantineAssistance;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
@@ -248,8 +249,12 @@ public class User extends Geoquerable implements Comparable<User> {
         return birthday;
     }
 
+    @Nullable
     public Date obtainBirthDayToDate() {
-        return birthday.toDate();
+        if (birthday != null)
+            return birthday.toDate();
+        else
+            return null;
     }
 
     private void setBirthday(Timestamp birthday) {
@@ -347,7 +352,7 @@ public class User extends Geoquerable implements Comparable<User> {
      *
      * @author Davide Finesso
      */
-    public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, @NonNull Date birthDay,
+    public static User createUser(@NonNull String id, @NonNull String name, @NonNull String surname, @NonNull Sex sex, Date birthDay,
                                   @NonNull String address, @NonNull String city, @NonNull String country, long latitude, long longitude,
                                   boolean greenpass) throws ExecutionException, InterruptedException {
 

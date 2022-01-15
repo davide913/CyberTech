@@ -328,18 +328,18 @@ public class MessageService extends FirebaseMessagingService {
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
             case request_accepted:
-                name = ctx.getString(R.string.alerts);
-                description = ctx.getString(R.string.notification_channel_quarantine_request_accepted);
+                name = ctx.getString(R.string.notification_channel_quarantine_request_accepted);
+                description = ctx.getString(R.string.notification_channel_quarantine_request_accepted_description);
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
             case request_stop_helping:
-                name = ctx.getString(R.string.alerts);
-                description = ctx.getString(R.string.notification_channel_quarantine_assistance_dismissed);
+                name = ctx.getString(R.string.notification_channel_quarantine_assistance_dismissed);
+                description = ctx.getString(R.string.notification_channel_quarantine_assistance_dismissed_description);
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
             case request_deleted:
-                name = ctx.getString(R.string.alerts);
-                description = ctx.getString(R.string.notification_channel_quarantine_assistance_deleted);
+                name = ctx.getString(R.string.notification_channel_quarantine_assistance_deleted);
+                description = ctx.getString(R.string.notification_channel_quarantine_assistance_deleted_description);
                 importance = NotificationManager.IMPORTANCE_HIGH;
                 break;
         }
