@@ -232,6 +232,7 @@
     <string name="positive">Positivo</string>
     <string name="notification_channel_quarantine_assistance_deleted" >Richiesta eliminata</string>
     <string name="notification_channel_quarantine_assistance_deleted_description" >Canale utilizzato per avvisare l\'utente negativo che la richiesta presa in carico è stata eliminata</string>
+    <string name="rent_score">Punti prestiti: </string>
     <array name="sex">
         <item>Maschio</item>
         <item>Femmina</item>

@@ -41,6 +41,7 @@ import it.unive.cybertech.database.Groups.Group;
 import it.unive.cybertech.database.Material.Exception.NoMaterialFoundException;
 import it.unive.cybertech.database.Material.Material;
 import it.unive.cybertech.database.Profile.Exception.NoDeviceFoundException;
+import it.unive.cybertech.database.Profile.Exception.NoQuarantineAssistanceFoundException;
 import it.unive.cybertech.database.Profile.Exception.NoUserFoundException;
 
 /**
@@ -976,8 +977,16 @@ public class User extends Geoquerable implements Comparable<User> {
      * @author Davide Finesso
      */
     public void deleteAllMyQuarantineAssistance() throws ExecutionException, InterruptedException {
-        for (QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
-            this.removeQuarantineAssistance(quarantineAssistance);
+        try {
+            for (QuarantineAssistance quarantineAssistance : obtainMaterializedQuarantineAssistance())
+                quarantineAssistance.deleteQuarantineAssistance();
+        } catch (NoQuarantineAssistanceFoundException e) {
+            e.printStackTrace();
+        }
+        DocumentReference quarDoc = getReference(User.table, this.id);
+        Tasks.await(quarDoc.update("quarantineAssistance", null));
+        quarantineAssistance = new ArrayList<>();
+        quarantineAssistanceMaterialized = new ArrayList<>();
     }
 
     /**
